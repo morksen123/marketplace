@@ -48,7 +48,7 @@ src/features/awesome-feature
 |
 +-- assets # assets folder can contain all the static files for a specific feature
 |
-+-- components # components scoped to a specific feature
++-- components # components scoped to a this feature
 |
 +-- hooks # hooks used to store logic and are scoped to a specific feature
 |
