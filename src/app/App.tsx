@@ -1,11 +1,15 @@
-import SignUpForm from '@/features/Authentication/components/SignUpForm';
+import { Suspense } from 'react';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import './App.css';
+import { routes } from './routes';
+
+const router = createBrowserRouter(routes);
 
 function App() {
   return (
-    <>
-      <SignUpForm />
-    </>
+    <Suspense fallback={<div>Loading...</div>}>
+      <RouterProvider router={router} />
+    </Suspense>
   );
 }
 
