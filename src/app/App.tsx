@@ -1,14 +1,15 @@
+import { ErrorFallback } from '@/components/errors';
 import { Suspense } from 'react';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
 import './App.css';
-import { routes } from './routes';
-
-const router = createBrowserRouter(routes);
+import { AppRouter } from './router';
 
 function App() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <RouterProvider router={router} />
+      <ErrorBoundary fallbackRender={ErrorFallback}>
+        <AppRouter />
+      </ErrorBoundary>
     </Suspense>
   );
 }
