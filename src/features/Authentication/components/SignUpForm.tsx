@@ -14,7 +14,7 @@ import { z } from 'zod';
 import { signUpFormDefaultValues } from '../constants';
 import { SignUpSchema } from '../schema';
 
-const SignUpForm = () => {
+export const SignUpForm = () => {
   const form = useForm({
     resolver: zodResolver(SignUpSchema),
     defaultValues: signUpFormDefaultValues,
@@ -106,5 +106,3 @@ const SignUpForm = () => {
     </Form>
   );
 };
-
-export default SignUpForm;
