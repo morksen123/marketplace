@@ -10,3 +10,12 @@ export const signUpFormDefaultValues = {
   password: '',
   confirmPassword: '',
 };
+
+export const createProductListingDefaultValues = {
+  category: '',
+  title: '',
+  condition: '',
+  expirationDate: '',
+  price: 0, 
+  description: '',
+}

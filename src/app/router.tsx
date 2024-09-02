@@ -26,6 +26,13 @@ const routes: RouteObject[] = [
       return { Component: NotFoundRoute };
     },
   },
+  {
+    path: '/create-product-listing',
+    lazy: async () => {
+      const { CreateListingRoute } = await import('./routes/create-product-listing');
+      return { Component: CreateListingRoute };
+    },
+  },
 ];
 
 const router = createBrowserRouter(routes);
