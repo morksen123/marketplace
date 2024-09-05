@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 
 const ProfileManagement: React.FC = () => {
   const [profilePic, setProfilePic] = useState<string | null>(null);
+  const [userDetails, setUserDetails] = useState<[] | null>(null);
 
   // load current profile pic
   useEffect(() => {
@@ -24,8 +25,22 @@ const ProfileManagement: React.FC = () => {
       }
     };
 
+    const fetchUserDetails = async () => {
+      try {
+        const response = await fetch('/api/user/details');
+        if (response.ok) {
+          const data = await response.json();
+          setUserDetails(data);
+        } else {
+          console.error('Failed to fetch user details');
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+
     fetchProfilePic();
-    // setProfilePic(currentProfilePic);
+    fetchUserDetails();
   }, []);
   
   // image change and upload method
@@ -37,19 +52,26 @@ const ProfileManagement: React.FC = () => {
       const imageUrl = URL.createObjectURL(file);
       setProfilePic(imageUrl);
       
-      // Uncomment and adjust the following lines to make an API call
-      // need to add error handling as well
+      // To do: add API call to upload profile pic and add error handling
       // const formData = new FormData();
       // formData.append('profilePic', file);
       // await fetch('/api/upload-profile-pic', { method: 'POST', body: formData });
     }
   };
 
+  // To do: change this to userDetails once API is ready
+  const formFields = [
+    { label: 'First Name', type: 'text', defaultValue: 'John' },
+    { label: 'Last Name', type: 'text', defaultValue: 'Doe' },
+    { label: 'Email Address', type: 'email', defaultValue: 'johndoe@email.com' },
+    { label: 'Home Address', type: 'text', defaultValue: 'Block 123 Your Mom Avenue #01-01 456123' },
+  ];
+
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-4xl mx-auto">
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4">Hello, John Doe</h1>
+          <h1 className="text-2xl font-bold mb-4">Hello, {userDetails ? `${userDetails.firstName} ${userDetails.lastName}` : 'John Doe'}</h1>
           <h2 className="text-lg font-semibold mb-6">My Details</h2>
           
           <div className="flex flex-col md:flex-row gap-6">
@@ -67,25 +89,21 @@ const ProfileManagement: React.FC = () => {
 
             {/* Right column: Form and other components */}
             <div className="md:w-2/3 w-full">
-            <div className="grid w-full items-center gap-1.5 justify-start">
-                {['First Name', 'Last Name', 'Email Address', 'Home Address'].map((label) => (
-                  <div key={label} className='mb-2'>
-                    <Label htmlFor={label} className="block text-sm font-medium text-gray-700 mb-1">
-                      {label}
-                    </Label>
-                    <Input 
-                      type={label === 'Email Address' ? 'email' : 'text'}
-                      defaultValue={label === 'First Name' ? 'John' : 
-                                    label === 'Last Name' ? 'Doe' : 
-                                    label === 'Email Address' ? 'johndoe@email.com' : 
-                                    'Block 123 Your Mom Avenue #01-01 456123'}
-                      className="mt-1 block w-full"
-                      disabled
-                      id={label}
-                    />
-                  </div>
-                ))}
+            <form className="space-y-6">
+            {formFields.map(({ label, type, defaultValue }) => (
+              <div key={label}>
+                <Label className="block text-sm font-medium text-gray-700">
+                  {label}
+                </Label>
+                <Input 
+                  type={type}
+                  defaultValue={defaultValue}
+                  className="mt-1 block w-full"
+                />
               </div>
+            ))}
+            <Button variant="outline" className="w-full">Save My New Details</Button>
+          </form>
 
               <div className="mt-8">
                 <ul className="space-y-4">
