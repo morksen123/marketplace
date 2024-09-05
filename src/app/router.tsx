@@ -26,6 +26,13 @@ const routes: RouteObject[] = [
       return { Component: NotFoundRoute };
     },
   },
+  {
+    path: '/profile',
+    lazy: async () => {
+      const { ProfileManagementRoute } = await import('./routes/profile-management');
+      return { Component: ProfileManagementRoute };
+    },
+  }
 ];
 
 const router = createBrowserRouter(routes);
