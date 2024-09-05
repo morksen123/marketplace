@@ -29,10 +29,24 @@ const routes: RouteObject[] = [
   {
     path: '/profile',
     lazy: async () => {
-      const { ProfileManagementRoute } = await import('./routes/profile-management');
+      const { ProfileManagementRoute } = await import('./routes/buyerProfile/profile-management');
       return { Component: ProfileManagementRoute };
     },
-  }
+  },
+  {
+    path: '/profile/change-password',
+    lazy: async () => {
+      const { ChangePasswordRoute } = await import('./routes/buyerProfile/change-password');
+      return { Component: ChangePasswordRoute };
+    },
+  },
+  {
+    path: '/profile/account-deactivation',
+    lazy: async () => {
+      const { AccountDeactivationRoute } = await import('./routes/buyerProfile/account-deactivation');
+      return { Component: AccountDeactivationRoute };
+    },
+  },
 ];
 
 const router = createBrowserRouter(routes);

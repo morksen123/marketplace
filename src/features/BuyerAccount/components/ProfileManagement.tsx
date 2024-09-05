@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { userDetailDefaultValues } from '../constants';
+import { Link } from 'react-router-dom';
 
 const ProfileManagement: React.FC = () => {
   const [profilePic, setProfilePic] = useState<string | null>(null);
-  const [userDetails, setUserDetails] = useState<[] | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetails>(userDetailDefaultValues);
 
+  interface UserDetails {
+    [key: string]: string;
+  }
+  
   // load current profile pic
   useEffect(() => {
     // fetch current profile pic from API
@@ -61,18 +67,18 @@ const ProfileManagement: React.FC = () => {
 
   // To do: change this to userDetails once API is ready
   const formFields = [
-    { label: 'First Name', type: 'text', defaultValue: 'John' },
-    { label: 'Last Name', type: 'text', defaultValue: 'Doe' },
-    { label: 'Email Address', type: 'email', defaultValue: 'johndoe@email.com' },
-    { label: 'Home Address', type: 'text', defaultValue: 'Block 123 Your Mom Avenue #01-01 456123' },
+    { label: 'First Name', type: 'text', name: 'firstName' },
+    { label: 'Last Name', type: 'text', name: 'lastName' },
+    { label: 'Email Address', type: 'email', name: 'emailAddress' },
+    { label: 'Home Address', type: 'text', name: 'homeAddress' },
   ];
 
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-4xl mx-auto">
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4">Hello, {userDetails ? `${userDetails.firstName} ${userDetails.lastName}` : 'John Doe'}</h1>
-          <h2 className="text-lg font-semibold mb-6">My Details</h2>
+          <h1 className="text-2xl font-bold mb-10">Hello, {userDetails.firstName} {userDetails.lastName}</h1>
+          
           
           <div className="flex flex-col md:flex-row gap-6">
             {/* Left column: Profile picture and change button */}
@@ -89,15 +95,16 @@ const ProfileManagement: React.FC = () => {
 
             {/* Right column: Form and other components */}
             <div className="md:w-2/3 w-full">
+            <h2 className="text-lg font-semibold mb-6 text-left">My Details</h2>
             <form className="space-y-6">
-            {formFields.map(({ label, type, defaultValue }) => (
-              <div key={label}>
+            {formFields.map(({ label, type, name }) => (
+              <div key={name}>
                 <Label className="block text-sm font-medium text-gray-700">
                   {label}
                 </Label>
                 <Input 
                   type={type}
-                  defaultValue={defaultValue}
+                  defaultValue={userDetails[name]}
                   className="mt-1 block w-full"
                 />
               </div>
@@ -107,12 +114,19 @@ const ProfileManagement: React.FC = () => {
 
               <div className="mt-8">
                 <ul className="space-y-4">
-                  {['Change Password', 'Notifications', 'Purchasing Preferences', 'Account Deactivation'].map((text) => (
+                  {[
+                    { text: 'Change Password', path: '/profile/change-password' },
+                    { text: 'Notifications', path: '/profile/notifications' },
+                    { text: 'Purchasing Preferences', path: '/profile/purchasing-preferences' },
+                    { text: 'Account Deactivation', path: '/profile/account-deactivation' }
+                  ].map(({ text, path }) => (
                     <li key={text}>
-                      <Button variant="ghost" className="w-full justify-between">
-                        {text}
-                        <span className="ml-2">→</span>
-                      </Button>
+                      <Link to={path} style={{ textDecoration: 'none' }}>
+                        <Button variant="ghost" className="w-full justify-between">
+                          {text}
+                          <span className="ml-2">→</span>
+                        </Button>
+                      </Link>
                     </li>
                   ))}
                 </ul>
