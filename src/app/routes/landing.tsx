@@ -1,5 +1,9 @@
-import { Home } from '@/features/Home/components/Home';
+import { Landing } from '@/features/Landing/components/Landing';
 
 export const LandingRoute = () => {
-  return <Home />;
+  return (
+    <div>
+      <Landing/>
+    </div>
+  );
 };
