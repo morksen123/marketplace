@@ -1,11 +1,13 @@
+import usersIcon from '@/assets/customers.png';
+import foodDumpImage from '@/assets/food-dump.png';
+import foodWasteIcon from '@/assets/food-waste.png';
+import greenhouseGasIcon from '@/assets/greenhouse-gas.png';
+import bannerImage from '@/assets/landing.png';
+
+import PersonOutlinedIcon from '@/assets/person.svg';
+import DistributorOutlinedIcon from '@/assets/shop.svg';
 import { Button } from '@/components/ui/button';
-import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import { useNavigate } from 'react-router-dom';
-import usersIcon from '../../../assets/customers.png';
-import foodDumpImage from '../../../assets/food-dump.png';
-import foodWasteIcon from '../../../assets/food-waste.png';
-import greenhouseGasIcon from '../../../assets/greenhouse-gas.png';
-import bannerImage from '../../../assets/landing.png'; // Your banner image
 
 export const Landing = () => {
   const navigate = useNavigate();
@@ -27,15 +29,17 @@ export const Landing = () => {
             <div className="flex space-x-4">
               <Button
                 onClick={() => navigate('/buyer-home')} // Redirect to Buyer page
+                className="min-w-[136px] min-h-[60px]"
               >
-                <PersonOutlineOutlinedIcon className="mr-2" />
-                Buyer
+                <PersonOutlinedIcon />
+                <p className="ml-2 font-semibold">Buyer</p>
               </Button>
               <Button
                 onClick={() => navigate('/distributor-home')} // Redirect to Distributor page
+                className="min-w-[136px] min-h-[60px]"
               >
-                <PersonOutlineOutlinedIcon className="mr-2" />
-                Distributor
+                <DistributorOutlinedIcon />
+                <p className="ml-2 font-semibold">Distributor</p>
               </Button>
             </div>
           </div>
