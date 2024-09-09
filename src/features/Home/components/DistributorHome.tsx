@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Button, Tabs, Tab, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 
 export const DistributorHome = () => {
+  const navigate = useNavigate();
 
   // Dummy data for metrics and orders
   const metrics = [
@@ -28,7 +30,9 @@ export const DistributorHome = () => {
         <h1 className="text-3xl font-bold">Store</h1>
 
         {/* New Product Listing Button */}
-        <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center">
+        <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center"
+        onClick={() => navigate('/create-product-listing')}
+        >
           <AddIcon className="mr-2" /> New Product Listing
         </button>
       </div>
