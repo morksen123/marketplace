@@ -109,7 +109,7 @@ const ProfileManagement: React.FC = () => {
                 />
               </div>
             ))}
-            <Button variant="outline" className="w-full">Save My New Details</Button>
+            <Button variant="secondary" className="w-full">Save My New Details</Button>
           </form>
 
               <div className="mt-8">
