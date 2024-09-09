@@ -15,28 +15,29 @@ export const Landing = () => {
   return (
     <>
       {/* Banner Section */}
-      <section className="relative">
+      <div className="relative">
         <img
           src={bannerImage}
           alt="GudFood Banner"
-          className="w-full h-auto object-cover"
+          className="w-full object-cover"
           style={{ maxHeight: '600px' }}
         />
 
+        {/* banner text */}
         <div className="absolute top-0 left-10 h-full flex flex-col justify-center text-white">
           <p className="text-primary ml-20 text-lg mb-4 text-left">I am a:</p>
           <div className="ml-20">
             <div className="flex space-x-4">
               <Button
                 onClick={() => navigate('/buyer-home')} // Redirect to Buyer page
-                className="min-w-[136px] min-h-[60px]"
+                className="w-full sm:w-36 h-14"
               >
                 <PersonOutlinedIcon />
                 <p className="ml-2 font-semibold">Buyer</p>
               </Button>
               <Button
                 onClick={() => navigate('/distributor-home')} // Redirect to Distributor page
-                className="min-w-[136px] min-h-[60px]"
+                className="w-full sm:w-36 h-14"
               >
                 <DistributorOutlinedIcon />
                 <p className="ml-2 font-semibold">Distributor</p>
@@ -44,14 +45,14 @@ export const Landing = () => {
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Content Section */}
-      <section className="p-8">
+      <main className="wrapper">
+        {/* Content Section */}
         {/* Our Mission */}
-        <div className="mb-8">
+        <section>
           <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
-          <p className="text-gray-700">
+          <p className="text-gray-700 mb-8">
             At Gudfood, our mission is to combat food waste by creating a
             sustainable marketplace where distributors and businesses can
             connect to redistribute surplus and near-expiry products. By
@@ -61,53 +62,53 @@ export const Landing = () => {
             responsible consumption, aligning with global sustainability goals
             and working together to minimize waste and support a greener future.
           </p>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {/* Greenhouse Gas Emissions */}
-          <div className="p-4 bg-white rounded-lg shadow text-center">
-            <img
-              src={greenhouseGasIcon}
-              alt="Greenhouse Gas"
-              className="mx-auto h-16 mb-4"
-            />
-            <h3 className="text-xl font-bold">
-              5% Greenhouse Gas Emissions Reduced
-            </h3>
+          {/* statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {/* Greenhouse Gas Emissions */}
+            <div className="p-4 bg-white rounded-lg shadow text-center">
+              <img
+                src={greenhouseGasIcon}
+                alt="Greenhouse Gas"
+                className="mx-auto h-16 mb-4"
+              />
+              <h3 className="text-xl font-bold">
+                5% Greenhouse Gas Emissions Reduced
+              </h3>
+            </div>
+
+            {/* Food Waste Prevented */}
+            <div className="p-4 bg-white rounded-lg shadow text-center">
+              <img
+                src={foodWasteIcon}
+                alt="Food Waste"
+                className="mx-auto h-16 mb-4"
+              />
+              <h3 className="text-xl font-bold">5000kg Food Waste Prevented</h3>
+            </div>
+
+            {/* Users Onboard */}
+            <div className="p-4 bg-white rounded-lg shadow text-center">
+              <img src={usersIcon} alt="Users" className="mx-auto h-16 mb-4" />
+              <h3 className="text-xl font-bold">Over 50,000 Users Onboard</h3>
+            </div>
           </div>
+        </section>
 
-          {/* Food Waste Prevented */}
-          <div className="p-4 bg-white rounded-lg shadow text-center">
-            <img
-              src={foodWasteIcon}
-              alt="Food Waste"
-              className="mx-auto h-16 mb-4"
-            />
-            <h3 className="text-xl font-bold">5000kg Food Waste Prevented</h3>
-          </div>
+        <section>
+          <h2 className="text-3xl font-bold mb-4">The Problem</h2>
+          <div className="flex flex-col md:flex-row">
+            {/* Left Side - Image */}
+            <div className="md:w-1/2 w-full mb-4 md:mb-0">
+              <img
+                src={foodDumpImage}
+                alt="Food Dump"
+                className="w-full h-80 object-cover rounded-3xl shadow-3xl"
+              />
+            </div>
 
-          {/* Users Onboard */}
-          <div className="p-4 bg-white rounded-lg shadow text-center">
-            <img src={usersIcon} alt="Users" className="mx-auto h-16 mb-4" />
-            <h3 className="text-xl font-bold">Over 50,000 Users Onboard</h3>
-          </div>
-        </div>
-
-        <h2 className="text-3xl font-bold mb-10">The Problem</h2>
-
-        <div className="mb-8 flex flex-col md:flex-row items-center">
-          {/* Left Side - Image */}
-          <div className="md:w-1/2 w-full mb-4 md:mb-0">
-            <img
-              src={foodDumpImage}
-              alt="Food Dump"
-              className="w-full h-80 object-cover rounded-lg shadow-lg"
-            />
-          </div>
-
-          {/* Right Side - Text */}
-          <div className="md:w-1/2 w-full md:pl-8">
-            <p className="text-gray-700">
+            {/* Right Side - Text */}
+            <p className="text-gray-700 sm:text-start md:w-1/2 w-full md:pl-10">
               Food waste is a significant and persistent challenge in Singapore,
               especially at the distributor level. Daily, central warehouses of
               major supermarket chains in Singapore face the rejection of 7,500
@@ -122,8 +123,8 @@ export const Landing = () => {
               distributor level is essential for alleviating these impacts.
             </p>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
     </>
   );
 };
