@@ -47,7 +47,7 @@ const AccountDeactivation: React.FC = () => {
           <div className="flex items-center mt-4">
             <Checkbox
               checked={confirmDeactivation}
-              onCheckedChange={setConfirmDeactivation}
+              onCheckedChange={(checked) => setConfirmDeactivation(checked as boolean)}
               className="mr-2"
             />
             <label className="text-sm text-gray-700">

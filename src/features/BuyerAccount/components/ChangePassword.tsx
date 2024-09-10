@@ -58,7 +58,7 @@ const ChangePassword: React.FC = () => {
             />
           </div>
 
-          <Button type="submit" variant="primary" className="w-full">
+          <Button type="submit" variant="secondary" className="w-full">
             Change Password
           </Button>
         </form>
