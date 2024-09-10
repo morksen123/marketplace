@@ -1,9 +1,5 @@
-import { Landing } from '@/features/Landing/components/Landing';
+import { LandingContent } from '@/features/Landing/components/LandingContent';
 
 export const LandingRoute = () => {
-  return (
-    <div>
-      <Landing/>
-    </div>
-  );
+  return <LandingContent />;
 };

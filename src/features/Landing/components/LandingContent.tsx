@@ -3,15 +3,9 @@ import foodDumpImage from '@/assets/food-dump.png';
 import foodWasteIcon from '@/assets/food-waste.png';
 import greenhouseGasIcon from '@/assets/greenhouse-gas.png';
 import bannerImage from '@/assets/landing.png';
+import { BannerContent } from './BannerContent';
 
-import PersonOutlinedIcon from '@/assets/person.svg';
-import DistributorOutlinedIcon from '@/assets/shop.svg';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-
-export const Landing = () => {
-  const navigate = useNavigate();
-
+export const LandingContent = () => {
   return (
     <>
       {/* Banner Section */}
@@ -23,32 +17,11 @@ export const Landing = () => {
           style={{ maxHeight: '600px' }}
         />
 
-        {/* banner text */}
-        <div className="absolute top-0 left-10 h-full flex flex-col justify-center text-white">
-          <p className="text-primary ml-20 text-lg mb-4 text-left">I am a:</p>
-          <div className="ml-20">
-            <div className="flex space-x-4">
-              <Button
-                onClick={() => navigate('/buyer-home')} // Redirect to Buyer page
-                className="w-full sm:w-36 h-14"
-              >
-                <PersonOutlinedIcon />
-                <p className="ml-2 font-semibold">Buyer</p>
-              </Button>
-              <Button
-                onClick={() => navigate('/distributor-home')} // Redirect to Distributor page
-                className="w-full sm:w-36 h-14"
-              >
-                <DistributorOutlinedIcon />
-                <p className="ml-2 font-semibold">Distributor</p>
-              </Button>
-            </div>
-          </div>
-        </div>
+        <BannerContent />
       </div>
 
+      {/* Content Section */}
       <main className="wrapper">
-        {/* Content Section */}
         {/* Our Mission */}
         <section>
           <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
