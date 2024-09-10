@@ -2,7 +2,7 @@ import usersIcon from '@/assets/customers.png';
 import foodDumpImage from '@/assets/food-dump.png';
 import foodWasteIcon from '@/assets/food-waste.png';
 import greenhouseGasIcon from '@/assets/greenhouse-gas.png';
-import bannerImage from '@/assets/landing.png';
+import bannerImage from '@/assets/landing-v3.png';
 import { BannerContent } from './BannerContent';
 
 export const LandingContent = () => {
@@ -14,7 +14,6 @@ export const LandingContent = () => {
           src={bannerImage}
           alt="GudFood Banner"
           className="w-full object-cover"
-          style={{ maxHeight: '600px' }}
         />
 
         <BannerContent />

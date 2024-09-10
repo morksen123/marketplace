@@ -25,8 +25,10 @@ export const BannerContent: React.FC = () => {
     [],
   );
 
+  const isFormOpen = signInFormState !== 'Closed';
+
   return (
-    <div className="absolute top-0 ml-28 h-full flex flex-col">
+    <div className="absolute top-0 ml-28 h-full flex flex-col justify-center">
       <div className="mb-8 text-start">
         <h1
           className="text-white text-8xl font-bold"
@@ -38,11 +40,16 @@ export const BannerContent: React.FC = () => {
           Be a part of the mission to reduce food waste
         </h2>
       </div>
-      {signInFormState !== 'Closed' ? (
-        <SignInForm state={signInFormState} onClose={handleFormToggle} />
-      ) : (
-        <div className="ml-2">
-          <p className="text-primary  text-lg mb-4 text-left">I am a:</p>
+
+      {/* Parent container with reserved space */}
+      <div className="ml-2 relative min-h-[400px] md:min-h-[300px] lg:min-h-[350px]">
+        {/* Buttons */}
+        <div
+          className={`flex flex-col transition-all duration-500 ease-in-out ${
+            isFormOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
+          <p className="text-primary text-lg mb-4 text-left">I am a:</p>
           <div className="flex space-x-4">
             <UserTypeButton
               icon={<PersonOutlinedIcon />}
@@ -56,7 +63,18 @@ export const BannerContent: React.FC = () => {
             />
           </div>
         </div>
-      )}
+
+        {/* Sign-in form */}
+        <div
+          className={`absolute top-0 left-0 w-full transition-all duration-500 ease-in-out ${
+            isFormOpen
+              ? 'opacity-100 visible'
+              : 'opacity-0 invisible pointer-events-none'
+          }`}
+        >
+          <SignInForm state={signInFormState} onClose={handleFormToggle} />
+        </div>
+      </div>
     </div>
   );
 };
