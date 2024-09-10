@@ -55,14 +55,14 @@ const SignInForm: React.FC<SignInFormProps> = ({ state, onClose }) => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleUserSignIn)}
-          className="space-y-4"
+          className="space-y-3"
         >
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem className="text-left">
-                <FormLabel>Email</FormLabel>
+                <FormLabel className="font-semibold">Email</FormLabel>
                 <FormControl>
                   <Input {...field} type="email" className="w-full" />
                 </FormControl>
@@ -75,7 +75,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ state, onClose }) => {
             name="password"
             render={({ field }) => (
               <FormItem className="text-left">
-                <FormLabel>Password</FormLabel>
+                <FormLabel className="font-semibold">Password</FormLabel>
                 <FormControl>
                   <Input {...field} type="password" className="w-full" />
                 </FormControl>

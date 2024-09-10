@@ -9,7 +9,7 @@ export const LandingContent = () => {
   return (
     <>
       {/* Banner Section */}
-      <div className="relative">
+      <section className="relative">
         <img
           src={bannerImage}
           alt="GudFood Banner"
@@ -18,7 +18,7 @@ export const LandingContent = () => {
         />
 
         <BannerContent />
-      </div>
+      </section>
 
       {/* Content Section */}
       <main className="wrapper">

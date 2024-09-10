@@ -26,13 +26,24 @@ export const BannerContent: React.FC = () => {
   );
 
   return (
-    <div className="absolute top-0 left-10 h-full flex flex-col justify-center">
+    <div className="absolute top-0 ml-28 h-full flex flex-col">
+      <div className="mb-8 text-start">
+        <h1
+          className="text-white text-8xl font-bold"
+          style={{ fontFamily: 'Slackey' }}
+        >
+          GudFood
+        </h1>
+        <h2 className="text-white text-lg mt-2 ml-2">
+          Be a part of the mission to reduce food waste
+        </h2>
+      </div>
       {signInFormState !== 'Closed' ? (
         <SignInForm state={signInFormState} onClose={handleFormToggle} />
       ) : (
-        <>
-          <p className="text-primary ml-20 text-lg mb-4 text-left">I am a:</p>
-          <div className="ml-20 flex space-x-4">
+        <div className="ml-2">
+          <p className="text-primary  text-lg mb-4 text-left">I am a:</p>
+          <div className="flex space-x-4">
             <UserTypeButton
               icon={<PersonOutlinedIcon />}
               label="Buyer"
@@ -44,7 +55,7 @@ export const BannerContent: React.FC = () => {
               onClick={() => handleFormToggle('Distributor')}
             />
           </div>
-        </>
+        </div>
       )}
     </div>
   );
