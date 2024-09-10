@@ -14,6 +14,8 @@
     --primary-foreground: 0 0% 0%;
     --secondary: 147 99% 24%;
     --secondary-foreground: 0 0% 100%;
+    --warning: 45 100% 87%;
+    --warning-foreground: 0 0% 0%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 210 40% 96.1%;
@@ -65,5 +67,11 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .wrapper {
+    @apply max-w-7xl lg:mx-auto p-5 md:px-10 xl:px-0 w-full;
   }
 }
