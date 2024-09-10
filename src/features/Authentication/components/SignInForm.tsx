@@ -100,7 +100,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ state, onClose }) => {
       <footer className="text-center mt-4">
         <span className="text-primary-foreground">
           No account?{' '}
-          <a href="#" className="text-authYellow hover:underline">
+          <a href="/auth/register" className="text-authYellow hover:underline">
             Create an account
           </a>
         </span>
