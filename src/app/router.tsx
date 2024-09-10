@@ -27,21 +27,21 @@ const routes: RouteObject[] = [
     },
   },
   {
-    path: '/profile',
+    path: '/buyer/profile',
     lazy: async () => {
       const { ProfileManagementRoute } = await import('./routes/buyerProfile/profile-management');
       return { Component: ProfileManagementRoute };
     },
   },
   {
-    path: '/profile/change-password',
+    path: '/buyer/profile/change-password',
     lazy: async () => {
       const { ChangePasswordRoute } = await import('./routes/buyerProfile/change-password');
       return { Component: ChangePasswordRoute };
     },
   },
   {
-    path: '/profile/account-deactivation',
+    path: '/buyer/profile/account-deactivation',
     lazy: async () => {
       const { AccountDeactivationRoute } = await import('./routes/buyerProfile/account-deactivation');
       return { Component: AccountDeactivationRoute };
