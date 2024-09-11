@@ -174,7 +174,7 @@ const ProfileManagement: React.FC = () => {
             />
           </div>
 
-          <div className="flex justify-end space-x-2 mt-4">
+          <div className="flex justify-start space-x-2 mt-4">
             {isEditing ? (
               <>
                 <Button onClick={handleSave} variant="secondary">Save</Button>
@@ -192,7 +192,7 @@ const ProfileManagement: React.FC = () => {
                   {[
                     { text: 'Change Password', path: '/profile/change-password' },
                     { text: 'Notifications', path: '/profile/notifications' },
-                    { text: 'Purchasing Preferences', path: '/profile/purchasing-preferences' },
+                    { text: 'Listing Preferences', path: '/profile/listing-preferences' },
                     { text: 'Account Deactivation', path: '/profile/account-deactivation' }
                   ].map(({ text, path }) => (
                     <li key={text}>
