@@ -40,6 +40,13 @@ const routes: RouteObject[] = [
       return { Component: DistributorHomeRoute };
     },
   },
+  {
+    path: '/distributor-account',
+    lazy: async () => {
+      const { ProfileManagementRoute } = await import('./routes/distributorAccount/distributor-account');
+      return { Component: ProfileManagementRoute };
+    },
+  },
 ];
 
 const router = createBrowserRouter(routes);
