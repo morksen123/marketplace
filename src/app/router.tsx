@@ -27,6 +27,20 @@ const routes: RouteObject[] = [
     },
   },
   {
+    path: '/buyer-home',
+    lazy: async () => {
+      const { BuyerHomeRoute } = await import('./routes/buyer-home');
+      return { Component: BuyerHomeRoute };
+    },
+  },
+  {
+    path: '/distributor-home',
+    lazy: async () => {
+      const { DistributorHomeRoute } = await import('./routes/distributor-home');
+      return { Component: DistributorHomeRoute };
+    },
+  },
+  {
     path: '/buyer/profile',
     lazy: async () => {
       const { ProfileManagementRoute } = await import('./routes/buyerProfile/profile-management');
