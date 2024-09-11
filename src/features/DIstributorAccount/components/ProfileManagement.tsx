@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { AlertCircle } from 'lucide-react';
+import { distributorProfileDefaultValues } from '../constants';
 
 interface DistributorProfile {
   companyName: string;
@@ -32,16 +33,8 @@ const ProfileManagement: React.FC = () => {
         setEditedProfile(data);
       } catch (error) {
         console.error('Error fetching profile:', error);
-        const mockData: DistributorProfile = {
-          companyName: 'GudFood Distributor Co.',
-          companyAddress: '123 Food St, Singapore 123456',
-          businessRegistrationNumber: 'UEN20240000A',
-          primaryContactName: 'John Doe',
-          primaryContactEmail: 'john@gudfood.com',
-          primaryPhoneNumber: '+65 9123 4567',
-        };
-        setProfile(mockData);
-        setEditedProfile(mockData);
+        setProfile(distributorProfileDefaultValues);
+        setEditedProfile(distributorProfileDefaultValues);
       }
     };
 
@@ -107,7 +100,7 @@ const ProfileManagement: React.FC = () => {
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Distributor Profile</h1>
+      <h1 className="text-2xl font-bold mb-4">{profile.companyName} Profile</h1>
       
       {successMessage && (
         <Alert className="mb-4">
@@ -116,8 +109,11 @@ const ProfileManagement: React.FC = () => {
       )}
 
       {showInfoAlert && (
-        <Alert variant="info" className="mb-4">
+        <Alert className="mb-4">
           <AlertCircle className="h-4 w-4" />
+          <AlertTitle>
+            Some fields are restricted.
+          </AlertTitle>
           <AlertDescription>
             Some fields (Company Name, Company Address, and Business Registration Number) are restricted. 
             To update this information, please contact our help team at{' '}
