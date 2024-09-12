@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { userDetailDefaultValues } from '../constants';
 import { Link } from 'react-router-dom';
 
 const ProfileManagement: React.FC = () => {
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetails>(userDetailDefaultValues);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedDetails, setEditedDetails] = useState<UserDetails>(userDetailDefaultValues);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   interface UserDetails {
     [key: string]: string;
@@ -37,6 +41,7 @@ const ProfileManagement: React.FC = () => {
         if (response.ok) {
           const data = await response.json();
           setUserDetails(data);
+          setEditedDetails(data);
         } else {
           console.error('Failed to fetch user details');
         }
@@ -65,6 +70,32 @@ const ProfileManagement: React.FC = () => {
     }
   };
 
+  const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    // TODO: Add API call to save user details
+    await new Promise((resolve) => setTimeout(resolve, 500)); // Simulating API call
+    setUserDetails(editedDetails);
+    setIsEditing(false);
+    setSuccessMessage('Profile updated successfully!');
+    setTimeout(() => setSuccessMessage(null), 3000);
+  };
+
+  const handleCancel = () => {
+    setEditedDetails(userDetails);
+    setIsEditing(false);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditedDetails({
+      ...editedDetails,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   // To do: change this to userDetails once API is ready
   const formFields = [
     { label: 'First Name', type: 'text', name: 'firstName' },
@@ -79,7 +110,12 @@ const ProfileManagement: React.FC = () => {
         <div className="p-6">
           <h1 className="text-2xl font-bold mb-10">Hello, {userDetails.firstName} {userDetails.lastName}</h1>
           
-          
+          {successMessage && (
+            <Alert className="mb-4">
+              <AlertDescription>{successMessage}</AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex flex-col md:flex-row gap-6">
             {/* Left column: Profile picture and change button */}
             <div className="md:w-1/3 flex flex-col items-center">
@@ -104,21 +140,33 @@ const ProfileManagement: React.FC = () => {
                 </Label>
                 <Input 
                   type={type}
-                  defaultValue={userDetails[name]}
-                  className="mt-1 block w-full"
+                  name={name}
+                  value={isEditing ? editedDetails[name as keyof UserDetails] : userDetails[name as keyof UserDetails]}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className={`mt-1 block w-full ${!isEditing ? 'bg-gray-100' : ''}`}
                 />
               </div>
             ))}
-            <Button variant="secondary" className="w-full">Save My New Details</Button>
+            <div className="flex justify-start space-x-2 mt-4">
+                  {isEditing ? (
+                    <>
+                      <Button onClick={handleSave} variant="secondary">Save</Button>
+                      <Button onClick={handleCancel} variant="outline">Cancel</Button>
+                    </>
+                  ) : (
+                    <Button onClick={handleEdit} variant="secondary">Edit Profile</Button>
+                  )}
+                </div>
           </form>
 
               <div className="mt-8">
                 <ul className="space-y-4">
                   {[
-                    { text: 'Change Password', path: '/profile/change-password' },
-                    { text: 'Notifications', path: '/profile/notifications' },
-                    { text: 'Purchasing Preferences', path: '/profile/purchasing-preferences' },
-                    { text: 'Account Deactivation', path: '/profile/account-deactivation' }
+                    { text: 'Change Password', path: '/buyer/profile/change-password' },
+                    { text: 'Notifications', path: '/buyer/profile/notifications' },
+                    { text: 'Purchasing Preferences', path: '/buyer/profile/purchasing-preferences' },
+                    { text: 'Account Deactivation', path: '/buyer/profile/account-deactivation' }
                   ].map(({ text, path }) => (
                     <li key={text}>
                       <Link to={path} style={{ textDecoration: 'none' }}>
