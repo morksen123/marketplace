@@ -12,7 +12,7 @@ export type User = Entity<{
   lastName: string;
   email: string;
   homeAddress: string;
-  role: 'BUYER' | 'DISTRIBUTOR';
+  role: UserRole;
 }>;
 
 export type LoginResponse = {
@@ -27,3 +27,5 @@ export interface ApiResponse<T> {
   data: T | null;
   error: ApiError | null;
 }
+
+export type UserRole = 'Buyer' | 'Distributor';

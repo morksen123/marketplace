@@ -3,6 +3,7 @@ import DistributorOutlinedIcon from '@/assets/shop.svg';
 import { Button } from '@/components/ui/button';
 import SignInForm from '@/features/Authentication/components/SignInForm';
 import { SignInFormState } from '@/features/Authentication/types/form-state';
+import { UserRole } from '@/types/api';
 import { useCallback, useState } from 'react';
 
 const UserTypeButton: React.FC<{
@@ -19,11 +20,14 @@ const UserTypeButton: React.FC<{
 export const BannerContent: React.FC = () => {
   const [signInFormState, setSignInFormState] =
     useState<SignInFormState>('Closed');
+  const [userRole, setUserRole] = useState<UserRole>();
 
-  const handleFormToggle = useCallback(
-    (state: SignInFormState) => setSignInFormState(state),
-    [],
-  );
+  const handleFormToggle = useCallback((state: SignInFormState) => {
+    setSignInFormState(state);
+    if (state !== 'Closed') {
+      setUserRole(state);
+    }
+  }, []);
 
   const isFormOpen = signInFormState !== 'Closed';
 
@@ -72,7 +76,9 @@ export const BannerContent: React.FC = () => {
               : 'opacity-0 invisible pointer-events-none'
           }`}
         >
-          <SignInForm state={signInFormState} onClose={handleFormToggle} />
+          {userRole && (
+            <SignInForm userRole={userRole} onClose={handleFormToggle} />
+          )}
         </div>
       </div>
     </div>

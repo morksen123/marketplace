@@ -8,9 +8,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { register, RegisterForm } from '@/lib/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { signUpFormDefaultValues } from '../constants';
 import { SignUpSchema } from '../schema';
 
@@ -20,8 +20,9 @@ export const SignUpForm = () => {
     defaultValues: signUpFormDefaultValues,
   });
 
-  const handleUserSignUp = async (data: z.infer<typeof SignUpSchema>) => {
-    console.log('sign up', data);
+  const handleUserSignUp = async (data: RegisterForm) => {
+    const user = await register(data);
+    console.log(user);
   };
 
   const isFormSubmitting = form.formState.isSubmitting;

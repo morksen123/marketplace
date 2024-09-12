@@ -1,6 +1,5 @@
 import { toast } from '@/hooks/use-toast';
 import { ApiError, ApiResponse } from '@/types/api';
-import { refreshAuth } from './auth';
 
 export const API_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
@@ -35,18 +34,9 @@ export async function apiClient<T>(
     const response = await fetch(`${API_URL}${endpoint}`, options);
 
     if (response.status === 401) {
-      // Token might be expired, try to refresh
-      const refreshed = await refreshAuth();
-      if (refreshed) {
-        // Retry the original request
-        return apiClient<T>(endpoint, method, body);
-      } else {
-        // Refresh failed, user needs to login again
-        throw new Error('Session expired. Please login again.');
-      }
+      // Token is invalid or expired, user needs to login again
+      throw new Error('Session expired. Please login again.');
     }
-
-    const data: T = await response.json();
 
     if (!response.ok) {
       const error: ApiError = new Error(
@@ -56,6 +46,7 @@ export async function apiClient<T>(
       throw error;
     }
 
+    const data: T = await response.json();
     return { data, error: null };
   } catch (error) {
     const apiError = error as ApiError;

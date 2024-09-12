@@ -9,17 +9,18 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { login, LoginCredentials } from '@/lib/auth';
+import { UserRole } from '@/types/api';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { signInFormDefaultValues } from '../constants';
 import { SignInSchema } from '../schema';
 import { SignInFormState } from '../types/form-state';
 import { CheckboxWithText } from './CheckBoxWithText';
 
 type SignInFormProps = {
-  state: SignInFormState;
+  userRole: UserRole;
   onClose: (state: SignInFormState) => void;
 };
 
@@ -36,21 +37,22 @@ const FormHeader: React.FC<{ title: string; onClose: () => void }> = ({
   </header>
 );
 
-const SignInForm: React.FC<SignInFormProps> = ({ state, onClose }) => {
+const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
   const form = useForm({
     resolver: zodResolver(SignInSchema),
     defaultValues: signInFormDefaultValues,
   });
 
-  const handleUserSignIn = async (data: z.infer<typeof SignInSchema>) => {
-    console.log('sign in', data);
+  const handleUserSignIn = async (data: LoginCredentials) => {
+    const user = await login(data, userRole);
+    if (user) {
+      console.log(user);
+    }
   };
-
-  if (state === 'Closed') return null;
 
   return (
     <div className="bg-white rounded-lg shadow p-6 min-w-[25rem]">
-      <FormHeader title={state} onClose={() => onClose('Closed')} />
+      <FormHeader title={userRole} onClose={() => onClose('Closed')} />
 
       <Form {...form}>
         <form
