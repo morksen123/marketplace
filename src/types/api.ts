@@ -1,23 +1,27 @@
-export type BaseEntity = {
+// Buyer DTO Type
+interface BuyerDTO {
   id: string;
-  createdAt: number;
-};
+  name: string;
+  role: string;
+}
 
-export type Entity<T> = {
-  [K in keyof T]: T[K];
-} & BaseEntity;
+// Distributor DTO Type
+interface DistributorDTO {
+  id: string;
+  name: string;
+  role: string;
+}
 
-export type User = Entity<{
-  firstName: string;
-  lastName: string;
+// Union type for user info
+export type UserInfo = BuyerDTO | DistributorDTO;
+
+// Authentication Response Type
+export type LoginResponse = UserInfo;
+
+export interface RegisterResponse {
   email: string;
-  homeAddress: string;
-  role: UserRole;
-}>;
-
-export type LoginResponse = {
-  user: User;
-};
+  role: string;
+}
 
 export interface ApiError extends Error {
   status?: number;
@@ -27,5 +31,3 @@ export interface ApiResponse<T> {
   data: T | null;
   error: ApiError | null;
 }
-
-export type UserRole = 'Buyer' | 'Distributor';

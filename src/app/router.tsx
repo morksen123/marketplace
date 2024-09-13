@@ -1,8 +1,11 @@
+import { ROLES } from '@/features/Authentication/types/auth';
+import { AuthGuard, RoleGuard } from '@/lib/auth';
 import {
+  createBrowserRouter,
   RouteObject,
   RouterProvider,
-  createBrowserRouter,
 } from 'react-router-dom';
+import { AppRoot } from './routes/app/root';
 
 const routes: RouteObject[] = [
   {
@@ -20,24 +23,52 @@ const routes: RouteObject[] = [
     },
   },
   {
+    path: '/',
+    element: <AuthGuard />,
+    children: [
+      {
+        element: <AppRoot />,
+        children: [
+          {
+            element: <RoleGuard allowedRoles={[ROLES.BUYER]} />,
+            children: [
+              {
+                path: 'buyer-home',
+                lazy: async () => {
+                  const { BuyerHomeRoute } = await import(
+                    './routes/app/home/buyer-home'
+                  );
+                  return { Component: BuyerHomeRoute };
+                },
+              },
+              // Add other buyer-specific routes here
+            ],
+          },
+          {
+            element: <RoleGuard allowedRoles={[ROLES.DISTRIBUTOR]} />,
+            children: [
+              {
+                path: 'distributor-home',
+                lazy: async () => {
+                  const { DistributorHomeRoute } = await import(
+                    './routes/app/home/distributor-home'
+                  );
+                  return { Component: DistributorHomeRoute };
+                },
+              },
+              // Add other distributor-specific routes here
+            ],
+          },
+          // You can add more role-specific sections here
+        ],
+      },
+    ],
+  },
+  {
     path: '*',
     lazy: async () => {
       const { NotFoundRoute } = await import('./routes/not-found');
       return { Component: NotFoundRoute };
-    },
-  },
-  {
-    path: '/buyer-home',
-    lazy: async () => {
-      const { BuyerHomeRoute } = await import('./routes/buyer-home');
-      return { Component: BuyerHomeRoute };
-    },
-  },
-  {
-    path: '/distributor-home',
-    lazy: async () => {
-      const { DistributorHomeRoute } = await import('./routes/distributor-home');
-      return { Component: DistributorHomeRoute };
     },
   },
 ];

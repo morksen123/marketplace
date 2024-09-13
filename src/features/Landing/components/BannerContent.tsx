@@ -2,8 +2,7 @@ import PersonOutlinedIcon from '@/assets/person.svg';
 import DistributorOutlinedIcon from '@/assets/shop.svg';
 import { Button } from '@/components/ui/button';
 import SignInForm from '@/features/Authentication/components/SignInForm';
-import { SignInFormState } from '@/features/Authentication/types/form-state';
-import { UserRole } from '@/types/api';
+import { ROLES, SignInFormState } from '@/features/Authentication/types/auth';
 import { useCallback, useState } from 'react';
 
 const UserTypeButton: React.FC<{
@@ -19,17 +18,15 @@ const UserTypeButton: React.FC<{
 
 export const BannerContent: React.FC = () => {
   const [signInFormState, setSignInFormState] =
-    useState<SignInFormState>('Closed');
-  const [userRole, setUserRole] = useState<UserRole>();
+    useState<SignInFormState>('CLOSED');
+
+  const userRole = signInFormState !== 'CLOSED' ? signInFormState : null;
 
   const handleFormToggle = useCallback((state: SignInFormState) => {
     setSignInFormState(state);
-    if (state !== 'Closed') {
-      setUserRole(state);
-    }
   }, []);
 
-  const isFormOpen = signInFormState !== 'Closed';
+  const isFormOpen = signInFormState !== 'CLOSED';
 
   return (
     <div className="absolute top-0 ml-28 h-full flex flex-col justify-center">
@@ -58,12 +55,12 @@ export const BannerContent: React.FC = () => {
             <UserTypeButton
               icon={<PersonOutlinedIcon />}
               label="Buyer"
-              onClick={() => handleFormToggle('Buyer')}
+              onClick={() => handleFormToggle(ROLES.BUYER)}
             />
             <UserTypeButton
               icon={<DistributorOutlinedIcon />}
               label="Distributor"
-              onClick={() => handleFormToggle('Distributor')}
+              onClick={() => handleFormToggle(ROLES.DISTRIBUTOR)}
             />
           </div>
         </div>

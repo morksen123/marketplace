@@ -8,11 +8,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { register, RegisterForm } from '@/lib/auth';
+import { handleSuccessApi } from '@/lib/api-client';
+import { register } from '@/lib/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { signUpFormDefaultValues } from '../constants';
 import { SignUpSchema } from '../schema';
+import { RegisterForm } from '../types/auth';
 
 export const SignUpForm = () => {
   const form = useForm({
@@ -22,7 +24,12 @@ export const SignUpForm = () => {
 
   const handleUserSignUp = async (data: RegisterForm) => {
     const user = await register(data);
-    console.log(user);
+    if (user) {
+      handleSuccessApi(
+        'Account Created',
+        'Your account has been successfully created. You can now log in.',
+      );
+    }
   };
 
   const isFormSubmitting = form.formState.isSubmitting;
@@ -31,7 +38,7 @@ export const SignUpForm = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleUserSignUp)}
-        className="space-y-2 text-left"
+        className="text-left"
       >
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
