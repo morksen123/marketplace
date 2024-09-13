@@ -3,22 +3,61 @@ import ProfileManagement from '@/components/profile/ProfileManagement';
 import { distributorProfileDefaultValues } from '../constants';
 
 const DistributorProfileManagement: React.FC = () => {
+  const API_BASE_URL = 'http://localhost:8080/api';
+  
   const fetchProfile = async () => {
     // Implement fetch logic here
+    try {
+      const response = await fetch(`${API_BASE_URL}/distributor/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW1hQGVtYWlsLmNvbSIsImlhdCI6MTcyNjI0ODA4NiwiZXhwIjoxNzI2ODUyODg2fQ.6SxEL4IrmskwZSfwDsQaD8U-P7ORO35i_iseZJ44kVI`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        return data;
+      } else {
+        throw new Error('Failed to fetch profile');
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
     return distributorProfileDefaultValues;
   };
 
   const updateProfile = async (profile: any) => {
     // Implement update logic here
+    try {
+      const response = await fetch(`${API_BASE_URL}/distributor/profile/update`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW1hQGVtYWlsLmNvbSIsImlhdCI6MTcyNjI0ODA4NiwiZXhwIjoxNzI2ODUyODg2fQ.6SxEL4IrmskwZSfwDsQaD8U-P7ORO35i_iseZJ44kVI`
+        },
+        body: JSON.stringify(profile)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        return data;
+      } else {
+        throw new Error('Failed to update profile');
+      }
+    } catch (error) { 
+      console.error('Error updating profile:', error);
+    }
   };
 
   const profileFields = [
-    { label: 'Company Name', name: 'companyName', type: 'text', editable: false },
-    { label: 'Company Address', name: 'companyAddress', type: 'text', editable: false },
-    { label: 'Business Registration Number', name: 'businessRegistrationNumber', type: 'text', editable: false },
-    { label: 'Primary Contact Name', name: 'primaryContactName', type: 'text', editable: true },
-    { label: 'Primary Contact Email', name: 'primaryContactEmail', type: 'email', editable: true },
-    { label: 'Primary Phone Number', name: 'primaryPhoneNumber', type: 'tel', editable: true },
+    { label: 'Distributor Name', name: 'distributorName', type: 'text', editable: false },
+    { label: 'Company Address', name: 'address', type: 'text', editable: false },
+    { label: 'Business Registration Number', name: 'uen', type: 'text', editable: false },
+    { label: 'Primary Contact Name', name: 'contactName', type: 'text', editable: true },
+    { label: 'Primary Contact Email', name: 'email', type: 'email', editable: true },
+    { label: 'Primary Phone Number', name: 'contactNumber', type: 'tel', editable: true },
   ];
 
   const links = [
@@ -28,7 +67,7 @@ const DistributorProfileManagement: React.FC = () => {
     { text: 'Account Deactivation', path: '/profile/account-deactivation' }
   ];
 
-  const greeting = (profile: any) => `${profile.companyName} Profile`;
+  const greeting = (profile: any) => `${profile.distributorName} Profile`;
 
   return (
     <ProfileManagement
