@@ -5,8 +5,11 @@ export const SignUpSchema = z
     email: z.string().email({
       message: 'Please enter a valid email address',
     }),
-    name: z.string().min(1, {
-      message: 'Please enter your name',
+    firstName: z.string().min(1, {
+      message: 'Please enter your first name',
+    }),
+    lastName: z.string().min(1, {
+      message: 'Please enter your last name',
     }),
     password: z.string().min(6, {
       message: 'Password must be at least 6 characters long',
@@ -14,8 +17,8 @@ export const SignUpSchema = z
     confirmPassword: z.string().min(6, {
       message: 'Password must be at least 6 characters long',
     }),
-    phoneNumber: z.string().min(8, {
-      message: 'Phone number must be at least 8 characters long',
+    homeAddress: z.string().min(6, {
+      message: 'Home address must be at least 6 characters long',
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {
