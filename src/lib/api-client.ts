@@ -4,8 +4,15 @@ import { ApiError, ApiResponse } from '@/types/api';
 export const API_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
+export const handleSuccessApi = (title: string, description: string) => {
+  toast({
+    variant: 'success',
+    title: title,
+    description: description,
+  });
+};
+
 const handleApiError = (error: ApiError): void => {
-  console.error('API Error', error);
   toast({
     variant: 'destructive',
     title: 'Error',
