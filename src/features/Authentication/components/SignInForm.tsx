@@ -9,18 +9,18 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { login, LoginCredentials } from '@/lib/auth';
-import { UserRole } from '@/types/api';
+import { capitalizeFirstLetter } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { signInFormDefaultValues } from '../constants';
+import { useAuthActions } from '../hooks/useAuthActions';
 import { SignInSchema } from '../schema';
-import { SignInFormState } from '../types/form-state';
+import { LoginCredentials, RoleTypes, SignInFormState } from '../types/auth';
 import { CheckboxWithText } from './CheckBoxWithText';
 
 type SignInFormProps = {
-  userRole: UserRole;
+  userRole: RoleTypes;
   onClose: (state: SignInFormState) => void;
 };
 
@@ -38,22 +38,22 @@ const FormHeader: React.FC<{ title: string; onClose: () => void }> = ({
 );
 
 const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
+  const { login } = useAuthActions();
   const form = useForm({
     resolver: zodResolver(SignInSchema),
     defaultValues: signInFormDefaultValues,
   });
 
   const handleUserSignIn = async (data: LoginCredentials) => {
-    const user = await login(data, userRole);
-    if (user) {
-      console.log(user);
-    }
+    await login({ credentials: data, role: userRole });
   };
 
   return (
     <div className="bg-white rounded-lg shadow p-6 min-w-[25rem]">
-      <FormHeader title={userRole} onClose={() => onClose('Closed')} />
-
+      <FormHeader
+        title={capitalizeFirstLetter(userRole)}
+        onClose={() => onClose('CLOSED')}
+      />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleUserSignIn)}
