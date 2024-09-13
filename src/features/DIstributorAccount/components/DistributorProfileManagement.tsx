@@ -61,10 +61,10 @@ const DistributorProfileManagement: React.FC = () => {
   ];
 
   const links = [
-    { text: 'Change Password', path: '/profile/change-password' },
-    { text: 'Notifications', path: '/profile/notifications' },
-    { text: 'Listing Preferences', path: '/profile/listing-preferences' },
-    { text: 'Account Deactivation', path: '/profile/account-deactivation' }
+    { text: 'Change Password', path: '/distributor-account/change-password' },
+    { text: 'Notifications', path: '/distributor-account/notifications' },
+    { text: 'Listing Preferences', path: '/distributor-account/listing-preferences' },
+    { text: 'Account Deactivation', path: '/distributor-account/account-deactivation' }
   ];
 
   const greeting = (profile: any) => `${profile.distributorName} Profile`;

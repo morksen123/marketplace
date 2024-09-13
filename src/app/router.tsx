@@ -48,6 +48,20 @@ const routes: RouteObject[] = [
     },
   },
   {
+    path: '/distributor-account/change-password',
+    lazy: async () => {
+      const { ChangePasswordRoute } = await import('./routes/distributorAccount/change-password');
+      return { Component: ChangePasswordRoute };
+    },
+  },
+  {
+    path: '/distributor-account/account-deactivation',
+    lazy: async () => {
+      const { AccountDeactivationRoute } = await import('./routes/distributorAccount/account-deactivation');
+      return { Component: AccountDeactivationRoute };
+    },
+  },
+  {
     path: '/buyer/profile',
     lazy: async () => {
       const { ProfileManagementRoute } = await import('./routes/buyerProfile/profile-management');
