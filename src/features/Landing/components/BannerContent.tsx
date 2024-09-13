@@ -53,7 +53,7 @@ export const BannerContent: React.FC = () => {
             isFormOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
         >
-          <p className="text-primary text-lg mb-4 text-left">I am a:</p>
+          <p className="text-primary text-lg mb-4 text-left">Login:</p>
           <div className="flex space-x-4">
             <UserTypeButton
               icon={<PersonOutlinedIcon />}
