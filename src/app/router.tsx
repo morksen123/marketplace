@@ -41,6 +41,33 @@ const routes: RouteObject[] = [
                   return { Component: BuyerHomeRoute };
                 },
               },
+              {
+                path: '/buyer/profile',
+                lazy: async () => {
+                  const { ProfileManagementRoute } = await import(
+                    './routes/buyerProfile/profile-management'
+                  );
+                  return { Component: ProfileManagementRoute };
+                },
+              },
+              {
+                path: '/buyer/profile/change-password',
+                lazy: async () => {
+                  const { ChangePasswordRoute } = await import(
+                    './routes/buyerProfile/change-password'
+                  );
+                  return { Component: ChangePasswordRoute };
+                },
+              },
+              {
+                path: '/buyer/profile/account-deactivation',
+                lazy: async () => {
+                  const { AccountDeactivationRoute } = await import(
+                    './routes/buyerProfile/account-deactivation'
+                  );
+                  return { Component: AccountDeactivationRoute };
+                },
+              },
               // Add other buyer-specific routes here
             ],
           },

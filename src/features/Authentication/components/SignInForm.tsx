@@ -39,7 +39,6 @@ const FormHeader: React.FC<{ title: string; onClose: () => void }> = ({
 
 const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
   const { login } = useAuthActions();
-
   const form = useForm({
     resolver: zodResolver(SignInSchema),
     defaultValues: signInFormDefaultValues,
@@ -55,7 +54,6 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
         title={capitalizeFirstLetter(userRole)}
         onClose={() => onClose('CLOSED')}
       />
-
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleUserSignIn)}
