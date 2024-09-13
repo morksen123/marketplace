@@ -3,20 +3,59 @@ import ProfileManagement from '@/components/profile/ProfileManagement';
 import { userDetailDefaultValues } from '../constants';
 
 const BuyerProfileManagement: React.FC = () => {
+  const API_BASE_URL = 'http://localhost:8080/api';
+  
   const fetchProfile = async () => {
     // Implement fetch logic here
-    return userDetailDefaultValues;
+    try {
+      const response = await fetch(`${API_BASE_URL}/buyer/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtdXJzeWlkQGVtYWlsLmNvbSIsImlhdCI6MTcyNjIxMDE4NywiZXhwIjoxNzI2ODE0OTg3fQ.yOW1A2-0SYqXXTfWEUc5xd9Vn7PvZyVPEi1C4Wg4NxA`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        return data;
+      } else {
+        throw new Error('Failed to fetch profile');
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+    //return userDetailDefaultValues;
   };
 
   const updateProfile = async (profile: any) => {
     // Implement update logic here
+    try {
+      const response = await fetch(`${API_BASE_URL}/buyer/profile/update`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtdXJzeWlkQGVtYWlsLmNvbSIsImlhdCI6MTcyNjIxMDE4NywiZXhwIjoxNzI2ODE0OTg3fQ.yOW1A2-0SYqXXTfWEUc5xd9Vn7PvZyVPEi1C4Wg4NxA`
+        },
+        body: JSON.stringify(profile)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        return data;
+      } else {
+        throw new Error('Failed to update profile');
+      }
+    } catch (error) { 
+      console.error('Error updating profile:', error);
+    }
   };
 
   const profileFields = [
     { label: 'First Name', name: 'firstName', type: 'text', editable: true },
     { label: 'Last Name', name: 'lastName', type: 'text', editable: true },
-    { label: 'Email Address', name: 'emailAddress', type: 'email', editable: true },
-    { label: 'Home Address', name: 'homeAddress', type: 'text', editable: true },
+    { label: 'Email Address', name: 'email', type: 'email', editable: true },
+    { label: 'Shipping Address', name: 'shippingAddresses', type: 'text', editable: true }, // to change to fit multiple addresses
   ];
 
   const links = [

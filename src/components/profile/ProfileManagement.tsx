@@ -35,19 +35,16 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({
   }, [fetchProfile]);
 
   const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
-    console.log("Edit button clicked");
     e.preventDefault();
     setIsEditing(true);
   };
 
   const handleCancel = () => {
-    console.log("Cancel button clicked");
     setEditedProfile(profile);
     setIsEditing(false);
   };
 
   const handleSave = async () => {
-    console.log("Save button clicked");
     await updateProfile(editedProfile);
     setProfile(editedProfile);
     setIsEditing(false);
@@ -56,7 +53,6 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({
   };
 
   const handleNonEditableFieldClick = () => {
-    console.log("Non editable field clicked");
     setAlertMessage("To edit this field, please contact our help team at help@gudfood.com.");
     setTimeout(() => setAlertMessage(null), 5000); // Hide alert after 5 seconds
   };
