@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { capitalizeFirstLetter } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
 import { signInFormDefaultValues } from '../constants';
 import { useAuthActions } from '../hooks/useAuthActions';
 import { SignInSchema } from '../schema';
@@ -72,7 +73,15 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
             )}
           />
 
-          <CheckboxWithText text="Remember me" />
+          <div className="flex justify-between items-center text-sm">
+            <CheckboxWithText text="Remember me" />
+            <Link
+              to="/auth/forgot-password"
+              className="text-authYellow hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
           <Button
             type="submit"
@@ -85,14 +94,12 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
         </form>
       </Form>
 
-      <footer className="text-center mt-4">
-        <span className="text-primary-foreground">
-          No account?{' '}
-          <a href="/auth/register" className="text-authYellow hover:underline">
-            Create an account
-          </a>
-        </span>
-      </footer>
+      <p className="text-primary-foreground text-center mt-4">
+        No account?{' '}
+        <Link to="/auth/register" className="text-authYellow hover:underline">
+          Create an account
+        </Link>
+      </p>
     </div>
   );
 };
