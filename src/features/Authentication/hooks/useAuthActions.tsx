@@ -43,7 +43,7 @@ export function useAuthActions() {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      navigate('/');
+      window.location.href = '/';
     },
   });
 
@@ -53,6 +53,7 @@ export function useAuthActions() {
     },
     onSuccess: (data) => {
       if (data) {
+        navigate('/');
         handleSuccessApi(
           'Account Created',
           'Your account has been successfully created. You can now log in.',
