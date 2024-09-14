@@ -3,7 +3,7 @@ export const signInFormDefaultValues = {
   password: '',
 };
 
-export const signUpFormDefaultValues = {
+export const buyerSignUpFormDefaultValues = {
   email: '',
   firstName: '',
   lastName: '',
@@ -17,6 +17,20 @@ export const forgotPasswordDefaultValues = {
 };
 
 export const resetPasswordDefaultValues = {
+  password: '',
+  confirmPassword: '',
+};
+
+export const distributorSignUpFormDefaultValues = {
+  companyName: '',
+  businessRegistrationNumber: '',
+  companyAddress: '',
+  proofOfAddress: undefined,
+  acraBusinessProfile: undefined,
+  primaryContactName: '',
+  primaryContactEmail: '',
+  primaryPhoneNumber: '',
+  username: '',
   password: '',
   confirmPassword: '',
 };

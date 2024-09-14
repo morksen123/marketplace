@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import {
+  BuyerSignUpSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
-  SignUpSchema,
 } from '../schema';
 
 export enum ROLES {
@@ -27,7 +27,21 @@ export interface LoginCredentials {
   password: string;
 }
 
-export type RegisterForm = z.infer<typeof SignUpSchema>;
+export type BuyerRegisterForm = z.infer<typeof BuyerSignUpSchema>;
+
+export interface DistributorRegisterForm {
+  companyName: string;
+  businessRegistrationNumber: string;
+  companyAddress: string;
+  proofOfAddress?: File;
+  acraBusinessProfile?: File;
+  primaryContactName: string;
+  primaryContactEmail: string;
+  primaryPhoneNumber: string;
+  username: string;
+  password: string;
+  confirmPassword: string;
+}
 
 export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 

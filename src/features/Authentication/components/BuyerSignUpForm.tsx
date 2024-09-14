@@ -10,20 +10,20 @@ import {
 import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { signUpFormDefaultValues } from '../constants';
+import { buyerSignUpFormDefaultValues } from '../constants';
 import { useAuthActions } from '../hooks/useAuthActions';
-import { SignUpSchema } from '../schema';
-import { RegisterForm } from '../types/auth';
+import { BuyerSignUpSchema } from '../schema';
+import { BuyerRegisterForm } from '../types/auth';
 
 export const BuyerSignUpForm = () => {
-  const { register } = useAuthActions();
+  const { registerBuyer } = useAuthActions();
   const form = useForm({
-    resolver: zodResolver(SignUpSchema),
-    defaultValues: signUpFormDefaultValues,
+    resolver: zodResolver(BuyerSignUpSchema),
+    defaultValues: buyerSignUpFormDefaultValues,
   });
 
-  const handleUserSignUp = async (data: RegisterForm) => {
-    await register(data);
+  const handleUserSignUp = async (data: BuyerRegisterForm) => {
+    await registerBuyer(data);
   };
 
   const isFormSubmitting = form.formState.isSubmitting;
