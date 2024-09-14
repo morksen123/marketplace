@@ -3,9 +3,9 @@ import { BuyerNavMenu } from '@/features/NavigationMenu/components/BuyerNavMenu'
 
 export const BuyerHomeRoute = () => {
   return (
-    <div>
+    <>
       <BuyerNavMenu />
       <BuyerHome />
-    </div>
+    </>
   );
 };

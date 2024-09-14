@@ -2,7 +2,7 @@ import PersonOutlinedIcon from '@/assets/person.svg';
 import DistributorOutlinedIcon from '@/assets/shop.svg';
 import { Button } from '@/components/ui/button';
 import SignInForm from '@/features/Authentication/components/SignInForm';
-import { SignInFormState } from '@/features/Authentication/types/form-state';
+import { ROLES, SignInFormState } from '@/features/Authentication/types/auth';
 import { useCallback, useState } from 'react';
 
 const UserTypeButton: React.FC<{
@@ -18,14 +18,15 @@ const UserTypeButton: React.FC<{
 
 export const BannerContent: React.FC = () => {
   const [signInFormState, setSignInFormState] =
-    useState<SignInFormState>('Closed');
+    useState<SignInFormState>('CLOSED');
 
-  const handleFormToggle = useCallback(
-    (state: SignInFormState) => setSignInFormState(state),
-    [],
-  );
+  const userRole = signInFormState !== 'CLOSED' ? signInFormState : null;
 
-  const isFormOpen = signInFormState !== 'Closed';
+  const handleFormToggle = useCallback((state: SignInFormState) => {
+    setSignInFormState(state);
+  }, []);
+
+  const isFormOpen = signInFormState !== 'CLOSED';
 
   return (
     <div className="absolute top-0 ml-28 h-full flex flex-col justify-center">
@@ -49,17 +50,17 @@ export const BannerContent: React.FC = () => {
             isFormOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
         >
-          <p className="text-primary text-lg mb-4 text-left">I am a:</p>
+          <p className="text-primary text-lg mb-4 text-left">Login:</p>
           <div className="flex space-x-4">
             <UserTypeButton
               icon={<PersonOutlinedIcon />}
               label="Buyer"
-              onClick={() => handleFormToggle('Buyer')}
+              onClick={() => handleFormToggle(ROLES.BUYER)}
             />
             <UserTypeButton
               icon={<DistributorOutlinedIcon />}
               label="Distributor"
-              onClick={() => handleFormToggle('Distributor')}
+              onClick={() => handleFormToggle(ROLES.DISTRIBUTOR)}
             />
           </div>
         </div>
@@ -72,7 +73,9 @@ export const BannerContent: React.FC = () => {
               : 'opacity-0 invisible pointer-events-none'
           }`}
         >
-          <SignInForm state={signInFormState} onClose={handleFormToggle} />
+          {userRole && (
+            <SignInForm userRole={userRole} onClose={handleFormToggle} />
+          )}
         </div>
       </div>
     </div>

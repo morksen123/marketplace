@@ -10,18 +10,20 @@ import {
 import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { signUpFormDefaultValues } from '../constants';
+import { useAuthActions } from '../hooks/useAuthActions';
 import { SignUpSchema } from '../schema';
+import { RegisterForm } from '../types/auth';
 
 export const SignUpForm = () => {
+  const { register } = useAuthActions();
   const form = useForm({
     resolver: zodResolver(SignUpSchema),
     defaultValues: signUpFormDefaultValues,
   });
 
-  const handleUserSignUp = async (data: z.infer<typeof SignUpSchema>) => {
-    console.log('sign up', data);
+  const handleUserSignUp = async (data: RegisterForm) => {
+    await register(data);
   };
 
   const isFormSubmitting = form.formState.isSubmitting;
@@ -30,78 +32,107 @@ export const SignUpForm = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleUserSignUp)}
-        className="space-y-6"
+        className="text-left"
       >
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input {...field} type="email" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="phoneNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mobile Number</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input {...field} type="password" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
-                <FormControl>
-                  <Input {...field} type="password" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">First Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">Email Address</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="john.doe@example.com"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="homeAddress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">Home Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="123 Main St, City, 621338" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">
+                    Confirm Password
+                  </FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
-        <Button type="submit" className="w-full" disabled={isFormSubmitting}>
-          {isFormSubmitting ? 'Processing...' : 'Register'}
-        </Button>
+        <div className="flex justify-end mt-4">
+          <Button
+            variant={'secondary'}
+            type="submit"
+            disabled={isFormSubmitting}
+          >
+            {isFormSubmitting ? 'Processing...' : 'Register'}
+          </Button>
+        </div>
       </form>
     </Form>
   );
