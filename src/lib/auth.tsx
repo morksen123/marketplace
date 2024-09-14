@@ -3,6 +3,7 @@ import { useAuthStatus } from '@/features/Authentication/hooks/useAuthStatus';
 import {
   LoginCredentials,
   RegisterForm,
+  ResetPasswordFormValues,
   RoleGuardProps,
   ROLES,
   RoleTypes,
@@ -47,6 +48,20 @@ export async function checkAuth() {
 export async function resetPassword(email: string, role: RoleTypes) {
   const roleRoute = role.toLowerCase();
   await post(`/${roleRoute}/reset-password-request`, { email });
+}
+
+export async function changePasswordAfterReset(
+  data: ResetPasswordFormValues,
+  role: RoleTypes,
+  token: string,
+) {
+  const roleRoute = role.toLowerCase();
+  await post(
+    `/${roleRoute}/reset-password?token=${encodeURIComponent(token)}`,
+    {
+      newPassword: data.password,
+    },
+  );
 }
 
 // guard
