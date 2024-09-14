@@ -1,5 +1,5 @@
-import BuyerProfileManagement from "@/features/BuyerAccount/components/BuyerProfileManagement";
+import ProfileManagement from "@/features/BuyerAccount/components/ProfileManagement";
 
 export const ProfileManagementRoute = () => {
-  return <BuyerProfileManagement />
+  return <ProfileManagement />
 };
