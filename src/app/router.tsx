@@ -33,7 +33,7 @@ const routes: RouteObject[] = [
             element: <RoleGuard allowedRoles={[ROLES.BUYER]} />,
             children: [
               {
-                path: 'buyer-home',
+                path: '/buyer/home',
                 lazy: async () => {
                   const { BuyerHomeRoute } = await import(
                     './routes/app/home/buyer-home'
@@ -75,7 +75,7 @@ const routes: RouteObject[] = [
             element: <RoleGuard allowedRoles={[ROLES.DISTRIBUTOR]} />,
             children: [
               {
-                path: 'distributor-home',
+                path: '/distributor/home',
                 lazy: async () => {
                   const { DistributorHomeRoute } = await import(
                     './routes/app/home/distributor-home'

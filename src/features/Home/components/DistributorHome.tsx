@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
-import { Button, Tabs, Tab, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from '@mui/material';
+import { useState } from 'react';
 
 export const DistributorHome = () => {
-
   // Dummy data for metrics and orders
   const metrics = [
     { label: 'Food Saved', value: '500kg' },
     { label: 'Orders Made', value: '1000' },
     { label: 'Revenue Generated', value: '$15,000' },
-    { label: 'New Customers', value: '50' }
+    { label: 'New Customers', value: '50' },
   ];
 
   const orders = [
@@ -19,7 +24,14 @@ export const DistributorHome = () => {
   ];
 
   const [selectedTab, setSelectedTab] = useState('All');
-  const tabs = ['All', 'New', 'Fruits & Vegetables', 'Canned Goods', 'Frozen', 'Expiring'];
+  const tabs = [
+    'All',
+    'New',
+    'Fruits & Vegetables',
+    'Canned Goods',
+    'Frozen',
+    'Expiring',
+  ];
 
   return (
     <div className="p-4">
@@ -74,10 +86,11 @@ export const DistributorHome = () => {
             {tabs.map((tab) => (
               <button
                 key={tab}
-                className={`py-4 px-4 text-black focus:outline-none flex-grow ${selectedTab === tab
-                  ? 'border-b-2 border-green-500 text-green-500'
-                  : 'hover:text-green-500'
-                  }`}
+                className={`py-4 px-4 text-black focus:outline-none flex-grow ${
+                  selectedTab === tab
+                    ? 'border-b-2 border-green-500 text-green-500'
+                    : 'hover:text-green-500'
+                }`}
                 onClick={() => setSelectedTab(tab)}
               >
                 {tab}
