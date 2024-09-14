@@ -8,28 +8,22 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { handleSuccessApi } from '@/lib/api-client';
-import { register } from '@/lib/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { signUpFormDefaultValues } from '../constants';
+import { useAuthActions } from '../hooks/useAuthActions';
 import { SignUpSchema } from '../schema';
 import { RegisterForm } from '../types/auth';
 
 export const SignUpForm = () => {
+  const { register } = useAuthActions();
   const form = useForm({
     resolver: zodResolver(SignUpSchema),
     defaultValues: signUpFormDefaultValues,
   });
 
   const handleUserSignUp = async (data: RegisterForm) => {
-    const user = await register(data);
-    if (user) {
-      handleSuccessApi(
-        'Account Created',
-        'Your account has been successfully created. You can now log in.',
-      );
-    }
+    await register(data);
   };
 
   const isFormSubmitting = form.formState.isSubmitting;
