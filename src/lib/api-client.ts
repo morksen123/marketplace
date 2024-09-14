@@ -20,6 +20,16 @@ const handleApiError = (error: ApiError): void => {
   });
 };
 
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error: ApiError = new Error(errorData.message || 'An error occurred');
+    error.status = response.status;
+    throw error;
+  }
+  return response.json();
+}
+
 export async function apiClient<T>(
   endpoint: string,
   method: string = 'GET',
@@ -41,19 +51,10 @@ export async function apiClient<T>(
     const response = await fetch(`${API_URL}${endpoint}`, options);
 
     if (response.status === 401) {
-      // Token is invalid or expired, user needs to login again
       throw new Error('Session expired. Please login again.');
     }
 
-    if (!response.ok) {
-      const error: ApiError = new Error(
-        response.statusText || 'An error occurred',
-      );
-      error.status = response.status;
-      throw error;
-    }
-
-    const data: T = await response.json();
+    const data = await handleResponse<T>(response);
     return { data, error: null };
   } catch (error) {
     const apiError = error as ApiError;

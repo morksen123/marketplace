@@ -9,8 +9,8 @@ import {
 } from '@/features/Authentication/types/auth';
 import { LoginResponse, RegisterResponse } from '@/types/api';
 import { Navigate, Outlet } from 'react-router-dom';
-import Cookies from 'universal-cookie';
 import { get, post } from './api-client';
+import { getUserRoleFromCookie } from './utils';
 
 // actions
 export async function login(
@@ -53,18 +53,17 @@ export const AuthGuard = () => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to={'/'} replace />;
+    window.location.href = '/';
   }
 
   return <Outlet />;
 };
 
 export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles }) => {
-  const cookies = new Cookies();
-  const userRole = cookies.get('user_role');
+  const userRole = getUserRoleFromCookie();
 
   if (!userRole || !allowedRoles.includes(userRole as RoleTypes)) {
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to="/unauthorized" replace />; // TODO: create unauthorized page
   }
 
   return <Outlet />;

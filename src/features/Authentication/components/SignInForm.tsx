@@ -1,4 +1,3 @@
-import PersonOutlinedIcon from '@/assets/person.svg';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -11,31 +10,18 @@ import {
 import { Input } from '@/components/ui/input';
 import { capitalizeFirstLetter } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { signInFormDefaultValues } from '../constants';
 import { useAuthActions } from '../hooks/useAuthActions';
 import { SignInSchema } from '../schema';
 import { LoginCredentials, RoleTypes, SignInFormState } from '../types/auth';
 import { CheckboxWithText } from './CheckBoxWithText';
+import { FormHeader } from './FormHeader';
 
 type SignInFormProps = {
   userRole: RoleTypes;
   onClose: (state: SignInFormState) => void;
 };
-
-const FormHeader: React.FC<{ title: string; onClose: () => void }> = ({
-  title,
-  onClose,
-}) => (
-  <header className="w-full flex items-center justify-between mb-6 relative">
-    <ArrowLeft onClick={onClose} className="cursor-pointer absolute left-0" />
-    <div className="flex items-center justify-center w-full">
-      <PersonOutlinedIcon />
-      <h1 className="ml-2 text-lg font-semibold">{title}</h1>
-    </div>
-  </header>
-);
 
 const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
   const { login } = useAuthActions();
