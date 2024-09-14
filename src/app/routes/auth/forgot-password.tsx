@@ -16,6 +16,7 @@ import {
   ForgotPasswordFormValues,
   RoleTypes,
 } from '@/features/Authentication/types/auth';
+import { capitalizeFirstLetter } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
@@ -67,7 +68,7 @@ export const ForgotPasswordRoute = () => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{capitalizeFirstLetter(role)} Email</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
