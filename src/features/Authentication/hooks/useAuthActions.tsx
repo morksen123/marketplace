@@ -43,7 +43,7 @@ export function useAuthActions() {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      navigate('/');
+      window.location.href = '/';
     },
   });
 
