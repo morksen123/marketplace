@@ -97,7 +97,11 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
 
       <p className="text-primary-foreground text-center mt-4">
         No account?{' '}
-        <Link to="/auth/register" className="text-authYellow hover:underline">
+        <Link
+          to="/auth/register"
+          state={{ role: userRole }}
+          className="text-authYellow hover:underline"
+        >
           Create an account
         </Link>
       </p>

@@ -1,14 +1,15 @@
+import { RegisterHeader } from '@/features/Authentication/components/RegisterHeader';
 import { SignUpForm } from '@/features/Authentication/components/SignUpForm';
+import { RoleTypes } from '@/features/Authentication/types/auth';
+import { useLocation } from 'react-router-dom';
 
 export const RegisterRoute = () => {
+  const location = useLocation();
+  const { role } = location.state as { role: RoleTypes };
+
   return (
     <div className="wrapper">
-      <h1 className="text-2xl mb-2">
-        Join the <span className="font-bold">Gud</span>food Movement
-      </h1>
-      <p className="mb-6">
-        Create an Account to Buy Smart, Save More, and Reduce Waste!
-      </p>
+      <RegisterHeader role={role} />
       <SignUpForm />
     </div>
   );
