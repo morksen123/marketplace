@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 
 import { login, logout } from '@/lib/auth';
+import { userAtom } from '@/store/authAtoms';
 import { useNavigate } from 'react-router-dom';
-import { userAtom } from '../atoms/authAtoms';
 import { LoginCredentials, ROLES, RoleTypes } from '../types/auth';
 
 export function useAuthActions() {
