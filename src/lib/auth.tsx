@@ -48,8 +48,6 @@ export const checkAuth = async () => {
 export const AuthGuard = () => {
   const { isAuthenticated, isLoading } = useAuthStatus();
 
-  // const location = useLocation();
-
   if (isLoading) {
     return <div>Loading...</div>; // change to a nicer spinner
   }
