@@ -11,3 +11,12 @@ export const signUpFormDefaultValues = {
   password: '',
   homeAddress: '',
 };
+
+export const forgotPasswordDefaultValues = {
+  email: '',
+};
+
+export const resetPasswordDefaultValues = {
+  password: '',
+  confirmPassword: '',
+};

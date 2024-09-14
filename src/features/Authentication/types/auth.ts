@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { SignUpSchema } from '../schema';
+import {
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  SignUpSchema,
+} from '../schema';
 
 export enum ROLES {
   BUYER = 'BUYER',
@@ -24,3 +28,7 @@ export interface LoginCredentials {
 }
 
 export type RegisterForm = z.infer<typeof SignUpSchema>;
+
+export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
