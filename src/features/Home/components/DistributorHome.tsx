@@ -53,7 +53,7 @@ export const DistributorHome = () => {
     { label: 'Food Saved', value: '500kg' },
     { label: 'Orders Made', value: '1000' },
     { label: 'Revenue Generated', value: '$15,000' },
-    { label: 'New Customers', value: '50' }
+    { label: 'New Customers', value: '50' },
   ];
 
   const orders = [

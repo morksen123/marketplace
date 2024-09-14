@@ -134,7 +134,7 @@ export const EditProductListing = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="wrapper">
       <h1 className="text-2xl font-bold mb-6 text-left mt-6">Edit Product Listing</h1>
 
       <Form {...form}>
@@ -193,10 +193,6 @@ export const EditProductListing = () => {
                 <FormControl>
                   <select {...field}
                     className="w-full p-2 border rounded"
-                    onChange={(e) => {
-                      setSelectedCategory(e.target.value);
-                      field.onChange(e);
-                    }}
                   >
                     <option value="">Select the condition of the product</option>
                     {foodConditions.map((condition) => (

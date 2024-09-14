@@ -5,10 +5,11 @@ export const signInFormDefaultValues = {
 
 export const signUpFormDefaultValues = {
   email: '',
-  name: '',
-  phoneNumber: '',
-  password: '',
+  firstName: '',
+  lastName: '',
   confirmPassword: '',
+  password: '',
+  homeAddress: '',
 };
 
 export const createProductListingDefaultValues = {

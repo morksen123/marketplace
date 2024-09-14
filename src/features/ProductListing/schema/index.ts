@@ -8,8 +8,8 @@ export const CreateProductListingSchema = z.object({
   price: z.number().min(0.01, "Price must be greater than 0"),
   deliveryMethod: z.string().nonempty("Delivery method is required"),
   description: z.string(),
-  weight: z.number().min(0.1, "Weight must be greater than 0"),
-  pickUpLocation: z.string().nonempty("Pick up location is required"),
+  weight: z.number().min(0.1, "Weight must be greater than 0").optional(),
+  pickUpLocation: z.string().nonempty("Pick up location is required").optional(),
   batches: z.array(
     z.object({
       quantity: z.number(),

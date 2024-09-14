@@ -15,25 +15,8 @@ import AddIcon from '@mui/icons-material/Add';
 import { CreateProductListingSchema } from '@/features/ProductListing/schema';
 import { useNavigate } from 'react-router-dom';
 import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping } from '@/features/ProductListing/constants';
-
-interface BatchDto {
-  bestBeforeDate: string;
-  quantity: number;
-  isActive: boolean;
-}
-
-interface ProductFormData {
-  listingTitle: string;
-  foodCategory: string;
-  foodCondition: string;
-  minPurchaseQty: number;
-  price: number;
-  deliveryMethod: string;
-  description: string;
-  weight: number;
-  pickUpLocation: string;
-  batches: BatchDto[];
-}
+import { S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 
 export const CreateProductListing = () => {
   const navigate = useNavigate();
@@ -41,6 +24,7 @@ export const CreateProductListing = () => {
   const [foodConditions, setFoodConditions] = useState<string[]>([]);
   const [deliveryMethods, setDeliveryMethods] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [productPictures, setProductPictures] = useState<string[]>([]);
 
   const form = useForm({
     resolver: zodResolver(CreateProductListingSchema),
@@ -91,9 +75,8 @@ export const CreateProductListing = () => {
     fetchEnums();
   }, []);
 
-  const handleCreateListing = async (data: ProductFormData) => {
+  const handleCreateListing = async (data) => {
     try {
-
       const response = await fetch('/api/products/', {
         method: 'POST',
         headers: {
@@ -121,13 +104,48 @@ export const CreateProductListing = () => {
     }
 
     window.alert('Product created successfully!');
-    navigate('/distributor-home');
+    navigate('/home/distributor');
+  };
+
+  const s3Client = new S3Client({
+    region: 'ap-southeast-2',
+    credentials: {
+      accessKeyId: 'AKIAS2VS4QJVRXLKSVXV',
+      secretAccessKey: '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',
+    },
+  });
+
+  const handleFileUpload = async (files) => {
+    const uploadedPictureUrls = [];
+  
+    for (const file of files) {
+      const fileName = `${Date.now()}-${file.name}`;
+      const upload = new Upload({
+        client: s3Client,
+        params: {
+          Bucket: 'gudfood-pictures',
+          Key: fileName,
+          Body: file,
+          ACL: 'public-read',        
+        },
+      });
+  
+      try {
+        const result = await upload.done();
+        const url = `https://${result.Bucket}.s3.amazonaws.com/${result.Key}`;
+        uploadedPictureUrls.push(url);
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      }
+    }
+  
+    setProductPictures([...productPictures, ...uploadedPictureUrls]);
   };
 
   const isFormSubmitting = form.formState.isSubmitting;
 
   return (
-    <div className="p-4">
+    <div className="wrapper">
       <h1 className="text-2xl font-bold mb-6 text-left mt-6">Create New Product Listing</h1>
 
       <Form {...form}>
@@ -159,7 +177,7 @@ export const CreateProductListing = () => {
                     {...field}
                     className="w-full p-2 border rounded"
                     onChange={(e) => {
-                      setSelectedCategory(e.target.value); // Set selected category
+                      setSelectedCategory(e.target.value);
                       field.onChange(e);
                     }}
                   >
@@ -186,10 +204,6 @@ export const CreateProductListing = () => {
                 <FormControl>
                   <select {...field}
                     className="w-full p-2 border rounded"
-                    onChange={(e) => {
-                      setSelectedCategory(e.target.value);
-                      field.onChange(e);
-                    }}
                   >
                     <option value="">Select the condition of the product</option>
                     {foodConditions.map((condition) => (
@@ -217,6 +231,20 @@ export const CreateProductListing = () => {
               </FormItem>
             </div>
           )}
+
+          <FormItem>
+            <FormLabel className="block text-left">Upload Product Images</FormLabel>
+            <FormControl>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => handleFileUpload(e.target.files)}
+                className="w-full p-2 border rounded"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
 
           {/* Description */}
           <FormField
@@ -249,7 +277,7 @@ export const CreateProductListing = () => {
                     <Input
                       {...field}
                       type="number"
-                      step="5"
+                      step="1"
                       placeholder="Minimum Quantity"
                       value={field.value ?? ''}
                       onChange={(e) => field.onChange(e.target.valueAsNumber)}
@@ -281,6 +309,31 @@ export const CreateProductListing = () => {
               )}
             />
           </div>
+
+          {/* Weight and Pickup Location */}
+          {/* Conditionally show weight field only for CANNED_GOODS */}
+          {selectedCategory === 'CANNED_GOODS' && (
+            <FormField
+              control={form.control}
+              name="weight"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel className="block text-left">Weight per can (kg)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="number"
+                      step="1"
+                      placeholder="Weight"
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           {/* Delivery Method */}
           <div className="flex space-x-4">
@@ -322,31 +375,6 @@ export const CreateProductListing = () => {
             )}
           </div>
 
-          {/* Weight and Pickup Location */}
-          {/* Conditionally show weight field only for CANNED_GOODS */}
-          {selectedCategory === 'CANNED_GOODS' && (
-            <FormField
-              control={form.control}
-              name="weight"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel className="block text-left">Weight per can (kg)</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      step="0.1"
-                      placeholder="Weight"
-                      value={field.value ?? ''}
-                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
           {/* Batches */}
           <div className="space-y-4">
             <h2 className="text-xl font-bold mb-4 text-left">Batch Details</h2>
@@ -358,8 +386,8 @@ export const CreateProductListing = () => {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel className="block text-left">Batch Quantity {selectedCategory === 'CANNED_GOODS'
-                      ? '(total number of cans)'
-                      : `(total ${unitMapping[selectedCategory] || 'units'})`}</FormLabel>
+                        ? '(total number of cans)'
+                        : `(total ${unitMapping[selectedCategory] || 'units'})`}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}

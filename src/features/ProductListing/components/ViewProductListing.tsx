@@ -176,25 +176,40 @@ export const ViewProductListing = () => {
     }
 
     return (
-        <div className="container mx-auto mt-6 p-4 relative">
+        <div className="wrapper">
             {/* Carousel */}
-            <Carousel className="w-full max-w-xs mx-auto mb-6">
+            <Carousel className="w-full max-w-10xl mx-auto mb-6">
                 <CarouselContent>
-                    {Array.from({ length: 5 }).map((_, index) => (
-                        <CarouselItem key={index}>
-                            <div className="p-1">
-                                <Card>
-                                    <CardContent className="flex aspect-square items-center justify-center p-6">
-                                        <span className="text-4xl font-semibold">{index + 1}</span>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </CarouselItem>
-                    ))}
+                    {product.productPictures?.map((pictureUrl, index) => {
+                        if (index % 3 === 0) {
+                            return (
+                                <CarouselItem key={index}>
+                                    <div className="flex space-x-2">
+                                        {product.productPictures.slice(index, index + 3).map((pic, idx) => (
+                                            <div key={idx} className="w-1/3 p-1">
+                                                <Card className="h-full rounded-lg border-none"> {/* Added 'border-none' */}
+                                                    <CardContent className="flex items-center justify-center h-full p-0">
+                                                        <img
+                                                            src={pic}
+                                                            alt={`Product Image ${index + idx + 1}`}
+                                                            className="object-cover w-full h-full rounded-lg"
+                                                        />
+                                                    </CardContent>
+                                                </Card>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CarouselItem>
+                            );
+                        }
+                        return null;
+                    })}
                 </CarouselContent>
                 <CarouselPrevious />
                 <CarouselNext />
             </Carousel>
+
+
 
             <div className="flex justify-between items-center mb-6">
                 <div>

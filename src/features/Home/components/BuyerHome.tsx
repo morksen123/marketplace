@@ -16,7 +16,6 @@ export const BuyerHome = () => {
         const response = await fetch('/api/products/active', {
           method: 'GET',
           headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbmdAZ21haWwuY29tIiwiaWF0IjoxNzI2MjA3NDIzLCJleHAiOjE3MjY4MTIyMjN9.SScCI90ac49GsW1hVd-7Q8tXNo3UAWjkL3G5Ej2aywo',
             'Content-Type': 'application/json',
           },
         });
@@ -109,11 +108,7 @@ export const BuyerHome = () => {
     <div>
       {/* Hero Section */}
       <section className="relative">
-        <img
-          src={bannerImage}
-          alt="GudFood Banner"
-          className="w-full h-auto"
-        />
+        <img src={bannerImage} alt="GudFood Banner" className="w-full h-auto" />
       </section>
 
       <section className="py-10">
