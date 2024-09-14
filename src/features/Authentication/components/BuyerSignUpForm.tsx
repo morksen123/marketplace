@@ -15,7 +15,7 @@ import { useAuthActions } from '../hooks/useAuthActions';
 import { SignUpSchema } from '../schema';
 import { RegisterForm } from '../types/auth';
 
-export const SignUpForm = () => {
+export const BuyerSignUpForm = () => {
   const { register } = useAuthActions();
   const form = useForm({
     resolver: zodResolver(SignUpSchema),

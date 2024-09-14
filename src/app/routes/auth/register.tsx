@@ -1,5 +1,6 @@
+import { BuyerSignUpForm } from '@/features/Authentication/components/BuyerSignUpForm';
+import { DistributorSignUpForm } from '@/features/Authentication/components/DistributorSignUpForm';
 import { RegisterHeader } from '@/features/Authentication/components/RegisterHeader';
-import { SignUpForm } from '@/features/Authentication/components/SignUpForm';
 import { RoleTypes } from '@/features/Authentication/types/auth';
 import { useLocation } from 'react-router-dom';
 
@@ -10,7 +11,7 @@ export const RegisterRoute = () => {
   return (
     <div className="wrapper">
       <RegisterHeader role={role} />
-      <SignUpForm />
+      {role === 'BUYER' ? <BuyerSignUpForm /> : <DistributorSignUpForm />}
     </div>
   );
 };

@@ -17,7 +17,7 @@ import { useAuthActions } from '../hooks/useAuthActions';
 import { SignInSchema } from '../schema';
 import { LoginCredentials, RoleTypes, SignInFormState } from '../types/auth';
 import { CheckboxWithText } from './CheckBoxWithText';
-import { FormHeader } from './FormHeader';
+import { SignInHeader } from './SignInHeader';
 
 type SignInFormProps = {
   userRole: RoleTypes;
@@ -37,7 +37,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6 min-w-[25rem]">
-      <FormHeader
+      <SignInHeader
         title={capitalizeFirstLetter(userRole)}
         onClose={() => onClose('CLOSED')}
       />
