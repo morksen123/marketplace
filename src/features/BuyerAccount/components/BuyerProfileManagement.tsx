@@ -35,7 +35,7 @@ const BuyerProfileManagement: React.FC = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtdXJzeWlkQGVtYWlsLmNvbSIsImlhdCI6MTcyNjIxMDE4NywiZXhwIjoxNzI2ODE0OTg3fQ.yOW1A2-0SYqXXTfWEUc5xd9Vn7PvZyVPEi1C4Wg4NxA`
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtdXJzeWlkQGVtYWlsLmNvbSIsImlhdCI6MTcyNjI1MzU1OSwiZXhwIjoxNzI2ODU4MzU5fQ.2d2oHe7-BaHJW5U3IJHw7_6dII24tMv33clYv9ncWjA`
         },
         body: JSON.stringify(profile)
       });

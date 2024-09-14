@@ -52,7 +52,7 @@ const AccountDeactivation: React.FC<AccountDeactivationProps> = ({ userType, onD
             <Checkbox
               checked={confirmDeactivation}
               onCheckedChange={(checked) => setConfirmDeactivation(checked as boolean)}
-              className="mr-2"
+              className="mr-2 border-gray-300 text-red-600 focus:ring-red-500"
             />
             <label className="text-sm text-gray-700">
               I understand the consequences, deactivate my account.

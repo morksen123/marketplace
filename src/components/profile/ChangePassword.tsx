@@ -1,24 +1,30 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface ChangePasswordProps {
   onSubmit: (currentPassword: string, newPassword: string) => void;
   title?: string;
 }
 
-const ChangePassword: React.FC<ChangePasswordProps> = ({ onSubmit, title = "Change Password" }) => {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+const ChangePassword: React.FC<ChangePasswordProps> = ({
+  onSubmit,
+  title = 'Change Password',
+}) => {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword === confirmNewPassword) {
       onSubmit(currentPassword, newPassword);
     } else {
-      // Handle password mismatch error
-      console.error("New passwords do not match");
+      setPasswordMismatch(true);
+      console.log('New passwords do not match');
     }
   };
 
@@ -66,6 +72,14 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onSubmit, title = "Chan
               required
             />
           </div>
+
+          {passwordMismatch && (
+            <Alert variant="destructive" className="">
+              <AlertDescription>
+                New passwords do not match. Please try again.
+              </AlertDescription>
+            </Alert>
+          )}
 
           <Button type="submit" variant="secondary" className="w-full">
             Change Password
