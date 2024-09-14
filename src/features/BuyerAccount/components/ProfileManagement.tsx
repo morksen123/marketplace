@@ -13,8 +13,8 @@ const BuyerProfileManagement: React.FC = () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtdXJzeWlkQGVtYWlsLmNvbSIsImlhdCI6MTcyNjIxMDE4NywiZXhwIjoxNzI2ODE0OTg3fQ.yOW1A2-0SYqXXTfWEUc5xd9Vn7PvZyVPEi1C4Wg4NxA`,
         },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
