@@ -23,6 +23,15 @@ const routes: RouteObject[] = [
     },
   },
   {
+    path: '/auth/forgot-password',
+    lazy: async () => {
+      const { ForgotPasswordRoute } = await import(
+        './routes/auth/forgot-password'
+      );
+      return { Component: ForgotPasswordRoute };
+    },
+  },
+  {
     path: '/',
     element: <AuthGuard />,
     children: [

@@ -39,10 +39,15 @@ export async function logout(): Promise<void> {
   await post<void>('/auth/logout', {});
 }
 
-export const checkAuth = async () => {
+export async function checkAuth() {
   const { data } = await get('/auth/check');
   return data;
-};
+}
+
+export async function resetPassword(email: string, role: RoleTypes) {
+  const roleRoute = role.toLowerCase();
+  await post(`/${roleRoute}/reset-password-request`, { email });
+}
 
 // guard
 export const AuthGuard = () => {

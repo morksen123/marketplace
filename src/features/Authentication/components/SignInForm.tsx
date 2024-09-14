@@ -77,6 +77,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
             <CheckboxWithText text="Remember me" />
             <Link
               to="/auth/forgot-password"
+              state={{ role: userRole }}
               className="text-authYellow hover:underline"
             >
               Forgot Password?
@@ -86,7 +87,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
           <Button
             type="submit"
             variant="warning"
-            className="w-full border-[1px]"
+            className="w-full"
             disabled={form.formState.isSubmitting}
           >
             {form.formState.isSubmitting ? 'Logging in...' : 'Sign In'}
