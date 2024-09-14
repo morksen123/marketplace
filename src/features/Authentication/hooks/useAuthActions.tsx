@@ -1,10 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 
-import { login, logout } from '@/lib/auth';
+import { handleSuccessApi } from '@/lib/api-client';
+import { login, logout, register } from '@/lib/auth';
+import { userAtom } from '@/store/authAtoms';
 import { useNavigate } from 'react-router-dom';
-import { userAtom } from '../atoms/authAtoms';
-import { LoginCredentials, ROLES, RoleTypes } from '../types/auth';
+import {
+  LoginCredentials,
+  RegisterForm,
+  ROLES,
+  RoleTypes,
+} from '../types/auth';
 
 export function useAuthActions() {
   const [, setUser] = useAtom(userAtom);
@@ -23,12 +29,13 @@ export function useAuthActions() {
     },
     onSuccess: (data) => {
       setUser(data);
+      // Invalidate and refetch authCheck query
       queryClient.invalidateQueries({ queryKey: ['authCheck'] });
 
       if (data?.role === ROLES.BUYER) {
-        navigate('/buyer-home');
+        navigate('/buyer/home');
       } else if (data?.role === ROLES.DISTRIBUTOR) {
-        navigate('/distributor-home');
+        navigate('/distributor/home');
       }
     },
   });
@@ -36,13 +43,27 @@ export function useAuthActions() {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['authCheck'] });
+      navigate('/');
+    },
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: (data: RegisterForm) => {
+      return register(data);
+    },
+    onSuccess: (data) => {
+      if (data) {
+        handleSuccessApi(
+          'Account Created',
+          'Your account has been successfully created. You can now log in.',
+        );
+      }
     },
   });
 
   return {
-    login: loginMutation.mutate,
+    login: loginMutation.mutate, // change to mutateAsync if we need the data in the component
     logout: logoutMutation.mutate,
+    register: registerMutation.mutate,
   };
 }

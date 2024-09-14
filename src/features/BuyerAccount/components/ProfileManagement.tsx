@@ -2,6 +2,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { LogoutButton } from '@/features/Authentication/components/LogoutButton';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { userDetailDefaultValues } from '../constants';
@@ -224,6 +225,8 @@ const ProfileManagement: React.FC = () => {
                     </li>
                   ))}
                 </ul>
+                {/* might shift this logout button to somewhere else */}
+                <LogoutButton />
               </div>
             </div>
           </div>
