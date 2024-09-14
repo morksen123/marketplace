@@ -8,10 +8,11 @@ import {
   RoleTypes,
 } from '@/features/Authentication/types/auth';
 import { LoginResponse, RegisterResponse } from '@/types/api';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import Cookies from 'universal-cookie';
 import { get, post } from './api-client';
 
+// actions
 export async function login(
   credentials: LoginCredentials,
   role: RoleTypes,
@@ -43,22 +44,18 @@ export const checkAuth = async () => {
   return data;
 };
 
+// guard
 export const AuthGuard = () => {
   const { isAuthenticated, isLoading } = useAuthStatus();
 
-  const location = useLocation();
+  // const location = useLocation();
 
   if (isLoading) {
     return <div>Loading...</div>; // change to a nicer spinner
   }
 
   if (!isAuthenticated) {
-    return (
-      <Navigate
-        to={`/auth/login?redirectTo=${encodeURIComponent(location.pathname)}`}
-        replace
-      />
-    );
+    return <Navigate to={'/'} replace />;
   }
 
   return <Outlet />;
