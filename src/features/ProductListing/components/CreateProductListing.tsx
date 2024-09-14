@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -10,21 +10,118 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { createProductListingDefaultValues } from '../constants';
-import { CreateProductListingSchema } from '../schema';
+import { useForm, useWatch } from 'react-hook-form';
 import AddIcon from '@mui/icons-material/Add';
+import { CreateProductListingSchema } from '@/features/ProductListing/schema';
+import { useNavigate } from 'react-router-dom';
+import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping } from '@/features/ProductListing/constants';
+
+interface BatchDto {
+  bestBeforeDate: string;
+  quantity: number;
+  isActive: boolean;
+}
+
+interface ProductFormData {
+  listingTitle: string;
+  foodCategory: string;
+  foodCondition: string;
+  minPurchaseQty: number;
+  price: number;
+  deliveryMethod: string;
+  description: string;
+  weight: number;
+  pickUpLocation: string;
+  batches: BatchDto[];
+}
 
 export const CreateProductListing = () => {
+  const navigate = useNavigate();
+  const [foodCategories, setFoodCategories] = useState<string[]>([]);
+  const [foodConditions, setFoodConditions] = useState<string[]>([]);
+  const [deliveryMethods, setDeliveryMethods] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+
   const form = useForm({
     resolver: zodResolver(CreateProductListingSchema),
-    defaultValues: createProductListingDefaultValues,
+    defaultValues: {
+      listingTitle: '',
+      foodCategory: '',
+      foodCondition: '',
+      minPurchaseQty: '',
+      price: '',
+      deliveryMethod: '',
+      description: '',
+      weight: '',
+      pickUpLocation: '',
+      batches: [{ bestBeforeDate: '', quantity: '', isActive: true }],
+      productPictures: [],
+      productTags: [],
+    },
   });
 
-  const handleCreateListing = async (data: z.infer<typeof CreateProductListingSchema>) => {
-    console.log('Listing created:', data);
-    // You can handle form submission here (e.g., send data to the backend)
+  const deliveryMethod = useWatch({
+    control: form.control,
+    name: "deliveryMethod",
+  });
+
+  // Fetch food categories, conditions, and delivery methods from backend
+  useEffect(() => {
+    const fetchEnums = async () => {
+      try {
+        const [categoryResponse, conditionResponse, deliveryResponse] = await Promise.all([
+          fetch('/api/products/food-category'),
+          fetch('/api/products/food-condition'),
+          fetch('/api/products/delivery-method'),
+        ]);
+
+        const categoryData = await categoryResponse.json();
+        const conditionData = await conditionResponse.json();
+        const deliveryData = await deliveryResponse.json();
+
+        setFoodCategories(categoryData);
+        setFoodConditions(conditionData);
+        setDeliveryMethods(deliveryData);
+
+      } catch (error) {
+        console.error('Error fetching enum values:', error);
+      }
+    };
+
+    fetchEnums();
+  }, []);
+
+  const handleCreateListing = async (data: ProductFormData) => {
+    try {
+
+      const response = await fetch('/api/products/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbmdAZ21haWwuY29tIiwiaWF0IjoxNzI2MjA3NDIzLCJleHAiOjE3MjY4MTIyMjN9.SScCI90ac49GsW1hVd-7Q8tXNo3UAWjkL3G5Ej2aywo',
+        },
+
+        body: JSON.stringify({
+          ...data,
+          distributorId: null,
+          isActive: true,
+          createdDateTime: new Date().toISOString(),
+          editedOn: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create product');
+      }
+
+      const result = await response.json();
+      console.log('Product created successfully:', result);
+    } catch (error) {
+      console.error('Error creating product:', error);
+    }
+
+    window.alert('Product created successfully!');
+    navigate('/distributor-home');
   };
 
   const isFormSubmitting = form.formState.isSubmitting;
@@ -34,150 +131,225 @@ export const CreateProductListing = () => {
       <h1 className="text-2xl font-bold mb-6 text-left mt-6">Create New Product Listing</h1>
 
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleCreateListing)}
-          className="space-y-6 w-2/3"
-        >
-          <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="block text-left">Listing Title</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Enter the name of the product e.g. Tomatoes" className="w-full" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="block text-left">Category</FormLabel>
-                  <FormControl>
-                    <select {...field} className="w-full p-2 border rounded">
-                      <option value="">Select the category of the product</option>
-                      <option value="fruits-vegetables">Fruits & Vegetables</option>
-                      <option value="canned-food">Canned Food</option>
-                      <option value="frozen">Frozen</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="condition"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="block text-left">Food Condition</FormLabel>
-                  <FormControl>
-                    <select {...field} className="w-full p-2 border rounded">
-                      <option value="">Select the condition of the product</option>
-                      <option value="near-expiry">Near Expiry</option>
-                      <option value="bruised">Bruised</option>
-                      <option value="dented">Dented</option>
-                      <option value="ugly">Ugly</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <form onSubmit={form.handleSubmit(handleCreateListing)} className="space-y-6 w-2/3">
+          {/* Listing Title */}
+          <FormField
+            control={form.control}
+            name="listingTitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-left">Listing Title</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Enter the product title" className="w-full" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Category */}
+          <FormField
+            control={form.control}
+            name="foodCategory"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-left">Category</FormLabel>
+                <FormControl>
+                  <select
+                    {...field}
+                    className="w-full p-2 border rounded"
+                    onChange={(e) => {
+                      setSelectedCategory(e.target.value); // Set selected category
+                      field.onChange(e);
+                    }}
+                  >
+                    <option value="">Select the category of the product</option>
+                    {foodCategories.map((category) => (
+                      <option key={category} value={category}>
+                        {foodCategoryMapping[category] || category}
+                      </option>
+                    ))}
+                  </select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Condition */}
+          <FormField
+            control={form.control}
+            name="foodCondition"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-left">Food Condition</FormLabel>
+                <FormControl>
+                  <select {...field}
+                    className="w-full p-2 border rounded"
+                    onChange={(e) => {
+                      setSelectedCategory(e.target.value);
+                      field.onChange(e);
+                    }}
+                  >
+                    <option value="">Select the condition of the product</option>
+                    {foodConditions.map((condition) => (
+                      <option key={condition} value={condition}>
+                        {foodConditionMapping[condition] || condition}
+                      </option>
+                    ))}
+                  </select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {(selectedCategory === 'DAIRY_AND_EGGS' || selectedCategory === 'DRY_GOODS_AND_STAPLES') && (
             <div className="flex space-x-4">
-              <FormField
-                control={form.control}
-                name="minPurchaseQuantity"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel className="block text-left">Minimum Purchase Quantity (in kg)</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="number" step="0.1" placeholder="Enter the minimum purchase quantity" className="w-full" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel className="block text-left">Price (in kg)</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="number" step="0.01" placeholder="Enter the price of the product" className="w-full" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <FormItem className="flex-1">
+                <FormLabel className="block text-left">Units</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter the units of the product e.g. if your product is eggs, enter dozens"
+                    className="w-full p-2 border rounded"
+                  />
+                </FormControl>
+              </FormItem>
             </div>
+          )}
+
+          {/* Description */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-left">Description</FormLabel>
+                <FormControl>
+                  <textarea {...field} className="w-full p-2 border rounded" rows={4} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Min Purchase Quantity and Price */}
+          <div className="flex space-x-4">
+            <FormField
+              control={form.control}
+              name="minPurchaseQty"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel className="block text-left">
+                    {selectedCategory === 'CANNED_GOODS'
+                      ? 'Minimum Purchase Quantity (number of cans)'
+                      : `Minimum Purchase Quantity (${unitMapping[selectedCategory] || 'units'})`}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="number"
+                      step="5"
+                      placeholder="Minimum Quantity"
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel className="block text-left">Price (per {unitMapping[selectedCategory] || 'unit'})</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="number"
+                      step="1"
+                      placeholder="Price"
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Delivery Method */}
+          <div className="flex space-x-4">
             <FormField
               control={form.control}
               name="deliveryMethod"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex-1">
                   <FormLabel className="block text-left">Delivery Method</FormLabel>
                   <FormControl>
                     <select {...field} className="w-full p-2 border rounded">
                       <option value="">Select the delivery method</option>
-                      <option value="self-pickup">Self Pickup</option>
-                      <option value="arranged-delivery">Arranged Delivery</option>
+                      {deliveryMethods.map((method) => (
+                        <option key={method} value={method}>
+                          {deliveryMethodMapping[method] || method}
+                        </option>
+                      ))}
                     </select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {deliveryMethod === 'SELF_PICK_UP' && (
+              <FormField
+                control={form.control}
+                name="pickUpLocation"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel className="block text-left">Pickup Location</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Location" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
+
+          {/* Weight and Pickup Location */}
+          {/* Conditionally show weight field only for CANNED_GOODS */}
+          {selectedCategory === 'CANNED_GOODS' && (
             <FormField
               control={form.control}
-              name="description"
+              name="weight"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="block text-left">Description</FormLabel>
+                <FormItem className="flex-1">
+                  <FormLabel className="block text-left">Weight per can (kg)</FormLabel>
                   <FormControl>
-                    <textarea
+                    <Input
                       {...field}
-                      className="w-full p-2 border rounded"
-                      rows={4}
-                      placeholder="Enter a description about the product"
+                      type="number"
+                      step="0.1"
+                      placeholder="Weight"
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {/* <FormField
-              control={form.control}
-              name="images"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="block text-left">Upload Pictures</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept=".png,.jpg,.jpeg"
-                      multiple
-                      onChange={(e) => field.onChange(e.target.files)}
-                      className="w-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <p className="text-sm text-gray-500">Accept PNG or JPG up to 10MB</p>
-                </FormItem>
-              )}
-            /> */}
-          </div>
+          )}
 
-          <hr className="my-6 border-gray-300" />
-
+          {/* Batches */}
           <div className="space-y-4">
-            <h2 className="text-xl font-bold mb-4 text-left">Batch</h2>
+            <h2 className="text-xl font-bold mb-4 text-left">Batch Details</h2>
             {form.watch('batches', []).map((batch, index) => (
               <div key={index} className="flex space-x-4 items-end">
                 <FormField
@@ -185,27 +357,38 @@ export const CreateProductListing = () => {
                   name={`batches.${index}.quantity`}
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel className="block text-left">Quantity (in kg)</FormLabel>
+                      <FormLabel className="block text-left">Batch Quantity {selectedCategory === 'CANNED_GOODS'
+                      ? '(total number of cans)'
+                      : `(total ${unitMapping[selectedCategory] || 'units'})`}</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" step="0.1" placeholder="Enter the batch quantity" className="w-full" />
+                        <Input
+                          {...field}
+                          type="number"
+                          step="1"
+                          placeholder="Quantity"
+                          value={field.value ?? ''}
+                          onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
-                  name={`batches.${index}.bestBefore`}
+                  name={`batches.${index}.bestBeforeDate`}
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel className="block text-left">Best Before Date</FormLabel>
                       <FormControl>
-                        <Input {...field} type="date" placeholder="DD/MM/YYYY" className="w-full" />
+                        <Input {...field} type="date" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <Button
                   type="button"
                   className="bg-red-600 hover:bg-red-700 text-white"
@@ -219,69 +402,36 @@ export const CreateProductListing = () => {
                 </Button>
               </div>
             ))}
-            {form.watch('batches', []).length < 1 && (
-              <div className="flex justify-end w-full">
-                <Button
-                  type="button"
-                  className="bg-transparent text-gray-500 hover:bg-transparent hover:text-black"
-                  onClick={() => {
-                    const batches = form.getValues('batches') || [];
-                    form.setValue('batches', [...batches, { quantity: '', bestBefore: '' }]);
-                  }}
-                >
-                  <AddIcon className="mr-2" />
-                  Add Batch
-                </Button>
-              </div>
-            )}
-            {/* TODO: This is only for SR1 */}
-
+            <div className="flex justify-end w-full">
+              <Button
+                type="button"
+                className="bg-transparent text-gray-500 hover:bg-transparent hover:text-black"
+                onClick={() => {
+                  const batches = form.getValues('batches') || [];
+                  form.setValue('batches', [
+                    ...batches,
+                    { quantity: '', bestBeforeDate: '', isActive: true },
+                  ]);
+                }}
+              >
+                <AddIcon className="mr-2" />
+                Add Batch
+              </Button>
+            </div>
           </div>
 
+          {/* Submit Button */}
           <div className="flex justify-end w-full">
             <Button
               type="submit"
-              className="w-50 bg-green-600 hover:bg-green-700 text-white "
+              className="w-50 bg-green-600 hover:bg-green-700 text-white"
+              disabled={isFormSubmitting}
             >
               {isFormSubmitting ? 'Processing...' : 'Create Product'}
             </Button>
           </div>
         </form>
       </Form>
-
-      {/* <div className="w-1/2 p-4 rounded-lg shadow">
-          <h2 className="text-xl font-bold mb-4">Preview Your Listing</h2>
-          <h3 className="text-lg font-bold mb-2">{form.watch('title') || 'Product Title'}</h3>
-          <p className="mb-2 text-left">
-            <b>Category:</b> {form.watch('category') || ''}
-          </p>
-          <p className="mb-2 text-left">
-            <b>Condition:</b> {form.watch('condition') || ''}
-          </p>
-          <p className="mb-2 text-left">
-            <b>Expiration Date:</b> {form.watch('expirationDate') || ''}
-          </p>
-          <p className="mb-2 text-left">
-            <b>Price:</b> {form.watch('price') ? `$${form.watch('price')}` : ''} per kg
-          </p>
-          <p className="mb-2 text-left">
-            <b>Minimum Purchase Quantity:</b> {form.watch('minPurchaseQuantity') || ''} kg
-          </p>
-          <p className="mb-2 text-left">
-            <b>Total Quantity:</b> {form.watch('totalQuantity') || ''} kg
-          </p>
-          <p className="mb-2 text-left">
-            <b>Delivery Method:</b> {form.watch('deliveryMethod') || ''}
-          </p>
-          <p className="mb-2 text-left">
-            <b>Description:</b> {form.watch('description') || ''}
-          </p>
-          {form.watch('images') && (
-            <p className="text-gray-500 mb-2">
-              Images: {form.watch('images').length} file(s) selected
-            </p>
-          )}
-        </div> */}
     </div>
   );
 };

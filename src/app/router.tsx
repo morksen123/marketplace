@@ -34,14 +34,14 @@ const routes: RouteObject[] = [
     }
   },
   {
-    path: '/view-product-listing',
+    path: '/view-product-listing/:productId',
     lazy: async () => {
       const { ViewProductListingRoute } = await import('./routes/view-product-listing');
       return { Component: ViewProductListingRoute };
     }
   },
   {
-    path: '/edit-product-listing',
+    path: '/edit-product-listing/:productId',
     lazy: async () => {
       const { EditProductListingRoute } = await import('./routes/edit-product-listing');
       return { Component: EditProductListingRoute };

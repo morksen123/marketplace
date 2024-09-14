@@ -1,27 +1,21 @@
 import * as z from 'zod';
 
 export const CreateProductListingSchema = z.object({
-  category: z.string().min(1, {
-    message: 'Category is required',
-  }),
-  title: z.string().min(1, {
-    message: 'Title is required',
-  }),
-  condition: z.string().min(1, {
-    message: 'Condition is required',
-  }),
-  expirationDate: z.string().min(1, {
-    message: 'Expiration date is required',
-  }),
-  price: z
-    .number()
-    .positive({
-      message: 'Price must be a positive number',
+  listingTitle: z.string().nonempty("Title is required"),
+  foodCategory: z.string().nonempty("Category is required"),
+  foodCondition: z.string().nonempty("Condition is required"),
+  minPurchaseQty: z.number().min(1, "Minimum purchase quantity must be greater than 0"),
+  price: z.number().min(0.01, "Price must be greater than 0"),
+  deliveryMethod: z.string().nonempty("Delivery method is required"),
+  description: z.string(),
+  weight: z.number().min(0.1, "Weight must be greater than 0"),
+  pickUpLocation: z.string().nonempty("Pick up location is required"),
+  batches: z.array(
+    z.object({
+      quantity: z.number(),
+      bestBeforeDate: z.string(),
     })
-    .min(0.01, {
-      message: 'Price must be greater than zero',
-    }),
-  description: z.string().min(1, {
-    message: 'Description is required',
-  }),
+  ),
+  productPictures: z.array(z.string()).optional(),
+  productTags: z.array(z.string()).optional(),
 });
