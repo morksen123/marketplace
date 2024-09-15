@@ -42,6 +42,15 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/buyer/search',
+                lazy: async () => {
+                  const { SearchResultsRoute } = await import(
+                    './routes/app/search/search-results'
+                  );
+                  return { Component: SearchResultsRoute };
+                },
+              },
+              {
                 path: '/buyer/profile',
                 lazy: async () => {
                   const { ProfileManagementRoute } = await import(

@@ -1,12 +1,17 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+{/* Icons */}
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
-import { useState } from 'react';
 
 export const BuyerNavMenu = () => {
   const [selectedTab, setSelectedTab] = useState('Home');
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   const tabs = [
     'Home',
@@ -16,6 +21,20 @@ export const BuyerNavMenu = () => {
     'Frozen',
     'Sale',
   ];
+
+ // Handle input change
+ const handleInputChange = (e) => {
+  setSearchQuery(e.target.value);
+};
+
+// Handle search submission
+const handleSearchSubmit = (e) => {
+  e.preventDefault();
+  if (searchQuery.trim()) {
+    navigate(`/buyer/search?q=${encodeURIComponent(searchQuery.trim())}`);
+  }
+};
+
 
   return (
     <nav className="bg-white shadow-md w-full">
@@ -30,16 +49,18 @@ export const BuyerNavMenu = () => {
 
           {/* Search Bar */}
           <div className="flex-grow mx-4 max-w-md">
-            <div className="relative">
+            <form onSubmit={handleSearchSubmit} className="relative">
               <input
                 type="text"
                 placeholder="Search..."
+                value={searchQuery}
+                onChange={handleInputChange}
                 className="w-full py-2 px-4 rounded-lg focus:outline-none border border-gray-300 bg-gray-100 text-black"
               />
-              <button className="absolute right-0 top-0 mt-1.5 mr-2">
+              <button type="submit" className="absolute right-0 top-0 mt-1.5 mr-2">
                 <SearchIcon className="w-6 h-6 text-gray-600" />
               </button>
-            </div>
+            </form> 
           </div>
 
           {/* Navigation Links with Icons */}
