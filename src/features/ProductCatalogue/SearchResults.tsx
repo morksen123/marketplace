@@ -16,8 +16,20 @@ const SearchResultsPage = () => {
   useEffect(() => {
     const fetchSearchResults = async () => {
       setLoading(true);
+      
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      try {
+        const response = await fetch(`/api/products/search?q=${searchQuery}`);
+        const data = await response.json();
+        setSearchResults(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+        setLoading(false);
+      }
+
+      
       // Mock data - replace with actual API call in production
       const mockResults = [
         { id: 1, name: 'Organic Apples', price: 2.99, category: 'Fruits', expiryDate: '2023-09-30' },
