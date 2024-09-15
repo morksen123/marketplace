@@ -1,30 +1,35 @@
 import bannerImage from '@/assets/buyer-homepage-banner.png';
+import ProductCard from '@/components/product/ProductCard';
 
 export const BuyerHome = () => {
   const products = [
     {
       id: 1,
       name: 'Product 1',
-      price: '$20',
+      price: 20,
       image: 'https://via.placeholder.com/150',
+      expiryDate: '2024-05-01',
     },
     {
       id: 2,
       name: 'Product 2',
-      price: '$30',
+      price: 30,
       image: 'https://via.placeholder.com/150',
+      expiryDate: '2024-05-01',
     },
     {
       id: 3,
       name: 'Product 3',
-      price: '$40',
+      price: 40,
       image: 'https://via.placeholder.com/150',
+      expiryDate: '2024-05-01',
     },
     {
       id: 4,
       name: 'Product 4',
-      price: '$50',
+      price: 50,
       image: 'https://via.placeholder.com/150',
+      expiryDate: '2024-05-01',
     },
   ];
 
@@ -42,18 +47,7 @@ export const BuyerHome = () => {
         </h3>
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {products.map((product) => (
-            <div key={product.id} className="bg-white shadow-lg rounded-lg p-4">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-40 object-cover rounded-lg"
-              />
-              <h4 className="text-xl font-semibold mt-4">{product.name}</h4>
-              <p className="text-gray-600 mt-2">{product.price}</p>
-              <button className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-800">
-                Buy Now
-              </button>
-            </div>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </section>
