@@ -2,6 +2,7 @@ import React from 'react';
 import ProfileManagement from '@/components/profile/ProfileManagement';
 import { LogoutButton } from '@/features/Authentication/components/LogoutButton';
 import { userDetailDefaultValues } from '../constants';
+import { BuyerNavMenu } from '@/features/NavigationMenu/components/BuyerNavMenu';
 
 const BuyerProfileManagement: React.FC = () => {
   const API_BASE_URL = 'http://localhost:8080/api';
@@ -36,8 +37,8 @@ const BuyerProfileManagement: React.FC = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtdXJzeWlkQGVtYWlsLmNvbSIsImlhdCI6MTcyNjI1MzU1OSwiZXhwIjoxNzI2ODU4MzU5fQ.2d2oHe7-BaHJW5U3IJHw7_6dII24tMv33clYv9ncWjA`,
         },
+        credentials: 'include',
         body: JSON.stringify(profile),
       });
       if (response.ok) {
@@ -82,12 +83,14 @@ const BuyerProfileManagement: React.FC = () => {
 
   return (
     <div>
+      <BuyerNavMenu />
       <ProfileManagement
         fetchProfile={fetchProfile}
         updateProfile={updateProfile}
         profileFields={profileFields}
         links={links}
         greeting={greeting}
+        hasProfilePicture={true}
       />
       {/* might shift this logout button to somewhere else */}
       <LogoutButton />

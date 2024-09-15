@@ -1,6 +1,7 @@
 import React from 'react';
 import ProfileManagement from '@/components/profile/ProfileManagement';
 import { distributorProfileDefaultValues } from '../constants';
+import { DistributorNavMenu } from '@/features/NavigationMenu/components/DistributorNavMenu';
 
 const DistributorProfileManagement: React.FC = () => {
   const API_BASE_URL = 'http://localhost:8080/api';
@@ -37,8 +38,8 @@ const DistributorProfileManagement: React.FC = () => {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW1hQGVtYWlsLmNvbSIsImlhdCI6MTcyNjI0ODA4NiwiZXhwIjoxNzI2ODUyODg2fQ.6SxEL4IrmskwZSfwDsQaD8U-P7ORO35i_iseZJ44kVI`,
           },
+          credentials: 'include',
           body: JSON.stringify(profile),
         },
       );
@@ -94,28 +95,33 @@ const DistributorProfileManagement: React.FC = () => {
   ];
 
   const links = [
-    { text: 'Change Password', path: '/distributor-account/change-password' },
-    { text: 'Notifications', path: '/distributor-account/notifications' },
+    { text: 'Change Password', path: '/distributor/profile/change-password' },
+    { text: 'Notifications', path: '/distributor/profile/notifications' },
     {
       text: 'Listing Preferences',
-      path: '/distributor-account/listing-preferences',
+      path: '/distributor/profile/listing-preferences',
     },
     {
       text: 'Account Deactivation',
-      path: '/distributor-account/account-deactivation',
+      path: '/distributor/profile/account-deactivation',
     },
   ];
 
   const greeting = (profile: any) => `${profile.distributorName} Profile`;
 
   return (
-    <ProfileManagement
-      fetchProfile={fetchProfile}
-      updateProfile={updateProfile}
-      profileFields={profileFields}
-      links={links}
-      greeting={greeting}
-    />
+    <div>
+      <DistributorNavMenu />
+
+      <ProfileManagement
+        fetchProfile={fetchProfile}
+        updateProfile={updateProfile}
+        profileFields={profileFields}
+        links={links}
+        greeting={greeting}
+        hasProfilePicture={false}
+      />
+    </div>
   );
 };
 

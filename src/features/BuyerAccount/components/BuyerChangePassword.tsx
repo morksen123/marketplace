@@ -8,26 +8,31 @@ const handleBuyerPasswordChange = async (
   console.log(currentPassword, newPassword);
 
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/buyer/change-password`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ currentPassword, newPassword }),
+    fetch('http://localhost:8080/api/buyer/change-password', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    );
-    if (response.ok) {
-      const data = await response.json();
-      console.log(data);
-      return data;
-    } else {
-      throw new Error('Failed to update password');
-    }
+      body: JSON.stringify({
+        currPassword: currentPassword,
+        newPassword: newPassword
+      }),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.text();
+    })
+    .then(data => {
+      console.log(data); // Should be the success message
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
   } catch (error) {
-    console.error('Error updating password:', error);
+    console.error('Error:', error);
   }
 };
 
