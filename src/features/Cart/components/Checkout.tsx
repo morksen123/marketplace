@@ -1,11 +1,11 @@
 import { useCart } from '../hooks/useCart';
 
 export const Checkout: React.FC = () => {
-  const { cart, total, clearCart } = useCart();
+  const { cart, cartPrice, clearCart } = useCart();
 
   const handleCheckout = () => {
-    // Here you would typically integrate with a payment gateway
-    alert(`Checkout completed. Total: $${total.toFixed(2)}`);
+    // integrate with a payment gateway
+    alert(`Checkout completed. Total: $${cartPrice.toFixed(2)}`);
     clearCart();
   };
 
@@ -19,7 +19,7 @@ export const Checkout: React.FC = () => {
           </span>
         </div>
       ))}
-      <div>Total: ${total.toFixed(2)}</div>
+      <div>Total: ${cartPrice.toFixed(2)}</div>
       <button onClick={handleCheckout}>Complete Purchase</button>
     </div>
   );

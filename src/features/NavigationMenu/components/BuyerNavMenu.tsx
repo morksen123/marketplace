@@ -1,12 +1,15 @@
+import { Button } from '@/components/ui/button';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const BuyerNavMenu = () => {
   const [selectedTab, setSelectedTab] = useState('Home');
+  const navigate = useNavigate();
 
   const tabs = [
     'Home',
@@ -62,9 +65,12 @@ export const BuyerNavMenu = () => {
             >
               <PersonOutlineOutlinedIcon className="mr-1" /> Account
             </a>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center">
+            <Button
+              onClick={() => navigate('/buyer/cart')}
+              className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center"
+            >
               <ShoppingCartOutlinedIcon className="mr-2" /> Cart
-            </button>
+            </Button>
           </div>
         </div>
       </div>

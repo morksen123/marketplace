@@ -45,7 +45,17 @@ export const useCart = () => {
     setCart([]);
   };
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const cartPrice = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
-  return { cart, addToCart, removeFromCart, updateQuantity, clearCart, total };
+  return {
+    cart,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    cartPrice,
+  };
 };

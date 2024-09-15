@@ -86,6 +86,22 @@ const routes: RouteObject[] = [
                   return { Component: AccountDeactivationRoute };
                 },
               },
+              {
+                path: '/buyer/cart',
+                lazy: async () => {
+                  const { CartRoute } = await import('./routes/cart/cart');
+                  return { Component: CartRoute };
+                },
+              },
+              {
+                path: '/buyer/checkout',
+                lazy: async () => {
+                  const { CheckoutRoute } = await import(
+                    './routes/payment/checkout'
+                  );
+                  return { Component: CheckoutRoute };
+                },
+              },
               // Add other buyer-specific routes here
             ],
           },

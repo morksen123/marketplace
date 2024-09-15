@@ -1,7 +1,8 @@
+import { Link } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 
 export const Cart: React.FC = () => {
-  const { cart, removeFromCart, updateQuantity, total } = useCart();
+  const { cart, removeFromCart, updateQuantity, cartPrice } = useCart();
 
   return (
     <div>
@@ -20,7 +21,8 @@ export const Cart: React.FC = () => {
           <button onClick={() => removeFromCart(item.id)}>Remove</button>
         </div>
       ))}
-      <div>Total: ${total.toFixed(2)}</div>
+      <Link to="/buyer/checkout">Checkout</Link>
+      <div>Total: ${cartPrice.toFixed(2)}</div>
     </div>
   );
 };
