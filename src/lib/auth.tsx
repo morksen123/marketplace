@@ -69,7 +69,7 @@ export const AuthGuard = () => {
   const { isAuthenticated, isLoading } = useAuthStatus();
 
   if (isLoading) {
-    return <div>Loading...</div>; // change to a nicer spinner
+    return <div className="wrapper">Loading...</div>; // change to a nicer spinner
   }
 
   if (!isAuthenticated) {

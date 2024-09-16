@@ -4,12 +4,15 @@ export const CreateProductListingSchema = z.object({
   listingTitle: z.string().nonempty("Title is required"),
   foodCategory: z.string().nonempty("Category is required"),
   foodCondition: z.string().nonempty("Condition is required"),
-  minPurchaseQty: z.number().min(1, "Minimum purchase quantity must be greater than 0"),
-  price: z.number().min(0.01, "Price must be greater than 0"),
   deliveryMethod: z.string().nonempty("Delivery method is required"),
   description: z.string(),
-  weight: z.number().min(0.1, "Weight must be greater than 0").optional(),
-  pickUpLocation: z.string().nonempty("Pick up location is required").optional(),
+  minPurchaseQty: z.coerce.number()
+    .min(1, "Minimum purchase quantity is required"),
+  price: z.coerce.number()
+    .min(0.01, "Price is required"),
+  weight: z.coerce.number().optional(),
+  units: z.string().optional(),
+  pickUpLocation: z.string().optional(),
   batches: z.array(
     z.object({
       quantity: z.number(),
@@ -18,4 +21,11 @@ export const CreateProductListingSchema = z.object({
   ),
   productPictures: z.array(z.string()).optional(),
   productTags: z.array(z.string()).optional(),
+  bulkPricings: z.array(
+    z.object({
+      minQuantity: z.number(),
+      maxQuantity: z.number(),
+      price: z.number(),
+    })
+  ),
 });

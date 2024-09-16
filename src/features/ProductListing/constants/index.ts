@@ -1,10 +1,18 @@
 export const createProductListingDefaultValues = {
-  category: '',
-  title: '',
-  condition: '',
-  expirationDate: '',
-  price: 0, 
+  listingTitle: '',
+  foodCategory: '',
+  foodCondition: '',
+  minPurchaseQty: '',
+  price: '',
+  deliveryMethod: '',
   description: '',
+  weight: '',
+  units: '',
+  pickUpLocation: '',
+  batches: [{ bestBeforeDate: '', quantity: '', isActive: true }],
+  productPictures: [],
+  productTags: [],
+  bulkPricings: [{ minQuantity: '', maxQuantity: '', price: ''}],
 }
 
 export const foodCategoryMapping: Record<string, string> = {
@@ -30,7 +38,33 @@ export const deliveryMethodMapping: Record<string, string> = {
 export const unitMapping: Record<string, string> = {
   FRUITS_AND_VEGETABLES: "kg",
   FROZEN: "kg",
-  CANNED_GOODS: "can",
-  DAIRY_AND_EGGS: "unit",
-  DRY_GOODS_AND_STAPLES: "unit",
+  CANNED_GOODS: "can(s)",
+  DAIRY_AND_EGGS: "unit(s)",
+  DRY_GOODS_AND_STAPLES: "unit(s)",
 };
+
+export interface Batch {
+  quantity: number;
+  bestBeforeDate: string;
+}
+
+export interface BulkPricing {
+  minQuantity: number;
+  maxQuantity: number;
+  price: number;
+}
+
+export interface Product {
+  listingTitle: string;
+  price: number;
+  productPictures: string[];
+  foodCondition: string;
+  foodCategory: string;
+  description: string;
+  weight: number;
+  deliveryMethod: string;
+  pickUpLocation?: string;
+  minPurchaseQty: number;
+  batches?: Batch[];
+  bulkPricings?: BulkPricing[];
+}

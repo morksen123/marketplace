@@ -42,9 +42,9 @@ export const BuyerHome = () => {
       const response = await fetch(`/api/buyer/favourites/check?productId=${productId}`, {
         method: 'GET',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllckBnbWFpbC5jb20iLCJpYXQiOjE3MjYyMDc1NzEsImV4cCI6MTcyNjgxMjM3MX0.Ddn1Dtnj1-Suj07LNCM86ordKv8RzOGw1D13RcfuTTI',
           'Content-Type': 'application/json',
         },
+        credentials: 'include'
       });
       if (response.ok) {
         const isFavourited = await response.json();
@@ -74,17 +74,17 @@ export const BuyerHome = () => {
         response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/remove`, {
           method: 'PUT',
           headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllckBnbWFpbC5jb20iLCJpYXQiOjE3MjYyMDc1NzEsImV4cCI6MTcyNjgxMjM3MX0.Ddn1Dtnj1-Suj07LNCM86ordKv8RzOGw1D13RcfuTTI',
             'Content-Type': 'application/json',
           },
+          credentials: 'include'
         });
       } else {
         response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/add`, {
           method: 'PUT',
           headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllckBnbWFpbC5jb20iLCJpYXQiOjE3MjYyMDc1NzEsImV4cCI6MTcyNjgxMjM3MX0.Ddn1Dtnj1-Suj07LNCM86ordKv8RzOGw1D13RcfuTTI',
             'Content-Type': 'application/json',
           },
+          credentials: 'include'
         });
       }
 

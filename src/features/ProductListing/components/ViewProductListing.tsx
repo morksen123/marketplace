@@ -8,19 +8,41 @@ import { Carousel, CarouselItem, CarouselContent, CarouselPrevious, CarouselNext
 import { useNavigate, useParams } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import AddIcon from '@mui/icons-material/Add';
-import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping } from '@/features/ProductListing/constants';
+import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping, Product, Batch } from '@/features/ProductListing/constants';
 
 export const ViewProductListing = () => {
+
     const navigate = useNavigate();
     const { productId } = useParams();
-    const [product, setProduct] = useState(null);
-    const [batches, setBatches] = useState([]);
+    const [product, setProduct] = useState<Product | null>(null);;
+    const [batches, setBatches] = useState<Batch[]>([]);
     const [open, setOpen] = useState(false);
     const [openAddBatch, setOpenAddBatch] = useState(false);
     const [newBatchQuantity, setNewBatchQuantity] = useState('');
-    const [newBatchExpiryDate, setNewBatchExpiryDate] = useState('');
+    const [newBatchBestBeforeDate, setNewBatchBestBeforeDate] = useState('');
     const [isFavourite, setIsFavourite] = useState(false);
+    const [loading, setLoading] = useState(true);
     const buyerId = 1; // To change
+
+    const getTodayDate = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0'); // Add leading 0 if necessary
+        const day = String(today.getDate()).padStart(2, '0'); // Add leading 0 if necessary
+        return `${year}-${month}-${day}`;
+    };
+
+    const formatDisplayDate = (dateString) => {
+        if (!dateString) return '';
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', options); // en-GB for British date formatting
+    };
+
+    const handleDateChange = (e) => {
+        const dateValue = e.target.value;
+        setNewBatchBestBeforeDate(dateValue);
+    };
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -31,6 +53,8 @@ export const ViewProductListing = () => {
                 setBatches(data.batches || []);
             } catch (error) {
                 console.error('Error fetching product:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -39,9 +63,9 @@ export const ViewProductListing = () => {
                 const response = await fetch(`/api/buyer/favourites/check?productId=${productId}`, {
                     method: 'GET',
                     headers: {
-                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllckBnbWFpbC5jb20iLCJpYXQiOjE3MjYyMDc1NzEsImV4cCI6MTcyNjgxMjM3MX0.Ddn1Dtnj1-Suj07LNCM86ordKv8RzOGw1D13RcfuTTI',
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include',
                 });
 
                 const result = await response.json();
@@ -74,23 +98,22 @@ export const ViewProductListing = () => {
                 response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/remove`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllckBnbWFpbC5jb20iLCJpYXQiOjE3MjYyMDc1NzEsImV4cCI6MTcyNjgxMjM3MX0.Ddn1Dtnj1-Suj07LNCM86ordKv8RzOGw1D13RcfuTTI',
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include',
                 });
             } else {
                 response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/add`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllckBnbWFpbC5jb20iLCJpYXQiOjE3MjYyMDc1NzEsImV4cCI6MTcyNjgxMjM3MX0.Ddn1Dtnj1-Suj07LNCM86ordKv8RzOGw1D13RcfuTTI',
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include',
                 });
             }
 
             if (response.ok) {
                 setIsFavourite(!isFavourite);
-                alert(isFavourite ? 'Removed from favourites' : 'Added to favourites');
             } else {
                 const errorMessage = await response.text();
                 console.error('Error:', errorMessage);
@@ -101,20 +124,20 @@ export const ViewProductListing = () => {
         }
     };
 
-    // Delete Product API call
-    const handleConfirmDelete = async () => {
+    // This actually deactivates the product not deletes
+    const handleConfirmDeactivate = async () => {
         try {
-            const response = await fetch(`/api/products/product/${productId}`, {
-                method: 'DELETE',
+            const response = await fetch(`/api/products/product/deactivate/${productId}`, {
+                method: 'PUT',
                 headers: {
-                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbmdAZ21haWwuY29tIiwiaWF0IjoxNzI2MjA3NDIzLCJleHAiOjE3MjY4MTIyMjN9.SScCI90ac49GsW1hVd-7Q8tXNo3UAWjkL3G5Ej2aywo',
                     'Content-Type': 'application/json'
-                }
+                },
+                credentials: 'include',
             });
 
             if (response.ok) {
                 alert(`Product ID: ${productId} deleted successfully.`);
-                navigate('/distributor-home');
+                navigate('/distributor/home');
             } else {
                 const errorMessage = await response.text();
                 console.error('Error deleting product:', errorMessage);
@@ -128,10 +151,10 @@ export const ViewProductListing = () => {
     };
 
     const handleAddBatch = async () => {
-        if (newBatchQuantity && newBatchExpiryDate) {
+        if (newBatchQuantity && newBatchBestBeforeDate) {
             const batchData = {
                 quantity: parseInt(newBatchQuantity),
-                expiryDate: newBatchExpiryDate
+                bestBeforeDate: newBatchBestBeforeDate
             };
 
             try {
@@ -139,9 +162,9 @@ export const ViewProductListing = () => {
                 const response = await fetch(`/api/products/product/${productId}/batch`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllckBnbWFpbC5jb20iLCJpYXQiOjE3MjYyMDc1NzEsImV4cCI6MTcyNjgxMjM3MX0.Ddn1Dtnj1-Suj07LNCM86ordKv8RzOGw1D13RcfuTTI',
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(batchData) // Send batch data as JSON
                 });
 
@@ -155,7 +178,7 @@ export const ViewProductListing = () => {
                     // Reset the form and close the dialog
                     setOpenAddBatch(false);
                     setNewBatchQuantity('');
-                    setNewBatchExpiryDate('');
+                    setNewBatchBestBeforeDate('');
                     alert('Batch added successfully');
                 } else {
                     const errorMessage = await response.text();
@@ -169,10 +192,12 @@ export const ViewProductListing = () => {
         }
     };
 
-
+    if (loading) {
+        return <div className="wrapper">Loading...</div>;
+    }
 
     if (!product) {
-        return <div>Loading...</div>; // Show loading spinner or message while data is being fetched
+        return <div className="wrapper">No product found</div>;
     }
 
     return (
@@ -214,7 +239,7 @@ export const ViewProductListing = () => {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-left">{product.listingTitle}</h1>
-                    <p className="text-2xl text-green-600 font-semibold">${product.price.toFixed(2)} per kilogram</p>
+                    <p className="text-2xl text-green-600 font-semibold text-left">${product.price.toFixed(2)} per {unitMapping[product.foodCategory] || "unit"}</p>
                 </div>
 
                 <button onClick={handleToggleFavourite} className="flex items-center">
@@ -227,12 +252,39 @@ export const ViewProductListing = () => {
                     <h2 className="text-2xl font-semibold">Details</h2>
 
                     <p><strong>Food Condition: </strong>{foodConditionMapping[product.foodCondition] || product.foodCondition}</p>
-                    <p><strong>Food Condition: </strong>{foodCategoryMapping[product.foodCategory] || product.foodCategory}</p>
+                    <p><strong>Food Category: </strong>{foodCategoryMapping[product.foodCategory] || product.foodCategory}</p>
                     <p><strong>Description: </strong>{product.description}</p>
                     <p><strong>Delivery Method: </strong>{deliveryMethodMapping[product.deliveryMethod] || product.deliveryMethod}</p>
-                    <p><strong>Minimum Purchase Quantity: </strong>{product.minPurchaseQty} kg</p>
-                    {product.weight && <p><strong>Weight: </strong>{product.weight} kg</p>}
                     {product.pickUpLocation && <p><strong>Pick Up Location: </strong>{product.pickUpLocation}</p>}
+                    {product.weight != null && product.weight > 0 && (<p><strong>Weight: </strong>{product.weight} kg</p>)}
+                    <p><strong>Minimum Purchase Quantity: </strong>{product.minPurchaseQty} {unitMapping[product.foodCategory] || "unit"}</p>
+                </div>
+
+                 {/* Bulk Pricing Section */}
+                <div className="mt-8">
+                    <h2 className="text-2xl font-semibold mb-4">Bulk Pricing</h2>
+                    {product.bulkPricings && product.bulkPricings.length > 0 ? (
+                        <table className="w-full border-collapse border border-gray-300">
+                            <thead>
+                                <tr className="bg-gray-100">
+                                    <th className="border border-gray-300 px-4 py-2">Min Quantity</th>
+                                    <th className="border border-gray-300 px-4 py-2">Max Quantity</th>
+                                    <th className="border border-gray-300 px-4 py-2">Price per {unitMapping[product.foodCategory] || "unit"}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {product.bulkPricings.map((pricing, index) => (
+                                    <tr key={index}>
+                                        <td className="border border-gray-300 px-4 py-2">{pricing.minQuantity}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{pricing.maxQuantity || 'No limit'}</td>
+                                        <td className="border border-gray-300 px-4 py-2">${pricing.price.toFixed(2)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <p>No bulk pricing available for this product.</p>
+                    )}
                 </div>
 
                 <div className="mt-6 mb-6 flex justify-end space-x-2">
@@ -265,9 +317,9 @@ export const ViewProductListing = () => {
                             <Card key={index} className="flex  items-center">
                                 <CardContent className="flex-1 p-4">
                                     <p className="font-semibold">Total Quantity</p>
-                                    <p>{batch.quantity} kg</p>
+                                    <p>{batch.quantity} {unitMapping[product.foodCategory] || "unit"}</p>
                                     <p className="font-semibold">Best Before Date</p>
-                                    <p>{batch.bestBeforeDate}</p>
+                                    {batch.bestBeforeDate ? formatDisplayDate(batch.bestBeforeDate) : ''}
                                 </CardContent>
                             </Card>
                         ))}
@@ -291,7 +343,7 @@ export const ViewProductListing = () => {
                         </button>
                         <button
                             className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 flex items-center"
-                            onClick={handleConfirmDelete}
+                            onClick={handleConfirmDeactivate}
                         >
                             <DeleteIcon className="mr-2" /> Delete
                         </button>
@@ -318,16 +370,19 @@ export const ViewProductListing = () => {
                         />
                         <TextField
                             margin="dense"
-                            id="expiryDate"
-                            label="Expiry Date"
+                            id="bestBeforeDate"
+                            label="Best Before Date"
                             type="date"
                             fullWidth
                             variant="standard"
                             InputLabelProps={{
                                 shrink: true,
                             }}
-                            value={newBatchExpiryDate}
-                            onChange={(e) => setNewBatchExpiryDate(e.target.value)}
+                            value={newBatchBestBeforeDate}
+                            onChange={handleDateChange}
+                            inputProps={{
+                                min: getTodayDate(),
+                            }}
                         />
                     </DialogContent>
                     <DialogActions>

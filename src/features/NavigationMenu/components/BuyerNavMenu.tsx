@@ -3,6 +3,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import { useState } from 'react';
 
 export const BuyerNavMenu = () => {
@@ -61,6 +62,12 @@ export const BuyerNavMenu = () => {
               className="text-black hover:text-gray-600 flex items-center"
             >
               <PersonOutlineOutlinedIcon className="mr-1" /> Account
+            </a>
+            <a
+              href="/account"
+              className="text-black hover:text-gray-600 flex items-center"
+            >
+              <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
             </a>
             <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center">
               <ShoppingCartOutlinedIcon className="mr-2" /> Cart

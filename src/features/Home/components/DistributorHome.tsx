@@ -1,31 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
+import { foodCategoryMapping, foodConditionMapping, Product } from '@/features/Home/constants';
 
 export const DistributorHome = () => {
 
   const [foodCategories, setFoodCategories] = useState<string[]>([]);
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product>([]);
   const [selectedTab, setSelectedTab] = useState('All');
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
+
       try {
         const [categoryResponse, productsResponse] = await Promise.all([
           fetch('/api/products/food-category'),
           fetch('http://localhost:8080/api/products/distributor/active', {
             method: 'GET',
             headers: {
-              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbmdAZ21haWwuY29tIiwiaWF0IjoxNzI2MjA3NDIzLCJleHAiOjE3MjY4MTIyMjN9.SScCI90ac49GsW1hVd-7Q8tXNo3UAWjkL3G5Ej2aywo',
               'Content-Type': 'application/json',
-            }
+            },
+            credentials: 'include',
           })
         ]);
 
         const categoryData = await categoryResponse.json();
         const productsData = await productsResponse.json();
+
+        console.log(categoryData);
+        console.log(productsData);
 
         setFoodCategories(['All', ...categoryData]); // Adding "All" to the categories
         setProducts(productsData);
@@ -63,7 +68,7 @@ export const DistributorHome = () => {
   ];
 
   return (
-    <div className="p-4">
+    <div className="wrapper">
       {/* Store Title */}
       <div className="flex justify-between items-center mt-6">
         <h1 className="text-3xl font-bold">Store</h1>
@@ -138,8 +143,8 @@ export const DistributorHome = () => {
                     className="w-full h-40 object-cover rounded"
                   />
                   <h3 className="text-lg font-bold mt-4">{product.listingTitle}</h3>
-                  <p className="text-gray-500">{product.foodCategory}</p>
-                  <p className="text-gray-500">Condition: {product.foodCondition}</p>
+                  <p className="text-gray-500">{foodCategoryMapping[product.foodCategory] || product.foodCategory}</p>
+                  <p className="text-gray-500"><i>{foodConditionMapping[product.foodCondition] || product.foodCondition}</i></p>
                 </div>
               ))
             ) : (
