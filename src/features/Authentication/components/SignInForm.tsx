@@ -11,14 +11,13 @@ import { Input } from '@/components/ui/input';
 import { capitalizeFirstLetter } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { signInFormDefaultValues } from '../constants';
 import { useAuthActions } from '../hooks/useAuthActions';
 import { SignInSchema } from '../schema';
 import { LoginCredentials, RoleTypes, SignInFormState } from '../types/auth';
 import { CheckboxWithText } from './CheckBoxWithText';
-import { useNavigate } from 'react-router-dom';
-import { FormHeader } from './FormHeader';
+import { SignInHeader } from './SignInHeader';
 
 type SignInFormProps = {
   userRole: RoleTypes;
@@ -40,7 +39,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6 min-w-[25rem]">
-      <FormHeader
+      <SignInHeader
         title={capitalizeFirstLetter(userRole)}
         onClose={() => onClose('CLOSED')}
       />
@@ -100,7 +99,11 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
 
       <p className="text-primary-foreground text-center mt-4">
         No account?{' '}
-        <Link to="/auth/register" className="text-authYellow hover:underline">
+        <Link
+          to="/auth/register"
+          state={{ role: userRole }}
+          className="text-authYellow hover:underline"
+        >
           Create an account
         </Link>
       </p>

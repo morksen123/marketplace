@@ -1,8 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
 import { useAuthStatus } from '@/features/Authentication/hooks/useAuthStatus';
 import {
+  BuyerRegisterForm,
+  DistributorRegisterForm,
   LoginCredentials,
-  RegisterForm,
   ResetPasswordFormValues,
   RoleGuardProps,
   ROLES,
@@ -28,10 +29,21 @@ export async function login(
   return data || null;
 }
 
-export async function register(
-  userData: RegisterForm,
+export async function buyerRegister(
+  userData: BuyerRegisterForm,
 ): Promise<RegisterResponse | null> {
   const { data } = await post<RegisterResponse>('/buyer/register', userData);
+
+  return data || null;
+}
+
+export async function distributorRegister(
+  userData: DistributorRegisterForm,
+): Promise<RegisterResponse | null> {
+  const { data } = await post<RegisterResponse>(
+    '/distributor/register',
+    userData,
+  );
 
   return data || null;
 }
