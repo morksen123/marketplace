@@ -133,7 +133,7 @@ export const BuyerSignUpForm = () => {
             type="submit"
             disabled={isFormSubmitting}
           >
-            {isFormSubmitting ? 'Processing...' : 'Register'}
+            {isFormSubmitting ? 'Processing...' : 'Register as Buyer'}
           </Button>
         </div>
       </form>
