@@ -8,7 +8,7 @@ const handleBuyerPasswordChange = async (
   console.log(currentPassword, newPassword);
 
   try {
-    fetch('http://localhost:8080/api/buyer/change-password', {
+    await fetch('http://localhost:8080/api/buyer/change-password', {
       method: 'PUT',
       credentials: 'include',
       headers: {
