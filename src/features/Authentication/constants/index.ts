@@ -12,11 +12,11 @@ export const signUpFormDefaultValues = {
   homeAddress: '',
 };
 
-export const createProductListingDefaultValues = {
-  category: '',
-  title: '',
-  condition: '',
-  expirationDate: '',
-  price: 0, 
-  description: '',
-}
+export const forgotPasswordDefaultValues = {
+  email: '',
+};
+
+export const resetPasswordDefaultValues = {
+  password: '',
+  confirmPassword: '',
+};

@@ -2,12 +2,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 
 import { handleSuccessApi } from '@/lib/api-client';
-import { login, logout, register } from '@/lib/auth';
+import {
+  changePasswordAfterReset,
+  login,
+  logout,
+  register,
+  resetPassword,
+} from '@/lib/auth';
 import { userAtom } from '@/store/authAtoms';
 import { useNavigate } from 'react-router-dom';
 import {
   LoginCredentials,
   RegisterForm,
+  ResetPasswordFormValues,
   ROLES,
   RoleTypes,
 } from '../types/auth';
@@ -43,8 +50,25 @@ export function useAuthActions() {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      navigate('/');
+      window.location.href = '/';
     },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: ({ email, role }: { email: string; role: RoleTypes }) =>
+      resetPassword(email, role),
+  });
+
+  const changePasswordAfterResetMutation = useMutation({
+    mutationFn: ({
+      data,
+      role,
+      token,
+    }: {
+      data: ResetPasswordFormValues;
+      role: RoleTypes;
+      token: string;
+    }) => changePasswordAfterReset(data, role, token),
   });
 
   const registerMutation = useMutation({
@@ -53,6 +77,7 @@ export function useAuthActions() {
     },
     onSuccess: (data) => {
       if (data) {
+        navigate('/');
         handleSuccessApi(
           'Account Created',
           'Your account has been successfully created. You can now log in.',
@@ -65,5 +90,7 @@ export function useAuthActions() {
     login: loginMutation.mutate, // change to mutateAsync if we need the data in the component
     logout: logoutMutation.mutate,
     register: registerMutation.mutate,
+    resetPassword: resetPasswordMutation.mutate,
+    changePasswordAfterReset: changePasswordAfterResetMutation.mutate,
   };
 }

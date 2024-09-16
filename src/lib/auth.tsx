@@ -3,14 +3,15 @@ import { useAuthStatus } from '@/features/Authentication/hooks/useAuthStatus';
 import {
   LoginCredentials,
   RegisterForm,
+  ResetPasswordFormValues,
   RoleGuardProps,
   ROLES,
   RoleTypes,
 } from '@/features/Authentication/types/auth';
 import { LoginResponse, RegisterResponse } from '@/types/api';
 import { Navigate, Outlet } from 'react-router-dom';
-import Cookies from 'universal-cookie';
 import { get, post } from './api-client';
+import { getUserRoleFromCookie } from './utils';
 
 // actions
 export async function login(
@@ -39,10 +40,29 @@ export async function logout(): Promise<void> {
   await post<void>('/auth/logout', {});
 }
 
-export const checkAuth = async () => {
+export async function checkAuth() {
   const { data } = await get('/auth/check');
   return data;
-};
+}
+
+export async function resetPassword(email: string, role: RoleTypes) {
+  const roleRoute = role.toLowerCase();
+  await post(`/${roleRoute}/reset-password-request`, { email });
+}
+
+export async function changePasswordAfterReset(
+  data: ResetPasswordFormValues,
+  role: RoleTypes,
+  token: string,
+) {
+  const roleRoute = role.toLowerCase();
+  await post(
+    `/${roleRoute}/reset-password?token=${encodeURIComponent(token)}`,
+    {
+      newPassword: data.password,
+    },
+  );
+}
 
 // guard
 export const AuthGuard = () => {
@@ -53,18 +73,17 @@ export const AuthGuard = () => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to={'/'} replace />;
+    window.location.href = '/';
   }
 
   return <Outlet />;
 };
 
 export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles }) => {
-  const cookies = new Cookies();
-  const userRole = cookies.get('user_role');
+  const userRole = getUserRoleFromCookie();
 
   if (!userRole || !allowedRoles.includes(userRole as RoleTypes)) {
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to="/unauthorized" replace />; // TODO: create unauthorized page
   }
 
   return <Outlet />;

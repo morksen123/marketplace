@@ -35,28 +35,16 @@ export const SignInSchema = z.object({
   }),
 });
 
-export const CreateProductListingSchema = z.object({
-  category: z.string().min(1, {
-    message: 'Category is required',
-  }),
-  title: z.string().min(1, {
-    message: 'Title is required',
-  }),
-  condition: z.string().min(1, {
-    message: 'Condition is required',
-  }),
-  expirationDate: z.string().min(1, {
-    message: 'Expiration date is required',
-  }),
-  price: z
-    .number()
-    .positive({
-      message: 'Price must be a positive number',
-    })
-    .min(0.01, {
-      message: 'Price must be greater than zero',
-    }),
-  description: z.string().min(1, {
-    message: 'Description is required',
-  }),
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
 });
+
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
