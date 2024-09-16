@@ -8,7 +8,11 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
 
-export const BuyerNavMenu = () => {
+interface BuyerNavMenuProps {
+  showTabs?: boolean;
+}
+
+export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) => {
   const [selectedTab, setSelectedTab] = useState('Home');
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
@@ -22,19 +26,18 @@ export const BuyerNavMenu = () => {
     'Sale',
   ];
 
- // Handle input change
- const handleInputChange = (e) => {
-  setSearchQuery(e.target.value);
-};
+  // Handle input change
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
 
-// Handle search submission
-const handleSearchSubmit = (e) => {
-  e.preventDefault();
-  if (searchQuery.trim()) {
-    navigate(`/buyer/search?q=${encodeURIComponent(searchQuery.trim())}`);
-  }
-};
-
+  // Handle search submission
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/buyer/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <nav className="bg-white shadow-md w-full">
@@ -91,23 +94,25 @@ const handleSearchSubmit = (e) => {
       </div>
 
       {/* Tabs Menu */}
-      <div className="bg-white w-full">
-        <div className="flex justify-between">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              className={`py-4 px-4 text-black focus:outline-none flex-grow ${
-                selectedTab === tab
-                  ? 'border-b-2 border-green-500 text-green-500'
-                  : 'hover:text-green-500'
-              }`}
-              onClick={() => setSelectedTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
+      {showTabs && (
+        <div className="bg-white w-full">
+          <div className="flex justify-between">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                className={`py-4 px-4 text-black focus:outline-none flex-grow ${
+                  selectedTab === tab
+                    ? 'border-b-2 border-green-500 text-green-500'
+                    : 'hover:text-green-500'
+                }`}
+                onClick={() => setSelectedTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </nav>
   );
 };
