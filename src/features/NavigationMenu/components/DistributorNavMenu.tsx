@@ -2,6 +2,7 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirectoryOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 
 export const DistributorNavMenu = () => {
   return (
@@ -34,6 +35,12 @@ export const DistributorNavMenu = () => {
               className="text-black hover:text-gray-600 flex items-center"
             >
               <PersonOutlineOutlinedIcon className="mr-1" /> Account
+            </a>
+            <a
+              href="/account"
+              className="text-black hover:text-gray-600 flex items-center"
+            >
+              <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
             </a>
             <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center">
               <StoreMallDirectoryOutlinedIcon className="mr-2" /> Store

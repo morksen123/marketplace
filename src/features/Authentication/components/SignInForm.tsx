@@ -17,6 +17,7 @@ import { useAuthActions } from '../hooks/useAuthActions';
 import { SignInSchema } from '../schema';
 import { LoginCredentials, RoleTypes, SignInFormState } from '../types/auth';
 import { CheckboxWithText } from './CheckBoxWithText';
+import { useNavigate } from 'react-router-dom';
 import { FormHeader } from './FormHeader';
 
 type SignInFormProps = {
@@ -30,9 +31,11 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
     resolver: zodResolver(SignInSchema),
     defaultValues: signInFormDefaultValues,
   });
+  const navigate = useNavigate();
 
   const handleUserSignIn = async (data: LoginCredentials) => {
     await login({ credentials: data, role: userRole });
+    navigate('/buyer/home');
   };
 
   return (
