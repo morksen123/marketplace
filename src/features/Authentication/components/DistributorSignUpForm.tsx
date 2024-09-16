@@ -11,18 +11,20 @@ import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { distributorSignUpFormDefaultValues } from '../constants';
+import { useAuthActions } from '../hooks/useAuthActions';
 import { DistributorSignUpSchema } from '../schema';
 import { DistributorRegisterForm } from '../types/auth';
 
 export const DistributorSignUpForm = () => {
-  // const { registerDistributor } = useAuthActions();
-  const form = useForm({
+  const { registerDistributor } = useAuthActions();
+  const form = useForm<DistributorRegisterForm>({
     resolver: zodResolver(DistributorSignUpSchema),
     defaultValues: distributorSignUpFormDefaultValues,
   });
 
   const handleDistributorSignUp = async (data: DistributorRegisterForm) => {
     console.log(data);
+    await registerDistributor(data);
   };
 
   const isFormSubmitting = form.formState.isSubmitting;
@@ -31,50 +33,124 @@ export const DistributorSignUpForm = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleDistributorSignUp)}
-        className="text-left space-y-6"
+        className="text-left space-y-4"
       >
-        {/* Company Information */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Company Information</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="companyName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">Company Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="ABC Corporation" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="businessRegistrationNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">
-                    Business Registration Number (UEN/ROC)
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="201234567K" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="companyAddress"
+            name="distributorName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-semibold">Company Address</FormLabel>
+                <FormLabel className="font-semibold">
+                  Distributor Name
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter distributor name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="uen"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-semibold">UEN/ROC</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter UEN/ROC" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-semibold">Address</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter address" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="contactNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-semibold">Contact Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter contact number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="contactName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-semibold">Contact Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter contact name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-semibold">Email</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="Enter email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-semibold">Username</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter username" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-semibold">Password</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="123 Business St, #01-01, Singapore 123456"
+                    type="password"
+                    placeholder="Enter password"
                     {...field}
                   />
                 </FormControl>
@@ -82,144 +158,6 @@ export const DistributorSignUpForm = () => {
               </FormItem>
             )}
           />
-        </div>
-
-        {/* Document Uploads */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Document Uploads</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="proofOfAddress"
-              render={({ field: { onChange, ...rest } }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">
-                    Proof of Address
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      onChange={(e) =>
-                        onChange(e.target.files ? e.target.files[0] : undefined)
-                      }
-                      {...rest}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="acraBusinessProfile"
-              render={({ field: { onChange, ...rest } }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">
-                    ACRA Business Profile
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      onChange={(e) =>
-                        onChange(e.target.files ? e.target.files[0] : null)
-                      }
-                      {...rest}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        {/* Primary Contact Information */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Primary Contact Information</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="primaryContactName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">
-                    Primary Contact Name
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="primaryContactEmail"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">
-                    Primary Contact Email
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="john.doe@example.com"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <FormField
-            control={form.control}
-            name="primaryPhoneNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-semibold">
-                  Primary Phone Number
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder="+65 1234 5678" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Account Credentials */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Account Credentials</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">Username</FormLabel>
-                  <FormControl>
-                    <Input placeholder="johndoe123" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
           <FormField
             control={form.control}
             name="confirmPassword"
@@ -229,7 +167,11 @@ export const DistributorSignUpForm = () => {
                   Confirm Password
                 </FormLabel>
                 <FormControl>
-                  <Input type="password" {...field} />
+                  <Input
+                    type="password"
+                    placeholder="Confirm password"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -1,3 +1,5 @@
+import { DistributorRegisterForm } from '../types/auth';
+
 export const signInFormDefaultValues = {
   email: '',
   password: '',
@@ -21,16 +23,16 @@ export const resetPasswordDefaultValues = {
   confirmPassword: '',
 };
 
-export const distributorSignUpFormDefaultValues = {
-  companyName: '',
-  businessRegistrationNumber: '',
-  companyAddress: '',
-  proofOfAddress: undefined,
-  acraBusinessProfile: undefined,
-  primaryContactName: '',
-  primaryContactEmail: '',
-  primaryPhoneNumber: '',
+export const distributorSignUpFormDefaultValues: DistributorRegisterForm = {
+  distributorName: '',
+  // bizProfile: '',
+  // proofOfAddress: '',
+  address: '',
+  uen: '',
   username: '',
   password: '',
   confirmPassword: '',
+  contactName: '',
+  email: '',
+  contactNumber: '',
 };

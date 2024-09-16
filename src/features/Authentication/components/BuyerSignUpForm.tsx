@@ -22,7 +22,7 @@ export const BuyerSignUpForm = () => {
     defaultValues: buyerSignUpFormDefaultValues,
   });
 
-  const handleUserSignUp = async (data: BuyerRegisterForm) => {
+  const handleBuyerSignUp = async (data: BuyerRegisterForm) => {
     await registerBuyer(data);
   };
 
@@ -31,7 +31,7 @@ export const BuyerSignUpForm = () => {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleUserSignUp)}
+        onSubmit={form.handleSubmit(handleBuyerSignUp)}
         className="text-left space-y-4"
       >
         <div className="grid grid-cols-2 gap-4">
