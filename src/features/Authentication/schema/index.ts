@@ -1,8 +1,5 @@
 import * as z from 'zod';
 
-// const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-// const ACCEPTED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
-
 export const BuyerSignUpSchema = z
   .object({
     email: z.string().email({
@@ -46,6 +43,24 @@ export const DistributorSignUpSchema = z
     confirmPassword: z.string().min(6, {
       message: 'Password must be at least 6 characters long',
     }),
+    proofOfAddress: z
+      .instanceof(File)
+      .optional()
+      .refine((file) => {
+        if (file) {
+          return file.size <= 5 * 1024 * 1024; // 5MB limit
+        }
+        return true;
+      }, 'File size should be less than 5MB'),
+    bizProfile: z
+      .instanceof(File)
+      .optional()
+      .refine((file) => {
+        if (file) {
+          return file.size <= 5 * 1024 * 1024; // 5MB limit
+        }
+        return true;
+      }, 'File size should be less than 5MB'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",

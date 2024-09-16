@@ -39,8 +39,8 @@ export interface DistributorRegisterForm {
   confirmPassword: string; // confirm password is not needed in the server
   contactName: string;
   email: string;
-  // proofOfAddress: string;
-  // bizProfile: string;
+  proofOfAddress: string;
+  bizProfile: string;
 }
 
 export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;

@@ -25,8 +25,8 @@ export const resetPasswordDefaultValues = {
 
 export const distributorSignUpFormDefaultValues: DistributorRegisterForm = {
   distributorName: '',
-  // bizProfile: '',
-  // proofOfAddress: '',
+  bizProfile: '',
+  proofOfAddress: '',
   address: '',
   uen: '',
   username: '',
