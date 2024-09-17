@@ -3,6 +3,7 @@ import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirectoryOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+import logo from '../../../assets/gudfood-logo.png';
 
 export const DistributorNavMenu = () => {
   return (
@@ -10,10 +11,10 @@ export const DistributorNavMenu = () => {
       <div className="w-full p-4">
         <div className="flex justify-between items-center">
           {/* Logo Section */}
-          <div className="text-black text-2xl font-bold pl-6">
-            {' '}
-            {/* Added left padding */}
-            <a href="/">GudFood</a>
+          <div className="pl-6">
+            <a href="/">
+              <img src={logo} alt="GudFood Logo" className="h-12" />
+            </a>
           </div>
 
           {/* Navigation Links with Icons */}
@@ -42,7 +43,7 @@ export const DistributorNavMenu = () => {
             >
               <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
             </a>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center">
+            <button className="button button-green">
               <StoreMallDirectoryOutlinedIcon className="mr-2" /> Store
             </button>
           </div>

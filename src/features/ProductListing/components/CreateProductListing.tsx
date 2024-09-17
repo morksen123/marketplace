@@ -142,8 +142,6 @@ export const CreateProductListing = () => {
     return uploadedPictureUrls;
   };
 
-  console.log(form.formState.errors);
-
   // Handle form submission and upload pictures
   const handleCreateListing = async (data) => {
     try {
@@ -598,7 +596,7 @@ export const CreateProductListing = () => {
                   name={`bulkPricings.${index}.price`}
                   render={({ field }) => (
                     <FormItem className="flex-1 block text-left">
-                      <FormLabel>Price</FormLabel>
+                      <FormLabel>Price (per {unitMapping[selectedCategory] || 'unit'})</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -632,7 +630,7 @@ export const CreateProductListing = () => {
                 {/* Remove Button */}
                 <Button
                   type="button"
-                  className="bg-red-600 hover:bg-red-700 text-white self-end"
+                  className="button button-red self-end"
                   onClick={() => {
                     const bulkPricings = form.getValues('bulkPricings');
                     bulkPricings.splice(index, 1);
@@ -713,7 +711,7 @@ export const CreateProductListing = () => {
                   {/* Remove Button */}
                   <Button
                     type="button"
-                    className="bg-red-600 hover:bg-red-700 text-white self-end"
+                    className="button button-red self-end"
                     onClick={() => {
                       const batches = form.getValues('batches');
                       batches.splice(index, 1);
@@ -747,7 +745,7 @@ export const CreateProductListing = () => {
           <div className="flex justify-end w-full">
             <Button
               type="submit"
-              className="w-50 bg-green-600 hover:bg-green-700 text-white"
+              className="button button-green"
               disabled={isFormSubmitting}
             >
               {isFormSubmitting ? 'Processing...' : 'Create Product'}
