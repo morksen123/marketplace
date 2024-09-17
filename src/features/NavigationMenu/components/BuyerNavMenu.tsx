@@ -1,4 +1,4 @@
-import { useState } from 'react';
+// import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 {/* Icons */}
@@ -8,7 +8,8 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
-// import { useState } from 'react';
+import { useState } from 'react';
+import logo from '../../../assets/gudfood-logo.png';
 
 interface BuyerNavMenuProps {
   showTabs?: boolean;
@@ -46,10 +47,10 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) =
       <div className="w-full p-4">
         <div className="flex justify-between items-center">
           {/* Logo Section */}
-          <div className="text-black text-2xl font-bold pl-6">
-            {' '}
-            {/* Added left padding */}
-            <a href="/">GudFood</a>
+          <div className="pl-6">
+            <a href="/">
+              <img src={logo} alt="GudFood Logo" className="h-12" />
+            </a>
           </div>
 
           {/* Search Bar */}

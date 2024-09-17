@@ -56,7 +56,7 @@ export const EditProductListing = () => {
           fetch('/api/products/food-category'),
           fetch('/api/products/food-condition'),
           fetch('/api/products/delivery-method'),
-          fetch(`/api/products/${productId}`),
+          fetch(`/api/products/product/${productId}`),
         ]);
 
         const categoryData = await categoryResponse.json();
@@ -398,6 +398,20 @@ export const EditProductListing = () => {
             )}
           </div>
 
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className="block text-left">
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <textarea {...field} className="w-full p-2 border rounded" rows={4} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           {/* Product Tags Input */}
           <FormField
             control={form.control}
@@ -480,171 +494,6 @@ export const EditProductListing = () => {
               />
             </div>
           </div>
-
-          {/* Bulk Pricing Quantity */}
-          {/* <h3 className="text-xl font-bold mb-4 text-left">Bulk Pricing</h3>
-          {form.watch('bulkPricings', []).map((bulkPricing, index) => (
-            <div key={index}>
-              <div className="flex space-x-4 items-start">
-                <FormField
-                  control={form.control}
-                  name={`bulkPricings.${index}.minQuantity`}
-                  render={({ field }) => (
-                    <FormItem className="flex-1 block text-left">
-                      <FormLabel>Minimum Quantity ({unitMapping[selectedCategory] || 'unit'})</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          step="1"
-                          placeholder="Minimum Quantity"
-                          value={field.value ?? ''}
-                          onChange={(e) => {
-                            const newValue = e.target.valueAsNumber;
-                            field.onChange(newValue);
-                            if (index > 0) {
-                              const prevMaxQuantity = Number(form.getValues(`bulkPricings.${index - 1}.maxQuantity`));
-                              if (newValue <= prevMaxQuantity) {
-                                form.setError(`bulkPricings.${index}.minQuantity`, {
-                                  type: 'manual',
-                                  message: `Must be greater than previous max quantity (${prevMaxQuantity})`
-                                });
-                              } else {
-                                form.clearErrors(`bulkPricings.${index}.minQuantity`);
-                              }
-                            }
-                            // Check if max quantity is more than min quantity
-                            const maxQuantity = Number(form.getValues(`bulkPricings.${index}.maxQuantity`));
-                            if (maxQuantity <= newValue) {
-                              form.setError(`bulkPricings.${index}.maxQuantity`, {
-                                type: 'manual',
-                                message: 'Max quantity must be greater than min quantity'
-                              });
-                            } else {
-                              form.clearErrors(`bulkPricings.${index}.maxQuantity`);
-                            }
-                          }}
-                          className="h-10"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name={`bulkPricings.${index}.maxQuantity`}
-                  render={({ field }) => (
-                    <FormItem className="flex-1 block text-left">
-                      <FormLabel>Maximum Quantity ({unitMapping[selectedCategory] || 'unit'})</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          step="1"
-                          placeholder="Maximum Quantity"
-                          value={field.value ?? ''}
-                          onChange={(e) => {
-                            const newValue = e.target.valueAsNumber;
-                            field.onChange(newValue);
-                            if (index < form.getValues('bulkPricings').length - 1) {
-                              const nextMinQuantity = Number(form.getValues(`bulkPricings.${index + 1}.minQuantity`));
-                              if (newValue >= nextMinQuantity) {
-                                form.setError(`bulkPricings.${index}.maxQuantity`, {
-                                  type: 'manual',
-                                  message: `Must be less than next min quantity (${nextMinQuantity})`
-                                });
-                              } else {
-                                form.clearErrors(`bulkPricings.${index}.maxQuantity`);
-                              }
-                            }
-                            // Check if max quantity is more than min quantity
-                            const minQuantity = Number(form.getValues(`bulkPricings.${index}.minQuantity`));
-                            if (newValue <= minQuantity) {
-                              form.setError(`bulkPricings.${index}.maxQuantity`, {
-                                type: 'manual',
-                                message: 'Max quantity must be greater than min quantity'
-                              });
-                            } else {
-                              form.clearErrors(`bulkPricings.${index}.maxQuantity`);
-                            }
-                          }}
-                          className="h-10"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name={`bulkPricings.${index}.price`}
-                  render={({ field }) => (
-                    <FormItem className="flex-1 block text-left">
-                      <FormLabel>Price per {unitMapping[selectedCategory] || 'unit'}</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          step="0.01"
-                          placeholder="Price"
-                          value={field.value ?? ''}
-                          onChange={(e) => {
-                            const newValue = e.target.valueAsNumber;
-                            field.onChange(newValue);
-                            if (index > 0) {
-                              const prevPrice = Number(form.getValues(`bulkPricings.${index - 1}.price`));
-                              if (newValue >= prevPrice) {
-                                form.setError(`bulkPricings.${index}.price`, {
-                                  type: 'manual',
-                                  message: `Must be less than previous price (${prevPrice})`
-                                });
-                              } else {
-                                form.clearErrors(`bulkPricings.${index}.price`);
-                              }
-                            }
-                          }}
-                          className="h-10"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="button"
-                  className="bg-red-600 hover:bg-red-700 text-white self-end"
-                  onClick={() => {
-                    const bulkPricings = form.getValues('bulkPricings');
-                    bulkPricings.splice(index, 1);
-                    form.setValue('bulkPricings', bulkPricings);
-                  }}
-                >
-                  Remove
-                </Button>
-              </div>
-            </div>
-          ))}
-
-          <div className="flex justify-end w-full">
-            <Button
-              type="button"
-              className="bg-transparent text-gray-500 hover:bg-transparent hover:text-black"
-              onClick={() => {
-                const bulkPricings = form.getValues('bulkPricings') || [];
-                form.setValue('bulkPricings', [
-                  ...bulkPricings,
-                  { minQuantity: '', maxQuantity: '', price: '' },
-                ]);
-              }}
-            >
-              <AddIcon className="mr-2" />
-              Add Bulk Pricing
-            </Button>
-          </div> */}
           
           {/* Submit Button */}
           <div className="flex justify-end w-full">

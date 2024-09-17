@@ -8,7 +8,7 @@ import { Carousel, CarouselItem, CarouselContent, CarouselPrevious, CarouselNext
 import { useNavigate, useParams } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import AddIcon from '@mui/icons-material/Add';
-import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping, Product, Batch } from '@/features/ProductListing/constants';
+import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping, Product, Batch, BulkPricing } from '@/features/ProductListing/constants';
 
 export const ViewProductListing = () => {
 
@@ -16,12 +16,16 @@ export const ViewProductListing = () => {
     const { productId } = useParams();
     const [product, setProduct] = useState<Product | null>(null);;
     const [batches, setBatches] = useState<Batch[]>([]);
+    const [bulkPricings, setBulkPricings] = useState<BulkPricing[]>([]);
     const [open, setOpen] = useState(false);
     const [openAddBatch, setOpenAddBatch] = useState(false);
     const [newBatchQuantity, setNewBatchQuantity] = useState('');
     const [newBatchBestBeforeDate, setNewBatchBestBeforeDate] = useState('');
     const [isFavourite, setIsFavourite] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [openAddBulkPricing, setOpenAddBulkPricing] = useState(false);
+    const [newBulkPrice, setNewBulkPrice] = useState({ minQuantity: '', maxQuantity: '', price: '' });
+
     const buyerId = 1; // To change
 
     const getTodayDate = () => {
@@ -47,10 +51,11 @@ export const ViewProductListing = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await fetch(`/api/products/${productId}`);
+                const response = await fetch(`/api/products/product/${productId}`);
                 const data = await response.json();
                 setProduct(data);
                 setBatches(data.batches || []);
+                setBulkPricings(data.bulkPricings || []);
             } catch (error) {
                 console.error('Error fetching product:', error);
             } finally {
@@ -192,6 +197,91 @@ export const ViewProductListing = () => {
         }
     };
 
+    const handleDeleteBatch = async (batchId: Long) => {
+        try {
+            const response = await fetch(`/api/products/product/${productId}/batch?batchId=${batchId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                setBatches(batches.filter(batch => batch.batchId !== batchId));
+                alert('Batch ID: ${id} deleted successfully.');
+            } else {
+                const errorMessage = await response.text();
+                alert('Failed to delete batch: ${errorMessage}');
+            }
+        } catch (error) {
+            console.error('Error deleting batch:', error);
+            alert('An error occurred while deleting batch');
+        }
+    };
+
+    const handleAddBulkPricing = async () => {
+        const { minQuantity, maxQuantity, price } = newBulkPrice;
+
+        if (minQuantity && price) {
+            const bulkPricingData = {
+                minQuantity: parseInt(minQuantity),
+                maxQuantity: maxQuantity ? parseInt(maxQuantity) : null,
+                price: parseFloat(price),
+            };
+
+            try {
+                const response = await fetch(`/api/products/product/${productId}/bulk-pricing`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(bulkPricingData),
+                });
+
+                if (response.ok) {
+                    const newBulkPricing = await response.json();
+                    setBulkPricings([...bulkPricings, newBulkPricing]);
+                    setOpenAddBulkPricing(false);
+                    setNewBulkPrice({ minQuantity: '', maxQuantity: '', price: '' }); // Reset form
+                    alert('Bulk pricing added successfully');
+                } else {
+                    const errorMessage = await response.text();
+                    alert(`Failed to add bulk pricing: ${errorMessage}`);
+                }
+            } catch (error) {
+                console.error('Error adding bulk pricing:', error);
+                alert('An error occurred while adding bulk pricing');
+            }
+        } else {
+            alert('Please fill in all required fields');
+        }
+    };
+
+    const handleDeleteBulkPricing = async (id: Long) => {
+        try {
+            const response = await fetch(`/api/products/product/${productId}/bulk-pricing?bulkPricingId=${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                setBulkPricings(bulkPricings.filter(pricings => pricings.id !== id));
+                alert('Bulk pricing ID: ${id} deleted successfully.');
+            } else {
+                const errorMessage = await response.text();
+                alert('Failed to delete bulk pricing: ${errorMessage}');
+            }
+        } catch (error) {
+            console.error('Error deleting bulk pricing:', error);
+            alert('An error occurred while deleting bulk pricing');
+        }
+    };
+
     if (loading) {
         return <div className="wrapper">Loading...</div>;
     }
@@ -260,74 +350,150 @@ export const ViewProductListing = () => {
                     <p><strong>Minimum Purchase Quantity: </strong>{product.minPurchaseQty} {unitMapping[product.foodCategory] || "unit"}</p>
                 </div>
 
-                 {/* Bulk Pricing Section */}
-                <div className="mt-8">
-                    <h2 className="text-2xl font-semibold mb-4">Bulk Pricing</h2>
-                    {product.bulkPricings && product.bulkPricings.length > 0 ? (
-                        <table className="w-full border-collapse border border-gray-300">
-                            <thead>
-                                <tr className="bg-gray-100">
-                                    <th className="border border-gray-300 px-4 py-2">Min Quantity</th>
-                                    <th className="border border-gray-300 px-4 py-2">Max Quantity</th>
-                                    <th className="border border-gray-300 px-4 py-2">Price per {unitMapping[product.foodCategory] || "unit"}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {product.bulkPricings.map((pricing, index) => (
-                                    <tr key={index}>
-                                        <td className="border border-gray-300 px-4 py-2">{pricing.minQuantity}</td>
-                                        <td className="border border-gray-300 px-4 py-2">{pricing.maxQuantity || 'No limit'}</td>
-                                        <td className="border border-gray-300 px-4 py-2">${pricing.price.toFixed(2)}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    ) : (
-                        <p>No bulk pricing available for this product.</p>
-                    )}
-                </div>
-
                 <div className="mt-6 mb-6 flex justify-end space-x-2">
-                    <button className="bg-orange-600 text-white px-4 py-2 rounded-full hover:bg-orange-700 flex items-center"
+                    <button className="button button-orange"
                         onClick={handleEdit}
                     >
                         <EditIcon className="mr-2" /> Edit
                     </button>
                     <button
-                        className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 flex items-center"
+                        className="button button-red"
                         onClick={handleClickOpen}
                     >
                         <DeleteIcon className="mr-2" /> Delete
                     </button>
                 </div>
 
-                {/* Batches Section */}
+                {/* Bulk Pricing Section */}
                 <div className="mt-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-semibold">Batches</h2>
-                        <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center"
-                            onClick={() => setOpenAddBatch(true)}
+                    <h2 className="text-2xl font-semibold mb-4">Bulk Pricing</h2>
+                    <div className="overflow-hidden rounded-lg border border-gray-300 shadow-sm">
+                        <table className="w-full border-collapse">
+                            <thead>
+                                <tr className="bg-gray-50">
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Min Quantity</th>
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Max Quantity</th>
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Price per {unitMapping[product.foodCategory] || "unit"}</th>
+                                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600 w-20">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                {bulkPricings.map((pricing, index) => (
+                                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{pricing.minQuantity}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{pricing.maxQuantity || 'No limit'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">${pricing.price.toFixed(2)}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-500 flex justify-center space-x-2">
+                                            <button
+                                                onClick={() => handleDeleteBulkPricing(pricing.id)}
+                                                className="text-red-600 hover:text-red-800"
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {openAddBulkPricing && (
+                                    <tr>
+                                        <td className="px-4 py-3">
+                                            <input
+                                                type="number"
+                                                value={newBulkPrice.minQuantity}
+                                                onChange={(e) => setNewBulkPrice({ ...newBulkPrice, minQuantity: e.target.value })}
+                                                className="w-full p-2 border rounded"
+                                                placeholder="Min Quantity"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <input
+                                                type="number"
+                                                value={newBulkPrice.maxQuantity}
+                                                onChange={(e) => setNewBulkPrice({ ...newBulkPrice, maxQuantity: e.target.value })}
+                                                className="w-full p-2 border rounded"
+                                                placeholder="Max Quantity"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <input
+                                                type="number"
+                                                value={newBulkPrice.price}
+                                                onChange={(e) => setNewBulkPrice({ ...newBulkPrice, price: e.target.value })}
+                                                className="w-full p-2 border rounded"
+                                                placeholder="Price"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center justify-center space-x-2 h-full">
+                                                <button
+                                                    onClick={() => setOpenAddBulkPricing(false)}
+                                                    className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={handleAddBulkPricing}
+                                                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                                                >
+                                                    Add
+                                                </button>
 
-                        >
-                            <AddIcon className="mr-2" /> Add Batch
-                        </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="flex justify-end">
+                        {!openAddBulkPricing && (
+                            <button onClick={() => setOpenAddBulkPricing(true)} className="mt-4 text-gray-700">
+                                <AddIcon /> Add Bulk Pricing
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Batches Section */}
+                <div className="mt-12">
+                    <h2 className="text-2xl font-semibold text-gray-800 mb-6">Batches</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {batches.map((batch, index) => (
-                            <Card key={index} className="flex  items-center">
-                                <CardContent className="flex-1 p-4">
-                                    <p className="font-semibold">Total Quantity</p>
-                                    <p>{batch.quantity} {unitMapping[product.foodCategory] || "unit"}</p>
-                                    <p className="font-semibold">Best Before Date</p>
-                                    {batch.bestBeforeDate ? formatDisplayDate(batch.bestBeforeDate) : ''}
+                            <Card key={index} className="hover:shadow-lg transition duration-300 ease-in-out relative">
+                                <button
+                                    onClick={() => handleDeleteBatch(batch.batchId)}
+                                    className="absolute top-2 right-2 text-red-600 hover:text-red-800"
+                                >
+                                    <DeleteIcon />
+                                </button>
+                                <CardContent className="p-5">
+                                    <div className="mb-3">
+                                        <p className="text-sm text-gray-700 font-semibold">Total Quantity</p>
+                                        <p className="text-lg  text-gray-500">{batch.quantity} {unitMapping[product.foodCategory] || "unit"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-700 font-semibold">Best Before Date</p>
+                                        <p className="text-lg text-gray-500">
+                                            {batch.bestBeforeDate ? formatDisplayDate(batch.bestBeforeDate) : 'Not specified'}
+                                        </p>
+                                    </div>
                                 </CardContent>
                             </Card>
                         ))}
+                        <Card className="hover:shadow-lg transition duration-300 ease-in-out flex items-center justify-center">
+                            <CardContent className="p-5 w-full h-full">
+                                <button
+                                    className="w-full h-full bg-white text-black rounded-lg ease-in-out flex items-center justify-center"
+                                    onClick={() => setOpenAddBatch(true)}
+                                >
+                                    <AddIcon className="mr-2" /> Add Batch
+                                </button>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
 
                 {/* Dialog */}
-                <Dialog open={open} onClose={handleClose}>
+                <Dialog open={open} onClose={handleClose} className="wrapper">
                     <DialogTitle>{"Confirm Deletion"}</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
@@ -342,7 +508,7 @@ export const ViewProductListing = () => {
                             Cancel
                         </button>
                         <button
-                            className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 flex items-center"
+                            className="button button-red"
                             onClick={handleConfirmDeactivate}
                         >
                             <DeleteIcon className="mr-2" /> Delete
