@@ -47,7 +47,7 @@ export const ViewProductListing = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await fetch(`/api/products/product/${productId}`);
+                const response = await fetch(`/api/products/${productId}`);
                 const data = await response.json();
                 setProduct(data);
                 setBatches(data.batches || []);
