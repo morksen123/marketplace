@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { capitalizeFirstLetter } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { signInFormDefaultValues } from '../constants';
 import { useAuthActions } from '../hooks/useAuthActions';
 import { SignInSchema } from '../schema';
@@ -30,11 +30,9 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
     resolver: zodResolver(SignInSchema),
     defaultValues: signInFormDefaultValues,
   });
-  const navigate = useNavigate();
 
   const handleUserSignIn = async (data: LoginCredentials) => {
     await login({ credentials: data, role: userRole });
-    navigate('/buyer/home');
   };
 
   return (
