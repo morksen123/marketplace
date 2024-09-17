@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAtom } from 'jotai';
+import { userAtom } from '@/store/authAtoms';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ProductCard from '@/components/product/ProductCard';
 import ProductFilter from './ProductFilter';
@@ -9,6 +11,7 @@ const SearchResultsPage = () => {
   const searchQuery = new URLSearchParams(location.search).get('q');
   const [searchResults, setSearchResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
+  const [favourites, setFavourites] = useState({});
   const [filters, setFilters] = useState({
     categories: [],
     minPrice: 0,
@@ -18,6 +21,8 @@ const SearchResultsPage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [user] = useAtom(userAtom);
+  const buyerId = user?.id;
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -37,6 +42,9 @@ const SearchResultsPage = () => {
 
         const responseData = await response.json();
         setSearchResults(responseData);
+        responseData.forEach((product) => {
+          checkFavourited(product.productId);
+        });
       } catch (error) {
         console.error('Error fetching search results:', error);
         setError(error.message);
@@ -48,9 +56,68 @@ const SearchResultsPage = () => {
     if (searchQuery) {
       fetchSearchResults();
     }
-    console.log('Applying filters:', filters);
-    console.log('Products:', searchResults);
   }, [searchQuery]);
+
+  const checkFavourited = async (productId) => {
+    try {
+      const response = await fetch(`/api/buyer/favourites/check?productId=${productId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const isFavourited = await response.json();
+        setFavourites((prevFavourites) => ({
+          ...prevFavourites,
+          [productId]: isFavourited,
+        }));
+      } else {
+        console.error('Failed to check if product is favourited');
+      }
+    } catch (error) {
+      console.error('Error checking favourite status:', error);
+    }
+  };
+
+  const handleToggleFavourite = async (productId) => {
+    try {
+      const isFavourited = favourites[productId];
+      let response;
+      if (isFavourited) {
+        response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/remove`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include'
+        });
+      } else {
+        response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/add`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include'
+        });
+      }
+
+      if (response.ok) {
+        setFavourites((prevFavourites) => ({
+          ...prevFavourites,
+          [productId]: !isFavourited,
+        }));
+        alert(isFavourited ? 'Removed from favourites' : 'Added to favourites');
+      } else {
+        const errorMessage = await response.text();
+        console.error('Error:', errorMessage);
+        alert(`Failed to update favourites: ${errorMessage}`);
+      }
+    } catch (error) {
+      console.error('Error occurred while updating favourites:', error);
+    }
+  };
 
   useEffect(() => {
     const applyFilters = () => {
@@ -99,7 +166,9 @@ const SearchResultsPage = () => {
               <ProductCard 
                 key={product.productId} 
                 product={product} 
-                onClick={() => handleProductClick(product.productId)}
+                isFavourite={favourites[product.productId]}
+                onProductClick={() => handleProductClick(product.productId)}
+                onToggleFavourite={() => handleToggleFavourite(product.productId)}
               />
             ))}
           </div>

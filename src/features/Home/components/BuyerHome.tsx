@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useAtom } from 'jotai';
+import { userAtom } from '@/store/authAtoms';
 import bannerImage from '../../../assets/buyer-homepage-banner.png';
 import { useNavigate } from 'react-router-dom';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
@@ -7,7 +9,8 @@ export const BuyerHome = () => {
   const [products, setProducts] = useState([]);
   const [favourites, setFavourites] = useState({}); // To store favourite status per product
   const navigate = useNavigate();
-  const buyerId = 1; // To change
+  const [user] = useAtom(userAtom);
+  const buyerId = user?.id;
 
   // Fetch products from the API when the component mounts
   useEffect(() => {
