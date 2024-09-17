@@ -62,7 +62,26 @@ export const DistributorSignUpForm = () => {
 
   const [currentStep, setCurrentStep] = useState(1);
 
-  const nextStep = () => setCurrentStep(currentStep + 1);
+  const nextStep = () => {
+    const fieldsToValidate = [
+      'distributorName',
+      'uen',
+      'address',
+      'contactName',
+      'email',
+      'contactNumber',
+      'username',
+      'password',
+      'confirmPassword'
+    ];
+
+    form.trigger(fieldsToValidate).then((isValid) => {
+      if (isValid) {
+        setCurrentStep(currentStep + 1);
+      }
+    });
+  };
+
   const prevStep = () => setCurrentStep(currentStep - 1);
 
   return (
@@ -153,7 +172,7 @@ export const DistributorSignUpForm = () => {
                       name="email"
                       render={({ field }) => (
                         <FormItem className="text-left block">
-                          <FormLabel>Email Address</FormLabel>
+                          <FormLabel>Primary Contact Email Address</FormLabel>
                           <FormControl>
                             <Input type="email" placeholder="contact@example.com" {...field} />
                           </FormControl>
@@ -162,6 +181,34 @@ export const DistributorSignUpForm = () => {
                       )}
                     />
                   </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                      control={form.control}
+                      name="contactNumber"
+                      render={({ field }) => (
+                        <FormItem className="text-left block">
+                          <FormLabel>Primary Contact Phone Number</FormLabel>
+                          <FormControl>
+                            <Input type="contactNumber" placeholder="91234567" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem className="text-left block">
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input type="username" placeholder="Enter username" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
