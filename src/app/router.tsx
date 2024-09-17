@@ -104,6 +104,15 @@ const routes: RouteObject[] = [
                   return { Component: AccountDeactivationRoute };
                 },
               },
+              {
+                path: '/buyer/profile/favourites',
+                lazy: async () => {
+                  const { FavouritesPageRoute } = await import(
+                    './routes/buyerProfile/favourites-page'
+                  );
+                  return { Component: FavouritesPageRoute };
+                },
+              },
               // Add other buyer-specific routes here
             ],
           },
