@@ -288,13 +288,13 @@ export const ViewProductListing = () => {
                 </div>
 
                 <div className="mt-6 mb-6 flex justify-end space-x-2">
-                    <button className="bg-orange-600 text-white px-4 py-2 rounded-full hover:bg-orange-700 flex items-center"
+                    <button className="button button-orange"
                         onClick={handleEdit}
                     >
                         <EditIcon className="mr-2" /> Edit
                     </button>
                     <button
-                        className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 flex items-center"
+                        className="button button-red"
                         onClick={handleClickOpen}
                     >
                         <DeleteIcon className="mr-2" /> Delete
@@ -305,7 +305,7 @@ export const ViewProductListing = () => {
                 <div className="mt-8">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-semibold">Batches</h2>
-                        <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center"
+                        <button className="button button-green"
                             onClick={() => setOpenAddBatch(true)}
 
                         >

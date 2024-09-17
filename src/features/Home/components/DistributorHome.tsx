@@ -75,7 +75,7 @@ export const DistributorHome = () => {
 
         {/* New Product Listing Button */}
         <button
-          className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center"
+          className="button button-green"
           onClick={() => navigate('/create-product-listing')}
         >
           <AddIcon className="mr-2" /> New Product Listing
