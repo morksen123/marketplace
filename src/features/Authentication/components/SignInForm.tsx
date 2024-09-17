@@ -16,7 +16,7 @@ import { signInFormDefaultValues } from '../constants';
 import { useAuthActions } from '../hooks/useAuthActions';
 import { SignInSchema } from '../schema';
 import { LoginCredentials, RoleTypes, SignInFormState } from '../types/auth';
-import { CheckboxWithText } from './CheckBoxWithText';
+// import { CheckboxWithText } from './CheckBoxWithText';
 import { SignInHeader } from './SignInHeader';
 
 type SignInFormProps = {
@@ -75,8 +75,8 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
             )}
           />
 
-          <div className="flex justify-between items-center text-sm">
-            <CheckboxWithText text="Remember me" />
+          <div className="flex justify-end text-sm">
+            {/* <CheckboxWithText text="Remember me" /> */}
             <Link
               to="/auth/forgot-password"
               state={{ role: userRole }}

@@ -17,3 +17,13 @@ export const foodCategoryMapping: Record<string, string> = {
     SELF_PICK_UP: "Self Pickup",
     DOORSTEP_DELIVERY: "Doorstep Delivery",
   };
+
+  export interface Distributor {
+    distributorName: string;
+    address: number;
+    email: string;
+    name: string;
+    contactName: string;
+    warehouseAddress: number;
+    isApproved: Boolean;
+  }

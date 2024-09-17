@@ -12,6 +12,14 @@ export const handleSuccessApi = (title: string, description: string) => {
   });
 };
 
+export const handleErrorApi = (title: string, description: string) => {
+  toast({
+    variant: 'destructive',
+    title: title,
+    description: description,
+  });
+};
+
 const handleApiError = (error: ApiError): void => {
   toast({
     variant: 'destructive',
