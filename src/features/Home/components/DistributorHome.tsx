@@ -2,22 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
-import { foodCategoryMapping, foodConditionMapping, Product } from '@/features/Home/constants';
+import { Distributor, foodCategoryMapping, foodConditionMapping } from '@/features/Home/constants';
+import { useAtom } from 'jotai';
+import { userAtom } from '@/store/authAtoms';
+import { Product } from '@/features/ProductListing/constants';
 
 export const DistributorHome = () => {
 
   const [foodCategories, setFoodCategories] = useState<string[]>([]);
   const [products, setProducts] = useState<Product>([]);
   const [selectedTab, setSelectedTab] = useState('All');
+  const [distributor, setDistributor] = useState<Distributor>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
 
       try {
-        const [categoryResponse, productsResponse] = await Promise.all([
+        const [categoryResponse, productsResponse, distributorResponse] = await Promise.all([
           fetch('/api/products/food-category'),
           fetch('http://localhost:8080/api/products/distributor/active', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          }),
+          fetch(`http://localhost:8080/api/distributor/profile`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -28,12 +39,14 @@ export const DistributorHome = () => {
 
         const categoryData = await categoryResponse.json();
         const productsData = await productsResponse.json();
+        const distributorData = await distributorResponse.json();
 
         console.log(categoryData);
-        console.log(productsData);
+        console.log(distributorData);
 
         setFoodCategories(['All', ...categoryData]); // Adding "All" to the categories
         setProducts(productsData);
+        setDistributor(distributorData);
 
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -74,12 +87,41 @@ export const DistributorHome = () => {
         <h1 className="text-3xl font-bold">Store</h1>
 
         {/* New Product Listing Button */}
-        <button
-          className="button button-green"
-          onClick={() => navigate('/create-product-listing')}
-        >
-          <AddIcon className="mr-2" /> New Product Listing
-        </button>
+        <div className="relative inline-block">
+          <button
+            className={`px-4 py-2 rounded-md text-white font-semibold flex items-center ${
+              distributor.isApproved 
+                ? 'button button-green' 
+                : 'button button-green opacity-70 filter blur-[0.5px]'
+            }`}
+            onClick={() => distributor.isApproved && navigate('/create-product-listing')}
+            disabled={!distributor.isApproved}
+            style={{ 
+              cursor: distributor.isApproved ? 'pointer' : 'not-allowed',
+              transition: 'opacity 0.3s, background-color 0.3s, filter 0.3s'
+            }}
+          >
+            <AddIcon className="mr-2" />
+            New Product Listing
+          </button>
+          {!distributor.isApproved && (
+            <div 
+              className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs font-medium rounded-md shadow-lg opacity-0 transition-opacity duration-300"
+              style={{
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+              }}
+            >
+              Awaiting admin account approval
+            </div>
+          )}
+        </div>
+        <style jsx>{`
+          .relative:hover > div {
+            opacity: 1 !important;
+          }
+        `}</style>
+
       </div>
 
       {/* Metrics Section */}

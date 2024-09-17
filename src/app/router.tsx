@@ -173,23 +173,29 @@ const routes: RouteObject[] = [
   {
     path: '/create-product-listing',
     lazy: async () => {
-      const { CreateProductListingRoute } = await import('./routes/create-product-listing');
+      const { CreateProductListingRoute } = await import(
+        './routes/create-product-listing'
+      );
       return { Component: CreateProductListingRoute };
-    }
+    },
   },
   {
     path: '/view-product-listing/:productId',
     lazy: async () => {
-      const { ViewProductListingRoute } = await import('./routes/view-product-listing');
+      const { ViewProductListingRoute } = await import(
+        './routes/view-product-listing'
+      );
       return { Component: ViewProductListingRoute };
-    }
+    },
   },
   {
     path: '/edit-product-listing/:productId',
     lazy: async () => {
-      const { EditProductListingRoute } = await import('./routes/edit-product-listing');
+      const { EditProductListingRoute } = await import(
+        './routes/edit-product-listing'
+      );
       return { Component: EditProductListingRoute };
-    }
+    },
   },
 ];
 
