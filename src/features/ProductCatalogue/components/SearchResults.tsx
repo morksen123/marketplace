@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import SortIcon from '@mui/icons-material/Sort';
 import ProductCard from '@/components/product/ProductCard';
 import ProductFilter from './ProductFilter';
 
+
+
 const SearchResultsPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const searchQuery = new URLSearchParams(location.search).get('q');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,6 +73,10 @@ const SearchResultsPage = () => {
     // Implement filtering logic here
   };
 
+  const handleProductClick = (productId) => {
+    navigate(`/buyer/view-product/${productId}`);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -94,7 +101,11 @@ const SearchResultsPage = () => {
           <div className="w-3/4 pl-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {searchResults.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard 
+                  key={product.productId} 
+                  product={product} 
+                  onClick={() => handleProductClick(product.productId)}
+                />
               ))}
             </div>
 

@@ -62,7 +62,7 @@ export const BuyerHome = () => {
 
   // Function to handle navigation to the product detail page
   const handleProductClick = (productId: number) => {
-    navigate(`/view-product-listing/${productId}`);
+    navigate(`/buyer/view-product/${productId}`);
   };
 
   // Function to toggle favourite status for a product

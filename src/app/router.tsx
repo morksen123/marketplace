@@ -69,6 +69,15 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/buyer/view-product/:productId',
+                lazy: async () => {
+                  const { ViewProductListingBuyerRoute } = await import(
+                    './routes/app/search/view-product-listing-buyer'
+                  );
+                  return { Component: ViewProductListingBuyerRoute };
+                },
+              },
+              {
                 path: '/buyer/profile',
                 lazy: async () => {
                   const { ProfileManagementRoute } = await import(
