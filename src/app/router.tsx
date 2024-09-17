@@ -102,6 +102,33 @@ const routes: RouteObject[] = [
                 },
               },
               // Add other distributor-specific routes here
+              {
+                path: '/distributor/profile',
+                lazy: async () => {
+                  const { ProfileManagementRoute } = await import(
+                    './routes/distributorAccount/distributor-account'
+                  );
+                  return { Component: ProfileManagementRoute };
+                },
+              },
+              {
+                path: '/distributor/profile/change-password',
+                lazy: async () => {
+                  const { ChangePasswordRoute } = await import(
+                    './routes/distributorAccount/change-password'
+                  );
+                  return { Component: ChangePasswordRoute };
+                },
+              },
+              {
+                path: '/distributor/profile/account-deactivation',
+                lazy: async () => {
+                  const { AccountDeactivationRoute } = await import(
+                    './routes/distributorAccount/account-deactivation'
+                  );
+                  return { Component: AccountDeactivationRoute };
+                },
+              },
             ],
           },
           // You can add more role-specific sections here
