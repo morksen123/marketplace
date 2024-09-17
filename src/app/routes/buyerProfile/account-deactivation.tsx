@@ -1,5 +1,5 @@
-import AccountDeactivation from "@/features/BuyerAccount/components/AccountDeactivation";
+import BuyerAccountDeactivation from "@/features/BuyerAccount/components/BuyerAccountDeactivation";
 
 export const AccountDeactivationRoute = () => {
-  return <AccountDeactivation />
+  return <BuyerAccountDeactivation />
 };

@@ -1,5 +1,5 @@
-import ChangePassword from "@/features/BuyerAccount/components/ChangePassword";
+import BuyerChangePassword from "@/features/BuyerAccount/components/BuyerChangePassword";
 
 export const ChangePasswordRoute = () => {
-  return <ChangePassword />
+  return <BuyerChangePassword />
 };
