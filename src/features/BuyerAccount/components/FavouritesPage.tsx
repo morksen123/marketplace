@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAtom } from 'jotai';
 import { userAtom } from '@/store/authAtoms';
 import { useNavigate } from 'react-router-dom';
-import ProductCard from "@/components/product/ProductCard";
+import ProductCard from '@/components/product/ProductCard';
 
 interface Product {
   productId: number;
@@ -17,27 +17,26 @@ const FavouritesPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const [user] = useAtom(userAtom);
-  const buyerId = user?.id;
+//   const buyerId = 1;
 
   useEffect(() => {
-    if (!buyerId) {
-      console.log(buyerId);
-      fetchFavouriteProducts();
-    }
-  }, [buyerId]);
+    fetchFavouriteProducts();
+  }, []);
 
   const fetchFavouriteProducts = async () => {
     // if (!buyerId) return;
-    console.log(buyerId);
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/buyer/${buyerId}/favourites`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `http://localhost:8080/api/buyer/favourites`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
         },
-        credentials: 'include'
-      });
+      );
       if (response.ok) {
         const data = await response.json();
         setFavouriteProducts(data);
@@ -57,17 +56,20 @@ const FavouritesPage: React.FC = () => {
 
   const handleToggleFavourite = async (productId: number) => {
     try {
-      const response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/remove`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/buyer/${buyerId}/favourites/${productId}/remove`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
         },
-        credentials: 'include'
-      });
+      );
 
       if (response.ok) {
-        setFavouriteProducts(prevProducts => 
-          prevProducts.filter(product => product.productId !== productId)
+        setFavouriteProducts((prevProducts) =>
+          prevProducts.filter((product) => product.productId !== productId),
         );
         alert('Removed from favourites');
       } else {
