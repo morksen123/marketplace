@@ -19,6 +19,7 @@ import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitM
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { useDropzone } from 'react-dropzone';
+import { handleSuccessApi } from '@/lib/api-client';
 
 export const CreateProductListing = () => {
   const navigate = useNavigate();
@@ -175,11 +176,11 @@ export const CreateProductListing = () => {
 
       const result = await response.json();
       console.log('Product created successfully:', result);
-      window.alert('Product created successfully!');
+      handleSuccessApi('Success!', 'Product has been created.');
       navigate('/distributor/home');
     } catch (error) {
       console.error('Error creating product:', error);
-      window.alert('Error creating product');
+      handleErrorApi('Error!', 'An error occurred while creating the product.');
     }
   };
 

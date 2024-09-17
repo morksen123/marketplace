@@ -9,6 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import AddIcon from '@mui/icons-material/Add';
 import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping, Product, Batch, BulkPricing } from '@/features/ProductListing/constants';
+import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
 
 export const ViewProductListing = () => {
 
@@ -21,7 +22,6 @@ export const ViewProductListing = () => {
     const [openAddBatch, setOpenAddBatch] = useState(false);
     const [newBatchQuantity, setNewBatchQuantity] = useState('');
     const [newBatchBestBeforeDate, setNewBatchBestBeforeDate] = useState('');
-    const [isFavourite, setIsFavourite] = useState(false);
     const [loading, setLoading] = useState(true);
     const [openAddBulkPricing, setOpenAddBulkPricing] = useState(false);
     const [newBulkPrice, setNewBulkPrice] = useState({ minQuantity: '', maxQuantity: '', price: '' });
@@ -63,25 +63,7 @@ export const ViewProductListing = () => {
             }
         };
 
-        const checkFavourited = async () => {
-            try {
-                const response = await fetch(`/api/buyer/favourites/check?productId=${productId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                });
-
-                const result = await response.json();
-                setIsFavourite(result);
-            } catch (error) {
-                console.error('Error checking if product is favourited:', error);
-            }
-        };
-
         fetchProduct();
-        checkFavourited();
     }, [productId]);
 
     const handleClickOpen = () => {
@@ -96,39 +78,6 @@ export const ViewProductListing = () => {
         navigate(`/edit-product-listing/${productId}`, { state: { product } });
     };
 
-    const handleToggleFavourite = async () => {
-        try {
-            let response;
-            if (isFavourite) {
-                response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/remove`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                });
-            } else {
-                response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/add`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                });
-            }
-
-            if (response.ok) {
-                setIsFavourite(!isFavourite);
-            } else {
-                const errorMessage = await response.text();
-                console.error('Error:', errorMessage);
-                alert(`Failed to update favourites: ${errorMessage}`);
-            }
-        } catch (error) {
-            console.error('Error occurred while updating favourites:', error);
-        }
-    };
-
     // This actually deactivates the product not deletes
     const handleConfirmDeactivate = async () => {
         try {
@@ -141,12 +90,12 @@ export const ViewProductListing = () => {
             });
 
             if (response.ok) {
-                alert(`Product ID: ${productId} deleted successfully.`);
+                handleSuccessApi('Success!', 'Product has been deleted.');
                 navigate('/distributor/home');
             } else {
                 const errorMessage = await response.text();
                 console.error('Error deleting product:', errorMessage);
-                alert(`Failed to delete product: ${errorMessage}`);
+                handleErrorApi('Error!', 'Failed to delete product.');
             }
         } catch (error) {
             console.error('Error occurred while deleting the product:', error);
@@ -184,15 +133,15 @@ export const ViewProductListing = () => {
                     setOpenAddBatch(false);
                     setNewBatchQuantity('');
                     setNewBatchBestBeforeDate('');
-                    alert('Batch added successfully');
+                    handleSuccessApi('Success!', 'Batch has been added.');
                 } else {
                     const errorMessage = await response.text();
                     console.error('Error adding batch:', errorMessage);
-                    alert(`Failed to add batch: ${errorMessage}`);
+                    handleErrorApi('Error!', 'Failed to add batch.');
                 }
             } catch (error) {
                 console.error('Error occurred while adding the batch:', error);
-                alert('An error occurred while adding the batch');
+                handleErrorApi('Error!', 'Failed to add batch.');
             }
         }
     };
@@ -209,14 +158,14 @@ export const ViewProductListing = () => {
 
             if (response.ok) {
                 setBatches(batches.filter(batch => batch.batchId !== batchId));
-                alert('Batch ID: ${id} deleted successfully.');
+                handleSuccessApi('Success!', 'Batch has been deleted.');
             } else {
                 const errorMessage = await response.text();
-                alert('Failed to delete batch: ${errorMessage}');
+                handleErrorApi('Error!', 'Failed to delete batch.');
             }
         } catch (error) {
             console.error('Error deleting batch:', error);
-            alert('An error occurred while deleting batch');
+            handleErrorApi('Error!', 'Failed to delete batch.');
         }
     };
 
@@ -245,14 +194,13 @@ export const ViewProductListing = () => {
                     setBulkPricings([...bulkPricings, newBulkPricing]);
                     setOpenAddBulkPricing(false);
                     setNewBulkPrice({ minQuantity: '', maxQuantity: '', price: '' }); // Reset form
-                    alert('Bulk pricing added successfully');
+                    handleSuccessApi('Success!', 'Bulk Pricing has been added.');
                 } else {
                     const errorMessage = await response.text();
-                    alert(`Failed to add bulk pricing: ${errorMessage}`);
+                    handleErrorApi('Error!', 'Failed to add bulk pricing.');
                 }
             } catch (error) {
                 console.error('Error adding bulk pricing:', error);
-                alert('An error occurred while adding bulk pricing');
             }
         } else {
             alert('Please fill in all required fields');
@@ -271,14 +219,14 @@ export const ViewProductListing = () => {
 
             if (response.ok) {
                 setBulkPricings(bulkPricings.filter(pricings => pricings.id !== id));
-                alert('Bulk pricing ID: ${id} deleted successfully.');
+                handleSuccessApi('Success!', 'Bulk Pricing has been deleted.');
             } else {
                 const errorMessage = await response.text();
-                alert('Failed to delete bulk pricing: ${errorMessage}');
+                handleErrorApi('Error!', 'Failed to delete bulk pricing.');
             }
         } catch (error) {
             console.error('Error deleting bulk pricing:', error);
-            alert('An error occurred while deleting bulk pricing');
+            handleErrorApi('Error!', 'Failed to delete bulk pricing.');
         }
     };
 
@@ -332,9 +280,6 @@ export const ViewProductListing = () => {
                     <p className="text-2xl text-green-600 font-semibold text-left">${product.price.toFixed(2)} per {unitMapping[product.foodCategory] || "unit"}</p>
                 </div>
 
-                <button onClick={handleToggleFavourite} className="flex items-center">
-                    <FavoriteOutlinedIcon style={{ color: isFavourite ? 'red' : 'gray', fontSize: '28px' }} />
-                </button>
             </div>
             <div className="text-left">
                 <hr className="border-gray-300 mb-6" />
@@ -479,16 +424,57 @@ export const ViewProductListing = () => {
                                 </CardContent>
                             </Card>
                         ))}
-                        <Card className="hover:shadow-lg transition duration-300 ease-in-out flex items-center justify-center">
-                            <CardContent className="p-5 w-full h-full">
-                                <button
-                                    className="w-full h-full bg-white text-black rounded-lg ease-in-out flex items-center justify-center"
-                                    onClick={() => setOpenAddBatch(true)}
-                                >
-                                    <AddIcon className="mr-2" /> Add Batch
-                                </button>
-                            </CardContent>
-                        </Card>
+                        {!openAddBatch ? (
+                            <Card className="hover:shadow-lg transition duration-300 ease-in-out flex items-center justify-center">
+                                <CardContent className="p-5 w-full h-full">
+                                    <button
+                                        className="w-full h-full bg-white text-black rounded-lg ease-in-out flex items-center justify-center"
+                                        onClick={() => setOpenAddBatch(true)}
+                                    >
+                                        <AddIcon className="mr-2" /> Add Batch
+                                    </button>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <Card className="hover:shadow-lg transition duration-300 ease-in-out">
+                                <CardContent className="p-5">
+                                    <div className="mb-3">
+                                        <p className="text-sm text-gray-700 font-semibold">Total Quantity</p>
+                                        <input
+                                            type="number"
+                                            value={newBatchQuantity}
+                                            onChange={(e) => setNewBatchQuantity(e.target.value)}
+                                            className="w-full p-2 border rounded"
+                                            placeholder={`Quantity (${unitMapping[product.foodCategory] || "unit"})`}
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <p className="text-sm text-gray-700 font-semibold">Best Before Date</p>
+                                        <input
+                                            type="date"
+                                            value={newBatchBestBeforeDate}
+                                            onChange={handleDateChange}
+                                            className="w-full p-2 border rounded"
+                                            min={getTodayDate()}
+                                        />
+                                    </div>
+                                    <div className="flex justify-end space-x-2">
+                                        <button
+                                            onClick={() => setOpenAddBatch(false)}
+                                            className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleAddBatch}
+                                            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
                     </div>
                 </div>
 
@@ -513,47 +499,6 @@ export const ViewProductListing = () => {
                         >
                             <DeleteIcon className="mr-2" /> Delete
                         </button>
-                    </DialogActions>
-                </Dialog>
-
-                {/* Add Batch Dialog */}
-                <Dialog open={openAddBatch} onClose={() => setOpenAddBatch(false)}>
-                    <DialogTitle>{"Add New Batch"}</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            Please enter the details for the new batch.
-                        </DialogContentText>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            id="quantity"
-                            label="Total Quantity (kg)"
-                            type="number"
-                            fullWidth
-                            variant="standard"
-                            value={newBatchQuantity}
-                            onChange={(e) => setNewBatchQuantity(e.target.value)}
-                        />
-                        <TextField
-                            margin="dense"
-                            id="bestBeforeDate"
-                            label="Best Before Date"
-                            type="date"
-                            fullWidth
-                            variant="standard"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            value={newBatchBestBeforeDate}
-                            onChange={handleDateChange}
-                            inputProps={{
-                                min: getTodayDate(),
-                            }}
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setOpenAddBatch(false)}>Cancel</Button>
-                        <Button onClick={handleAddBatch}>Add</Button>
                     </DialogActions>
                 </Dialog>
             </div>

@@ -4,8 +4,15 @@ import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirecto
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import logo from '../../../assets/gudfood-logo.png';
+import { useNavigate } from 'react-router-dom';
 
 export const DistributorNavMenu = () => {
+  const navigate = useNavigate();
+
+  const handleStoreClick = () => {
+    navigate('/distributor/home');
+  };
+
   return (
     <nav className="bg-white shadow-md w-full">
       <div className="w-full p-4">
@@ -32,7 +39,7 @@ export const DistributorNavMenu = () => {
               <SmsOutlinedIcon className="mr-1" /> Chats
             </a>
             <a
-              href="/account"
+              href="/distributor/profile"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <PersonOutlineOutlinedIcon className="mr-1" /> Account
@@ -43,7 +50,10 @@ export const DistributorNavMenu = () => {
             >
               <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
             </a>
-            <button className="button button-green">
+            <button
+              className="button button-green"
+              onClick={handleStoreClick}
+            >
               <StoreMallDirectoryOutlinedIcon className="mr-2" /> Store
             </button>
           </div>

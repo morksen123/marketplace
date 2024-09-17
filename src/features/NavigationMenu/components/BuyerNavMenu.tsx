@@ -59,7 +59,7 @@ export const BuyerNavMenu = () => {
               <SmsOutlinedIcon className="mr-1" /> Chats
             </a>
             <a
-              href="/account"
+              href="/buyer/profile"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <PersonOutlineOutlinedIcon className="mr-1" /> Account
@@ -70,7 +70,7 @@ export const BuyerNavMenu = () => {
             >
               <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
             </a>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center">
+            <button className="button button-green">
               <ShoppingCartOutlinedIcon className="mr-2" /> Cart
             </button>
           </div>
