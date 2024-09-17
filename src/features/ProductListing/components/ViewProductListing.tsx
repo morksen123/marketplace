@@ -425,17 +425,18 @@ export const ViewProductListing = () => {
                                         <td className="px-4 py-3">
                                             <div className="flex items-center justify-center space-x-2 h-full">
                                                 <button
-                                                    onClick={handleAddBulkPricing}
-                                                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                                                >
-                                                    Add
-                                                </button>
-                                                <button
                                                     onClick={() => setOpenAddBulkPricing(false)}
                                                     className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400"
                                                 >
                                                     Cancel
                                                 </button>
+                                                <button
+                                                    onClick={handleAddBulkPricing}
+                                                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                                                >
+                                                    Add
+                                                </button>
+
                                             </div>
                                         </td>
                                     </tr>
@@ -492,7 +493,7 @@ export const ViewProductListing = () => {
                 </div>
 
                 {/* Dialog */}
-                <Dialog open={open} onClose={handleClose}>
+                <Dialog open={open} onClose={handleClose} className="wrapper">
                     <DialogTitle>{"Confirm Deletion"}</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
@@ -507,7 +508,7 @@ export const ViewProductListing = () => {
                             Cancel
                         </button>
                         <button
-                            className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 flex items-center"
+                            className="button button-red"
                             onClick={handleConfirmDeactivate}
                         >
                             <DeleteIcon className="mr-2" /> Delete
