@@ -12,8 +12,8 @@ const BuyerProfileManagement: React.FC = () => {
 
   const API_BASE_URL = 'http://localhost:8080/api';
 
+  // Fetch profile from backend
   const fetchProfile = async () => {
-    // Implement fetch logic here
     try {
       const response = await fetch(`${API_BASE_URL}/buyer/profile`, {
         method: 'GET',
@@ -32,11 +32,10 @@ const BuyerProfileManagement: React.FC = () => {
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
-    //return userDetailDefaultValues;
   };
 
+  // Update profile to backend
   const updateProfile = async (profile: any) => {
-    // Implement update logic here
     try {
       const response = await fetch(`${API_BASE_URL}/buyer/profile/update`, {
         method: 'PUT',
@@ -63,11 +62,11 @@ const BuyerProfileManagement: React.FC = () => {
     { label: 'Last Name', name: 'lastName', type: 'text', editable: true },
     { label: 'Email Address', name: 'email', type: 'email', editable: true },
     {
-      label: 'Shipping Address',
+      label: 'Shipping Addresses',
       name: 'shippingAddresses',
-      type: 'text',
+      type: 'complex',
       editable: true,
-    }, // to change to fit multiple addresses
+    },
   ];
 
   const links = [
