@@ -23,6 +23,24 @@ const routes: RouteObject[] = [
     },
   },
   {
+    path: '/auth/forgot-password',
+    lazy: async () => {
+      const { ForgotPasswordRoute } = await import(
+        './routes/auth/forgot-password'
+      );
+      return { Component: ForgotPasswordRoute };
+    },
+  },
+  {
+    path: '/auth/reset-password',
+    lazy: async () => {
+      const { ResetPasswordRoute } = await import(
+        './routes/auth/reset-password'
+      );
+      return { Component: ResetPasswordRoute };
+    },
+  },
+  {
     path: '/',
     element: <AuthGuard />,
     children: [
@@ -93,6 +111,33 @@ const routes: RouteObject[] = [
                 },
               },
               // Add other distributor-specific routes here
+              {
+                path: '/distributor/profile',
+                lazy: async () => {
+                  const { ProfileManagementRoute } = await import(
+                    './routes/distributorAccount/distributor-account'
+                  );
+                  return { Component: ProfileManagementRoute };
+                },
+              },
+              {
+                path: '/distributor/profile/change-password',
+                lazy: async () => {
+                  const { ChangePasswordRoute } = await import(
+                    './routes/distributorAccount/change-password'
+                  );
+                  return { Component: ChangePasswordRoute };
+                },
+              },
+              {
+                path: '/distributor/profile/account-deactivation',
+                lazy: async () => {
+                  const { AccountDeactivationRoute } = await import(
+                    './routes/distributorAccount/account-deactivation'
+                  );
+                  return { Component: AccountDeactivationRoute };
+                },
+              },
             ],
           },
           // You can add more role-specific sections here
@@ -106,6 +151,27 @@ const routes: RouteObject[] = [
       const { NotFoundRoute } = await import('./routes/not-found');
       return { Component: NotFoundRoute };
     },
+  },
+  {
+    path: '/create-product-listing',
+    lazy: async () => {
+      const { CreateProductListingRoute } = await import('./routes/create-product-listing');
+      return { Component: CreateProductListingRoute };
+    }
+  },
+  {
+    path: '/view-product-listing/:productId',
+    lazy: async () => {
+      const { ViewProductListingRoute } = await import('./routes/view-product-listing');
+      return { Component: ViewProductListingRoute };
+    }
+  },
+  {
+    path: '/edit-product-listing/:productId',
+    lazy: async () => {
+      const { EditProductListingRoute } = await import('./routes/edit-product-listing');
+      return { Component: EditProductListingRoute };
+    }
   },
 ];
 

@@ -2,12 +2,21 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 
 import { handleSuccessApi } from '@/lib/api-client';
-import { login, logout, register } from '@/lib/auth';
+import {
+  buyerRegister,
+  changePasswordAfterReset,
+  distributorRegister,
+  login,
+  logout,
+  resetPassword,
+} from '@/lib/auth';
 import { userAtom } from '@/store/authAtoms';
 import { useNavigate } from 'react-router-dom';
 import {
+  BuyerRegisterForm,
+  DistributorRegisterForm,
   LoginCredentials,
-  RegisterForm,
+  ResetPasswordFormValues,
   ROLES,
   RoleTypes,
 } from '../types/auth';
@@ -47,9 +56,41 @@ export function useAuthActions() {
     },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: (data: RegisterForm) => {
-      return register(data);
+  const resetPasswordMutation = useMutation({
+    mutationFn: ({ email, role }: { email: string; role: RoleTypes }) =>
+      resetPassword(email, role),
+  });
+
+  const changePasswordAfterResetMutation = useMutation({
+    mutationFn: ({
+      data,
+      role,
+      token,
+    }: {
+      data: ResetPasswordFormValues;
+      role: RoleTypes;
+      token: string;
+    }) => changePasswordAfterReset(data, role, token),
+  });
+
+  const registerBuyerMutation = useMutation({
+    mutationFn: (data: BuyerRegisterForm) => {
+      return buyerRegister(data);
+    },
+    onSuccess: (data) => {
+      if (data) {
+        navigate('/');
+        handleSuccessApi(
+          'Account Created',
+          'Your account has been successfully created. You can now log in.',
+        );
+      }
+    },
+  });
+
+  const registerDistributorMutation = useMutation({
+    mutationFn: (data: DistributorRegisterForm) => {
+      return distributorRegister(data);
     },
     onSuccess: (data) => {
       if (data) {
@@ -65,6 +106,9 @@ export function useAuthActions() {
   return {
     login: loginMutation.mutate, // change to mutateAsync if we need the data in the component
     logout: logoutMutation.mutate,
-    register: registerMutation.mutate,
+    registerBuyer: registerBuyerMutation.mutate,
+    registerDistributor: registerDistributorMutation.mutate,
+    resetPassword: resetPasswordMutation.mutate,
+    changePasswordAfterReset: changePasswordAfterResetMutation.mutate,
   };
 }

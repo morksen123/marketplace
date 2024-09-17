@@ -17,7 +17,7 @@ function App() {
   );
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="wrapper">Loading...</div>}>
       <ErrorBoundary fallbackRender={ErrorFallback}>
         <QueryClientProvider client={queryClient}>
           <JotaiProvider>

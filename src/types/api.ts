@@ -17,7 +17,6 @@ export type UserInfo = BuyerDTO | DistributorDTO;
 
 // Authentication Response Type
 export type LoginResponse = UserInfo;
-
 export interface RegisterResponse {
   email: string;
   role: string;

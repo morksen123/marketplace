@@ -11,12 +11,13 @@ import { Input } from '@/components/ui/input';
 import { capitalizeFirstLetter } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
 import { signInFormDefaultValues } from '../constants';
 import { useAuthActions } from '../hooks/useAuthActions';
 import { SignInSchema } from '../schema';
 import { LoginCredentials, RoleTypes, SignInFormState } from '../types/auth';
 import { CheckboxWithText } from './CheckBoxWithText';
-import { FormHeader } from './FormHeader';
+import { SignInHeader } from './SignInHeader';
 
 type SignInFormProps = {
   userRole: RoleTypes;
@@ -29,14 +30,16 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
     resolver: zodResolver(SignInSchema),
     defaultValues: signInFormDefaultValues,
   });
+  const navigate = useNavigate();
 
   const handleUserSignIn = async (data: LoginCredentials) => {
     await login({ credentials: data, role: userRole });
+    navigate('/buyer/home');
   };
 
   return (
     <div className="bg-white rounded-lg shadow p-6 min-w-[25rem]">
-      <FormHeader
+      <SignInHeader
         title={capitalizeFirstLetter(userRole)}
         onClose={() => onClose('CLOSED')}
       />
@@ -72,12 +75,21 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
             )}
           />
 
-          <CheckboxWithText text="Remember me" />
+          <div className="flex justify-between items-center text-sm">
+            <CheckboxWithText text="Remember me" />
+            <Link
+              to="/auth/forgot-password"
+              state={{ role: userRole }}
+              className="text-authYellow hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
           <Button
             type="submit"
             variant="warning"
-            className="w-full border-[1px]"
+            className="w-full"
             disabled={form.formState.isSubmitting}
           >
             {form.formState.isSubmitting ? 'Logging in...' : 'Sign In'}
@@ -85,14 +97,16 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
         </form>
       </Form>
 
-      <footer className="text-center mt-4">
-        <span className="text-primary-foreground">
-          No account?{' '}
-          <a href="/auth/register" className="text-authYellow hover:underline">
-            Create an account
-          </a>
-        </span>
-      </footer>
+      <p className="text-primary-foreground text-center mt-4">
+        No account?{' '}
+        <Link
+          to="/auth/register"
+          state={{ role: userRole }}
+          className="text-authYellow hover:underline"
+        >
+          Create an account
+        </Link>
+      </p>
     </div>
   );
 };

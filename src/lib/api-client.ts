@@ -30,6 +30,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json();
 }
 
+// TODO: allow plain text server response
 export async function apiClient<T>(
   endpoint: string,
   method: string = 'GET',
