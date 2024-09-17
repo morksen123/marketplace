@@ -46,12 +46,14 @@ export const unitMapping: Record<string, string> = {
 export interface Batch {
   quantity: number;
   bestBeforeDate: string;
+  batchId: Long;
 }
 
 export interface BulkPricing {
   minQuantity: number;
   maxQuantity: number;
   price: number;
+  id: Long;
 }
 
 export interface Product {
