@@ -1,5 +1,11 @@
-import BuyerChangePassword from "@/features/BuyerAccount/components/BuyerChangePassword";
+import BuyerChangePassword from '@/features/BuyerAccount/components/BuyerChangePassword';
+import { BuyerNavMenu } from "@/features/NavigationMenu/components/BuyerNavMenu";
 
 export const ChangePasswordRoute = () => {
-  return <BuyerChangePassword />
+  return (
+    <>
+      <BuyerNavMenu showTabs={false} />
+      <BuyerChangePassword />
+    </>
+  );
 };

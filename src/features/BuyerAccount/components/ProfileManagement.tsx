@@ -1,14 +1,19 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
 import ProfileManagement from '@/components/profile/ProfileManagement';
 import { LogoutButton } from '@/features/Authentication/components/LogoutButton';
 import { userDetailDefaultValues } from '../constants';
 import { BuyerNavMenu } from '@/features/NavigationMenu/components/BuyerNavMenu';
 
 const BuyerProfileManagement: React.FC = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuthActions();
+
   const API_BASE_URL = 'http://localhost:8080/api';
 
+  // Fetch profile from backend
   const fetchProfile = async () => {
-    // Implement fetch logic here
     try {
       const response = await fetch(`${API_BASE_URL}/buyer/profile`, {
         method: 'GET',
@@ -27,11 +32,10 @@ const BuyerProfileManagement: React.FC = () => {
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
-    //return userDetailDefaultValues;
   };
 
+  // Update profile to backend
   const updateProfile = async (profile: any) => {
-    // Implement update logic here
     try {
       const response = await fetch(`${API_BASE_URL}/buyer/profile/update`, {
         method: 'PUT',
@@ -57,25 +61,22 @@ const BuyerProfileManagement: React.FC = () => {
     { label: 'First Name', name: 'firstName', type: 'text', editable: true },
     { label: 'Last Name', name: 'lastName', type: 'text', editable: true },
     { label: 'Email Address', name: 'email', type: 'email', editable: true },
-    {
-      label: 'Shipping Address',
-      name: 'shippingAddresses',
-      type: 'text',
-      editable: true,
-    }, // to change to fit multiple addresses
   ];
 
   const links = [
+    {text: 'My Addresses', path: '/buyer/profile/my-addresses'},
     { text: 'Change Password', path: '/buyer/profile/change-password' },
     { text: 'Notifications', path: '/buyer/profile/notifications' },
     {
       text: 'Purchasing Preferences',
       path: '/buyer/profile/purchasing-preferences',
     },
+    {text: 'Favourites', path: '/buyer/profile/favourites'},
     {
       text: 'Account Deactivation',
       path: '/buyer/profile/account-deactivation',
     },
+    {text: 'Logout', path: '/logout'}
   ];
 
   const greeting = (profile: any) =>
@@ -83,7 +84,6 @@ const BuyerProfileManagement: React.FC = () => {
 
   return (
     <div>
-      <BuyerNavMenu />
       <ProfileManagement
         fetchProfile={fetchProfile}
         updateProfile={updateProfile}
@@ -92,8 +92,6 @@ const BuyerProfileManagement: React.FC = () => {
         greeting={greeting}
         hasProfilePicture={true}
       />
-      {/* might shift this logout button to somewhere else */}
-      <LogoutButton />
     </div>
   );
 };

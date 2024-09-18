@@ -1,3 +1,7 @@
+// import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+{/* Icons */}
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
@@ -7,8 +11,14 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 import { useState } from 'react';
 import logo from '../../../assets/gudfood-logo.png';
 
-export const BuyerNavMenu = () => {
+interface BuyerNavMenuProps {
+  showTabs?: boolean;
+}
+
+export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) => {
   const [selectedTab, setSelectedTab] = useState('Home');
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   const tabs = [
     'Home',
@@ -18,6 +28,19 @@ export const BuyerNavMenu = () => {
     'Frozen',
     'Sale',
   ];
+
+  // Handle input change
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Handle search submission
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/buyer/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <nav className="bg-white shadow-md w-full">
@@ -32,16 +55,18 @@ export const BuyerNavMenu = () => {
 
           {/* Search Bar */}
           <div className="flex-grow mx-4 max-w-md">
-            <div className="relative">
+            <form onSubmit={handleSearchSubmit} className="relative">
               <input
                 type="text"
                 placeholder="Search..."
+                value={searchQuery}
+                onChange={handleInputChange}
                 className="w-full py-2 px-4 rounded-lg focus:outline-none border border-gray-300 bg-gray-100 text-black"
               />
-              <button className="absolute right-0 top-0 mt-1.5 mr-2">
+              <button type="submit" className="absolute right-0 top-0 mt-1.5 mr-2">
                 <SearchIcon className="w-6 h-6 text-gray-600" />
               </button>
-            </div>
+            </form> 
           </div>
 
           {/* Navigation Links with Icons */}
@@ -78,23 +103,25 @@ export const BuyerNavMenu = () => {
       </div>
 
       {/* Tabs Menu */}
-      <div className="bg-white w-full">
-        <div className="flex justify-between">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              className={`py-4 px-4 text-black focus:outline-none flex-grow ${
-                selectedTab === tab
-                  ? 'border-b-2 border-green-500 text-green-500'
-                  : 'hover:text-green-500'
-              }`}
-              onClick={() => setSelectedTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
+      {showTabs && (
+        <div className="bg-white w-full">
+          <div className="flex justify-between">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                className={`py-4 px-4 text-black focus:outline-none flex-grow ${
+                  selectedTab === tab
+                    ? 'border-b-2 border-green-500 text-green-500'
+                    : 'hover:text-green-500'
+                }`}
+                onClick={() => setSelectedTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </nav>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { useAuthActions } from "@/features/Authentication/hooks/useAuthActions";
 
 interface AccountDeactivationProps {
   userType: 'Buyer' | 'Distributor';
@@ -11,11 +12,13 @@ interface AccountDeactivationProps {
 const AccountDeactivation: React.FC<AccountDeactivationProps> = ({ userType, onDeactivate }) => {
   const [confirmDeactivation, setConfirmDeactivation] = useState(false);
   const [password, setPassword] = useState("");
+  const { logout } = useAuthActions();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (confirmDeactivation) {
-      onDeactivate(password);
+      await onDeactivate(password);
+      logout();
     } else {
       alert(`Please confirm that you want to deactivate your ${userType} account.`);
     }
@@ -37,14 +40,15 @@ const AccountDeactivation: React.FC<AccountDeactivationProps> = ({ userType, onD
         <form onSubmit={handleSubmit} className="space-y-6">
         <div>
             <label className="block text-sm font-medium text-gray-700">
-              Confirm your password
+              Re-enter your password to confirm deactivation
             </label>
             <Input
               type="password"
+              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full"
               required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
             />
           </div>
 
@@ -63,7 +67,7 @@ const AccountDeactivation: React.FC<AccountDeactivationProps> = ({ userType, onD
             type="submit"
             variant="destructive"
             className="w-full mt-6"
-            disabled={!confirmDeactivation}
+            disabled={!confirmDeactivation || !password}
           >
             Deactivate Account
           </Button>

@@ -105,14 +105,13 @@ const DistributorProfileManagement: React.FC = () => {
       text: 'Account Deactivation',
       path: '/distributor/profile/account-deactivation',
     },
+    {text: 'Logout', path: '/logout'}
   ];
 
   const greeting = (profile: any) => `${profile.distributorName} Profile`;
 
   return (
     <div>
-      <DistributorNavMenu />
-
       <ProfileManagement
         fetchProfile={fetchProfile}
         updateProfile={updateProfile}

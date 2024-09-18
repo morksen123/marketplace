@@ -60,6 +60,33 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/buyer/search',
+                lazy: async () => {
+                  const { SearchResultsRoute } = await import(
+                    './routes/app/search/search-results'
+                  );
+                  return { Component: SearchResultsRoute };
+                },
+              },
+              {
+                path: '/buyer/view-product/:productId',
+                lazy: async () => {
+                  const { ViewProductListingBuyerRoute } = await import(
+                    './routes/app/search/view-product-listing-buyer'
+                  );
+                  return { Component: ViewProductListingBuyerRoute };
+                },
+              },
+              {
+                path: '/buyer/profile/my-addresses',
+                lazy: async () => {
+                  const { ShippingAddressesPage } = await import(
+                    './routes/buyerProfile/shipping-addresses'
+                  );
+                  return { Component: ShippingAddressesPage };
+                },
+              },
+              {
                 path: '/buyer/profile',
                 lazy: async () => {
                   const { ProfileManagementRoute } = await import(
@@ -84,6 +111,15 @@ const routes: RouteObject[] = [
                     './routes/buyerProfile/account-deactivation'
                   );
                   return { Component: AccountDeactivationRoute };
+                },
+              },
+              {
+                path: '/buyer/profile/favourites',
+                lazy: async () => {
+                  const { FavouritesPageRoute } = await import(
+                    './routes/buyerProfile/favourites-page'
+                  );
+                  return { Component: FavouritesPageRoute };
                 },
               },
               // Add other buyer-specific routes here

@@ -36,6 +36,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   };
 
   const renderField = ({ label, name, type, editable }: {label: string, name: string, type: string, editable: boolean}) => {
+
     const value = isEditing ? editedProfile[name] : profile[name];
     const inputField = (
       <Input

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useAtom } from 'jotai';
+import { userAtom } from '@/store/authAtoms';
 import bannerImage from '../../../assets/buyer-homepage-banner.png';
 import { useNavigate } from 'react-router-dom';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
@@ -7,7 +9,8 @@ export const BuyerHome = () => {
   const [products, setProducts] = useState([]);
   const [favourites, setFavourites] = useState({}); // To store favourite status per product
   const navigate = useNavigate();
-  const buyerId = 1; // To change
+  const [user] = useAtom(userAtom);
+  const buyerId = user?.id;
 
   // Fetch products from the API when the component mounts
   useEffect(() => {
@@ -62,7 +65,7 @@ export const BuyerHome = () => {
 
   // Function to handle navigation to the product detail page
   const handleProductClick = (productId: number) => {
-    navigate(`/view-product-listing/${productId}`);
+    navigate(`/buyer/view-product/${productId}`);
   };
 
   // Function to toggle favourite status for a product
@@ -93,11 +96,13 @@ export const BuyerHome = () => {
           ...prevFavourites,
           [productId]: !isFavourited, // Toggle favourite status
         }));
-        alert(isFavourited ? 'Removed from favourites' : 'Added to favourites');
+        // alert(isFavourited ? 'Removed from favourites' : 'Added to favourites');
+        console.log(isFavourited ? 'Removed from favourites' : 'Added to favourites');
       } else {
         const errorMessage = await response.text();
         console.error('Error:', errorMessage);
-        alert(`Failed to update favourites: ${errorMessage}`);
+        // to change to proper error message
+        // alert(`Failed to update favourites: ${errorMessage}`);
       }
     } catch (error) {
       console.error('Error occurred while updating favourites:', error);
@@ -112,6 +117,7 @@ export const BuyerHome = () => {
       </section>
 
       <section className="wrapper mt-10">
+      {/* To refactor ProductCard */}
         <h3 className="text-3xl text-left font-bold text-gray-800">Our Products</h3>
         {/* Products Listings */}
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
