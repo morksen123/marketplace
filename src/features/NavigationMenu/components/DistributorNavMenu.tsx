@@ -19,7 +19,7 @@ export const DistributorNavMenu = () => {
         <div className="flex justify-between items-center">
           {/* Logo Section */}
           <div className="pl-6">
-            <a href="/">
+            <a href="/distributor/home">
               <img src={logo} alt="GudFood Logo" className="h-12" />
             </a>
           </div>
