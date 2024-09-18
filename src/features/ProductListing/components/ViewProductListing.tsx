@@ -180,6 +180,11 @@ export const ViewProductListing = () => {
             };
 
             try {
+                console.log("hello");
+                if (!validateBulkPricing(bulkPricingData)) {
+                    return; 
+                }
+
                 const response = await fetch(`/api/products/product/${productId}/bulk-pricing`, {
                     method: 'POST',
                     headers: {
@@ -206,6 +211,28 @@ export const ViewProductListing = () => {
             alert('Please fill in all required fields');
         }
     };
+
+    const validateBulkPricing = (newPricing) => {
+        const { minQuantity, maxQuantity } = newPricing;
+    
+        if (maxQuantity && minQuantity > maxQuantity) {
+            handleErrorApi('Error!', 'Minimum quantity cannot be greater than maximum quantity.');
+            return false;
+        }
+    
+        for (const pricing of bulkPricings) {
+            if (
+                (minQuantity >= pricing.minQuantity && minQuantity <= pricing.maxQuantity) ||  
+                (maxQuantity && maxQuantity >= pricing.minQuantity && maxQuantity <= pricing.maxQuantity)  
+            ) {
+                handleErrorApi('Error!', 'The quantity range overlaps with an existing range.');
+                return false;
+            }
+        }
+    
+        return true;
+    };
+    
 
     const handleDeleteBulkPricing = async (id: Long) => {
         try {
@@ -381,7 +408,6 @@ export const ViewProductListing = () => {
                                                 >
                                                     Add
                                                 </button>
-
                                             </div>
                                         </td>
                                     </tr>
