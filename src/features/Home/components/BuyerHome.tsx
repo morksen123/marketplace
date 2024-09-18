@@ -9,8 +9,9 @@ export const BuyerHome = () => {
   const [products, setProducts] = useState([]);
   const [favourites, setFavourites] = useState({}); // To store favourite status per product
   const navigate = useNavigate();
-  const [user] = useAtom(userAtom);
-  const buyerId = user?.id;
+  const [buyerId, setBuyerId] = useState<number | null>(0);
+  // const [user] = useAtom(userAtom);
+  // const buyerId = user?.id;
 
   // Fetch products from the API when the component mounts
   useEffect(() => {
@@ -36,8 +37,30 @@ export const BuyerHome = () => {
       }
     };
 
+    fetchBuyerId();
     fetchProducts();
   }, []);
+
+
+  const fetchBuyerId = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/buyer/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setBuyerId(data.buyerId);
+      } else {
+        console.error('Failed to fetch buyer ID');
+      }
+    } catch (error) {
+      console.error('Error fetching buyer ID:', error);
+    }
+  };
 
   // Function to check if a product is favourited
   const checkFavourited = async (productId: number) => {
