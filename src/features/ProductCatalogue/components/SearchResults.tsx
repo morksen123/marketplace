@@ -21,8 +21,9 @@ const SearchResultsPage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [user] = useAtom(userAtom);
-  const buyerId = user?.id;
+  const [buyerId, setBuyerId] = useState<number | null>(0);
+  // const [user] = useAtom(userAtom);
+  // const buyerId = user?.id;
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -56,7 +57,29 @@ const SearchResultsPage = () => {
     if (searchQuery) {
       fetchSearchResults();
     }
+    fetchBuyerId();
   }, [searchQuery]);
+
+  const fetchBuyerId = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/buyer/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setBuyerId(data.buyerId);
+      } else {
+        console.error('Failed to fetch buyer ID');
+      }
+    } catch (error) {
+      console.error('Error fetching buyer ID:', error);
+    }
+  };
+
 
   const checkFavourited = async (productId) => {
     try {
