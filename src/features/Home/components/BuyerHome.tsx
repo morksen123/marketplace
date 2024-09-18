@@ -4,6 +4,7 @@ import { userAtom } from '@/store/authAtoms';
 import bannerImage from '../../../assets/buyer-homepage-banner.png';
 import { useNavigate } from 'react-router-dom';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
+import { foodCategoryMapping, foodConditionMapping } from '../constants';
 
 export const BuyerHome = () => {
   const [products, setProducts] = useState([]);
@@ -176,8 +177,8 @@ export const BuyerHome = () => {
                   </button>
                 </div>
 
-                <p className="text-gray-500">{product.foodCategory}</p>
-                <p className="text-gray-500">Condition: {product.foodCondition}</p>
+                <p className="text-gray-500">{foodCategoryMapping[product.foodCategory] || product.foodCategory}</p>
+                <p className="text-gray-500">Condition: {foodConditionMapping[product.foodCondition] || product.foodCondition}</p>
               </div>
             ))
           ) : (
