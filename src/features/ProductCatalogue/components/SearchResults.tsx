@@ -108,11 +108,13 @@ const SearchResultsPage = () => {
           ...prevFavourites,
           [productId]: !isFavourited,
         }));
-        alert(isFavourited ? 'Removed from favourites' : 'Added to favourites');
+        // alert(isFavourited ? 'Removed from favourites' : 'Added to favourites');
+        console.log(isFavourited ? 'Removed from favourites' : 'Added to favourites');
       } else {
         const errorMessage = await response.text();
         console.error('Error:', errorMessage);
-        alert(`Failed to update favourites: ${errorMessage}`);
+        // to change to proper error message
+        // alert(`Failed to update favourites: ${errorMessage}`);
       }
     } catch (error) {
       console.error('Error occurred while updating favourites:', error);

@@ -71,11 +71,13 @@ const FavouritesPage: React.FC = () => {
         setFavouriteProducts((prevProducts) =>
           prevProducts.filter((product) => product.productId !== productId),
         );
-        alert('Removed from favourites');
+        // alert('Removed from favourites');
+        console.log('Removed from favourites');
       } else {
         const errorMessage = await response.text();
         console.error('Error:', errorMessage);
-        alert(`Failed to remove from favourites: ${errorMessage}`);
+        // to change to proper error message
+        // alert(`Failed to remove from favourites: ${errorMessage}`);
       }
     } catch (error) {
       console.error('Error occurred while updating favourites:', error);
