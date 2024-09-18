@@ -61,15 +61,10 @@ const BuyerProfileManagement: React.FC = () => {
     { label: 'First Name', name: 'firstName', type: 'text', editable: true },
     { label: 'Last Name', name: 'lastName', type: 'text', editable: true },
     { label: 'Email Address', name: 'email', type: 'email', editable: true },
-    {
-      label: 'Shipping Addresses',
-      name: 'shippingAddresses',
-      type: 'complex',
-      editable: true,
-    },
   ];
 
   const links = [
+    {text: 'My Addresses', path: '/buyer/profile/my-addresses'},
     { text: 'Change Password', path: '/buyer/profile/change-password' },
     { text: 'Notifications', path: '/buyer/profile/notifications' },
     {

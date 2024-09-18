@@ -78,6 +78,15 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/buyer/profile/my-addresses',
+                lazy: async () => {
+                  const { ShippingAddressesPage } = await import(
+                    './routes/buyerProfile/shipping-addresses'
+                  );
+                  return { Component: ShippingAddressesPage };
+                },
+              },
+              {
                 path: '/buyer/profile',
                 lazy: async () => {
                   const { ProfileManagementRoute } = await import(

@@ -116,17 +116,8 @@ export const BuyerHome = () => {
         <img src={bannerImage} alt="GudFood Banner" className="w-full h-auto" />
       </section>
 
-      <section className="py-10">
-
+      <section className="wrapper mt-10">
       {/* To refactor ProductCard */}
-      {/* <h3 className="text-3xl text-left font-bold text-gray-800">
-          Our Products
-        </h3>
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))} */}
-
         <h3 className="text-3xl text-left font-bold text-gray-800">Our Products</h3>
         {/* Products Listings */}
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
