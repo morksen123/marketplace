@@ -46,7 +46,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({
       const data = await fetchProfile();
       setProfile(data);
       setEditedProfile(data);
-      setProfilePic(data.profilePic);
+      setProfilePic(data?.profilePic);
     };
     loadProfile();
   }, [fetchProfile]);
