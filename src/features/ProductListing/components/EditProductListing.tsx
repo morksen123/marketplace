@@ -23,6 +23,7 @@ import {
 } from '@/features/ProductListing/constants';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
+import { handleSuccessApi } from '@/lib/api-client';
 
 export const EditProductListing = () => {
   const { productId } = useParams();
@@ -180,7 +181,7 @@ export const EditProductListing = () => {
         throw new Error('Failed to update product');
       }
 
-      alert('Product updated successfully!');
+      handleSuccessApi('Success!', 'Product has been updated.');
       navigate(`/view-product-listing/${productId}`);
     } catch (error) {
       console.error('Error updating product:', error);

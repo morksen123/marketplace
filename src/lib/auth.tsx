@@ -68,6 +68,7 @@ export async function changePasswordAfterReset(
   token: string,
 ) {
   const roleRoute = role.toLowerCase();
+  console.log(roleRoute)
   await post(
     `/${roleRoute}/reset-password?token=${encodeURIComponent(token)}`,
     {
