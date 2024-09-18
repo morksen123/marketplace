@@ -1,5 +1,7 @@
 import React from 'react';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
+import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping, Product, Batch } from '@/features/ProductListing/constants';
+
 
 interface ProductCardProps {
   product: {
@@ -13,6 +15,10 @@ interface ProductCardProps {
   onProductClick: (productId: number) => void;
   onToggleFavourite: (productId: number) => void;
 }
+
+const capitalizeFirstLetter = (string: string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+};
 
 const ProductCard: React.FC<ProductCardProps> = ({ 
   product, 
@@ -49,8 +55,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </button>
       </div>
 
-      <p className="text-gray-500">{product.foodCategory}</p>
-      <p className="text-gray-500">Condition: {product.foodCondition}</p>
+      <p className="text-gray-500 ">{foodCategoryMapping[product.foodCategory]}</p>
+      <p className="text-gray-500">Condition: {foodConditionMapping[product.foodCondition]}</p>
     </div>
   );
 };
