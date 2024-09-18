@@ -16,12 +16,35 @@ const FavouritesPage: React.FC = () => {
   const [favouriteProducts, setFavouriteProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const [user] = useAtom(userAtom);
+  const [buyerId, setBuyerId] = useState<number | null>(0);
+  // const [user] = useAtom(userAtom);
+  // const buyerId = user?.buyerId;
 //   const buyerId = 1;
 
   useEffect(() => {
+    fetchBuyerId();
     fetchFavouriteProducts();
   }, []);
+
+  const fetchBuyerId = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/buyer/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setBuyerId(data.buyerId);
+      } else {
+        console.error('Failed to fetch buyer ID');
+      }
+    } catch (error) {
+      console.error('Error fetching buyer ID:', error);
+    }
+  };
 
   const fetchFavouriteProducts = async () => {
     // if (!buyerId) return;

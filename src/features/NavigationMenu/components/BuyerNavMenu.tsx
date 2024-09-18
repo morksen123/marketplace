@@ -48,7 +48,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) =
         <div className="flex justify-between items-center">
           {/* Logo Section */}
           <div className="pl-6">
-            <a href="/">
+            <a href="/buyer/home">
               <img src={logo} alt="GudFood Logo" className="h-12" />
             </a>
           </div>

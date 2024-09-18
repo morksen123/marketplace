@@ -1,4 +1,11 @@
 import ChangePassword from '@/components/profile/ChangePassword';
+import { handleSuccessApi } from '@/lib/api-client';
+import { useNavigate } from 'react-router-dom';
+
+
+
+const DistributorChangePassword = () => {
+  const navigate = useNavigate();
 
 const handleDistributorPasswordChange = async (
   currentPassword: string,
@@ -24,6 +31,8 @@ const handleDistributorPasswordChange = async (
       return response.text();
     })
     .then(data => {
+      navigate('/distributor/profile');
+      handleSuccessApi('Success!', 'Password has been changed.');
       console.log(data); // Should be the success message
     })
     .catch(error => {
@@ -34,7 +43,6 @@ const handleDistributorPasswordChange = async (
   }
 };
 
-const DistributorChangePassword = () => {
   return <ChangePassword onSubmit={handleDistributorPasswordChange} />;
 };
 
