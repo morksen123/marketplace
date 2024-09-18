@@ -19,7 +19,7 @@ import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitM
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { useDropzone } from 'react-dropzone';
-import { handleSuccessApi } from '@/lib/api-client';
+import { handleErrorApi, handleSuccessApi } from '@/lib/api-client';
 
 export const CreateProductListing = () => {
   const navigate = useNavigate();
@@ -70,6 +70,14 @@ export const CreateProductListing = () => {
   // Retrieve the productTags field from the form
   const tags = form.watch('productTags');
 
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Add leading 0 if necessary
+    const day = String(today.getDate()).padStart(2, '0'); // Add leading 0 if necessary
+    return `${year}-${month}-${day}`;
+};
+
   // Handle adding a tag to productTags
   const handleAddTag = (event) => {
     event.preventDefault();
@@ -112,8 +120,13 @@ export const CreateProductListing = () => {
 
   const handleRemoveImage = (index: number) => {
     const updatedImages = [...selectedImages];
+    const updatedPictures = [...productPictures];
+  
     updatedImages.splice(index, 1);
+    updatedPictures.splice(index, 1);
+  
     setSelectedImages(updatedImages);
+    setProductPictures(updatedPictures);
   };
 
   // Handle file upload during form submission
@@ -702,7 +715,7 @@ export const CreateProductListing = () => {
                       <FormItem className="block text-left flex-1">
                         <FormLabel>Best Before Date</FormLabel>
                         <FormControl>
-                          <Input {...field} type="date" className="h-10" />
+                          <Input {...field} type="date" className="h-10" min={getTodayDate()}/>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
