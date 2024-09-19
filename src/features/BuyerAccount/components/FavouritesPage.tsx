@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useAtom } from 'jotai';
-import { userAtom } from '@/store/authAtoms';
-import { useNavigate } from 'react-router-dom';
 import ProductCard from '@/components/product/ProductCard';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Product {
   productId: number;
@@ -17,9 +15,6 @@ const FavouritesPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const [buyerId, setBuyerId] = useState<number | null>(0);
-  // const [user] = useAtom(userAtom);
-  // const buyerId = user?.buyerId;
-//   const buyerId = 1;
 
   useEffect(() => {
     fetchBuyerId();
