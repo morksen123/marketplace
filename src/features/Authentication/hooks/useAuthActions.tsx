@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAtom } from 'jotai';
 
 import { handleSuccessApi } from '@/lib/api-client';
 import {
@@ -10,7 +9,6 @@ import {
   logout,
   resetPassword,
 } from '@/lib/auth';
-import { userAtom } from '@/store/authAtoms';
 import { useNavigate } from 'react-router-dom';
 import {
   BuyerRegisterForm,
@@ -22,7 +20,6 @@ import {
 } from '../types/auth';
 
 export function useAuthActions() {
-  const [, setUser] = useAtom(userAtom);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -37,7 +34,6 @@ export function useAuthActions() {
       return login(credentials, role);
     },
     onSuccess: (data) => {
-      setUser(data);
       // Invalidate and refetch authCheck query
       queryClient.invalidateQueries({ queryKey: ['authCheck'] });
 

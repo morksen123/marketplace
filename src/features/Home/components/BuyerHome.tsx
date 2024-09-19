@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useAtom } from 'jotai';
-import { userAtom } from '@/store/authAtoms';
-import bannerImage from '../../../assets/buyer-homepage-banner.png';
-import { useNavigate } from 'react-router-dom';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import bannerImage from '../../../assets/buyer-homepage-banner.png';
 import { foodCategoryMapping, foodConditionMapping } from '../constants';
 
 export const BuyerHome = () => {
@@ -11,8 +9,6 @@ export const BuyerHome = () => {
   const [favourites, setFavourites] = useState({}); // To store favourite status per product
   const navigate = useNavigate();
   const [buyerId, setBuyerId] = useState<number | null>(0);
-  // const [user] = useAtom(userAtom);
-  // const buyerId = user?.id;
 
   // Fetch products from the API when the component mounts
   useEffect(() => {
@@ -42,7 +38,6 @@ export const BuyerHome = () => {
     fetchProducts();
   }, []);
 
-
   const fetchBuyerId = async () => {
     try {
       const response = await fetch(`http://localhost:8080/api/buyer/profile`, {
@@ -66,13 +61,16 @@ export const BuyerHome = () => {
   // Function to check if a product is favourited
   const checkFavourited = async (productId: number) => {
     try {
-      const response = await fetch(`/api/buyer/favourites/check?productId=${productId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/buyer/favourites/check?productId=${productId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
         },
-        credentials: 'include'
-      });
+      );
       if (response.ok) {
         const isFavourited = await response.json();
         setFavourites((prevFavourites) => ({
@@ -98,21 +96,27 @@ export const BuyerHome = () => {
       const isFavourited = favourites[productId];
       let response;
       if (isFavourited) {
-        response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/remove`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
+        response = await fetch(
+          `/api/buyer/${buyerId}/favourites/${productId}/remove`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
           },
-          credentials: 'include'
-        });
+        );
       } else {
-        response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/add`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
+        response = await fetch(
+          `/api/buyer/${buyerId}/favourites/${productId}/add`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
           },
-          credentials: 'include'
-        });
+        );
       }
 
       if (response.ok) {
@@ -121,7 +125,9 @@ export const BuyerHome = () => {
           [productId]: !isFavourited, // Toggle favourite status
         }));
         // alert(isFavourited ? 'Removed from favourites' : 'Added to favourites');
-        console.log(isFavourited ? 'Removed from favourites' : 'Added to favourites');
+        console.log(
+          isFavourited ? 'Removed from favourites' : 'Added to favourites',
+        );
       } else {
         const errorMessage = await response.text();
         console.error('Error:', errorMessage);
@@ -141,8 +147,10 @@ export const BuyerHome = () => {
       </section>
 
       <section className="wrapper mt-10">
-      {/* To refactor ProductCard */}
-        <h3 className="text-3xl text-left font-bold text-gray-800">Our Products</h3>
+        {/* To refactor ProductCard */}
+        <h3 className="text-3xl text-left font-bold text-gray-800">
+          Our Products
+        </h3>
         {/* Products Listings */}
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.length > 0 ? (
@@ -154,7 +162,11 @@ export const BuyerHome = () => {
               >
                 {/* Displaying the first image from productPictures if available */}
                 <img
-                  src={product.productPictures.length > 0 ? product.productPictures[0] : 'placeholder-image-url'}
+                  src={
+                    product.productPictures.length > 0
+                      ? product.productPictures[0]
+                      : 'placeholder-image-url'
+                  }
                   alt={product.listingTitle}
                   className="w-full h-40 object-cover rounded"
                 />
@@ -177,8 +189,15 @@ export const BuyerHome = () => {
                   </button>
                 </div>
 
-                <p className="text-gray-500">{foodCategoryMapping[product.foodCategory] || product.foodCategory}</p>
-                <p className="text-gray-500">Condition: {foodConditionMapping[product.foodCondition] || product.foodCondition}</p>
+                <p className="text-gray-500">
+                  {foodCategoryMapping[product.foodCategory] ||
+                    product.foodCategory}
+                </p>
+                <p className="text-gray-500">
+                  Condition:{' '}
+                  {foodConditionMapping[product.foodCondition] ||
+                    product.foodCondition}
+                </p>
               </div>
             ))
           ) : (

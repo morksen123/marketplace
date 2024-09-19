@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
-import { Distributor, foodCategoryMapping, foodConditionMapping } from '@/features/Home/constants';
-import { useAtom } from 'jotai';
-import { userAtom } from '@/store/authAtoms';
+import {
+  Distributor,
+  foodCategoryMapping,
+  foodConditionMapping,
+} from '@/features/Home/constants';
 import { Product } from '@/features/ProductListing/constants';
+import AddIcon from '@mui/icons-material/Add';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const DistributorHome = () => {
-
   const [foodCategories, setFoodCategories] = useState<string[]>([]);
   const [products, setProducts] = useState<Product>([]);
   const [selectedTab, setSelectedTab] = useState('All');
@@ -17,25 +24,25 @@ export const DistributorHome = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-
       try {
-        const [categoryResponse, productsResponse, distributorResponse] = await Promise.all([
-          fetch('/api/products/food-category'),
-          fetch('http://localhost:8080/api/products/distributor/active', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-          }),
-          fetch(`http://localhost:8080/api/distributor/profile`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-          })
-        ]);
+        const [categoryResponse, productsResponse, distributorResponse] =
+          await Promise.all([
+            fetch('/api/products/food-category'),
+            fetch('http://localhost:8080/api/products/distributor/active', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+            }),
+            fetch(`http://localhost:8080/api/distributor/profile`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+            }),
+          ]);
 
         const categoryData = await categoryResponse.json();
         const productsData = await productsResponse.json();
@@ -47,7 +54,6 @@ export const DistributorHome = () => {
         setFoodCategories(['All', ...categoryData]); // Adding "All" to the categories
         setProducts(productsData);
         setDistributor(distributorData);
-
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -62,9 +68,10 @@ export const DistributorHome = () => {
   };
 
   // Filter products based on selected tab
-  const filteredProducts = selectedTab === 'All'
-    ? products
-    : products.filter(product => product.foodCategory === selectedTab);
+  const filteredProducts =
+    selectedTab === 'All'
+      ? products
+      : products.filter((product) => product.foodCategory === selectedTab);
 
   // Dummy data for metrics and orders
   const metrics = [
@@ -90,22 +97,24 @@ export const DistributorHome = () => {
         <div className="relative inline-block">
           <button
             className={`px-4 py-2 rounded-md text-white font-semibold flex items-center ${
-              distributor.isApproved 
-                ? 'button button-green' 
+              distributor.isApproved
+                ? 'button button-green'
                 : 'button button-green opacity-70 filter blur-[0.5px]'
             }`}
-            onClick={() => distributor.isApproved && navigate('/create-product-listing')}
+            onClick={() =>
+              distributor.isApproved && navigate('/create-product-listing')
+            }
             disabled={!distributor.isApproved}
-            style={{ 
+            style={{
               cursor: distributor.isApproved ? 'pointer' : 'not-allowed',
-              transition: 'opacity 0.3s, background-color 0.3s, filter 0.3s'
+              transition: 'opacity 0.3s, background-color 0.3s, filter 0.3s',
             }}
           >
             <AddIcon className="mr-2" />
             New Product Listing
           </button>
           {!distributor.isApproved && (
-            <div 
+            <div
               className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs font-medium rounded-md shadow-lg opacity-0 transition-opacity duration-300"
               style={{
                 whiteSpace: 'nowrap',
@@ -121,7 +130,6 @@ export const DistributorHome = () => {
             opacity: 1 !important;
           }
         `}</style>
-
       </div>
 
       {/* Metrics Section */}
@@ -180,13 +188,27 @@ export const DistributorHome = () => {
                 >
                   {/* Displaying the first image from productPictures if available */}
                   <img
-                    src={product.productPictures.length > 0 ? product.productPictures[0] : 'placeholder-image-url'}
+                    src={
+                      product.productPictures.length > 0
+                        ? product.productPictures[0]
+                        : 'placeholder-image-url'
+                    }
                     alt={product.listingTitle}
                     className="w-full h-40 object-cover rounded"
                   />
-                  <h3 className="text-lg font-bold mt-4">{product.listingTitle}</h3>
-                  <p className="text-gray-500">{foodCategoryMapping[product.foodCategory] || product.foodCategory}</p>
-                  <p className="text-gray-500"><i>{foodConditionMapping[product.foodCondition] || product.foodCondition}</i></p>
+                  <h3 className="text-lg font-bold mt-4">
+                    {product.listingTitle}
+                  </h3>
+                  <p className="text-gray-500">
+                    {foodCategoryMapping[product.foodCategory] ||
+                      product.foodCategory}
+                  </p>
+                  <p className="text-gray-500">
+                    <i>
+                      {foodConditionMapping[product.foodCondition] ||
+                        product.foodCondition}
+                    </i>
+                  </p>
                 </div>
               ))
             ) : (
