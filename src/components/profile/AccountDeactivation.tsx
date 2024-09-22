@@ -25,8 +25,8 @@ const AccountDeactivation: React.FC<AccountDeactivationProps> = ({ userType, onD
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
+    <div className="flex justify-center">
+      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold mb-6 text-center text-red-600">
           Deactivate {userType} Account
         </h1>
@@ -37,9 +37,9 @@ const AccountDeactivation: React.FC<AccountDeactivationProps> = ({ userType, onD
           logging back in.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-            <label className="block text-sm font-medium text-gray-700">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Re-enter your password to confirm deactivation
             </label>
             <Input
@@ -48,15 +48,15 @@ const AccountDeactivation: React.FC<AccountDeactivationProps> = ({ userType, onD
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
+              className="w-full"
             />
           </div>
 
-          <div className="flex items-center mt-4">
+          <div className="flex items-center">
             <Checkbox
               checked={confirmDeactivation}
               onCheckedChange={(checked) => setConfirmDeactivation(checked as boolean)}
-              className="mr-2 border-gray-300 text-red-600 focus:ring-red-500"
+              className="mr-2"
             />
             <label className="text-sm text-gray-700">
               I understand the consequences, deactivate my account.
@@ -66,7 +66,7 @@ const AccountDeactivation: React.FC<AccountDeactivationProps> = ({ userType, onD
           <Button
             type="submit"
             variant="destructive"
-            className="w-full mt-6"
+            className="w-full mt-4"
             disabled={!confirmDeactivation || !password}
           >
             Deactivate Account
