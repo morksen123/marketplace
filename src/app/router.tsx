@@ -158,7 +158,7 @@ const routes: RouteObject[] = [
                 path: '/distributor/profile',
                 lazy: async () => {
                   const { ProfileManagementRoute } = await import(
-                    './routes/distributorAccount/distributor-account'
+                    './routes/distributorProfile/profile-management'
                   );
                   return { Component: ProfileManagementRoute };
                 },
@@ -167,7 +167,7 @@ const routes: RouteObject[] = [
                 path: '/distributor/profile/change-password',
                 lazy: async () => {
                   const { ChangePasswordRoute } = await import(
-                    './routes/distributorAccount/change-password'
+                    './routes/distributorProfile/change-password'
                   );
                   return { Component: ChangePasswordRoute };
                 },
@@ -176,7 +176,7 @@ const routes: RouteObject[] = [
                 path: '/distributor/profile/account-deactivation',
                 lazy: async () => {
                   const { AccountDeactivationRoute } = await import(
-                    './routes/distributorAccount/account-deactivation'
+                    './routes/distributorProfile/account-deactivation'
                   );
                   return { Component: AccountDeactivationRoute };
                 },

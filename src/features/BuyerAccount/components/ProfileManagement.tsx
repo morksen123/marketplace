@@ -1,10 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
 import ProfileManagement from '@/components/profile/ProfileManagement';
-import { LogoutButton } from '@/features/Authentication/components/LogoutButton';
-import { userDetailDefaultValues } from '../constants';
-import { BuyerNavMenu } from '@/features/NavigationMenu/components/BuyerNavMenu';
 
 const BuyerProfileManagement: React.FC = () => {
   const API_BASE_URL = 'http://localhost:8080/api';
