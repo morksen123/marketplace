@@ -128,12 +128,18 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) =
               </button>
               {showAccountDropdown && (
                 <div className="absolute right-0 mt-2 w-36 bg-white rounded-md shadow-lg z-10">
-                  <a
-                    href="/buyer/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-center"
-                  >
-                    My Profile
-                  </a>
+                  {window.location.pathname !== '/buyer/profile' ? (
+                    <a
+                      href="/buyer/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-center"
+                    >
+                      My Profile
+                    </a>
+                  ) : (
+                    <span className="block px-4 py-2 text-sm text-gray-400 text-center cursor-default">
+                      My Profile
+                    </span>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="block w-full text-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
