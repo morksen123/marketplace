@@ -22,7 +22,8 @@ import {
   createProductListingDefaultValues
 } from '@/features/ProductListing/constants';
 import CloseIcon from '@mui/icons-material/Close';
-import AddIcon from '@mui/icons-material/Add';
+import { S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 import { handleSuccessApi } from '@/lib/api-client';
 
 export const EditProductListing = () => {
@@ -35,7 +36,6 @@ export const EditProductListing = () => {
   const [foodConditions, setFoodConditions] = useState<string[]>([]);
   const [deliveryMethods, setDeliveryMethods] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [productPictures, setProductPictures] = useState<File[]>([]);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
@@ -69,7 +69,7 @@ export const EditProductListing = () => {
         setFoodConditions(conditionData);
         setDeliveryMethods(deliveryData);
 
-        const batchesWithDefaultValues = productData.batches?.map((batch) => ({
+        const batchesWithDefaultValues = productData.batches?.map((batch: any) => ({
           ...batch,
           bestBeforeDate: batch.bestBeforeDate ?? '',  // Ensure it's a string, not null
         })) || [{ bestBeforeDate: '', quantity: '', isActive: true }];
@@ -90,6 +90,8 @@ export const EditProductListing = () => {
           bulkPricings: productData.bulkPricings || [{ minQuantity: '', maxQuantity: '', price: '' }],
         });
 
+        setSelectedImages(productData.productPictures || []);
+
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -103,8 +105,7 @@ export const EditProductListing = () => {
   // File selection and removal
   const handleFileSelection = (files) => {
     const newFiles = Array.from(files);
-    setProductPictures((prevPictures) => [...prevPictures, ...newFiles]);
-    setSelectedImages((prevImages) => [...prevImages, ...newFiles]);
+    setSelectedImages((prevImages: File[]) => [...prevImages, ...newFiles]);
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -113,23 +114,54 @@ export const EditProductListing = () => {
     multiple: true,
   });
 
-    console.log(form.formState.errors);
-
-  const handleRemoveCurrentImage = (index: number) => {
-    setProductData((prevData) => {
-      const updatedImages = [...prevData.productPictures];
-      const removedImage = updatedImages.splice(index, 1)[0];
-      setImagesToDelete((prevImages) => [...prevImages, removedImage]);
-      return { ...prevData, productPictures: updatedImages };
-    });
-  };
-
   const handleRemoveSelectedImage = (index: number) => {
     setSelectedImages((prevImages) => {
       const updatedImages = [...prevImages];
-      updatedImages.splice(index, 1);
+      const removedImage = updatedImages.splice(index, 1)[0];
+
+      // If the image is a URL (from existing images), add it to imagesToDelete
+      if (typeof removedImage === 'string') {
+        setImagesToDelete((prev) => [...prev, removedImage]);
+      }
+
       return updatedImages;
     });
+  };
+
+  // AWS S3 configuration
+  const s3Client = new S3Client({
+    region: 'ap-southeast-2',
+    credentials: {
+      accessKeyId: 'AKIAS2VS4QJVRXLKSVXV',
+      secretAccessKey: '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',
+    },
+  });
+
+  // Handle file upload during form submission
+  const uploadFilesToS3 = async (files) => {
+    const uploadedPictureUrls = [];
+
+    for (const file of files) {
+      const fileName = `${Date.now()}-${file.name}`;
+      const upload = new Upload({
+        client: s3Client,
+        params: {
+          Bucket: 'gudfood-photos',
+          Key: fileName,
+          Body: file,
+        },
+      });
+
+      try {
+        const result = await upload.done();
+        const url = `https://${result.Bucket}.s3.amazonaws.com/${result.Key}`;
+        uploadedPictureUrls.push(url);
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      }
+    }
+
+    return uploadedPictureUrls;
   };
 
   // Tag handling
@@ -147,26 +179,29 @@ export const EditProductListing = () => {
     form.setValue('productTags', updatedTags);
   };
 
-  const handleUpdateListing = async (data: any) => {
+  const handleUpdateListing = async (data) => {
     try {
       const updatedProductData = {
         ...data,
         distributorId: null,
-        productPictures: [...productData.productPictures, ...selectedImages],
+        productPictures: selectedImages.filter((image) => typeof image === 'string'), // Keep only URLs for existing images
       };
 
-      // Upload new images if any
-      if (selectedImages.length > 0) {
-        const uploadedUrls = await uploadFilesToS3(selectedImages);
+      // Filter out new file objects (File instances)
+      const filesToUpload = selectedImages.filter((image) => image instanceof File);
+
+      // Upload new files if there are any
+      if (filesToUpload.length > 0) {
+        const uploadedUrls = await uploadFilesToS3(filesToUpload);
         updatedProductData.productPictures = [
-          ...productData.productPictures,
-          ...uploadedUrls,
+          ...updatedProductData.productPictures,  // Keep existing URLs
+          ...uploadedUrls,  // Add newly uploaded URLs
         ];
       }
 
       // Remove deleted images
       updatedProductData.productPictures = updatedProductData.productPictures.filter(
-        (url: string) => !imagesToDelete.includes(url)
+        (url) => !imagesToDelete.includes(url)
       );
 
       const response = await fetch(`/api/products/product/${productId}`, {
@@ -354,36 +389,17 @@ export const EditProductListing = () => {
             </div>
 
             {/* Display Current Images */}
-            {productData.productPictures?.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-left mb-2">Current Images</h4>
-                <div className="flex flex-wrap w-full gap-4">
-                  {productData.productPictures.map((image, index) => (
-                    <div key={index} className="relative w-24 h-24 border rounded overflow-hidden">
-                      <img src={image} alt={`Current ${index + 1}`} className="object-cover w-full h-full" />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCurrentImage(index)}
-                        className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1"
-                      >
-                        <CloseIcon fontSize="small" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Display Selected Images */}
-            {selectedImages.length > 0 && (
+            {selectedImages?.length > 0 && (
               <div className="mt-4">
                 <h4 className="text-left mb-2">Selected Images</h4>
                 <div className="flex flex-wrap w-full gap-4">
                   {selectedImages.map((image, index) => {
-                    const objectUrl = URL.createObjectURL(image);
+                    const isFile = image instanceof File; 
+                    const imageUrl = isFile ? URL.createObjectURL(image) : image;
+
                     return (
                       <div key={index} className="relative w-24 h-24 border rounded overflow-hidden">
-                        <img src={objectUrl} alt={`Selected ${index + 1}`} className="object-cover w-full h-full" />
+                        <img src={imageUrl} alt={`Current ${index + 1}`} className="object-cover w-full h-full" />
                         <button
                           type="button"
                           onClick={() => handleRemoveSelectedImage(index)}
@@ -495,7 +511,7 @@ export const EditProductListing = () => {
               />
             </div>
           </div>
-          
+
           {/* Submit Button */}
           <div className="flex justify-end w-full">
             <Button
