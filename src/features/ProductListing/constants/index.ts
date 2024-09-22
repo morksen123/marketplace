@@ -69,4 +69,5 @@ export interface Product {
   minPurchaseQty: number;
   batches?: Batch[];
   bulkPricings?: BulkPricing[];
+  distributorId: number;
 }

@@ -7,8 +7,9 @@ export const BuyerSideMenu: React.FC = () => {
   const links = [
     { text: "My Profile", path: "/buyer/profile" },
     { text: "My Addresses", path: "/buyer/profile/my-addresses" },
-    { text: "Change Password", path: "/buyer/profile/change-password" },
+    { text: "Chats", path: "/buyer/profile/chats" },
     { text: "Notifications", path: "/buyer/profile/notifications" },
+    { text: "Change Password", path: "/buyer/profile/change-password" },
     { text: "Purchasing Preferences", path: "/buyer/profile/purchasing-preferences" },
     { text: "Favourites", path: "/buyer/profile/favourites" },
     { text: "Account Deactivation", path: "/buyer/profile/account-deactivation" },

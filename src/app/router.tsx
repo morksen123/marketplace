@@ -122,7 +122,15 @@ const routes: RouteObject[] = [
                   return { Component: FavouritesPageRoute };
                 },
               },
-              // Add other buyer-specific routes here
+              {
+                path: '/buyer/profile/chats',
+                lazy: async () => {
+                  const { ChatsRoute } = await import(
+                    './routes/buyerProfile/chats'
+                  );
+                  return { Component: ChatsRoute };
+                },
+              },
             ],
           },
           {
@@ -163,6 +171,15 @@ const routes: RouteObject[] = [
                     './routes/distributorProfile/account-deactivation'
                   );
                   return { Component: AccountDeactivationRoute };
+                },
+              },
+              {
+                path: '/distributor/profile/chats',
+                lazy: async () => {
+                  const { ChatsRoute } = await import(
+                    './routes/distributorProfile/chats'
+                  );
+                  return { Component: ChatsRoute };
                 },
               },
             ],
