@@ -92,7 +92,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) =
                 onChange={handleInputChange}
                 className="w-full py-2 px-4 rounded-lg focus:outline-none border border-gray-300 bg-gray-100 text-black"
               />
-              <button type="submit" className="absolute right-0 top-0 mt-1.5 mr-2">
+              <button type="submit" className="absolute right-0 top-0 mt-1.5 mr-2" aria-label="Search">
                 <SearchIcon className="w-6 h-6 text-gray-600" />
               </button>
             </form> 

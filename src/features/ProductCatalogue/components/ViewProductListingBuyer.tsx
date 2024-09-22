@@ -3,10 +3,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import { Carousel, CarouselItem, CarouselContent, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import { useNavigate, useParams } from 'react-router-dom';
-import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping, Product, Batch } from '@/features/ProductListing/constants';
+import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping, Product, Batch } from '../constants';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import StarIcon from '@mui/icons-material/Star';
 import ChatIcon from '@mui/icons-material/Chat';
+import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 
 interface ViewProductListingBuyerProps {
     isBuyer: boolean;
@@ -17,12 +18,13 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
     const { productId } = useParams();
     const [product, setProduct] = useState<Product | null>(null);
     const [batches, setBatches] = useState<Batch[]>([]);
-    const [isFavourite, setIsFavourite] = useState(false);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [distributor, setDistributor] = useState(null);
     const [distributorId, setDistributorId] = useState<string | null>(null);
     const [buyerId, setBuyerId] = useState<number | null>(0);
+    const { toggleFavourite, favourites } = useFavourites();
+    const isFavourite = favourites?.some(fav => fav.productId === Number(productId));
   
     const formatDisplayDate = (dateString) => {
       if (!dateString) return '';
@@ -45,49 +47,7 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
           setLoading(false);
         }
       };
-  
-      const fetchBuyerId = async () => {
-        try {
-          const response = await fetch(`http://localhost:8080/api/buyer/profile`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setBuyerId(data.buyerId);
-          } else {
-            console.error('Failed to fetch buyer ID');
-          }
-        } catch (error) {
-          console.error('Error fetching buyer ID:', error);
-        }
-      };
-  
-      const checkFavourited = async () => {
-        if (isBuyer) {
-          try {
-            const response = await fetch(`/api/buyer/favourites/check?productId=${productId}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              credentials: 'include',
-            });
-  
-            const result = await response.json();
-            setIsFavourite(result);
-          } catch (error) {
-            console.error('Error checking if product is favourited:', error);
-          }
-        }
-      };
-  
-      fetchBuyerId();
       fetchProduct();
-      checkFavourited();
     }, [productId, isBuyer]);
   
     useEffect(() => {
@@ -111,40 +71,6 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
   
       fetchDistributor();
     }, [distributorId]);
-    const handleToggleFavourite = async () => {
-        if (!isBuyer) return;
-
-        try {
-            let response;
-            if (isFavourite) {
-                response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/remove`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                });
-            } else {
-                response = await fetch(`/api/buyer/${buyerId}/favourites/${productId}/add`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                });
-            }
-
-            if (response.ok) {
-                setIsFavourite(!isFavourite);
-            } else {
-                const errorMessage = await response.text();
-                console.error('Error:', errorMessage);
-                alert(`Failed to update favourites: ${errorMessage}`);
-            }
-        } catch (error) {
-            console.error('Error occurred while updating favourites:', error);
-        }
-    };
     
     console.log(buyerId);
 
@@ -211,7 +137,7 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
                         </div>
 
                         {isBuyer && (
-                            <button onClick={handleToggleFavourite} className="flex items-center">
+                            <button onClick={() => toggleFavourite(Number(productId))} className="flex items-center" aria-label='Toggle Favourite'>
                                 <FavoriteOutlinedIcon style={{ color: isFavourite ? 'red' : 'gray', fontSize: '28px' }} />
                             </button>
                         )}
