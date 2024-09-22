@@ -40,12 +40,11 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
   // can handle text response
   const contentType = response.headers.get("content-type");
-  if (contentType && contentType.indexOf("application/json") !== -1) {
-    return response.json();
-  } else {
+  if (contentType?.includes("text/plain")) {
     const text = await response.text();
     return text as unknown as T;
   }
+  return response.json();
 }
 
 // TODO: allow plain text server response
