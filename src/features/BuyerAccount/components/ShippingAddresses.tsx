@@ -10,9 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { shippingAddressDefaultValues } from '../constants';
-// import { Toast } from '@/components/ui/toast';
-
 
 const ShippingAddressesPage = () => {
   const API_BASE_URL = 'http://localhost:8080/api';
@@ -99,7 +96,7 @@ const ShippingAddressesPage = () => {
       <h1 className="text-2xl font-bold mb-4">Shipping Addresses</h1>
       <section className="wrapper mt-10">
         {addresses.length === 0 ? (
-          <p className="text-center text-gray-500">j
+          <p className="text-center text-gray-500">
             You haven't added any shipping addresses yet.
           </p>
         ) : (

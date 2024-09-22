@@ -7,9 +7,6 @@ import { userDetailDefaultValues } from '../constants';
 import { BuyerNavMenu } from '@/features/NavigationMenu/components/BuyerNavMenu';
 
 const BuyerProfileManagement: React.FC = () => {
-  const navigate = useNavigate();
-  const { logout } = useAuthActions();
-
   const API_BASE_URL = 'http://localhost:8080/api';
 
   // Fetch profile from backend
@@ -63,22 +60,6 @@ const BuyerProfileManagement: React.FC = () => {
     { label: 'Email Address', name: 'email', type: 'email', editable: true },
   ];
 
-  const links = [
-    {text: 'My Addresses', path: '/buyer/profile/my-addresses'},
-    { text: 'Change Password', path: '/buyer/profile/change-password' },
-    { text: 'Notifications', path: '/buyer/profile/notifications' },
-    {
-      text: 'Purchasing Preferences',
-      path: '/buyer/profile/purchasing-preferences',
-    },
-    {text: 'Favourites', path: '/buyer/profile/favourites'},
-    {
-      text: 'Account Deactivation',
-      path: '/buyer/profile/account-deactivation',
-    },
-    {text: 'Logout', path: '/logout'}
-  ];
-
   const greeting = (profile: any) =>
     `Hello, ${profile.firstName} ${profile.lastName}`;
 
@@ -88,7 +69,6 @@ const BuyerProfileManagement: React.FC = () => {
         fetchProfile={fetchProfile}
         updateProfile={updateProfile}
         profileFields={profileFields}
-        links={links}
         greeting={greeting}
         hasProfilePicture={true}
       />

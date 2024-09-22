@@ -1,4 +1,3 @@
-// import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 {/* Icons */}
@@ -8,8 +7,10 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
-import { useState } from 'react';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { useState, useRef, useEffect } from 'react';
 import logo from '../../../assets/gudfood-logo.png';
+import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
 
 interface BuyerNavMenuProps {
   showTabs?: boolean;
@@ -18,7 +19,10 @@ interface BuyerNavMenuProps {
 export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) => {
   const [selectedTab, setSelectedTab] = useState('Home');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const navigate = useNavigate();
+  const { logout } = useAuthActions();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
     'Home',
@@ -30,17 +34,42 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) =
   ];
 
   // Handle input change
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
   // Handle search submission
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/buyer/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
+
+  // Handle account dropdown toggle
+  const toggleAccountDropdown = () => {
+    setShowAccountDropdown(!showAccountDropdown);
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // Handle clicking outside of dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowAccountDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className="bg-white shadow-md w-full">
@@ -84,17 +113,36 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) =
               <SmsOutlinedIcon className="mr-1" /> Chats
             </a>
             <a
-              href="/buyer/profile"
-              className="text-black hover:text-gray-600 flex items-center"
-            >
-              <PersonOutlineOutlinedIcon className="mr-1" /> Account
-            </a>
-            <a
               href="/account"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
             </a>
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={toggleAccountDropdown}
+                className="text-black hover:text-gray-600 flex items-center"
+              >
+                <PersonOutlineOutlinedIcon className="mr-1" /> Account 
+                <ArrowDropDownIcon className={`transition-transform duration-300 ${showAccountDropdown ? 'rotate-180' : ''}`} />
+              </button>
+              {showAccountDropdown && (
+                <div className="absolute right-0 mt-2 w-36 bg-white rounded-md shadow-lg z-10">
+                  <a
+                    href="/buyer/profile"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-center"
+                  >
+                    My Profile
+                  </a>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
             <button className="button button-green">
               <ShoppingCartOutlinedIcon className="mr-2" /> Cart
             </button>

@@ -104,7 +104,7 @@ const FavouritesPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">My Favourites</h1>
+      <h1 className="text-2xl font-bold mb-4">My Favourites</h1>
       {isLoading ? (
         <div className="text-center">
           <p>Loading favourites...</p>
