@@ -1,9 +1,7 @@
-export interface Product {
+export interface CartItem {
   id: string;
   name: string;
   price: number;
-}
-
-export interface CartItem extends Product {
   quantity: number;
+  imageUrl: string;
 }

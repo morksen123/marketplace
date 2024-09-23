@@ -6,6 +6,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import { useCart } from '@/features/Cart/hooks/useCart';
 import {
   Batch,
   deliveryMethodMapping,
@@ -17,7 +18,7 @@ import {
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 interface ViewProductListingBuyerProps {
   isBuyer: boolean;
@@ -26,7 +27,7 @@ interface ViewProductListingBuyerProps {
 export const ViewProductListingBuyer: React.FC<
   ViewProductListingBuyerProps
 > = ({ isBuyer }) => {
-  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const { productId } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [batches, setBatches] = useState<Batch[]>([]);
@@ -35,9 +36,13 @@ export const ViewProductListingBuyer: React.FC<
   const [quantity, setQuantity] = useState(1);
   const buyerId = 1; // To change
 
-  const formatDisplayDate = (dateString) => {
+  const formatDisplayDate = (dateString: string) => {
     if (!dateString) return '';
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    };
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB', options);
   };
@@ -123,13 +128,8 @@ export const ViewProductListingBuyer: React.FC<
     }
   };
 
-  const handleAddToCart = async () => {
-    // Implement add to cart functionality
-    alert(
-      `Added ${quantity} ${
-        unitMapping[product?.foodCategory] || 'unit(s)'
-      } to cart`,
-    );
+  const handleAddToCart = (product: Product, quantity: number) => {
+    addToCart(product, quantity);
   };
 
   if (loading) {
@@ -145,7 +145,7 @@ export const ViewProductListingBuyer: React.FC<
       {/* Carousel */}
       <Carousel className="w-full max-w-10xl mx-auto mb-6">
         <CarouselContent>
-          {product.productPictures?.map((pictureUrl, index) => {
+          {product.productPictures?.map((_, index) => {
             if (index % 3 === 0) {
               return (
                 <CarouselItem key={index}>
@@ -289,7 +289,7 @@ export const ViewProductListingBuyer: React.FC<
             />
             <button
               className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center"
-              onClick={handleAddToCart}
+              onClick={() => handleAddToCart(product, quantity)}
             >
               <AddShoppingCartIcon className="mr-2" /> Add to Cart
             </button>
