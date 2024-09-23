@@ -1,7 +1,9 @@
-import React from 'react';
+import {
+  foodCategoryMapping,
+  foodConditionMapping,
+} from '@/features/ProductListing/constants';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
-import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping, Product, Batch } from '@/features/ProductListing/constants';
-
+import React from 'react';
 
 interface ProductCardProps {
   product: {
@@ -16,15 +18,11 @@ interface ProductCardProps {
   onToggleFavourite: (productId: number) => void;
 }
 
-const capitalizeFirstLetter = (string: string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-};
-
-const ProductCard: React.FC<ProductCardProps> = ({ 
-  product, 
-  isFavourite, 
-  onProductClick, 
-  onToggleFavourite 
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  isFavourite,
+  onProductClick,
+  onToggleFavourite,
 }) => {
   return (
     <div
@@ -32,7 +30,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
       onClick={() => onProductClick(product.productId)}
     >
       <img
-        src={product.productPictures.length > 0 ? product.productPictures[0] : 'placeholder-image-url'}
+        src={
+          product.productPictures.length > 0
+            ? product.productPictures[0]
+            : 'placeholder-image-url'
+        }
         alt={product.listingTitle}
         className="w-full h-40 object-cover rounded"
       />
@@ -55,8 +57,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </button>
       </div>
 
-      <p className="text-gray-500 ">{foodCategoryMapping[product.foodCategory]}</p>
-      <p className="text-gray-500">Condition: {foodConditionMapping[product.foodCondition]}</p>
+      <p className="text-gray-500 ">
+        {foodCategoryMapping[product.foodCategory]}
+      </p>
+      <p className="text-gray-500">
+        Condition: {foodConditionMapping[product.foodCondition]}
+      </p>
     </div>
   );
 };
