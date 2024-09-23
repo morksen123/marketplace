@@ -1,21 +1,21 @@
-// import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-{/* Icons */}
+import logo from '@/assets/gudfood-logo.png';
+import { Button } from '@/components/ui/button';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
-import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import { useState } from 'react';
-import logo from '../../../assets/gudfood-logo.png';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface BuyerNavMenuProps {
   showTabs?: boolean;
 }
 
-export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) => {
+export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
+  showTabs = true,
+}) => {
   const [selectedTab, setSelectedTab] = useState('Home');
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
@@ -30,12 +30,12 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) =
   ];
 
   // Handle input change
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
   // Handle search submission
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/buyer/search?q=${encodeURIComponent(searchQuery.trim())}`);
@@ -63,41 +63,44 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({ showTabs = true }) =
                 onChange={handleInputChange}
                 className="w-full py-2 px-4 rounded-lg focus:outline-none border border-gray-300 bg-gray-100 text-black"
               />
-              <button type="submit" className="absolute right-0 top-0 mt-1.5 mr-2">
+              <button
+                type="submit"
+                className="absolute right-0 top-0 mt-1.5 mr-2"
+              >
                 <SearchIcon className="w-6 h-6 text-gray-600" />
               </button>
-            </form> 
+            </form>
           </div>
 
           {/* Navigation Links with Icons */}
           <div className="flex items-center space-x-12 pr-6">
-            <a
-              href="/faq"
+            <Link
+              to="/faq"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <SupportAgentOutlinedIcon className="mr-1" /> FAQ
-            </a>
-            <a
-              href="/chats"
+            </Link>
+            <Link
+              to="/chats"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <SmsOutlinedIcon className="mr-1" /> Chats
-            </a>
-            <a
-              href="/buyer/profile"
+            </Link>
+            <Link
+              to="/buyer/profile"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <PersonOutlineOutlinedIcon className="mr-1" /> Account
-            </a>
-            <a
-              href="/account"
+            </Link>
+            <Link
+              to="/account"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
-            </a>
-            <button className="button button-green">
+            </Link>
+            <Button variant="secondary" onClick={() => navigate('/buyer/cart')}>
               <ShoppingCartOutlinedIcon className="mr-2" /> Cart
-            </button>
+            </Button>
           </div>
         </div>
       </div>
