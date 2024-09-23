@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -9,17 +8,23 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  createProductListingDefaultValues,
+  deliveryMethodMapping,
+  foodCategoryMapping,
+  foodConditionMapping,
+  unitMapping,
+} from '@/features/ProductListing/constants';
+import { CreateProductListingSchema } from '@/features/ProductListing/schema';
+import { handleErrorApi, handleSuccessApi } from '@/lib/api-client';
+import { uploadMultipleFilesToS3 } from '@/lib/aws';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, useWatch } from 'react-hook-form';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
-import { CreateProductListingSchema } from '@/features/ProductListing/schema';
-import { useNavigate } from 'react-router-dom';
-import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping, unitMapping, createProductListingDefaultValues } from '@/features/ProductListing/constants';
-import { S3Client } from "@aws-sdk/client-s3";
-import { Upload } from "@aws-sdk/lib-storage";
+import { useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { handleErrorApi, handleSuccessApi } from '@/lib/api-client';
+import { useForm, useWatch } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
 export const CreateProductListing = () => {
   const navigate = useNavigate();
@@ -29,27 +34,28 @@ export const CreateProductListing = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [productPictures, setProductPictures] = useState<[]>([]);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
 
   const form = useForm({
     resolver: zodResolver(CreateProductListingSchema),
-    defaultValues: createProductListingDefaultValues
+    defaultValues: createProductListingDefaultValues,
   });
 
   const deliveryMethod = useWatch({
     control: form.control,
-    name: "deliveryMethod",
+    name: 'deliveryMethod',
   });
 
   // Fetch food categories, conditions, and delivery methods from backend
   useEffect(() => {
     const fetchEnums = async () => {
       try {
-        const [categoryResponse, conditionResponse, deliveryResponse] = await Promise.all([
-          fetch('/api/products/food-category'),
-          fetch('/api/products/food-condition'),
-          fetch('/api/products/delivery-method'),
-        ]);
+        const [categoryResponse, conditionResponse, deliveryResponse] =
+          await Promise.all([
+            fetch('/api/products/food-category'),
+            fetch('/api/products/food-condition'),
+            fetch('/api/products/delivery-method'),
+          ]);
 
         const categoryData = await categoryResponse.json();
         const conditionData = await conditionResponse.json();
@@ -58,7 +64,6 @@ export const CreateProductListing = () => {
         setFoodCategories(categoryData);
         setFoodConditions(conditionData);
         setDeliveryMethods(deliveryData);
-
       } catch (error) {
         console.error('Error fetching enum values:', error);
       }
@@ -76,7 +81,7 @@ export const CreateProductListing = () => {
     const month = String(today.getMonth() + 1).padStart(2, '0'); // Add leading 0 if necessary
     const day = String(today.getDate()).padStart(2, '0'); // Add leading 0 if necessary
     return `${year}-${month}-${day}`;
-};
+  };
 
   // Handle adding a tag to productTags
   const handleAddTag = (event) => {
@@ -85,7 +90,7 @@ export const CreateProductListing = () => {
     if (newTag && !tags.includes(newTag)) {
       form.setValue('productTags', [...tags, newTag]); // Update the form value
       event.target.value = ''; // Clear the input field after adding the tag
-      setInputValue("");
+      setInputValue('');
     }
   };
 
@@ -95,24 +100,18 @@ export const CreateProductListing = () => {
     form.setValue('productTags', updatedTags);
   };
 
-  // AWS S3 configuration
-  const s3Client = new S3Client({
-    region: 'ap-southeast-2',
-    credentials: {
-      accessKeyId: 'AKIAS2VS4QJVRXLKSVXV',
-      secretAccessKey: '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',
-    },
-  });
-
   const handleFileSelection = (files: FileList) => {
     const newFiles = Array.from(files);
-    setProductPictures((prevPictures: File[]) => [...prevPictures, ...newFiles]);
+    setProductPictures((prevPictures: File[]) => [
+      ...prevPictures,
+      ...newFiles,
+    ]);
     setSelectedImages((prevImages: File[]) => [...prevImages, ...newFiles]);
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
-      'image/*': []
+      'image/*': [],
     },
     onDrop: handleFileSelection,
     multiple: true, // Allow multiple file selection
@@ -121,51 +120,25 @@ export const CreateProductListing = () => {
   const handleRemoveImage = (index: number) => {
     const updatedImages = [...selectedImages];
     const updatedPictures = [...productPictures];
-  
+
     updatedImages.splice(index, 1);
     updatedPictures.splice(index, 1);
-  
+
     setSelectedImages(updatedImages);
     setProductPictures(updatedPictures);
-  };
-
-  // Handle file upload during form submission
-  const uploadFilesToS3 = async (files) => {
-    const uploadedPictureUrls = [];
-
-    for (const file of files) {
-      const fileName = `${Date.now()}-${file.name}`;
-      const upload = new Upload({
-        client: s3Client,
-        params: {
-          Bucket: 'gudfood-photos',
-          Key: fileName,
-          Body: file,
-        },
-      });
-
-      try {
-        const result = await upload.done();
-        const url = `https://${result.Bucket}.s3.amazonaws.com/${result.Key}`;
-        uploadedPictureUrls.push(url);
-      } catch (error) {
-        console.error('Error uploading file:', error);
-      }
-    }
-
-    return uploadedPictureUrls;
   };
 
   // Handle form submission and upload pictures
   const handleCreateListing = async (data) => {
     try {
-
       if (data.units) {
-        data.description = `This product is being sold in ${data.units.toLowerCase()} - ${data.description}`;
+        data.description = `This product is being sold in ${data.units.toLowerCase()} - ${
+          data.description
+        }`;
       }
 
       // First, upload the files to S3
-      const uploadedUrls = await uploadFilesToS3(productPictures);
+      const uploadedUrls = await uploadMultipleFilesToS3(productPictures);
       data.productPictures = uploadedUrls; // Assign uploaded picture URLs to form data
 
       const response = await fetch('/api/products/', {
@@ -201,10 +174,15 @@ export const CreateProductListing = () => {
 
   return (
     <div className="wrapper">
-      <h1 className="text-2xl font-bold mb-6 text-left mt-6">Create New Product Listing</h1>
+      <h1 className="text-2xl font-bold mb-6 text-left mt-6">
+        Create New Product Listing
+      </h1>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleCreateListing)} className="space-y-6 w-full">
+        <form
+          onSubmit={form.handleSubmit(handleCreateListing)}
+          className="space-y-6 w-full"
+        >
           {/* Listing Title */}
           <FormField
             control={form.control}
@@ -213,7 +191,11 @@ export const CreateProductListing = () => {
               <FormItem className="block text-left">
                 <FormLabel>Listing Title</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Enter the product title" className="w-full" />
+                  <Input
+                    {...field}
+                    placeholder="Enter the product title"
+                    className="w-full"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -257,10 +239,10 @@ export const CreateProductListing = () => {
               <FormItem className="block text-left">
                 <FormLabel>Food Condition</FormLabel>
                 <FormControl>
-                  <select {...field}
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="">Select the condition of the product</option>
+                  <select {...field} className="w-full p-2 border rounded">
+                    <option value="">
+                      Select the condition of the product
+                    </option>
                     {foodConditions.map((condition) => (
                       <option key={condition} value={condition}>
                         {foodConditionMapping[condition] || condition}
@@ -273,7 +255,8 @@ export const CreateProductListing = () => {
             )}
           />
 
-          {(selectedCategory === 'DAIRY_AND_EGGS' || selectedCategory === 'DRY_GOODS_AND_STAPLES') && (
+          {(selectedCategory === 'DAIRY_AND_EGGS' ||
+            selectedCategory === 'DRY_GOODS_AND_STAPLES') && (
             <FormField
               control={form.control}
               name="units"
@@ -291,7 +274,6 @@ export const CreateProductListing = () => {
                 </FormItem>
               )}
             />
-
           )}
 
           {/* Product Image Upload Section */}
@@ -303,14 +285,20 @@ export const CreateProductListing = () => {
 
             <div
               {...getRootProps()}
-              className={`border-2 border-dashed p-6 rounded-lg cursor-pointer ${isDragActive ? 'border-green-500' : 'border-gray-300'}`}
+              className={`border-2 border-dashed p-6 rounded-lg cursor-pointer ${
+                isDragActive ? 'border-green-500' : 'border-gray-300'
+              }`}
             >
               <input {...getInputProps()} />
 
               {isDragActive ? (
-                <p className="text-center text-green-500">Drop the files here...</p>
+                <p className="text-center text-green-500">
+                  Drop the files here...
+                </p>
               ) : (
-                <p className="text-center text-gray-500">Drag and drop some files here, or click to select files</p>
+                <p className="text-center text-gray-500">
+                  Drag and drop some files here, or click to select files
+                </p>
               )}
             </div>
 
@@ -322,8 +310,15 @@ export const CreateProductListing = () => {
                   {selectedImages.map((image, index) => {
                     const objectUrl = URL.createObjectURL(image); // Create a local URL for image preview
                     return (
-                      <div key={index} className="relative w-24 h-24 border rounded overflow-hidden">
-                        <img src={objectUrl} alt={`Selected ${index + 1}`} className="object-cover w-full h-full" />
+                      <div
+                        key={index}
+                        className="relative w-24 h-24 border rounded overflow-hidden"
+                      >
+                        <img
+                          src={objectUrl}
+                          alt={`Selected ${index + 1}`}
+                          className="object-cover w-full h-full"
+                        />
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(index)}
@@ -339,7 +334,6 @@ export const CreateProductListing = () => {
             )}
           </div>
 
-
           {/* Description */}
           <FormField
             control={form.control}
@@ -348,7 +342,11 @@ export const CreateProductListing = () => {
               <FormItem className="block text-left">
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <textarea {...field} className="w-full p-2 border rounded" rows={4} />
+                  <textarea
+                    {...field}
+                    className="w-full p-2 border rounded"
+                    rows={4}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -361,7 +359,9 @@ export const CreateProductListing = () => {
             name="productTags"
             render={() => (
               <FormItem>
-                <FormLabel className="block text-left mb-2">Add Product Tags</FormLabel>
+                <FormLabel className="block text-left mb-2">
+                  Add Product Tags
+                </FormLabel>
 
                 {/* Tags input section */}
                 <div className="w-full p-2 border rounded flex flex-wrap items-center gap-2">
@@ -384,7 +384,7 @@ export const CreateProductListing = () => {
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleAddTag(e)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddTag(e)}
                     placeholder="Type and press Enter..."
                     className="border-none focus:outline-none w-40"
                   />
@@ -468,7 +468,10 @@ export const CreateProductListing = () => {
                 name="minPurchaseQty"
                 render={({ field }) => (
                   <FormItem className="block text-left flex-1">
-                    <FormLabel>Minimum Purchase Quantity ({unitMapping[selectedCategory] || 'unit'})</FormLabel>
+                    <FormLabel>
+                      Minimum Purchase Quantity (
+                      {unitMapping[selectedCategory] || 'unit'})
+                    </FormLabel>
 
                     <FormControl>
                       <Input
@@ -490,7 +493,9 @@ export const CreateProductListing = () => {
                 name="price"
                 render={({ field }) => (
                   <FormItem className="block text-left flex-1">
-                    <FormLabel>Price (per {unitMapping[selectedCategory] || 'unit'})</FormLabel>
+                    <FormLabel>
+                      Price (per {unitMapping[selectedCategory] || 'unit'})
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -518,7 +523,10 @@ export const CreateProductListing = () => {
                   name={`bulkPricings.${index}.minQuantity`}
                   render={({ field }) => (
                     <FormItem className="flex-1 block text-left">
-                      <FormLabel>Minimum Quantity ({unitMapping[selectedCategory] || 'unit'})</FormLabel>
+                      <FormLabel>
+                        Minimum Quantity (
+                        {unitMapping[selectedCategory] || 'unit'})
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -530,25 +538,44 @@ export const CreateProductListing = () => {
                             const newValue = e.target.valueAsNumber;
                             field.onChange(newValue);
                             if (index > 0) {
-                              const prevMaxQuantity = Number(form.getValues(`bulkPricings.${index - 1}.maxQuantity`));
+                              const prevMaxQuantity = Number(
+                                form.getValues(
+                                  `bulkPricings.${index - 1}.maxQuantity`,
+                                ),
+                              );
                               if (newValue <= prevMaxQuantity) {
-                                form.setError(`bulkPricings.${index}.minQuantity`, {
-                                  type: 'manual',
-                                  message: `Must be greater than previous max quantity (${prevMaxQuantity})`
-                                });
+                                form.setError(
+                                  `bulkPricings.${index}.minQuantity`,
+                                  {
+                                    type: 'manual',
+                                    message: `Must be greater than previous max quantity (${prevMaxQuantity})`,
+                                  },
+                                );
                               } else {
-                                form.clearErrors(`bulkPricings.${index}.minQuantity`);
+                                form.clearErrors(
+                                  `bulkPricings.${index}.minQuantity`,
+                                );
                               }
                             }
                             // Check if max quantity is more than min quantity
-                            const maxQuantity = Number(form.getValues(`bulkPricings.${index}.maxQuantity`));
+                            const maxQuantity = Number(
+                              form.getValues(
+                                `bulkPricings.${index}.maxQuantity`,
+                              ),
+                            );
                             if (maxQuantity <= newValue) {
-                              form.setError(`bulkPricings.${index}.maxQuantity`, {
-                                type: 'manual',
-                                message: 'Max quantity must be greater than min quantity'
-                              });
+                              form.setError(
+                                `bulkPricings.${index}.maxQuantity`,
+                                {
+                                  type: 'manual',
+                                  message:
+                                    'Max quantity must be greater than min quantity',
+                                },
+                              );
                             } else {
-                              form.clearErrors(`bulkPricings.${index}.maxQuantity`);
+                              form.clearErrors(
+                                `bulkPricings.${index}.maxQuantity`,
+                              );
                             }
                           }}
                           className="h-10"
@@ -564,7 +591,10 @@ export const CreateProductListing = () => {
                   name={`bulkPricings.${index}.maxQuantity`}
                   render={({ field }) => (
                     <FormItem className="flex-1 block text-left">
-                      <FormLabel>Maximum Quantity ({unitMapping[selectedCategory] || 'unit'})</FormLabel>
+                      <FormLabel>
+                        Maximum Quantity (
+                        {unitMapping[selectedCategory] || 'unit'})
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -575,26 +605,48 @@ export const CreateProductListing = () => {
                           onChange={(e) => {
                             const newValue = e.target.valueAsNumber;
                             field.onChange(newValue);
-                            if (index < form.getValues('bulkPricings').length - 1) {
-                              const nextMinQuantity = Number(form.getValues(`bulkPricings.${index + 1}.minQuantity`));
+                            if (
+                              index <
+                              form.getValues('bulkPricings').length - 1
+                            ) {
+                              const nextMinQuantity = Number(
+                                form.getValues(
+                                  `bulkPricings.${index + 1}.minQuantity`,
+                                ),
+                              );
                               if (newValue >= nextMinQuantity) {
-                                form.setError(`bulkPricings.${index}.maxQuantity`, {
-                                  type: 'manual',
-                                  message: `Must be less than next min quantity (${nextMinQuantity})`
-                                });
+                                form.setError(
+                                  `bulkPricings.${index}.maxQuantity`,
+                                  {
+                                    type: 'manual',
+                                    message: `Must be less than next min quantity (${nextMinQuantity})`,
+                                  },
+                                );
                               } else {
-                                form.clearErrors(`bulkPricings.${index}.maxQuantity`);
+                                form.clearErrors(
+                                  `bulkPricings.${index}.maxQuantity`,
+                                );
                               }
                             }
                             // Check if max quantity is more than min quantity
-                            const minQuantity = Number(form.getValues(`bulkPricings.${index}.minQuantity`));
+                            const minQuantity = Number(
+                              form.getValues(
+                                `bulkPricings.${index}.minQuantity`,
+                              ),
+                            );
                             if (newValue <= minQuantity) {
-                              form.setError(`bulkPricings.${index}.maxQuantity`, {
-                                type: 'manual',
-                                message: 'Max quantity must be greater than min quantity'
-                              });
+                              form.setError(
+                                `bulkPricings.${index}.maxQuantity`,
+                                {
+                                  type: 'manual',
+                                  message:
+                                    'Max quantity must be greater than min quantity',
+                                },
+                              );
                             } else {
-                              form.clearErrors(`bulkPricings.${index}.maxQuantity`);
+                              form.clearErrors(
+                                `bulkPricings.${index}.maxQuantity`,
+                              );
                             }
                           }}
                           className="h-10"
@@ -610,7 +662,9 @@ export const CreateProductListing = () => {
                   name={`bulkPricings.${index}.price`}
                   render={({ field }) => (
                     <FormItem className="flex-1 block text-left">
-                      <FormLabel>Price (per {unitMapping[selectedCategory] || 'unit'})</FormLabel>
+                      <FormLabel>
+                        Price (per {unitMapping[selectedCategory] || 'unit'})
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -622,11 +676,15 @@ export const CreateProductListing = () => {
                             const newValue = e.target.valueAsNumber;
                             field.onChange(newValue);
                             if (index > 0) {
-                              const prevPrice = Number(form.getValues(`bulkPricings.${index - 1}.price`));
+                              const prevPrice = Number(
+                                form.getValues(
+                                  `bulkPricings.${index - 1}.price`,
+                                ),
+                              );
                               if (newValue >= prevPrice) {
                                 form.setError(`bulkPricings.${index}.price`, {
                                   type: 'manual',
-                                  message: `Must be less than previous price (${prevPrice})`
+                                  message: `Must be less than previous price (${prevPrice})`,
                                 });
                               } else {
                                 form.clearErrors(`bulkPricings.${index}.price`);
@@ -643,8 +701,8 @@ export const CreateProductListing = () => {
 
                 {/* Remove Button */}
                 <Button
-                  type="button"
-                  className="button button-red self-end"
+                  variant="destructive"
+                  className="self-end"
                   onClick={() => {
                     const bulkPricings = form.getValues('bulkPricings');
                     bulkPricings.splice(index, 1);
@@ -656,7 +714,7 @@ export const CreateProductListing = () => {
               </div>
             </div>
           ))}
-          
+
           {/* Add Bulk Pricing Button */}
           <div className="flex justify-end w-full">
             <Button
@@ -680,16 +738,22 @@ export const CreateProductListing = () => {
             <h2 className="text-xl font-bold mb-4 text-left">Batch Details</h2>
             {form.watch('batches', []).map((batch, index) => (
               <div key={index}>
-                <div className="flex space-x-4 items-start"> {/* Use items-start to align inputs to the top */}
+                <div className="flex space-x-4 items-start">
+                  {' '}
+                  {/* Use items-start to align inputs to the top */}
                   {/* Batch Quantity */}
                   <FormField
                     control={form.control}
                     name={`batches.${index}.quantity`}
                     render={({ field }) => (
                       <FormItem className="flex-1 block text-left">
-                        <FormLabel>Batch Quantity {selectedCategory === 'CANNED_GOODS'
-                          ? '(total number of cans)'
-                          : `(total ${unitMapping[selectedCategory] || 'units'})`}
+                        <FormLabel>
+                          Batch Quantity{' '}
+                          {selectedCategory === 'CANNED_GOODS'
+                            ? '(total number of cans)'
+                            : `(total ${
+                                unitMapping[selectedCategory] || 'units'
+                              })`}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -698,7 +762,9 @@ export const CreateProductListing = () => {
                             step="1"
                             placeholder="Quantity"
                             value={field.value ?? ''}
-                            onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                            onChange={(e) =>
+                              field.onChange(e.target.valueAsNumber)
+                            }
                             className="h-10"
                           />
                         </FormControl>
@@ -706,7 +772,6 @@ export const CreateProductListing = () => {
                       </FormItem>
                     )}
                   />
-
                   {/* Best Before Date */}
                   <FormField
                     control={form.control}
@@ -715,17 +780,21 @@ export const CreateProductListing = () => {
                       <FormItem className="block text-left flex-1">
                         <FormLabel>Best Before Date</FormLabel>
                         <FormControl>
-                          <Input {...field} type="date" className="h-10" min={getTodayDate()}/>
+                          <Input
+                            {...field}
+                            type="date"
+                            className="h-10"
+                            min={getTodayDate()}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   {/* Remove Button */}
                   <Button
-                    type="button"
-                    className="button button-red self-end"
+                    variant="destructive"
+                    className="self-end"
                     onClick={() => {
                       const batches = form.getValues('batches');
                       batches.splice(index, 1);
@@ -758,8 +827,8 @@ export const CreateProductListing = () => {
           {/* Submit Button */}
           <div className="flex justify-end w-full">
             <Button
+              variant="secondary"
               type="submit"
-              className="button button-green"
               disabled={isFormSubmitting}
             >
               {isFormSubmitting ? 'Processing...' : 'Create Product'}

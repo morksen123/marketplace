@@ -10,18 +10,17 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import { uploadFileToS3 } from '@/lib/aws';
 import { zodResolver } from '@hookform/resolvers/zod';
+import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
+import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import logo from '../../../assets/gudfood-logo-small.png';
 import { distributorSignUpFormDefaultValues } from '../constants';
 import { useAuthActions } from '../hooks/useAuthActions';
 import { DistributorSignUpSchema } from '../schema';
 import { DistributorRegisterForm } from '../types/auth';
-import logo from '../../../assets/gudfood-logo-small.png';
-import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
-import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 
 export const DistributorSignUpForm = () => {
   const { registerDistributor } = useAuthActions();
@@ -72,7 +71,7 @@ export const DistributorSignUpForm = () => {
       'contactNumber',
       'username',
       'password',
-      'confirmPassword'
+      'confirmPassword',
     ];
 
     form.trigger(fieldsToValidate).then((isValid) => {
@@ -97,7 +96,7 @@ export const DistributorSignUpForm = () => {
             Join as a Distributor
           </CardTitle>
           <p className="text-center mt-2">
-          Create an Account to Sell Smart, Save More, and Reduce Waste!
+            Create an Account to Sell Smart, Save More, and Reduce Waste!
           </p>
         </CardHeader>
         <CardContent>
@@ -116,7 +115,10 @@ export const DistributorSignUpForm = () => {
                         <FormItem className="text-left block">
                           <FormLabel>Company Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter company name" {...field} />
+                            <Input
+                              placeholder="Enter company name"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -131,7 +133,10 @@ export const DistributorSignUpForm = () => {
                             Business Registration Number (UEN/ROC)
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter your business registration number" {...field} />
+                            <Input
+                              placeholder="Enter your business registration number"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -146,7 +151,10 @@ export const DistributorSignUpForm = () => {
                         <FormItem className="text-left block">
                           <FormLabel>Company Address</FormLabel>
                           <FormControl>
-                            <Input placeholder="123 Business St, City, 621338" {...field} />
+                            <Input
+                              placeholder="123 Business St, City, 621338"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -161,7 +169,10 @@ export const DistributorSignUpForm = () => {
                         <FormItem className="text-left block">
                           <FormLabel>Primary Contact Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter contact name" {...field} />
+                            <Input
+                              placeholder="Enter contact name"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -174,7 +185,11 @@ export const DistributorSignUpForm = () => {
                         <FormItem className="text-left block">
                           <FormLabel>Primary Contact Email Address</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="contact@example.com" {...field} />
+                            <Input
+                              type="email"
+                              placeholder="contact@example.com"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -182,14 +197,18 @@ export const DistributorSignUpForm = () => {
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
+                    <FormField
                       control={form.control}
                       name="contactNumber"
                       render={({ field }) => (
                         <FormItem className="text-left block">
                           <FormLabel>Primary Contact Phone Number</FormLabel>
                           <FormControl>
-                            <Input type="contactNumber" placeholder="91234567" {...field} />
+                            <Input
+                              type="contactNumber"
+                              placeholder="91234567"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -202,13 +221,17 @@ export const DistributorSignUpForm = () => {
                         <FormItem className="text-left block">
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input type="username" placeholder="Enter username" {...field} />
+                            <Input
+                              type="username"
+                              placeholder="Enter username"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    </div>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -217,7 +240,11 @@ export const DistributorSignUpForm = () => {
                         <FormItem className="text-left block">
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Enter password" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Enter password"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -230,7 +257,11 @@ export const DistributorSignUpForm = () => {
                         <FormItem className="text-left block">
                           <FormLabel>Confirm Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Confirm password" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Confirm password"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -242,7 +273,9 @@ export const DistributorSignUpForm = () => {
 
               {currentStep === 2 && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-center">Document Upload</h3>
+                  <h3 className="text-lg font-semibold text-center">
+                    Document Upload
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -312,9 +345,11 @@ export const DistributorSignUpForm = () => {
                     variant="secondary"
                     type="submit"
                     disabled={isFormSubmitting}
-                    className="w-1/4 ml-auto button button-green"
+                    className="w-1/4 ml-auto"
                   >
-                    {isFormSubmitting ? 'Processing...' : 'Register as Distributor'}
+                    {isFormSubmitting
+                      ? 'Processing...'
+                      : 'Register as Distributor'}
                   </Button>
                 )}
               </div>
