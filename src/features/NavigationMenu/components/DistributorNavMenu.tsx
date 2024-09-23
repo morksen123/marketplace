@@ -2,17 +2,26 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirectoryOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+import logo from '../../../assets/gudfood-logo.png';
+import { useNavigate } from 'react-router-dom';
 
 export const DistributorNavMenu = () => {
+  const navigate = useNavigate();
+
+  const handleStoreClick = () => {
+    navigate('/distributor/home');
+  };
+
   return (
     <nav className="bg-white shadow-md w-full">
       <div className="w-full p-4">
         <div className="flex justify-between items-center">
           {/* Logo Section */}
-          <div className="text-black text-2xl font-bold pl-6">
-            {' '}
-            {/* Added left padding */}
-            <a href="/">GudFood</a>
+          <div className="pl-6">
+            <a href="/distributor/home">
+              <img src={logo} alt="GudFood Logo" className="h-12" />
+            </a>
           </div>
 
           {/* Navigation Links with Icons */}
@@ -30,12 +39,21 @@ export const DistributorNavMenu = () => {
               <SmsOutlinedIcon className="mr-1" /> Chats
             </a>
             <a
-              href="/account"
+              href="/distributor/profile"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <PersonOutlineOutlinedIcon className="mr-1" /> Account
             </a>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center">
+            <a
+              href="/account"
+              className="text-black hover:text-gray-600 flex items-center"
+            >
+              <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
+            </a>
+            <button
+              className="button button-green"
+              onClick={handleStoreClick}
+            >
               <StoreMallDirectoryOutlinedIcon className="mr-2" /> Store
             </button>
           </div>

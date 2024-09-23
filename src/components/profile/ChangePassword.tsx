@@ -1,22 +1,37 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
-const ChangePassword: React.FC = () => {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+interface ChangePasswordProps {
+  onSubmit: (currentPassword: string, newPassword: string) => void;
+  title?: string;
+}
+
+const ChangePassword: React.FC<ChangePasswordProps> = ({
+  onSubmit,
+  title = 'Change Password',
+}) => {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Add logic to handle password change
-    console.log("Password changed");
+    if (newPassword === confirmNewPassword) {
+      onSubmit(currentPassword, newPassword);
+    } else {
+      setPasswordMismatch(true);
+      console.log('New passwords do not match');
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center">Change Password</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">{title}</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -57,6 +72,14 @@ const ChangePassword: React.FC = () => {
               required
             />
           </div>
+
+          {passwordMismatch && (
+            <Alert variant="destructive" className="">
+              <AlertDescription>
+                New passwords do not match. Please try again.
+              </AlertDescription>
+            </Alert>
+          )}
 
           <Button type="submit" variant="secondary" className="w-full">
             Change Password

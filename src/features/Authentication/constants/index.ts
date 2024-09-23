@@ -1,9 +1,11 @@
+import { DistributorRegisterForm } from '../types/auth';
+
 export const signInFormDefaultValues = {
   email: '',
   password: '',
 };
 
-export const signUpFormDefaultValues = {
+export const buyerSignUpFormDefaultValues = {
   email: '',
   firstName: '',
   lastName: '',
@@ -19,4 +21,18 @@ export const forgotPasswordDefaultValues = {
 export const resetPasswordDefaultValues = {
   password: '',
   confirmPassword: '',
+};
+
+export const distributorSignUpFormDefaultValues: DistributorRegisterForm = {
+  distributorName: '',
+  bizProfile: '',
+  proofOfAddress: '',
+  address: '',
+  uen: '',
+  username: '',
+  password: '',
+  confirmPassword: '',
+  contactName: '',
+  email: '',
+  contactNumber: '',
 };

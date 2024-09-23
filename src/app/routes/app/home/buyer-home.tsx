@@ -4,7 +4,7 @@ import { BuyerNavMenu } from '@/features/NavigationMenu/components/BuyerNavMenu'
 export const BuyerHomeRoute = () => {
   return (
     <>
-      <BuyerNavMenu />
+      <BuyerNavMenu showTabs={true} />
       <BuyerHome />
     </>
   );

@@ -1,7 +1,7 @@
 import PersonOutlinedIcon from '@/assets/person.svg';
 import { ArrowLeft } from 'lucide-react';
 
-export const FormHeader: React.FC<{ title: string; onClose: () => void }> = ({
+export const SignInHeader: React.FC<{ title: string; onClose: () => void }> = ({
   title,
   onClose,
 }) => (

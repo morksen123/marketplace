@@ -12,6 +12,14 @@ export const handleSuccessApi = (title: string, description: string) => {
   });
 };
 
+export const handleErrorApi = (title: string, description: string) => {
+  toast({
+    variant: 'destructive',
+    title: title,
+    description: description,
+  });
+};
+
 const handleApiError = (error: ApiError): void => {
   toast({
     variant: 'destructive',
@@ -30,6 +38,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json();
 }
 
+// TODO: allow plain text server response
 export async function apiClient<T>(
   endpoint: string,
   method: string = 'GET',
@@ -50,9 +59,9 @@ export async function apiClient<T>(
   try {
     const response = await fetch(`${API_URL}${endpoint}`, options);
 
-    if (response.status === 401) {
-      throw new Error('Session expired. Please login again.');
-    }
+    // if (response.status === 401) {
+    //   throw new Error('Session expired. Please login again.');
+    // }
 
     const data = await handleResponse<T>(response);
     return { data, error: null };

@@ -1,5 +1,11 @@
-import AccountDeactivation from "@/features/BuyerAccount/components/AccountDeactivation";
+import BuyerAccountDeactivation from '@/features/BuyerAccount/components/BuyerAccountDeactivation';
+import { BuyerNavMenu } from "@/features/NavigationMenu/components/BuyerNavMenu";
 
 export const AccountDeactivationRoute = () => {
-  return <AccountDeactivation />
+  return (
+    <>
+      <BuyerNavMenu showTabs={false} />
+      <BuyerAccountDeactivation />
+    </>
+  );
 };
