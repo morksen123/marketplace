@@ -1,27 +1,44 @@
+import { Product } from '@/features/ProductListing/constants';
+import { cartQuantityAtom } from '@/store/cartAtom';
+import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
-import { CartItem, Product } from '../types/cart';
+import { CartItem } from '../types/cart';
 
 export const useCart = () => {
   const [cart, setCart] = useState<CartItem[]>(() => {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
+  const [, setCartQuantityAtom] = useAtom(cartQuantityAtom);
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+    const cartQuantity = cart.reduce((total, item) => total + item.quantity, 0);
+    setCartQuantityAtom(cartQuantity);
+  }, [cart, setCartQuantityAtom]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, quantity: number) => {
     setCart((currentCart) => {
-      const existingItem = currentCart.find((item) => item.id === product.id);
+      const existingItem = currentCart.find(
+        (item) => item.id === product.productId,
+      );
       if (existingItem) {
         return currentCart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+          item.id === product.productId
+            ? { ...item, quantity: item.quantity + quantity }
             : item,
         );
       }
-      return [...currentCart, { ...product, quantity: 1 }];
+      return [
+        ...currentCart,
+        {
+          imageUrl: product.productPictures[0],
+          id: product.productId,
+          name: product.listingTitle,
+          price: product.price,
+          quantity: 1,
+        },
+      ];
     });
   };
 

@@ -1,11 +1,13 @@
 import logo from '@/assets/gudfood-logo.png';
 import { Button } from '@/components/ui/button';
+import { cartQuantityAtom } from '@/store/cartAtom';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
+import { useAtom } from 'jotai';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -18,6 +20,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
 }) => {
   const [selectedTab, setSelectedTab] = useState('Home');
   const [searchQuery, setSearchQuery] = useState('');
+  const [cartQuantity] = useAtom(cartQuantityAtom);
   const navigate = useNavigate();
 
   const tabs = [
@@ -98,9 +101,17 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
             >
               <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
             </Link>
-            <Button variant="secondary" onClick={() => navigate('/buyer/cart')}>
-              <ShoppingCartOutlinedIcon className="mr-2" /> Cart
-            </Button>
+            <Link to="/buyer/cart">
+              <Button variant="secondary" className="relative">
+                <ShoppingCartOutlinedIcon className="mr-2 h-4 w-4" />
+                Cart
+                {cartQuantity > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {cartQuantity}
+                  </span>
+                )}
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

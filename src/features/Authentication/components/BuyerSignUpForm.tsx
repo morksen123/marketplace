@@ -158,7 +158,7 @@ export const BuyerSignUpForm = () => {
                   variant="secondary"
                   type="submit"
                   disabled={isFormSubmitting}
-                  className="w-full md:w-1/2 button button-green"
+                  className="w-full md:w-1/2"
                 >
                   {isFormSubmitting ? 'Processing...' : 'Register as Buyer'}
                 </Button>
