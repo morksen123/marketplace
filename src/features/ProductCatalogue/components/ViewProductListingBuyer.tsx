@@ -30,6 +30,28 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
       const date = new Date(dateString);
       return date.toLocaleDateString('en-GB', options);
     };
+
+    useEffect(() => {
+        const fetchDistributor = async () => {
+          if (distributorId) {
+            try {
+              const response = await fetch(`/api/distributor/admin/${distributorId}`);
+              if (!response.ok) {
+                throw new Error('Failed to fetch distributor');
+              }
+              const data = await response.json();
+              console.log(data);
+              setDistributor(data);
+            } catch (error) {
+              console.error('Error fetching distributor:', error);
+            } finally {
+              setLoading(false);
+            }
+          }
+        };
+    
+        fetchDistributor();
+      }, [distributorId]);
   
     useEffect(() => {
       const fetchProduct = async () => {
@@ -38,7 +60,7 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
           const data = await response.json();
           setProduct(data);
           setBatches(data.batches || []);
-          setDistributorId(data.distributorId); // Set distributorId here
+          setDistributorId(data.distributorId);
         } catch (error) {
           console.error('Error fetching product:', error);
         } finally {
@@ -90,27 +112,7 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
       checkFavourited();
     }, [productId, isBuyer]);
   
-    useEffect(() => {
-      const fetchDistributor = async () => {
-        if (distributorId) {
-          try {
-            const response = await fetch(`/api/distributor/admin/${distributorId}`);
-            if (!response.ok) {
-              throw new Error('Failed to fetch distributor');
-            }
-            const data = await response.json();
-            console.log(data);
-            setDistributor(data);
-          } catch (error) {
-            console.error('Error fetching distributor:', error);
-          } finally {
-            setLoading(false);
-          }
-        }
-      };
-  
-      fetchDistributor();
-    }, [distributorId]);
+    
     const handleToggleFavourite = async () => {
         if (!isBuyer) return;
 
@@ -146,8 +148,6 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
         }
     };
     
-    console.log(buyerId);
-
     const handleAddToCart = async () => {
         // Implement add to cart functionality
         alert(`Added ${quantity} ${unitMapping[product?.foodCategory] || 'unit(s)'} to cart`);
@@ -161,10 +161,26 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
         return <div className="wrapper">No product found</div>;
     }
 
-    const handleChatClick = () => {
+    const handleChatClick = async () => {
         if (distributorId) {
-            navigate(`/buyer/profile/chats/`); 
-            // navigate(`/buyer/profile/chats/{distributorId}`); 
+            try {
+                const response = await fetch(`/api/chat/createOrGet?distributorId=${distributorId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                });
+
+                if (response.ok) {
+                    const chat = await response.json();
+                    navigate('/buyer/profile/chats', { state: { chatId: chat.chatId } });
+                } else {
+                    console.error('Failed to create or get chat');
+                }
+            } catch (error) {
+                console.error('Error occurred while checking or creating chat:', error);
+            }
         }
     };
 
