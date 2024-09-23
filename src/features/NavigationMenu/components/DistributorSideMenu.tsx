@@ -6,6 +6,7 @@ export const DistributorSideMenu: React.FC = () => {
 
   const links = [
     {text: 'My Profile',path: '/distributor/profile',},
+    {text: 'Chats',path: '/distributor/profile/chats',},
     { text: 'Change Password', path: '/distributor/profile/change-password' },
     { text: 'Notifications', path: '/distributor/profile/notifications' },
     {text: 'Listing Preferences', path: '/distributor/profile/listing-preferences'},
