@@ -62,7 +62,7 @@ export const DistributorSignUpForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
 
   const nextStep = () => {
-    const fieldsToValidate = [
+    const fieldsToValidate: (keyof DistributorRegisterForm)[] = [
       'distributorName',
       'uen',
       'address',
