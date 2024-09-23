@@ -1,4 +1,6 @@
 import { Product } from '@/features/ProductListing/constants';
+import { cartQuantityAtom } from '@/store/cartAtom';
+import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { CartItem } from '../types/cart';
 
@@ -7,10 +9,13 @@ export const useCart = () => {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
+  const [, setCartQuantityAtom] = useAtom(cartQuantityAtom);
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+    const cartQuantity = cart.reduce((total, item) => total + item.quantity, 0);
+    setCartQuantityAtom(cartQuantity);
+  }, [cart, setCartQuantityAtom]);
 
   const addToCart = (product: Product, quantity: number) => {
     setCart((currentCart) => {
