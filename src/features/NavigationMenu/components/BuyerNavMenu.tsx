@@ -98,9 +98,11 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
             >
               <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
             </Link>
-            <Button variant="secondary" onClick={() => navigate('/buyer/cart')}>
-              <ShoppingCartOutlinedIcon className="mr-2" /> Cart
-            </Button>
+            <Link to="/buyer/cart">
+              <Button variant="secondary">
+                <ShoppingCartOutlinedIcon className="mr-2" /> Cart
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
