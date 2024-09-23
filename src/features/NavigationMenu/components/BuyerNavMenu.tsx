@@ -106,7 +106,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
                 <ShoppingCartOutlinedIcon className="mr-2 h-4 w-4" />
                 Cart
                 {cartQuantity > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-destructive text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                     {cartQuantity}
                   </span>
                 )}
