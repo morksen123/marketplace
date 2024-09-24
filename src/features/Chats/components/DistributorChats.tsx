@@ -58,6 +58,7 @@ export const DistributorChats: React.FC = () => {
       };
 
     fetchChats();
+    const chatIntervalId = setInterval(fetchChats, 1000);
     fetchDistributorId();
 
     // Check if chatId is passed via location state
@@ -65,6 +66,10 @@ export const DistributorChats: React.FC = () => {
       setSelectedChatId(location.state.chatId); // Set the selectedChatId from the state
       fetchChatDetails(location.state.chatId);  // Fetch the chat details based on chatId
     }
+
+    return () => {
+      clearInterval(chatIntervalId);
+    };
   }, [location.state]);
 
   // Function to fetch full chat details based on chatId
@@ -153,7 +158,10 @@ export const DistributorChats: React.FC = () => {
             >
               <div className="flex-grow">
                 <h3 className="font-semibold text-left">{chat.firstName} {chat.lastName}</h3>
-                {/* <p className="text-sm text-gray-600 text-left">{chat.lastMessage}</p> */}
+                <p className="text-sm text-gray-600 text-left truncate">
+                  {chat.lastMessage.slice(0, 60)}
+                  {chat.lastMessage.length > 60 ? '...' : ''}
+                </p>             
               </div>
             </li>
           ))}

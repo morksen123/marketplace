@@ -18,7 +18,7 @@ export const BuyerChats: React.FC = () => {
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);  // Use chatId initially
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);  // Full chat details will be stored here
   const [chats, setChats] = useState<Chat[]>([]);
-  const [messages, setMessages] = useState([]); // Messages for the selected chat
+  const [messages, setMessages] = useState<any[]>([]); // Messages for the selected chat
   const [stompClient, setStompClient] = useState<any>(null);
   const [senderId, setSenderId] = useState<any>(null);
 
@@ -35,6 +35,9 @@ export const BuyerChats: React.FC = () => {
         console.error('Error fetching chats:', error);
       }
     };
+
+    fetchChats(); // Initial fetch
+    const chatIntervalId = setInterval(fetchChats, 1000); // Fetch chats every 5 seconds
 
     const fetchBuyerId = async () => {
         try {
@@ -56,7 +59,6 @@ export const BuyerChats: React.FC = () => {
         }
       };
 
-    fetchChats();
     fetchBuyerId();
 
     // Check if chatId is passed via location state
@@ -64,6 +66,11 @@ export const BuyerChats: React.FC = () => {
       setSelectedChatId(location.state.chatId); // Set the selectedChatId from the state
       fetchChatDetails(location.state.chatId);  // Fetch the chat details based on chatId
     }
+
+    // Cleanup function
+    return () => {
+      clearInterval(chatIntervalId);
+    };
   }, [location.state]);
 
   // Function to fetch full chat details based on chatId
@@ -151,8 +158,10 @@ export const BuyerChats: React.FC = () => {
               onClick={() => handleSelectChat(chat)}
             >
               <div className="flex-grow">
-                <h3 className="font-semibold text-left">{chat.distributorName}</h3>
-                {/* <p className="text-sm text-gray-600 text-left">{chat.lastMessage}</p> */}
+                <p className="text-sm text-gray-600 text-left truncate">
+                  {chat.lastMessage.slice(0, 60)}
+                  {chat.lastMessage.length > 60 ? '...' : ''}
+                </p>
               </div>
             </li>
           ))}

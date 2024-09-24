@@ -28,25 +28,54 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]); // Store messages here
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const currentSubscriptionRef = useRef<any>(null);
 
   useEffect(() => {
+    const fetchChatMessages = async () => {
+      try {
+        const response = await fetch(`/api/chat/messages/${selectedChat?.chatId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setMessages(data); // Set the fetched messages to the state
+        } else {
+          console.error('Failed to fetch chat messages');
+        }
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
+      }
+    };
+
     if (selectedChat?.chatId) {
-      const fetchChatMessages = async () => {
-        try {
-          const response = await fetch(`/api/chat/messages/${selectedChat.chatId}`);
-          if (response.ok) {
-            const data = await response.json();
-            setMessages(data); // Set the fetched messages to the state
-          } else {
-            console.error('Failed to fetch chat messages');
+      fetchChatMessages();
+      // Subscribe to real-time updates for this chat
+      if (stompClient?.connected) {
+        // Unsubscribe from the previous chat if applicable
+        if (currentSubscriptionRef.current) {
+          currentSubscriptionRef.current.unsubscribe();
+        }
+
+        // Subscribe to the current chat's topic
+        currentSubscriptionRef.current = stompClient.subscribe(
+          `/topic/chat/${selectedChat.chatId}`,
+          (messageOutput: any) => {
+            const newMessage = JSON.parse(messageOutput.body);
+            // Add the received message to the chat
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
           }
-        } catch (error) {
-          console.error('Error fetching chat messages:', error);
+        );
+      }
+
+      const intervalId = setInterval(fetchChatMessages, 1000);
+
+      // Cleanup subscription when the component is unmounted or chat changes
+      return () => {
+        clearInterval(intervalId);
+        if (currentSubscriptionRef.current) {
+          currentSubscriptionRef.current.unsubscribe();
         }
       };
-      fetchChatMessages();
     }
-  }, [selectedChat]);
+  }, [selectedChat, stompClient]);
 
   const handleSendMessage = () => {
     if (message.trim() && selectedChat && stompClient?.connected) {
