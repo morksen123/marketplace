@@ -9,13 +9,13 @@ export const useCart = () => {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
-  const [, setCartQuantityAtom] = useAtom(cartQuantityAtom);
+  const [cartQuantity, setCartQuantity] = useAtom(cartQuantityAtom);
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
     const cartQuantity = cart.reduce((total, item) => total + item.quantity, 0);
-    setCartQuantityAtom(cartQuantity);
-  }, [cart, setCartQuantityAtom]);
+    setCartQuantity(cartQuantity);
+  }, [cart, setCartQuantity]);
 
   const addToCart = (product: Product, quantity: number) => {
     setCart((currentCart) => {
@@ -74,5 +74,6 @@ export const useCart = () => {
     updateQuantity,
     clearCart,
     cartPrice,
+    cartQuantity,
   };
 };
