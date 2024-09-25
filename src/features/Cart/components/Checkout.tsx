@@ -16,7 +16,7 @@ import { AddressForm } from './AddressForm';
 export const Checkout = () => {
   const { cart, cartPrice, clearCart } = useCart();
 
-  const [useShippingForBilling, setUseShippingForBilling] = useState(true);
+  const [useShippingForBilling, setUseShippingForBilling] = useState(false);
   const [shippingFee] = useState(0);
 
   const handlePlaceOrder = () => {
@@ -24,7 +24,7 @@ export const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div className="wrapper">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8">Checkout</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
