@@ -95,7 +95,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ userRole, onClose }) => {
         </form>
       </Form>
 
-      <p className="text-primary-foreground text-center mt-4">
+      <p className="text-center mt-4">
         No account?{' '}
         <Link
           to="/auth/register"
