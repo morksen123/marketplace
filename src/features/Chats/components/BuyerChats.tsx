@@ -158,6 +158,7 @@ export const BuyerChats: React.FC = () => {
               onClick={() => handleSelectChat(chat)}
             >
               <div className="flex-grow">
+                <h3 className="font-semibold text-left">{chat.distributorName}</h3>
                 <p className="text-sm text-gray-600 text-left truncate">
                   {chat.lastMessage.slice(0, 60)}
                   {chat.lastMessage.length > 60 ? '...' : ''}
