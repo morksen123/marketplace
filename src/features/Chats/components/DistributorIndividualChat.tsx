@@ -86,6 +86,22 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
     }
   }, [selectedChat, stompClient]);
 
+  const handleNewMessage = (message: any) => {
+    // Handle the new message and create a notification
+    const notificationPayload = {
+      userId: message.recipientId,
+      chatId: message.chatId,
+      messageContent: message.text,
+    };
+    
+    // Send to backend to persist
+    fetch('/api/notifications/message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(notificationPayload),
+    });
+  };
+
   const handleSendMessage = async () => {
     if ((message.trim() || images.length > 0) && selectedChat && stompClient?.connected) {
       const uploadedUrls = await uploadFilesToS3(images);

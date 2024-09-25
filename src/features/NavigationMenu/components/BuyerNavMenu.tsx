@@ -9,6 +9,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useState, useRef, useEffect } from 'react';
 import logo from '../../../assets/gudfood-logo.png';
 import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
+import { useNotification } from '@/components/common/NotificationContext';
 
 interface BuyerNavMenuProps {
   showTabs?: boolean;
@@ -23,6 +24,9 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
   const navigate = useNavigate();
   const { logout } = useAuthActions();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { notifications } = useNotification();
+
+  const unreadCount = notifications.filter((notif) => !notif.isRead).length;
 
   const tabs = [
     'Home',
@@ -116,17 +120,22 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
               <SmsOutlinedIcon className="mr-1" /> Chats
             </a>
             <a
-              href="/account"
-              className="text-black hover:text-gray-600 flex items-center"
+              href="/notifications"
+              className="text-black hover:text-gray-600 flex items-center relative"
             >
               <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
             </a>
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={toggleAccountDropdown}
                 className="text-black hover:text-gray-600 flex items-center"
               >
-                <PersonOutlineOutlinedIcon className="mr-1" /> Account 
+                <PersonOutlineOutlinedIcon className="mr-1" /> Account
                 <ArrowDropDownIcon className={`transition-transform duration-300 ${showAccountDropdown ? 'rotate-180' : ''}`} />
               </button>
               {showAccountDropdown && (
@@ -166,11 +175,10 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
             {tabs.map((tab) => (
               <button
                 key={tab}
-                className={`py-4 px-4 text-black focus:outline-none flex-grow ${
-                  selectedTab === tab
+                className={`py-4 px-4 text-black focus:outline-none flex-grow ${selectedTab === tab
                     ? 'border-b-2 border-green-500 text-green-500'
                     : 'hover:text-green-500'
-                }`}
+                  }`}
                 onClick={() => setSelectedTab(tab)}
               >
                 {tab}

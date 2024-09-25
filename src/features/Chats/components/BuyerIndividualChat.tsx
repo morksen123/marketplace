@@ -229,7 +229,7 @@ export const BuyerIndividualChat: React.FC<BuyerIndividualChatProps> = ({ select
     setImages((prevImages) => prevImages.filter((_, i) => i !== index));
     setImagePreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index));
   };
-
+  
   return (
     <>
       {selectedChat ? (
