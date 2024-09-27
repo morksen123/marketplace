@@ -1,5 +1,6 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import { Button } from '@/components/ui/button';
 import { Batch } from '@/features/ProductListing/constants';
 
 interface EditBatchModalProps {
@@ -92,8 +93,8 @@ export const EditBatchModal: React.FC<EditBatchModalProps> = ({ open, onClose, b
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} color="primary" disabled={!!dateError}>
+        <Button onClick={onClose} variant="outline">Cancel</Button>
+        <Button onClick={handleSave} variant="secondary" disabled={!!dateError}>
           Save
         </Button>
       </DialogActions>

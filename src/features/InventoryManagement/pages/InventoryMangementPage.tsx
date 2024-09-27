@@ -2,19 +2,53 @@ import React, { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { Product, Batch } from '@/features/ProductListing/constants';
-import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Tabs, Tab, TablePagination, TableSortLabel } from '@mui/material';
+import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Tabs, Tab, TablePagination, TableSortLabel, styled, TableContainer } from '@mui/material';
 import { foodCategoryMapping, foodConditionMapping } from '@/features/Home/constants';
 import { Link } from 'react-router-dom';
 import { EditBatchModal } from '../components/EditBatchModal';
+import { AddBatchModal } from '../components/AddBatchModal';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Button } from '@/components/ui/button';
 import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
+
 interface BatchWithProduct extends Batch {
   product: Product;
 }
 
 type SortColumn = keyof BatchWithProduct | `product.${keyof Product}`;
+
+const StyledTabs = styled(Tabs)({
+  '& .MuiTabs-indicator': {
+    backgroundColor: '#017A37', // Use the green color
+  },
+});
+
+const StyledTab = styled(Tab)({
+  color: '#4B5563', // Default text color
+  '&.Mui-selected': {
+    color: '#017A37', // Green color when selected
+  },
+  '&:hover': {
+    color: '#015A27', // Darker green on hover
+  },
+});
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  fontWeight: 'bold',
+  backgroundColor: theme.palette.common.white,
+  color: theme.palette.common.black,
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
 
 export const InventoryManagementPage: React.FC = () => {
   const [batches, setBatches] = useState<BatchWithProduct[]>([]);
@@ -27,6 +61,8 @@ export const InventoryManagementPage: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<BatchWithProduct | null>(null);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
 
@@ -52,6 +88,7 @@ export const InventoryManagementPage: React.FC = () => {
           const products: Product[] = await productsResponse.json();
           const allCategories: string[] = await categoriesResponse.json();
 
+          setProducts(products);
           const allBatches: BatchWithProduct[] = products.flatMap(product => 
             product.batches?.map(batch => ({
               ...batch,
@@ -179,6 +216,37 @@ export const InventoryManagementPage: React.FC = () => {
     }
   };
 
+  const handleAddBatch = async (productId: string, quantity: number, bestBeforeDate: string) => {
+    try {
+      const response = await fetch(`/api/products/product/${productId}/batch`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ quantity, bestBeforeDate }),
+      });
+
+      if (response.ok) {
+        const newBatch: Batch = await response.json();
+        const product = products.find(p => p.productId === productId);
+        if (product) {
+          const newBatchWithProduct: BatchWithProduct = {
+            ...newBatch,
+            product: product,
+          };
+          setBatches(prevBatches => [...prevBatches, newBatchWithProduct]);
+        }
+        handleSuccessApi('Success!', 'New batch has been added.');
+      } else {
+        handleErrorApi('Error!', 'Failed to add new batch.');
+      }
+    } catch (error) {
+      console.error('Error adding new batch:', error);
+      handleErrorApi('Error!', 'Failed to add new batch.');
+    }
+  };
+
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
       batches.map(batch => ({
@@ -214,17 +282,32 @@ export const InventoryManagementPage: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Inventory Management</h1>
-        <Button onClick={exportToExcel} variant="secondary">Export to Excel</Button>
+        <div>
+          <Button onClick={() => setAddModalOpen(true)} variant="outline" className="mr-2">
+            Add Batch
+          </Button>
+          <Button onClick={exportToExcel} variant="secondary">Export to Excel</Button>
+        </div>
       </div>
       
-      <Tabs value={selectedTab} onChange={handleTabChange} className="mb-4">
+      <StyledTabs 
+        value={selectedTab} 
+        onChange={handleTabChange} 
+        className="mb-4"
+        variant="scrollable"
+        scrollButtons="auto"
+      >
         {categories.map((category) => (
-          <Tab key={category} label={foodCategoryMapping[category] || category} value={category} />
+          <StyledTab 
+            key={category} 
+            label={foodCategoryMapping[category] || category} 
+            value={category} 
+          />
         ))}
-      </Tabs>
+      </StyledTabs>
 
-      <Paper className="overflow-x-auto"> {/* Add overflow-x-auto */}
-        <Table>
+      <TableContainer component={Paper} className="mt-4">
+        <Table stickyHeader aria-label="inventory table">
           <TableHead>
             <TableRow>
               {[
@@ -238,10 +321,9 @@ export const InventoryManagementPage: React.FC = () => {
                 { label: 'Batch Quantity', key: 'quantity' },
                 { label: 'Delivery Method', key: 'product.deliveryMethod' },
                 { label: 'Stock Value', key: 'stockValue' },
-                { label: 'Edit Batch', key: 'actions' },
-                { label: 'Delete Batch', key: 'deleteBatch' },
+                { label: 'Actions', key: 'actions' },
               ].map(({ label, key }) => (
-                <TableCell key={key}>
+                <StyledTableCell key={key} align="left">
                   <TableSortLabel
                     active={sortColumn === key}
                     direction={sortColumn === key ? sortDirection : 'asc'}
@@ -249,7 +331,7 @@ export const InventoryManagementPage: React.FC = () => {
                   >
                     {label}
                   </TableSortLabel>
-                </TableCell>
+                </StyledTableCell>
               ))}
             </TableRow>
           </TableHead>
@@ -257,11 +339,11 @@ export const InventoryManagementPage: React.FC = () => {
             {paginatedBatches.map((batch) => {
               const stockValue = batch.product.price * batch.quantity;
               return (
-                <TableRow key={batch.batchId}>
+                <StyledTableRow key={batch.batchId}>
                   <TableCell>
                     <Link 
                       to={`/view-product-listing/${batch.product.productId}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-green-600 hover:underline"
                     >
                       {batch.product.listingTitle}
                     </Link>
@@ -276,32 +358,38 @@ export const InventoryManagementPage: React.FC = () => {
                   <TableCell>{batch.product.deliveryMethod}</TableCell>
                   <TableCell>${stockValue.toFixed(2)}</TableCell>
                   <TableCell>
-                    <Button onClick={() => handleEditClick(batch)}>
-                      <EditIcon />
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button onClick={() => handleEditClick(batch)} className="text-green-600 hover:text-green-800 bg-transparent">
+                        <EditIcon fontSize="small" />
+                      </Button>
+                      <Button onClick={() => handleDeleteBatch(batch)} className="text-red-600 hover:text-red-800 bg-transparent">
+                        <DeleteIcon fontSize="small" />
+                      </Button>
+                    </div>
                   </TableCell>
-                  <TableCell>
-                    <Button onClick={() => handleDeleteBatch(batch)}>
-                      <DeleteIcon />
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                </StyledTableRow>
               );
             })}
           </TableBody>
         </Table>
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 50]}
-          component="div"
-          count={filteredBatches.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelDisplayedRows={({ from, to, count }) => `${from}-${to} of ${count}`}
-          labelRowsPerPage="Records per page:"
-        />
-      </Paper>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[10, 25, 50]}
+        component="div"
+        count={filteredBatches.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        labelDisplayedRows={({ from, to, count }) => `${from}-${to} of ${count}`}
+        labelRowsPerPage="Records per page:"
+      />
+      <AddBatchModal
+        open={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onSave={handleAddBatch}
+        products={products}
+      />
       <EditBatchModal
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
