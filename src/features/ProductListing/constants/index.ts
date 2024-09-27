@@ -70,4 +70,5 @@ export interface Product {
   batches?: Batch[];
   bulkPricings?: BulkPricing[];
   productId: string;
+  distributorId: string;
 }

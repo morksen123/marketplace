@@ -37,6 +37,7 @@ export const useCart = () => {
           name: product.listingTitle,
           price: product.price,
           quantity: 1,
+          distributorId: product.distributorId,
         },
       ];
     });

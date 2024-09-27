@@ -1,4 +1,4 @@
-import { useStripeSetup } from '@/hooks/useStripeSetup';
+import { useStripePaymentInit } from '@/hooks/useStripePaymentInit';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { Outlet } from 'react-router-dom';
@@ -8,7 +8,7 @@ const stripePromise = loadStripe(
 );
 
 export const StripeWrapper = () => {
-  const { clientSecret } = useStripeSetup();
+  const { clientSecret } = useStripePaymentInit();
 
   const appearance = {
     theme: 'stripe' as const,
