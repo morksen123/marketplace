@@ -1,12 +1,14 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { Promotion } from '../constants';
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { PromotionStatusSelect } from './PromotionStatusSelect';
 
 interface PromotionFormProps {
   formData: Partial<Promotion> | null;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
   handleStatusChange: (newStatus: Promotion['status']) => void;
 }
 
@@ -15,6 +17,24 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
   handleChange,
   handleStatusChange,
 }) => {
+  const [minEndDate, setMinEndDate] = useState<string>('');
+
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
+  
+  useEffect(() => {
+    // Update minEndDate when startDate changes
+    if (formData && formData.startDate) {
+      setMinEndDate(formData.startDate);
+    }
+  }, [formData?.startDate]);
+
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleChange(e);
+    setMinEndDate(e.target.value);
+  };
+
+  
   return (
     <>
       <div className="space-y-2">
@@ -30,18 +50,18 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
       </div>
 
       <div>
-          <label htmlFor="description" className="block mb-1">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData ? formData.description : ''}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            placeholder="Enter promotion description"
-          />
-        </div>
+        <label htmlFor="description" className="block mb-1">
+          Description
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          value={formData ? formData.description : ''}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          placeholder="Enter promotion description"
+        />
+      </div>
 
       <div className="space-y-2">
         <Label htmlFor="discountPercentage">Discount Percentage (%)</Label>
@@ -65,7 +85,8 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
           name="startDate"
           type="date"
           value={formData ? formData.startDate : ''}
-          onChange={handleChange}
+          onChange={handleStartDateChange}
+          min={today}
           required
         />
       </div>
@@ -78,6 +99,7 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
           type="date"
           value={formData ? formData.endDate : ''}
           onChange={handleChange}
+          min={minEndDate}
           required
         />
       </div>

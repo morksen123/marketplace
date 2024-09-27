@@ -20,11 +20,11 @@ const CreatePromotion: React.FC = () => {
     startDate: '',
     endDate: '',
     status: 'ACTIVE',
-    productIds: [], // hard-coded
-    distributorId: 2, // hard-coded
+    productIds: [],
+    distributorId: 0,
   });
 
-  const { activeProducts } = useDistributor();
+  const { activeProducts, distributorProfile } = useDistributor();
   const [applicableProducts, setApplicableProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -34,6 +34,7 @@ const CreatePromotion: React.FC = () => {
       setFormData((prev) => ({
         ...prev,
         productIds: activeProducts.map((product) => product.productId),
+        distributorId: distributorProfile?.distributorId ?? 0
       }));
     }
   }, [activeProducts]);

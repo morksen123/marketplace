@@ -1,8 +1,18 @@
 import { get, put } from '@/lib/api-client';
 import { ApiResponse } from '@/types/api';
-// import { Distributor, Product} from '../constants';
-import { Distributor } from '@/features/Home/constants';
 import { Product } from '@/features/ProductCatalogue/constants';
+
+
+interface Distributor {
+  distributorId: number;
+  distributorName: string;
+  address: number;
+  email: string;
+  name: string;
+  contactName: string;
+  warehouseAddress: number;
+  isApproved: Boolean;
+}
 
 export const getDistributorProfile = async (): Promise<ApiResponse<Distributor>> => {
   return get<Distributor>('/distributor/profile');

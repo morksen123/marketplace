@@ -1,7 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
 import { getDistributorProfile, updateDistributorProfile, getAllProductsByDistributor, getAllActiveProductsByDistributor } from '../lib/distributor';
-import { Distributor } from '@/features/Home/constants';
+
+
+interface Distributor {
+  distributorId: number;
+  distributorName: string;
+  address: number;
+  email: string;
+  name: string;
+  contactName: string;
+  warehouseAddress: number;
+  isApproved: Boolean;
+}
 
 export function useDistributor() {
   const queryClient = useQueryClient();
