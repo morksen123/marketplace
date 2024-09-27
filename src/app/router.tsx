@@ -224,6 +224,27 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/distributor/promotions',
+                lazy: async () => {
+                  const { ViewDistributorPromotionsRoute } = await import('./routes/promotions/view-distributor-promos');
+                  return {Component: ViewDistributorPromotionsRoute}
+                }
+              },
+              {
+                path: '/distributor/promotions/:promotionId',
+                lazy: async () => {
+                  const { EditDistributorPromotionsRoute } = await import('./routes/promotions/edit-promotion');
+                  return {Component: EditDistributorPromotionsRoute}
+                }
+              },
+              {
+                path: '/distributor/promotions/create-promotion',
+                lazy: async () => {
+                  const { CreateDistributorPromotionsRoute } = await import('./routes/promotions/create-promotion');
+                  return {Component: CreateDistributorPromotionsRoute}
+                }
+              },
+              {
                 path: '/distributor/transactions',
                 lazy: async () => {
                   const { TransactionsRoute } = await import(
