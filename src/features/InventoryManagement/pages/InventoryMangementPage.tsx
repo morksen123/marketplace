@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import { Product, Batch } from '@/features/ProductListing/constants';
 import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Tabs, Tab, TablePagination, TableSortLabel } from '@mui/material';
 import { foodCategoryMapping, foodConditionMapping } from '@/features/Home/constants';
 import { Link } from 'react-router-dom';
 import { EditBatchModal } from '../components/EditBatchModal';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Button } from '@/components/ui/button';
+import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
 interface BatchWithProduct extends Batch {
   product: Product;
 }
@@ -19,12 +23,13 @@ export const InventoryManagementPage: React.FC = () => {
   const [categories, setCategories] = useState<string[]>(['All']);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortColumn, setSortColumn] = useState<SortColumn>('product.productId');
+  const [sortColumn, setSortColumn] = useState<SortColumn>('product.listingTitle');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<BatchWithProduct | null>(null);
 
   useEffect(() => {
+
     const fetchProducts = async () => {
       try {
         const [productsResponse, categoriesResponse] = await Promise.all([
@@ -141,12 +146,64 @@ export const InventoryManagementPage: React.FC = () => {
           batch.batchId === updatedBatch.batchId ? { ...batch, ...updatedBatch } : batch
         );
         setBatches(updatedBatches);
+        handleSuccessApi('Success!', 'Batch has been updated.');
       } else {
         console.error('Failed to update batch');
+        handleErrorApi('Error!', 'Failed to update batch.');
       }
     } catch (error) {
       console.error('Error updating batch:', error);
+      handleErrorApi('Error!', 'Failed to update batch.');
     }
+  };
+
+  const handleDeleteBatch = async (batch: BatchWithProduct) => {
+    try {
+      const response = await fetch(`/api/products/product/${batch.product.productId}/batch?batchId=${batch.batchId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        setBatches(prevBatches => prevBatches.filter(b => b.batchId !== batch.batchId));
+        handleSuccessApi('Success!', 'Batch has been deleted.');
+      } else {
+        handleErrorApi('Error!', 'Failed to delete batch.');
+      }
+    } catch (error) {
+      console.error('Error deleting batch:', error);
+      handleErrorApi('Error!', 'Failed to delete batch.');
+    }
+  };
+
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(
+      batches.map(batch => ({
+        'Product ID': batch.product.productId,
+        'Product Name': batch.product.listingTitle,
+        'Category': foodCategoryMapping[batch.product.foodCategory] || batch.product.foodCategory,
+        'Condition': foodConditionMapping[batch.product.foodCondition] || batch.product.foodCondition,
+        'Unit Price': batch.product.price,
+        'Min Purchase Qty': batch.product.minPurchaseQty,
+        'Batch ID': batch.batchId,
+        'Best Before Date': new Date(batch.bestBeforeDate).toLocaleDateString(),
+        'Batch Quantity': batch.quantity,
+        'Delivery Method': batch.product.deliveryMethod,
+        'Stock Value': batch.product.price * batch.quantity,
+      }))
+    );
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventory');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    
+    saveAs(data, 'inventory.xlsx');
+    handleSuccessApi('Success!', 'Inventory has been exported to Excel.');
   };
 
   if (loading) {
@@ -155,7 +212,10 @@ export const InventoryManagementPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Inventory Management</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Inventory Management</h1>
+        <Button onClick={exportToExcel} variant="secondary">Export to Excel</Button>
+      </div>
       
       <Tabs value={selectedTab} onChange={handleTabChange} className="mb-4">
         {categories.map((category) => (
@@ -168,7 +228,6 @@ export const InventoryManagementPage: React.FC = () => {
           <TableHead>
             <TableRow>
               {[
-                { label: 'Product ID', key: 'product.productId' },
                 { label: 'Product Name', key: 'product.listingTitle' },
                 { label: 'Category', key: 'product.foodCategory' },
                 { label: 'Condition', key: 'product.foodCondition' },
@@ -180,6 +239,7 @@ export const InventoryManagementPage: React.FC = () => {
                 { label: 'Delivery Method', key: 'product.deliveryMethod' },
                 { label: 'Stock Value', key: 'stockValue' },
                 { label: 'Edit Batch', key: 'actions' },
+                { label: 'Delete Batch', key: 'deleteBatch' },
               ].map(({ label, key }) => (
                 <TableCell key={key}>
                   <TableSortLabel
@@ -198,7 +258,6 @@ export const InventoryManagementPage: React.FC = () => {
               const stockValue = batch.product.price * batch.quantity;
               return (
                 <TableRow key={batch.batchId}>
-                  <TableCell>{batch.product.productId}</TableCell>
                   <TableCell>
                     <Link 
                       to={`/view-product-listing/${batch.product.productId}`}
@@ -219,6 +278,11 @@ export const InventoryManagementPage: React.FC = () => {
                   <TableCell>
                     <Button onClick={() => handleEditClick(batch)}>
                       <EditIcon />
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleDeleteBatch(batch)}>
+                      <DeleteIcon />
                     </Button>
                   </TableCell>
                 </TableRow>
