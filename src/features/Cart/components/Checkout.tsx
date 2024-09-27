@@ -14,21 +14,44 @@ import {
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
-import { StripePaymentElementOptions } from '@stripe/stripe-js';
 import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
-import { AddressForm } from './AddressForm';
+import { AddressForm, AddressFormState } from './AddressForm';
 
-export const Checkout = () => {
+const initialAddressState: AddressFormState = {
+  firstName: '',
+  lastName: '',
+  address: '',
+  zipCode: '',
+  country: '',
+};
+
+export const Checkout: React.FC = () => {
   const stripe = useStripe();
   const elements = useElements();
   const { cart, cartPrice } = useCart();
 
-  const [useShippingForBilling, setUseShippingForBilling] = useState(false);
+  const [shippingAddress, setShippingAddress] =
+    useState<AddressFormState>(initialAddressState);
+  const [billingAddress, setBillingAddress] =
+    useState<AddressFormState>(initialAddressState);
+  const [useShippingForBilling, setUseShippingForBilling] = useState(true);
   const [shippingFee] = useState(0);
-
-  const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleShippingChange = (
+    field: keyof AddressFormState,
+    value: string,
+  ) => {
+    setShippingAddress((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleBillingChange = (
+    field: keyof AddressFormState,
+    value: string,
+  ) => {
+    setBillingAddress((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,58 +62,77 @@ export const Checkout = () => {
 
     setIsLoading(true);
 
-    const { error } = await stripe.confirmPayment({
+    await stripe.confirmPayment({
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/buyer/checkout/complete`,
+        payment_method_data: {
+          billing_details: {
+            name: `${billingAddress.firstName} ${billingAddress.lastName}`,
+            address: {
+              line1: billingAddress.address,
+              postal_code: billingAddress.zipCode,
+              country: billingAddress.country,
+              city: billingAddress.country,
+            },
+          },
+        },
       },
     });
 
-    if (error.type === 'card_error' || error.type === 'validation_error') {
-      setPaymentMessage(error.message || 'An unexpected error occurred.');
-    } else {
-      setPaymentMessage('An unexpected error occurred.');
-    }
-
     setIsLoading(false);
-  };
-
-  const paymentElementOptions: StripePaymentElementOptions = {
-    layout: 'tabs',
   };
 
   return (
     <div className="wrapper">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8">Checkout</h1>
-        <form onSubmit={handleSubmit}>
+        <h1 className="text-3xl font-extrabold text-center text-gray-900 mb-8">
+          Checkout
+        </h1>
+        <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-2">
-              <AddressForm title="Shipping Address" prefix="shipping" />
+            <div className="md:col-span-2 space-y-6">
+              <AddressForm
+                title="Shipping Address"
+                state={shippingAddress}
+                onChange={handleShippingChange}
+              />
 
-              <div className="mb-6">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="useShippingForBilling"
-                    checked={useShippingForBilling}
-                    onCheckedChange={() =>
-                      setUseShippingForBilling(!useShippingForBilling)
+              <div className="flex items-center space-x-2 bg-white p-4 rounded-lg ">
+                <Checkbox
+                  id="useShippingForBilling"
+                  checked={useShippingForBilling}
+                  onCheckedChange={(checked: boolean) => {
+                    setUseShippingForBilling(checked);
+                    if (checked) {
+                      setBillingAddress(shippingAddress);
                     }
-                  />
-                  <Label htmlFor="useShippingForBilling">
-                    Use shipping address for billing
-                  </Label>
-                </div>
+                  }}
+                />
+                <Label
+                  htmlFor="useShippingForBilling"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Use this address for billing
+                </Label>
               </div>
 
               {!useShippingForBilling && (
-                <AddressForm title="Billing Address" prefix="billing" />
+                <AddressForm
+                  title="Billing Address"
+                  state={billingAddress}
+                  onChange={handleBillingChange}
+                />
               )}
 
-              <PaymentElement
-                id="payment-element"
-                options={paymentElementOptions}
-              />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payment Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PaymentElement id="payment-element" />
+                </CardContent>
+              </Card>
             </div>
             <div>
               <Card>
@@ -117,20 +159,20 @@ export const Checkout = () => {
                     </div>
                   ))}
                   <Separator />
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span>${cartPrice.toFixed(2)}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium">${cartPrice.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Shipping</span>
+                    <span className="font-medium">
                       {shippingFee === 0
                         ? 'Free'
                         : `$${shippingFee.toFixed(2)}`}
                     </span>
                   </div>
                   <Separator />
-                  <div className="flex justify-between font-bold">
+                  <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
                     <span>${(cartPrice + shippingFee).toFixed(2)}</span>
                   </div>
@@ -149,14 +191,6 @@ export const Checkout = () => {
             </div>
           </div>
         </form>
-        {paymentMessage && (
-          <div
-            className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded"
-            role="alert"
-          >
-            {paymentMessage}
-          </div>
-        )}
       </div>
     </div>
   );
