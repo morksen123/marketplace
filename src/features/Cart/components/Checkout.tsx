@@ -9,6 +9,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useBuyerProfile } from '@/features/BuyerAccount/hooks/useBuyerProfile';
 import {
   PaymentElement,
   useElements,
@@ -38,6 +39,9 @@ export const Checkout: React.FC = () => {
   const [useShippingForBilling, setUseShippingForBilling] = useState(true);
   const [shippingFee] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const { buyerProfile } = useBuyerProfile();
+
+  const email = buyerProfile?.email;
 
   const handleShippingChange = (
     field: keyof AddressFormState,
@@ -66,6 +70,7 @@ export const Checkout: React.FC = () => {
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/buyer/checkout/complete`,
+        receipt_email: email,
         payment_method_data: {
           billing_details: {
             name: `${billingAddress.firstName} ${billingAddress.lastName}`,
