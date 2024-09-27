@@ -1,19 +1,23 @@
 import { post } from '@/lib/api-client';
 import { useEffect, useState } from 'react';
 
+interface StripePaymentIntentData {
+  client_secret: string;
+}
+
 export const useStripeSetup = () => {
   const [clientSecret, setClientSecret] = useState<string>('');
-  const [dpmCheckerLink, setDpmCheckerLink] = useState<string>('');
+  const [dpmCheckerLink] = useState<string>('');
 
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
         const amount = 1000; // $10.00 in cents
-        const distributorId = 1; // Replace with actual distributor ID
+        const distributorId = 2; // Replace with actual distributor ID
 
-        const { data, error } = await post(
+        const { data, error } = await post<StripePaymentIntentData>(
           `/payments/create-payment-intent?amount=${amount}&distributorId=${distributorId}`,
-          null, // No body needed, params are in the URL
+          {}, // No body needed, params are in the URL
         );
 
         if (error) {

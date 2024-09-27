@@ -131,17 +131,7 @@ const routes: RouteObject[] = [
                       const { CheckoutRoute } = await import(
                         './routes/payment/checkout'
                       );
-                      const { useStripeSetup } = await import(
-                        '../hooks/useStripeSetup'
-                      );
-                      return {
-                        Component: () => {
-                          const { dpmCheckerLink } = useStripeSetup();
-                          return (
-                            <CheckoutRoute dpmCheckerLink={dpmCheckerLink} />
-                          );
-                        },
-                      };
+                      return { Component: CheckoutRoute };
                     },
                   },
                   {
