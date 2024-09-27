@@ -13,9 +13,10 @@ import Button from '@mui/material/Button';
 
 interface Chat {
   chatId: number;
-  distributorName: string,
-  distributorId: number,
+  distributorName: string;
+  distributorId: number;
   lastMessage: string;
+  administratorId: number
 }
 
 interface Message {
@@ -25,6 +26,7 @@ interface Message {
   text: string;
   sentAt: string;
   images: string[];
+  title: string;
 }
 
 interface BuyerIndividualChatProps {
@@ -235,7 +237,7 @@ export const BuyerIndividualChat: React.FC<BuyerIndividualChatProps> = ({ select
       {selectedChat ? (
         <>
           <div className="p-4 border-b flex items-center">
-            <h2 className="text-xl font-semibold">{selectedChat.distributorName}</h2>
+            <h2 className="text-xl font-semibold">{selectedChat.distributorName ? selectedChat.distributorName : 'Administrator'}</h2>
           </div>
           <div className="flex-grow overflow-y-auto p-4">
             {messages.map((msg) => (
@@ -257,14 +259,20 @@ export const BuyerIndividualChat: React.FC<BuyerIndividualChatProps> = ({ select
                           )}
                         </div>
                       ))}
-                      {msg.text && (
-                        <div className="mt-2">
-                          <span className={`px-4 py-2 inline-block rounded ${msg.senderId === senderId ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>{msg.text}</span>
-                        </div>
-                      )}
+                    </div>
+                  ) : null}
+                  {msg.title ? (
+                    <div className={`mt-2 ${msg.senderId === senderId ? 'text-right' : 'text-left'}`}>
+                      <span className={`px-4 py-2 inline-block rounded ${msg.senderId === senderId ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>
+                        <strong>ANNOUNCEMENT</strong><br />
+                        <strong>{msg.title}</strong><br />
+                        {msg.text}
+                      </span>
                     </div>
                   ) : msg.text ? (
-                    <span className={`px-4 py-2 inline-block rounded ${msg.senderId === senderId ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>{msg.text}</span>
+                    <div className={`mt-2 ${msg.senderId === senderId ? 'text-right' : 'text-left'}`}>
+                      <span className={`px-4 py-2 inline-block rounded ${msg.senderId === senderId ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>{msg.text}</span>
+                    </div>
                   ) : null}
                 </div>
               </div>

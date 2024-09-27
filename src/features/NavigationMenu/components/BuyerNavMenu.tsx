@@ -110,7 +110,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
               <SupportAgentOutlinedIcon className="mr-1" /> FAQ
             </a>
             <a
-              href="/chats"
+              href="/buyer/profile/chats"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <SmsOutlinedIcon className="mr-1" /> Chats

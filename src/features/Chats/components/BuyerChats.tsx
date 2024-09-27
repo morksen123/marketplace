@@ -8,8 +8,9 @@ import { Client } from '@stomp/stompjs';
 interface Chat {
   chatId: number;
   distributorName: string;  
-  distributorId: string;
+  distributorId: number;
   lastMessage: string;
+  administratorId: string | null;
 }
 
 export const BuyerChats: React.FC = () => {
@@ -90,7 +91,9 @@ export const BuyerChats: React.FC = () => {
   };
 
   const filteredChats = chats.filter((chat) =>
-    chat.distributorName.toLowerCase().includes(searchTerm.toLowerCase())
+    chat.distributorName && searchTerm
+      ? chat.distributorName.toLowerCase().includes(searchTerm.toLowerCase())
+      : true
   );
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,6 +133,13 @@ export const BuyerChats: React.FC = () => {
     setStompClient(stompClient);
   };
 
+  // Sort chats to display administrator chat at the top
+  const sortedChats = [...filteredChats].sort((a, b) => {
+    if (a.administratorId && !b.administratorId) return -1;
+    if (!a.administratorId && b.administratorId) return 1;
+    return 0;
+  });
+
   return (
     <div className="flex h-full max-h-screen">
       {/* Left side - Chat list */}
@@ -149,7 +159,7 @@ export const BuyerChats: React.FC = () => {
           </div>
         </div>
         <ul className="overflow-y-auto flex-grow">
-          {filteredChats.map((chat) => (
+          {sortedChats.map((chat) => (
             <li
               key={chat.chatId}
               className={`p-3 flex items-start hover:bg-gray-100 cursor-pointer ${
@@ -158,7 +168,9 @@ export const BuyerChats: React.FC = () => {
               onClick={() => handleSelectChat(chat)}
             >
               <div className="flex-grow">
-                <h3 className="font-semibold text-left">{chat.distributorName}</h3>
+                <h3 className="font-semibold text-left">
+                  {chat.administratorId ? 'Administrator' : chat.distributorName}
+                </h3>
                 <p className="text-sm text-gray-600 text-left truncate">
                   {chat.lastMessage.slice(0, 60)}
                   {chat.lastMessage.length > 60 ? '...' : ''}

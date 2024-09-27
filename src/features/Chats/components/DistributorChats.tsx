@@ -7,10 +7,11 @@ import { Client } from '@stomp/stompjs';
 
 interface Chat {
   chatId: number;
-  firstName: string;  
+  firstName: string;
   lastName: string;
   buyerId: string;
   lastMessage: string;
+  administratorId: string | null;
 }
 
 export const DistributorChats: React.FC = () => {
@@ -26,7 +27,7 @@ export const DistributorChats: React.FC = () => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const response = await fetch('/api/chat/distributor'); 
+        const response = await fetch('/api/chat/distributor');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -38,24 +39,24 @@ export const DistributorChats: React.FC = () => {
     };
 
     const fetchDistributorId = async () => {
-        try {
-          const response = await fetch(`http://localhost:8080/api/distributor/profile`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setSenderId(data.distributorId);
-          } else {
-            console.error('Failed to fetch distributor ID');
-          }
-        } catch (error) {
-          console.error('Error fetching distributor ID:', error);
+      try {
+        const response = await fetch(`http://localhost:8080/api/distributor/profile`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setSenderId(data.distributorId);
+        } else {
+          console.error('Failed to fetch distributor ID');
         }
-      };
+      } catch (error) {
+        console.error('Error fetching distributor ID:', error);
+      }
+    };
 
     fetchChats();
     const chatIntervalId = setInterval(fetchChats, 1000);
@@ -103,31 +104,38 @@ export const DistributorChats: React.FC = () => {
 
   const connectToWebSocket = (chatId: string) => {
     const socket = new SockJS('http://localhost:8080/chat-websocket');
-    
+
     const stompClient = new Client({
-      webSocketFactory: () => socket,  
-      debug: (str) => console.log(str), 
-      reconnectDelay: 5000,      
+      webSocketFactory: () => socket,
+      debug: (str) => console.log(str),
+      reconnectDelay: 5000,
     });
-  
+
     stompClient.onConnect = (frame: any) => {
       console.log('Connected to WebSocket:', frame);
-  
+
       stompClient.subscribe(`/topic/chat/${chatId}`, (messageOutput: any) => {
         const message = JSON.parse(messageOutput.body);
         setMessages((prevMessages) => [...prevMessages, message]);
       });
     };
-  
+
     stompClient.onStompError = (frame) => {
       console.error('Broker reported error: ' + frame.headers['message']);
       console.error('Additional details: ' + frame.body);
     };
-  
+
     stompClient.activate();
-  
+
     setStompClient(stompClient);
   };
+
+  // Sort chats to display administrator chat at the top
+  const sortedChats = [...filteredChats].sort((a, b) => {
+    if (a.administratorId && !b.administratorId) return -1;
+    if (!a.administratorId && b.administratorId) return 1;
+    return 0;
+  });
 
   return (
     <div className="flex h-full max-h-screen">
@@ -148,20 +156,22 @@ export const DistributorChats: React.FC = () => {
           </div>
         </div>
         <ul className="overflow-y-auto flex-grow">
-          {filteredChats.map((chat) => (
+          {sortedChats.map((chat) => (
             <li
               key={chat.chatId}
-              className={`p-3 flex items-start hover:bg-gray-100 cursor-pointer ${
-                selectedChat?.chatId === chat.chatId ? 'bg-gray-200' : ''
-              }`}
+              className={`p-3 flex items-start hover:bg-gray-100 cursor-pointer ${selectedChat?.chatId === chat.chatId ? 'bg-gray-200' : ''
+                }`}
               onClick={() => handleSelectChat(chat)}
             >
               <div className="flex-grow">
+                <h3 className="font-semibold text-left">
+                  {chat.administratorId ? 'Administrator' : chat.distributorName}
+                </h3>
                 <h3 className="font-semibold text-left">{chat.firstName} {chat.lastName}</h3>
                 <p className="text-sm text-gray-600 text-left truncate">
                   {chat.lastMessage.slice(0, 60)}
                   {chat.lastMessage.length > 60 ? '...' : ''}
-                </p>             
+                </p>
               </div>
             </li>
           ))}
