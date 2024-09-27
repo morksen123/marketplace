@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { usePromotions } from '../hooks/usePromotions';
 import { Promotion } from '../constants';
 import { Button } from '@/components/ui/button';
-import { PromotionStatusSelect } from './PromotionStatusSelect';
 import { PromotionForm } from './PromotionForm';
 
 const EditPromotion: React.FC = () => {

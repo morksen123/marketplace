@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '@/features/ProductCatalogue/constants';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -67,17 +67,39 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onSe
         break;
       case 'category':
         selectedProductIds = products.filter(p => 
-          (selectedCategories.length === 0 || selectedCategories.includes(p.category)) &&
-          (selectedConditions.length === 0 || selectedConditions.includes(p.condition)) &&
+          (selectedCategories.length === 0 || selectedCategories.includes(p.foodCategory)) &&
+          (selectedConditions.length === 0 || selectedConditions.includes(p.foodCondition)) &&
           (selectedDeliveryMethods.length === 0 || selectedDeliveryMethods.includes(p.deliveryMethod))
         ).map(p => p.productId);
+        console.log(selectedProductIds)
         break;
-      case 'expiration':
-        // Implement expiration-based logic here
-        break;
+      // case 'expiration':
+      //   // Implement expiration-based logic here
+      //   break;
     }
+    console.log(selectedProductIds)
     onSelectedProductsChange(selectedProductIds);
   };
+  
+  const handleIndividualProductChange = (productId: number) => {
+    setSelectedIndividualProducts(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(id => id !== productId);
+      } else {
+        return [...prev, productId];
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (applicationType === 'individual') {
+      onSelectedProductsChange(selectedIndividualProducts);
+    }
+  }, [selectedIndividualProducts, applicationType]);
+
+  useEffect(() => {
+    updateSelectedProducts(applicationType);
+  }, [selectedCategories, selectedConditions, selectedDeliveryMethods, selectedIndividualProducts, expirationCriteria]);
 
   const renderApplicationOptions = () => {
     switch (applicationType) {
@@ -85,18 +107,17 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onSe
         return (
           <div className="mt-4">
             <Label>Select Individual Products</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Select products" />
-              </SelectTrigger>
-              <SelectContent>
-                {products.map(product => (
-                  <SelectItem key={product.productId} value={product.productId.toString()}>
-                    {product.listingTitle}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {products.map(product => (
+              <div key={product.productId} className="flex items-center space-x-2 mb-2">
+              <Checkbox 
+                id={product.productId.toString()} 
+                checked={selectedIndividualProducts.includes(product.productId)}
+                onCheckedChange={() => handleIndividualProductChange(product.productId)}
+                className="border-gray-300"
+              />
+              <label htmlFor={product.listingTitle}>{product.listingTitle}</label>
+            </div>
+            ))}
           </div>
         );
       case 'category':
@@ -146,7 +167,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onSe
             </div>
           </div>
         );
-      case 'expiration':
+      // case 'expiration':
         return (
           <div className="mt-4">
             <Label>Select Expiration Option</Label>
@@ -226,7 +247,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onSe
           <SelectItem value="all">All Products</SelectItem>
           <SelectItem value="individual">Apply by Individual Products</SelectItem>
           <SelectItem value="category">Apply by Category, Food Condition, Delivery Method</SelectItem>
-          <SelectItem value="expiration">Apply by Expiration Date</SelectItem>
+          {/* <SelectItem value="expiration">Apply by Expiration Date</SelectItem> */}
         </SelectContent>
       </Select>
 
