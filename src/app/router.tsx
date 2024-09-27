@@ -1,5 +1,6 @@
 import { ROLES } from '@/features/Authentication/types/auth';
 import { AuthGuard, RoleGuard } from '@/lib/auth';
+import { StripeWrapper } from '@/lib/stripe';
 import {
   createBrowserRouter,
   RouteObject,
@@ -122,12 +123,37 @@ const routes: RouteObject[] = [
               },
               {
                 path: '/buyer/checkout',
-                lazy: async () => {
-                  const { CheckoutRoute } = await import(
-                    './routes/payment/checkout'
-                  );
-                  return { Component: CheckoutRoute };
-                },
+                element: <StripeWrapper />,
+                children: [
+                  {
+                    index: true,
+                    lazy: async () => {
+                      const { CheckoutRoute } = await import(
+                        './routes/payment/checkout'
+                      );
+                      const { useStripeSetup } = await import(
+                        '../hooks/useStripeSetup'
+                      );
+                      return {
+                        Component: () => {
+                          const { dpmCheckerLink } = useStripeSetup();
+                          return (
+                            <CheckoutRoute dpmCheckerLink={dpmCheckerLink} />
+                          );
+                        },
+                      };
+                    },
+                  },
+                  {
+                    path: 'complete',
+                    lazy: async () => {
+                      const { CheckoutComplete } = await import(
+                        './routes/payment/checkout-complete'
+                      );
+                      return { Component: CheckoutComplete };
+                    },
+                  },
+                ],
               },
               {
                 path: '/buyer/profile/favourites',
