@@ -5,6 +5,7 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirectoryOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
+import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import { Link } from 'react-router-dom';
 
 export const DistributorNavMenu = () => {
@@ -26,6 +27,12 @@ export const DistributorNavMenu = () => {
               className="text-black hover:text-gray-600 flex items-center"
             >
               <SupportAgentOutlinedIcon className="mr-1" /> FAQ
+            </Link>
+            <Link
+              to="/inventory-management"
+              className="text-black hover:text-gray-600 flex items-center"
+            >
+              <InventoryOutlinedIcon className="mr-1" /> Inventory
             </Link>
             <Link
               to="/chats"
