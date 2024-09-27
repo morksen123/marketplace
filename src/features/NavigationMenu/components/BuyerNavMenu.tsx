@@ -1,14 +1,16 @@
-import { useNavigate } from 'react-router-dom';
+import logo from '@/assets/gudfood-logo.png';
+import { Button } from '@/components/ui/button';
+import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
+import { useCart } from '@/features/Cart/hooks/useCart';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
-import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { useState, useRef, useEffect } from 'react';
-import logo from '../../../assets/gudfood-logo.png';
-import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface BuyerNavMenuProps {
   showTabs?: boolean;
@@ -20,6 +22,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
   const [selectedTab, setSelectedTab] = useState('Home');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  const { cartQuantity } = useCart();
   const navigate = useNavigate();
   const { logout } = useAuthActions();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -60,7 +63,10 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
   // Handle clicking outside of dropdown to close it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowAccountDropdown(false);
       }
     };
@@ -77,9 +83,9 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
         <div className="flex justify-between items-center">
           {/* Logo Section */}
           <div className="pl-6">
-            <a href="/buyer/home">
+            <Link to="/buyer/home">
               <img src={logo} alt="GudFood Logo" className="h-12" />
-            </a>
+            </Link>
           </div>
 
           {/* Search Bar */}
@@ -103,41 +109,45 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
 
           {/* Navigation Links with Icons */}
           <div className="flex items-center space-x-12 pr-6">
-            <a
-              href="/faq"
+            <Link
+              to="/faq"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <SupportAgentOutlinedIcon className="mr-1" /> FAQ
-            </a>
-            <a
-              href="/buyer/profile/chats"
+            </Link>
+            <Link
+              to="/buyer/profile/chats"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <SmsOutlinedIcon className="mr-1" /> Chats
-            </a>
-            <a
-              href="/account"
+            </Link>
+            <Link
+              to="/account"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
-            </a>
+            </Link>
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={toggleAccountDropdown}
                 className="text-black hover:text-gray-600 flex items-center"
               >
-                <PersonOutlineOutlinedIcon className="mr-1" /> Account 
-                <ArrowDropDownIcon className={`transition-transform duration-300 ${showAccountDropdown ? 'rotate-180' : ''}`} />
+                <PersonOutlineOutlinedIcon className="mr-1" /> Account
+                <ArrowDropDownIcon
+                  className={`transition-transform duration-300 ${
+                    showAccountDropdown ? 'rotate-180' : ''
+                  }`}
+                />
               </button>
               {showAccountDropdown && (
                 <div className="absolute right-0 mt-2 w-36 bg-white rounded-md shadow-lg z-10">
                   {window.location.pathname !== '/buyer/profile' ? (
-                    <a
-                      href="/buyer/profile"
+                    <Link
+                      to="/buyer/profile"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-center"
                     >
                       My Profile
-                    </a>
+                    </Link>
                   ) : (
                     <span className="block px-4 py-2 text-sm text-gray-400 text-center cursor-default">
                       My Profile
@@ -152,9 +162,17 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
                 </div>
               )}
             </div>
-            <button className="button button-green">
-              <ShoppingCartOutlinedIcon className="mr-2" /> Cart
-            </button>
+            <Link to="/buyer/cart">
+              <Button variant="secondary" className="relative">
+                <ShoppingCartOutlinedIcon className="mr-2 h-4 w-4" />
+                Cart
+                {cartQuantity > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-destructive text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {cartQuantity}
+                  </span>
+                )}
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
