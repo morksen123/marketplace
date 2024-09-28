@@ -27,6 +27,7 @@ interface Message {
   sentAt: string;
   images: string[];
   title?: string;
+  senderRole: string;
 }
 
 interface DistributorIndividualChatProps {
@@ -96,6 +97,7 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
         text: message,
         senderId: senderId,
         images: uploadedUrls,
+        senderRole: 'distributor',
       };
 
       stompClient.publish({
@@ -238,49 +240,43 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
         <>
           <div className="p-4 border-b flex items-center">
             <h2 className="text-xl font-semibold">
-              {selectedChat.firstName && selectedChat.lastName
-                ? `${selectedChat.firstName} ${selectedChat.lastName}`
+              {selectedChat.firstName || selectedChat.lastName
+                ? `${selectedChat.firstName || ''} ${selectedChat.lastName || ''}`
                 : 'Administrator'}
             </h2>
           </div>
           <div className="flex-grow overflow-y-auto p-4">
-            {messages.map((msg) => (
-              <div key={msg.messageId} className={`mb-2 ${msg.senderId === senderId ? 'flex justify-end' : 'flex justify-start'}`}>
-                <div className={`max-w-xs ${msg.senderId !== senderId ? 'ml-0' : 'ml-auto'}`}>
-                  {msg.images && msg.images.length > 0 ? (
-                    <div className={`flex flex-col ${msg.senderId === senderId ? 'items-end' : 'items-start'}`}>
-                      {msg.images.map((image, index) => (
-                        <div key={index} className="mt-2 cursor-pointer" onClick={() => handleFileClick(image)}>
-                          {image.match(/\.(jpeg|jpg|gif|png)$/) ? (
-                            <div className="inline-block border rounded-lg p-2">
-                              <img src={image} alt="Message attachment" className="max-w-full rounded" />
-                            </div>
-                          ) : (
-                            <div className="flex items-center bg-gray-200 p-2 rounded">
-                              {getFileIcon(image)}
-                              <span className="ml-2">{getFileName(image)}</span>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
-                  {msg.title ? (
-                    <div className={`mt-2 ${msg.senderId === senderId ? 'text-right' : 'text-left'}`}>
-                      <span className={`px-4 py-2 inline-block rounded ${msg.senderId === senderId ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>
-                        <strong>ANNOUNCEMENT</strong><br />
-                        <strong>{msg.title}</strong><br />
-                        {msg.text}
-                      </span>
-                    </div>
-                  ) : msg.text ? (
-                    <div className={`mt-2 ${msg.senderId === senderId ? 'text-right' : 'text-left'}`}>
-                      <span className={`px-4 py-2 inline-block rounded ${msg.senderId === senderId ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>{msg.text}</span>
-                    </div>
-                  ) : null}
+            {messages.map((msg) => {
+              const isDistributorMessage = msg.senderId === senderId && msg.senderRole === 'distributor';
+              return (
+                <div 
+                  key={msg.messageId} 
+                  className={`mb-2 ${isDistributorMessage ? 'flex justify-end' : 'flex justify-start'}`}
+                >
+                  <div className={`max-w-xs ${isDistributorMessage ? 'ml-auto' : 'mr-auto'}`}>
+                    <span 
+                      className={`px-4 py-2 inline-block rounded ${
+                        isDistributorMessage ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'
+                      }`}
+                    >
+                      {msg.text}
+                    </span>
+                    {msg.images && msg.images.length > 0 && (
+                      <div className={`mt-2 ${isDistributorMessage ? 'text-right' : 'text-left'}`}>
+                        {msg.images.map((image, index) => (
+                          <img 
+                            key={index} 
+                            src={image} 
+                            alt={`Message attachment ${index + 1}`} 
+                            className="max-w-xs rounded" 
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="border-t p-4">
             {imagePreviews.length > 0 && (

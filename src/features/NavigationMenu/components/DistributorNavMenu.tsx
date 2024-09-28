@@ -64,7 +64,7 @@ export const DistributorNavMenu = () => {
               <SupportAgentOutlinedIcon className="mr-1" /> FAQ
             </Link>
             <Link
-              to="/profile/chats"
+              to="distributor/profile/chats"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <SmsOutlinedIcon className="mr-1" /> Chats

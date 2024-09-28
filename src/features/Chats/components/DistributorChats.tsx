@@ -165,7 +165,7 @@ export const DistributorChats: React.FC = () => {
             >
               <div className="flex-grow">
                 <h3 className="font-semibold text-left">
-                  {chat.administratorId ? 'Administrator' : chat.distributorName}
+                  {chat.administratorId ? 'Administrator' : ''}
                 </h3>
                 <h3 className="font-semibold text-left">{chat.firstName} {chat.lastName}</h3>
                 <p className="text-sm text-gray-600 text-left truncate">
