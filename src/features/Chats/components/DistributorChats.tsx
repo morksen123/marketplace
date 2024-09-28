@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
-// import { DistributorIndividualChat } from './DistributorIndividualChat';
+import { DistributorIndividualChat } from './DistributorIndividualChat';
 import { useGlobalChat } from '@/contexts/GlobalChatContext';
 import { Chat } from '@/types/chat';
 
@@ -67,7 +67,7 @@ export const DistributorChats: React.FC = () => {
       </div>
 
       <div className="w-2/3 flex flex-col">
-      <p>Place Holder</p>
+        <DistributorIndividualChat />
       </div>
     </div>
   );

@@ -1,47 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import SendIcon from '@mui/icons-material/Send';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
+import AttachFileIcon from '@mui/icons-material/Upload';
 import SaveIcon from '@mui/icons-material/Save';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from '@mui/icons-material/Remove';
 import CircularProgress from '@mui/material/CircularProgress';
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { Dialog, DialogContent, DialogActions } from '@mui/material';
 import Button from '@mui/material/Button';
-import WebSocketService from '../../../services/WebSocketService';
-import { useWebSocket } from '../../../hooks/useWebSocket';
+import { useGlobalChat } from '@/contexts/GlobalChatContext';
+import { Message } from '@/types/chat';
 
-interface Chat {
-  chatId: number;
-  firstName: string,
-  lastName: string,
-  buyerId: number,
-  lastMessage: string;
-}
-
-interface Message {
-  messageId: number;
-  chatId: number;
-  senderId: number;
-  text: string;
-  sentAt: string;
-  images: string[];
-  title?: string;
-  senderRole: string;
-  isSending?: boolean;
-}
-
-interface DistributorIndividualChatProps {
-  selectedChat: Chat | null;
-  senderId: number;
-}
-
-export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps> = ({ selectedChat, senderId }) => {
+export const DistributorIndividualChat: React.FC = () => {
   const [message, setMessage] = useState('');
-  const { messages, sendMessage } = useWebSocket(selectedChat?.chatId || null);
+  const { selectedChat, messages, sendMessage, fetchChatMessages } = useGlobalChat();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<{ type: string; content: string }[]>([]);
@@ -51,34 +26,20 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
-    const fetchChatMessages = async () => {
-      try {
-        const response = await fetch(`/api/chat/messages/${selectedChat?.chatId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setMessages(data);
-        } else {
-          console.error('Failed to fetch chat messages');
-        }
-      } catch (error) {
-        console.error('Error fetching chat messages:', error);
-      }
-    };
-
     if (selectedChat?.chatId) {
-      fetchChatMessages();
+      fetchChatMessages(selectedChat.chatId);
     }
-  }, [selectedChat]);
+  }, [selectedChat, fetchChatMessages]);
 
   const handleSendMessage = async () => {
     if ((message.trim() || images.length > 0) && selectedChat) {
       setIsSending(true);
       const uploadedUrls = await uploadFilesToS3(images);
 
-      const messagePayload = {
+      const messagePayload: Omit<Message, 'messageId' | 'sentAt'> = {
         chatId: selectedChat.chatId,
         text: message,
-        senderId: senderId,
+        senderId: selectedChat.distributorId,
         images: uploadedUrls,
         senderRole: 'distributor',
       };
@@ -225,8 +186,8 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
             </h2>
           </div>
           <div className="flex-grow overflow-y-auto p-4">
-            {messages.map((msg) => {
-              const isDistributorMessage = msg.senderId === senderId && msg.senderRole === 'distributor';
+            {messages[selectedChat.chatId]?.map((msg) => {
+              const isDistributorMessage = msg.senderRole === 'distributor';
               return (
                 <div 
                   key={msg.messageId} 

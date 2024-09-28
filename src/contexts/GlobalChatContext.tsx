@@ -47,28 +47,47 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const fetchChatMessages = async (chatId: number) => {
-    try {
-      const response = await fetch(`/api/chat/messages/${chatId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setMessages(prevMessages => ({
-          ...prevMessages,
-          [chatId]: data
-        }));
-      } else {
-        console.error('Failed to fetch chat messages');
+    if (!messages[chatId]) {
+      try {
+        const response = await fetch(`/api/chat/messages/${chatId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setMessages(prevMessages => ({
+            ...prevMessages,
+            [chatId]: data
+          }));
+        } else {
+          console.error('Failed to fetch chat messages');
+        }
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
       }
-    } catch (error) {
-      console.error('Error fetching chat messages:', error);
     }
   };
 
-  const sendMessage = (message: Omit<Message, 'messageId' | 'sentAt'>) => {
-    WebSocketService.sendMessage('/app/sendMessage', message);
-    setMessages(prevMessages => ({
-      ...prevMessages,
-      [message.chatId]: [...(prevMessages[message.chatId] || []), message as Message]
-    }));
+  const sendMessage = async (message: Omit<Message, 'messageId' | 'sentAt'>) => {
+    try {
+      const response = await fetch('/api/chat/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(message),
+      });
+
+      if (response.ok) {
+        const sentMessage = await response.json();
+        setMessages(prevMessages => ({
+          ...prevMessages,
+          [message.chatId]: [...(prevMessages[message.chatId] || []), sentMessage]
+        }));
+        WebSocketService.sendMessage('/app/sendMessage', sentMessage);
+      } else {
+        console.error('Failed to send message');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   return (
