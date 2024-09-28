@@ -239,6 +239,15 @@ const routes: RouteObject[] = [
       return { Component: EditProductListingRoute };
     },
   },
+  {
+    path: '/inventory-management',
+    lazy: async () => {
+      const { InventoryManagementRoute } = await import(
+        './routes/inventoryManagment/inventory-management'
+      );
+      return { Component: InventoryManagementRoute };
+    },
+  },
 ];
 
 const router = createBrowserRouter(routes);

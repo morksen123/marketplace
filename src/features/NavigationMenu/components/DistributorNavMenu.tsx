@@ -9,6 +9,8 @@ import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirecto
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
+
 
 export const DistributorNavMenu = () => {
   const navigate = useNavigate();
@@ -62,6 +64,12 @@ export const DistributorNavMenu = () => {
               className="text-black hover:text-gray-600 flex items-center"
             >
               <SupportAgentOutlinedIcon className="mr-1" /> FAQ
+            </Link>
+            <Link
+              to="/inventory-management"
+              className="text-black hover:text-gray-600 flex items-center"
+            >
+              <InventoryOutlinedIcon className="mr-1" /> Inventory
             </Link>
             <Link
               to="/distributor/profile/chats"
