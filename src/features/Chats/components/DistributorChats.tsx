@@ -147,7 +147,7 @@ export const DistributorChats: React.FC = () => {
               <input
                 type="text"
                 className="w-full px-4 py-2 pl-10 pr-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Search buyers"
+                placeholder="Search"
                 value={searchTerm}
                 onChange={handleSearch}
               />
