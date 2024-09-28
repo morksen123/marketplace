@@ -1,72 +1,79 @@
 import { Product } from '@/features/ProductListing/constants';
-import { cartQuantityAtom } from '@/store/cartAtom';
-import { useAtom } from 'jotai';
-import { useEffect, useState } from 'react';
-import { CartItem } from '../types/cart';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  addItemToCart,
+  removeItemFromCart,
+  updateItemQuantity,
+  viewCart,
+} from '../api/api-cart';
 
 export const useCart = () => {
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    const savedCart = localStorage.getItem('cart');
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
-  const [cartQuantity, setCartQuantity] = useAtom(cartQuantityAtom);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-    const cartQuantity = cart.reduce((total, item) => total + item.quantity, 0);
-    setCartQuantity(cartQuantity);
-  }, [cart, setCartQuantity]);
+  const { data: cart = null } = useQuery({
+    queryKey: ['cart'],
+    queryFn: viewCart,
+  });
+
+  const addToCartMutation = useMutation({
+    mutationFn: ({
+      productId,
+      quantity,
+    }: {
+      productId: string;
+      quantity: number;
+    }) => addItemToCart(productId, quantity),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    },
+  });
+
+  const removeFromCartMutation = useMutation({
+    mutationFn: removeItemFromCart,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    },
+  });
+
+  const updateQuantityMutation = useMutation({
+    mutationFn: ({
+      productId,
+      quantity,
+    }: {
+      productId: string;
+      quantity: number;
+    }) => updateItemQuantity(productId, quantity),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    },
+  });
 
   const addToCart = (product: Product, quantity: number) => {
-    setCart((currentCart) => {
-      const existingItem = currentCart.find(
-        (item) => item.id === product.productId,
-      );
-      if (existingItem) {
-        return currentCart.map((item) =>
-          item.id === product.productId
-            ? { ...item, quantity: item.quantity + quantity }
-            : item,
-        );
-      }
-      return [
-        ...currentCart,
-        {
-          imageUrl: product.productPictures[0],
-          id: product.productId,
-          name: product.listingTitle,
-          price: product.price,
-          quantity: 1,
-          distributorId: product.distributorId,
-        },
-      ];
-    });
-  };
-
-  const removeFromCart = (productId: string) => {
-    setCart((currentCart) =>
-      currentCart.filter((item) => item.id !== productId),
-    );
+    addToCartMutation.mutate({ productId: product.productId, quantity });
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
-    setCart((currentCart) =>
-      currentCart.map((item) =>
-        item.id === productId
-          ? { ...item, quantity: Math.max(0, quantity) }
-          : item,
-      ),
-    );
+    const quantityToAdd = Math.max(0, quantity);
+    updateQuantityMutation.mutate({ productId, quantity: quantityToAdd });
+  };
+
+  const removeFromCart = (productId: string) => {
+    removeFromCartMutation.mutate(productId);
   };
 
   const clearCart = () => {
-    setCart([]);
+    // Implement clearCart functionality if needed
+    // You might need to add a new API endpoint for this
   };
 
-  const cartPrice = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
+  const cartPrice =
+    cart?.cartLineItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    ) ?? 0;
+
+  const cartQuantity =
+    cart?.cartLineItems.reduce((total, item) => total + item.quantity, 0) ?? 0;
 
   return {
     cart,
