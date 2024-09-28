@@ -2,7 +2,6 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { post } from './api-client';
 
 interface StripePaymentIntentData {
   amount: number;
@@ -16,29 +15,27 @@ const stripePromise = loadStripe(
 
 export const StripeWrapper = () => {
   const [clientSecret, setClientSecret] = useState('');
+
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
-        const { data, error } = await post<StripePaymentIntentData>(
-          '/cart/checkout',
-          {},
-        );
-
-        if (error) {
-          console.error('Error creating payment intent:', error);
-          return;
-        }
-
-        console.log(data);
-
-        if (data) {
+        const response = await fetch('/api/cart/checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = (await response.json()) as StripePaymentIntentData;
           setClientSecret(data.clientSecret);
+        } else {
+          window.location.href = '/buyer/cart';
         }
-      } catch (err) {
-        console.error('Unexpected error:', err);
+      } catch (error) {
+        console.error('Error fetching buyer ID:', error);
       }
     };
-
     createPaymentIntent();
   }, []);
 
