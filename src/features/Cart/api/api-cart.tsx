@@ -27,7 +27,6 @@ export async function addItemToCart(
     `/cart/add?productId=${productId}&quantity=${quantity}`,
     {},
   );
-  console.log('addItem', data);
 
   return data || null;
 }
@@ -44,4 +43,8 @@ export async function updateItemQuantity(
 
 export async function removeItemFromCart(productId: string) {
   await del<string>(`/cart/delete?productId=${productId}`);
+}
+
+export async function createTransaction(paymentIntentId: string) {
+  await post(`/cart/create-transaction?paymentIntentId=${paymentIntentId}`, {});
 }

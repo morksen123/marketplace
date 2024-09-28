@@ -41,8 +41,6 @@ export const Checkout: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { buyerProfile } = useBuyerProfile();
 
-  const email = buyerProfile?.email;
-
   const handleShippingChange = (
     field: keyof AddressFormState,
     value: string,
@@ -70,7 +68,6 @@ export const Checkout: React.FC = () => {
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/buyer/checkout/complete`,
-        receipt_email: email,
         payment_method_data: {
           billing_details: {
             name: `${billingAddress.firstName} ${billingAddress.lastName}`,
@@ -135,7 +132,26 @@ export const Checkout: React.FC = () => {
                   <CardTitle>Payment Details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <PaymentElement id="payment-element" />
+                  {/* <PaymentElement id="payment-element" /> */}
+                  {buyerProfile && (
+                    <PaymentElement
+                      id="payment-element"
+                      options={{
+                        defaultValues: {
+                          billingDetails: {
+                            email: buyerProfile.email,
+                            name:
+                              buyerProfile.firstName +
+                              ' ' +
+                              buyerProfile.lastName,
+                            address: {
+                              postal_code: '100',
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -145,15 +161,20 @@ export const Checkout: React.FC = () => {
                   <CardTitle>Order Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {cart.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-4">
+                  {cart?.cartLineItems.map((item) => (
+                    <div
+                      key={item.cartLineItemId}
+                      className="flex items-center space-x-4"
+                    >
                       <img
-                        src={item.imageUrl}
-                        alt={item.name}
+                        src={item.product.productPictures[0]}
+                        alt={item.product.listingTitle}
                         className="w-12 h-12 object-cover rounded-md"
                       />
                       <div className="flex-grow text-left">
-                        <p className="font-medium">{item.name}</p>
+                        <p className="font-medium">
+                          {item.product.listingTitle}
+                        </p>
                         <p className="text-sm text-gray-500">
                           Qty: {item.quantity} x ${item.price.toFixed(2)}
                         </p>

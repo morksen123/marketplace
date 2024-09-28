@@ -15,7 +15,7 @@ export const Cart: React.FC = () => {
         <div className="space-y-6">
           {cart?.cartLineItems.map((item) => (
             <div
-              key={item.product.productId}
+              key={item.cartLineItemId}
               className="flex items-center justify-between border-b border-gray-200 py-4"
             >
               <div className="flex items-center space-x-4">

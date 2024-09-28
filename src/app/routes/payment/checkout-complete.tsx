@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { createTransaction } from '@/features/Cart/api/api-cart';
 import { useStripe } from '@stripe/react-stripe-js';
 import { PaymentIntent } from '@stripe/stripe-js';
 import { useEffect, useState } from 'react';
@@ -88,6 +89,10 @@ export const CheckoutComplete = () => {
       if (paymentIntent) {
         setStatus(paymentIntent.status);
         setPaymentIntent(paymentIntent);
+
+        if (paymentIntent.status === 'succeeded') {
+          createTransaction(paymentIntent.id);
+        }
       }
     });
   }, [stripe]);
@@ -131,11 +136,11 @@ export const CheckoutComplete = () => {
           <CardFooter className="flex justify-center space-x-4">
             <Button
               variant="outline"
-              onClick={() => (window.location.href = '/')}
+              onClick={() => (window.location.href = '/buyer/home')}
             >
               Return to Home
             </Button>
-            {paymentIntent && <Button>View Details</Button>}
+            {paymentIntent && <Button variant="secondary">View Details</Button>}
           </CardFooter>
         </Card>
       </div>
