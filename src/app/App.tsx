@@ -7,8 +7,27 @@ import { Suspense, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import './App.css';
 import { AppRouter } from './router';
+import { useEffect } from 'react';
+import WebSocketService from '../services/WebSocketService';
+import { GlobalChatProvider } from '@/contexts/GlobalChatContext';
 
 function App() {
+  useEffect(() => {
+    const initializeWebSocket = async () => {
+      try {
+        await WebSocketService.connect();
+        console.log('WebSocket connected');
+      } catch (error) {
+        console.error('WebSocket connection failed:', error);
+      }
+    };
+
+    initializeWebSocket();
+
+    return () => {
+      WebSocketService.disconnect();
+    };
+  }, []);
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -17,16 +36,18 @@ function App() {
   );
 
   return (
-    <Suspense fallback={<div className="wrapper">Loading...</div>}>
-      <ErrorBoundary fallbackRender={ErrorFallback}>
-        <QueryClientProvider client={queryClient}>
-          <JotaiProvider>
-            <Toaster />
-            <AppRouter />
-          </JotaiProvider>
-        </QueryClientProvider>
-      </ErrorBoundary>
-    </Suspense>
+    <GlobalChatProvider>
+      <Suspense fallback={<div className="wrapper">Loading...</div>}>
+        <ErrorBoundary fallbackRender={ErrorFallback}>
+          <QueryClientProvider client={queryClient}>
+            <JotaiProvider>
+              <Toaster />
+              <AppRouter />
+            </JotaiProvider>
+          </QueryClientProvider>
+        </ErrorBoundary>
+      </Suspense>
+    </GlobalChatProvider>
   );
 }
 

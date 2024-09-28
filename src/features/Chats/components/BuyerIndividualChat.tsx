@@ -11,6 +11,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { Dialog, DialogContent, DialogActions } from '@mui/material';
 import Button from '@mui/material/Button';
+import { useWebSocket } from '../../../hooks/useWebSocket';
 
 interface Chat {
   chatId: number;
@@ -34,15 +35,13 @@ interface Message {
 
 interface BuyerIndividualChatProps {
   selectedChat: Chat | null;
-  stompClient: any;
   senderId: number;
 }
 
-export const BuyerIndividualChat: React.FC<BuyerIndividualChatProps> = ({ selectedChat, stompClient, senderId }) => {
+export const BuyerIndividualChat: React.FC<BuyerIndividualChatProps> = ({ selectedChat, senderId }) => {
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { messages, sendMessage } = useWebSocket(selectedChat?.chatId || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const currentSubscriptionRef = useRef<any>(null);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<{ type: string; content: string }[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -67,42 +66,11 @@ export const BuyerIndividualChat: React.FC<BuyerIndividualChatProps> = ({ select
 
     if (selectedChat?.chatId) {
       fetchChatMessages();
-      if (stompClient?.connected) {
-        if (currentSubscriptionRef.current) {
-          currentSubscriptionRef.current.unsubscribe();
-        }
-
-        currentSubscriptionRef.current = stompClient.subscribe(
-          `/topic/chat/${selectedChat.chatId}`,
-          (messageOutput: any) => {
-            const newMessage = JSON.parse(messageOutput.body);
-            setMessages((prevMessages) => {
-              const existingMessage = prevMessages.find(msg => msg.messageId === newMessage.messageId);
-              if (existingMessage) {
-                return prevMessages.map(msg => 
-                  msg.messageId === newMessage.messageId ? { ...msg, isSending: false } : msg
-                );
-              } else {
-                return [...prevMessages, newMessage];
-              }
-            });
-          }
-        );
-      }
-
-      const intervalId = setInterval(fetchChatMessages, 1000);
-
-      return () => {
-        clearInterval(intervalId);
-        if (currentSubscriptionRef.current) {
-          currentSubscriptionRef.current.unsubscribe();
-        }
-      };
     }
-  }, [selectedChat, stompClient]);
+  }, [selectedChat]);
 
   const handleSendMessage = async () => {
-    if ((message.trim() || images.length > 0) && selectedChat && stompClient?.connected) {
+    if ((message.trim() || images.length > 0) && selectedChat) {
       setIsSending(true);
       const uploadedUrls = await uploadFilesToS3(images);
 
@@ -114,26 +82,12 @@ export const BuyerIndividualChat: React.FC<BuyerIndividualChatProps> = ({ select
         senderRole: 'buyer',
       };
 
-      const tempMessage = {
-        ...messagePayload,
-        messageId: Date.now(),
-        sentAt: new Date().toISOString(),
-        isSending: true,
-      };
-
-      setMessages((prevMessages) => [...prevMessages, tempMessage]);
-
-      stompClient.publish({
-        destination: '/app/sendMessage',
-        body: JSON.stringify(messagePayload),
-      });
+      sendMessage(messagePayload);
 
       setMessage('');
       setImages([]);
       setImagePreviews([]);
       setIsSending(false);
-    } else {
-      console.error("STOMP client is not connected");
     }
   };
 

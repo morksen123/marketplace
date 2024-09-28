@@ -1,144 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
-import { BuyerIndividualChat } from './BuyerIndividualChat';
-import { useLocation } from 'react-router-dom';
-import SockJS from 'sockjs-client';
-import { Client } from '@stomp/stompjs';
-
-interface Chat {
-  chatId: number;
-  distributorName: string;  
-  distributorId: number;
-  lastMessage: string;
-  administratorId: string | null;
-}
+// import { BuyerIndividualChat } from './BuyerIndividualChat';
+import { useGlobalChat } from '@/contexts/GlobalChatContext';
+import { Chat } from '@/types/chat';
 
 export const BuyerChats: React.FC = () => {
-  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);  // Use chatId initially
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);  // Full chat details will be stored here
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [messages, setMessages] = useState<any[]>([]); // Messages for the selected chat
-  const [stompClient, setStompClient] = useState<any>(null);
-  const [senderId, setSenderId] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        const response = await fetch('/api/chat/buyer'); // Fetch buyer chats from backend
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        setChats(data); // Set chats with the fetched ChatsDto data
-      } catch (error) {
-        console.error('Error fetching chats:', error);
-      }
-    };
-
-    fetchChats(); // Initial fetch
-    const chatIntervalId = setInterval(fetchChats, 1000); // Fetch chats every 5 seconds
-
-    const fetchBuyerId = async () => {
-        try {
-          const response = await fetch(`http://localhost:8080/api/buyer/profile`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setSenderId(data.buyerId);
-          } else {
-            console.error('Failed to fetch buyer ID');
-          }
-        } catch (error) {
-          console.error('Error fetching buyer ID:', error);
-        }
-      };
-
-    fetchBuyerId();
-
-    // Check if chatId is passed via location state
-    if (location.state?.chatId) {
-      setSelectedChatId(location.state.chatId); // Set the selectedChatId from the state
-      fetchChatDetails(location.state.chatId);  // Fetch the chat details based on chatId
-    }
-
-    // Cleanup function
-    return () => {
-      clearInterval(chatIntervalId);
-    };
-  }, [location.state]);
-
-  // Function to fetch full chat details based on chatId
-  const fetchChatDetails = async (chatId: number) => {
-    try {
-      const response = await fetch(`/api/chat/${chatId}`); // Fetch chat details by chatId
-      if (response.ok) {
-        const chat = await response.json();
-        setSelectedChat(chat); // Set the full chat details to selectedChat
-        connectToWebSocket(chat.chatId.toString());
-      } else {
-        console.error('Failed to fetch chat details');
-      }
-    } catch (error) {
-      console.error('Error fetching chat details:', error);
-    }
-  };
+  const { chats, setSelectedChat } = useGlobalChat();
 
   const filteredChats = chats.filter((chat) =>
     chat.distributorName && searchTerm
       ? chat.distributorName.toLowerCase().includes(searchTerm.toLowerCase())
       : true
   );
+   
+  const sortedChats = [...filteredChats].sort((a, b) => {
+    if (a.administratorId && !b.administratorId) return -1;
+    if (!a.administratorId && b.administratorId) return 1;
+    return 0;
+  });
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
   const handleSelectChat = (chat: Chat) => {
-    setSelectedChat(chat); // Store the selected chat object
-    connectToWebSocket(chat.chatId.toString());
+    setSelectedChat(chat);
   };
-
-  const connectToWebSocket = (chatId: string) => {
-    const socket = new SockJS('http://localhost:8080/chat-websocket');
-    
-    const stompClient = new Client({
-      webSocketFactory: () => socket,  
-      debug: (str) => console.log(str), 
-      reconnectDelay: 5000,      
-    });
-  
-    stompClient.onConnect = (frame: any) => {
-      console.log('Connected to WebSocket:', frame);
-  
-      stompClient.subscribe(`/topic/chat/${chatId}`, (messageOutput: any) => {
-        const message = JSON.parse(messageOutput.body);
-        setMessages((prevMessages) => [...prevMessages, message]);
-      });
-    };
-  
-    stompClient.onStompError = (frame) => {
-      console.error('Broker reported error: ' + frame.headers['message']);
-      console.error('Additional details: ' + frame.body);
-    };
-  
-    stompClient.activate();
-  
-    setStompClient(stompClient);
-  };
-
-  // Sort chats to display administrator chat at the top
-  const sortedChats = [...filteredChats].sort((a, b) => {
-    if (a.administratorId && !b.administratorId) return -1;
-    if (!a.administratorId && b.administratorId) return 1;
-    return 0;
-  });
 
   return (
     <div className="flex h-full max-h-screen">
@@ -162,9 +50,7 @@ export const BuyerChats: React.FC = () => {
           {sortedChats.map((chat) => (
             <li
               key={chat.chatId}
-              className={`p-3 flex items-start hover:bg-gray-100 cursor-pointer ${
-                selectedChat?.chatId === chat.chatId ? 'bg-gray-200' : ''
-              }`}
+              className={`p-3 flex items-start hover:bg-gray-100 cursor-pointer`}
               onClick={() => handleSelectChat(chat)}
             >
               <div className="flex-grow">
@@ -182,7 +68,7 @@ export const BuyerChats: React.FC = () => {
       </div>
 
       <div className="w-2/3 flex flex-col">
-        <BuyerIndividualChat selectedChat={selectedChat} stompClient={stompClient} senderId={senderId} />
+        <p>Place Holder</p>
       </div>
     </div>
   );
