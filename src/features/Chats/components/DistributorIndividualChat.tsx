@@ -6,6 +6,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CircularProgress from '@mui/material/CircularProgress';
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { Dialog, DialogContent, DialogActions } from '@mui/material';
@@ -28,6 +29,7 @@ interface Message {
   images: string[];
   title?: string;
   senderRole: string;
+  isSending?: boolean;
 }
 
 interface DistributorIndividualChatProps {
@@ -45,6 +47,8 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
   const [imagePreviews, setImagePreviews] = useState<{ type: string; content: string }[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     const fetchChatMessages = async () => {
@@ -72,7 +76,16 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
           `/topic/chat/${selectedChat.chatId}`,
           (messageOutput: any) => {
             const newMessage = JSON.parse(messageOutput.body);
-            setMessages((prevMessages) => [...prevMessages, newMessage]);
+            setMessages((prevMessages) => {
+              const existingMessage = prevMessages.find(msg => msg.messageId === newMessage.messageId);
+              if (existingMessage) {
+                return prevMessages.map(msg => 
+                  msg.messageId === newMessage.messageId ? { ...msg, isSending: false } : msg
+                );
+              } else {
+                return [...prevMessages, newMessage];
+              }
+            });
           }
         );
       }
@@ -90,6 +103,7 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
 
   const handleSendMessage = async () => {
     if ((message.trim() || images.length > 0) && selectedChat && stompClient?.connected) {
+      setIsSending(true);
       const uploadedUrls = await uploadFilesToS3(images);
 
       const messagePayload = {
@@ -100,22 +114,24 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
         senderRole: 'distributor',
       };
 
+      const tempMessage = {
+        ...messagePayload,
+        messageId: Date.now(),
+        sentAt: new Date().toISOString(),
+        isSending: true,
+      };
+
+      setMessages((prevMessages) => [...prevMessages, tempMessage]);
+
       stompClient.publish({
         destination: '/app/sendMessage',
         body: JSON.stringify(messagePayload),
       });
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          ...messagePayload,
-          messageId: Date.now(),
-          sentAt: new Date().toISOString(),
-        },
-      ]);
 
       setMessage('');
       setImages([]);
       setImagePreviews([]);
+      setIsSending(false);
     } else {
       console.error("STOMP client is not connected");
     }
@@ -184,23 +200,31 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
   };
 
   const handleFileClick = (file: string) => {
-    setSelectedFile(file);
-    setOpenDialog(true);
+    if (file.match(/\.(jpeg|jpg|gif|png)$/i)) {
+      setEnlargedImage(file);
+    } else {
+      setSelectedFile(file);
+      setOpenDialog(true);
+    }
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedFile(null);
+    setEnlargedImage(null);
   };
 
   const handleSaveFile = () => {
-    if (selectedFile) {
-      const link = document.createElement('a');
-      link.href = selectedFile;
-      link.download = selectedFile.split('/').pop() || 'download';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    if (selectedFile || enlargedImage) {
+      const fileUrl = selectedFile || enlargedImage;
+      if (fileUrl) {
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = fileUrl.split('/').pop() || 'download';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     }
     handleCloseDialog();
   };
@@ -254,22 +278,45 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
                   className={`mb-2 ${isDistributorMessage ? 'flex justify-end' : 'flex justify-start'}`}
                 >
                   <div className={`max-w-xs ${isDistributorMessage ? 'ml-auto' : 'mr-auto'}`}>
-                    <span 
-                      className={`px-4 py-2 inline-block rounded ${
-                        isDistributorMessage ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'
-                      }`}
-                    >
-                      {msg.text}
-                    </span>
+                    {msg.text && (
+                      <span 
+                        className={`px-4 py-2 inline-block rounded text-sm ${
+                          isDistributorMessage ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'
+                        }`}
+                      >
+                        {msg.title && (
+                          <>
+                            <strong>ANNOUNCEMENT: {msg.title}</strong>
+                            <br />
+                          </>
+                        )}
+                        {msg.text}
+                        {msg.isSending && (
+                          <CircularProgress size={16} className="ml-2" />
+                        )}
+                      </span>
+                    )}
                     {msg.images && msg.images.length > 0 && (
-                      <div className={`mt-2 ${isDistributorMessage ? 'text-right' : 'text-left'}`}>
+                      <div className={`${isDistributorMessage ? 'text-right' : 'text-left'}`}>
                         {msg.images.map((image, index) => (
-                          <img 
-                            key={index} 
-                            src={image} 
-                            alt={`Message attachment ${index + 1}`} 
-                            className="max-w-xs rounded" 
-                          />
+                          image.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+                            <img 
+                              key={index} 
+                              src={image} 
+                              alt={`Message attachment ${index + 1}`} 
+                              className="max-w-xs rounded cursor-pointer border border-gray-300" 
+                              onClick={() => handleFileClick(image)}
+                            />
+                          ) : (
+                            <div 
+                              key={index}
+                              className={`flex items-center rounded p-2 mt-1 cursor-pointer ${isDistributorMessage ? 'bg-green-500 text-white': 'bg-gray-200'}`}
+                              onClick={() => handleFileClick(image)}
+                            >
+                              {getFileIcon(image)}
+                              <span className="ml-2 text-sm">{getFileName(image)}</span>
+                            </div>
+                          )
                         ))}
                       </div>
                     )}
@@ -277,6 +324,7 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
                 </div>
               );
             })}
+            <div/>
           </div>
           <div className="border-t p-4">
             {imagePreviews.length > 0 && (
@@ -284,9 +332,9 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
                 {imagePreviews.map((preview, index) => (
                   <div key={index} className="relative mr-2 mb-2">
                     {preview.type === 'image' ? (
-                      <img src={preview.content} alt="Preview" className="w-16 h-16 object-cover rounded" />
+                      <img src={preview.content} alt="Preview" className="w-16 h-16 object-cover rounded border border-gray-300" />
                     ) : (
-                      <div className="w-48 h-16 flex items-center justify-start bg-gray-200 rounded p-2 overflow-hidden">
+                      <div className="w-48 h-16 flex items-center justify-start bg-green-100 rounded p-2 overflow-hidden">
                         {getFileIcon(preview.content)}
                         <span className="ml-2 text-sm truncate">{getFileName(preview.content)}</span>
                       </div>
@@ -314,8 +362,12 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
                 <AttachFileIcon className="w-5 h-5" />
               </button>
               <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} multiple />
-              <button onClick={handleSendMessage} className="ml-2 p-2 button button-green rounded-full">
-                <SendIcon className="w-5 h-5" />
+              <button 
+                onClick={handleSendMessage} 
+                className="ml-2 p-2 button button-green rounded-full"
+                disabled={isSending}
+              >
+                {isSending ? <CircularProgress size={24} /> : <SendIcon className="w-5 h-5" />}
               </button>
             </div>
           </div>
@@ -325,29 +377,56 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
           Select a chat to start messaging
         </div>
       )}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogContent>
-          {selectedFile && (
-            <div className="flex justify-center">
-              {selectedFile.toLowerCase().endsWith('.pdf') ? (
-                <div>PDF file preview not available. Click download to save the file.</div>
-              ) : selectedFile.toLowerCase().endsWith('.xlsx') || selectedFile.toLowerCase().endsWith('.xls') ? (
-                <div>Excel file preview not available. Click download to save the file.</div>
-              ) : selectedFile.match(/\.(jpeg|jpg|gif|png)$/) ? (
-                <img src={selectedFile} alt="Full size" style={{ maxWidth: '100%', maxHeight: '70vh' }} />
-              ) : (
-                <div>File preview not available. Click download to save the file.</div>
-              )}
+      <Dialog
+        open={openDialog || !!enlargedImage}
+        onClose={handleCloseDialog}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          style: {
+            borderRadius: '12px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+          },
+        }}
+      >
+        <DialogContent style={{ padding: '24px' }}>
+          {enlargedImage ? (
+            <img src={enlargedImage} alt="Enlarged" style={{ width: '100%', height: 'auto', borderRadius: '8px' }} />
+          ) : selectedFile ? (
+            <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+              File preview not available. Click download to save the file.
             </div>
-          )}
+          ) : null}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
+        <DialogActions style={{ padding: '16px 24px' }}>
+          <Button
+            onClick={handleCloseDialog}
+            style={{
+              backgroundColor: '#017A37',
+              color: 'white',
+              padding: '8px 16px',
+              borderRadius: '4px',
+              textTransform: 'none',
+            }}
+          >
             Close
           </Button>
-          <Button onClick={handleSaveFile} color="primary" startIcon={<SaveIcon />}>
-            Download
-          </Button>
+          {(selectedFile || enlargedImage) && (
+            <Button
+              onClick={handleSaveFile}              
+              startIcon={<SaveIcon />}
+              style={{
+                backgroundColor: '#017A37',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                marginLeft: '12px',
+                textTransform: 'none',
+              }}
+            >
+              Download
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </>
