@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import { DistributorIndividualChat } from './DistributorIndividualChat';
 import { useGlobalChat } from '@/contexts/GlobalChatContext';
@@ -7,12 +7,18 @@ import { Chat } from '@/types/chat';
 export const DistributorChats: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { chats, setSelectedChat } = useGlobalChat();
+  const [, forceUpdate] = useState({});
+
+  useEffect(() => {
+    // Force a re-render when chats change
+    forceUpdate({});
+  }, [chats]);
 
   const filteredChats = chats.filter((chat) =>
     `${chat.firstName} ${chat.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-    const sortedChats = [...filteredChats].sort((a, b) => {
+  const sortedChats = [...filteredChats].sort((a, b) => {
     if (a.administratorId && !b.administratorId) return -1;
     if (!a.administratorId && b.administratorId) return 1;
     return 0;

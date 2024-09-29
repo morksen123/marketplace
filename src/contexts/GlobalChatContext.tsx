@@ -24,15 +24,29 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const handleChatMessage = useCallback((message: any) => {
     const data = JSON.parse(message.body);
+    console.log('Received message:', data);
+  
     if (data.messageType === 'MESSAGE') {
-      setMessages(prevMessages => ({
-        ...prevMessages,
-        [data.chatId]: [...(prevMessages[data.chatId] || []), data]
-      }));
+      setMessages((prevMessages) => {
+        const updatedMessages = {
+          ...prevMessages,
+          [data.chatId]: [...(prevMessages[data.chatId] || []), data],
+        };
+        return updatedMessages;
+      });
+  
+      setChats((prevChats) => {
+        const updatedChats = prevChats.map((chat) => 
+          chat.chatId === data.chatId 
+            ? { ...chat, lastMessage: data.text } 
+            : chat
+        );
+        return updatedChats;
+      });
     } else if (data.messageType === 'ANNOUNCEMENT') {
-      setAnnouncements(prevAnnouncements => ({
+      setAnnouncements((prevAnnouncements) => ({
         ...prevAnnouncements,
-        [data.chatId]: [...(prevAnnouncements[data.chatId] || []), data]
+        [data.chatId]: [...(prevAnnouncements[data.chatId] || []), data],
       }));
     }
   }, []);
@@ -72,6 +86,7 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         fetchedChats.forEach((chat: Chat) => {
           WebSocketService.subscribe(`/topic/chat/${chat.chatId}`, handleChatMessage);
         });
+        setChats(fetchedChats);
         
         console.log('WebSocket connected successfully');
         setIsLoading(false);
@@ -94,7 +109,18 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [fetchChats, handleChatUpdate, handleChatMessage]);
 
   useEffect(() => {
-    connectWebSocket();
+    const connect = async () => {
+      try {
+        await connectWebSocket();
+      } catch (error) {
+        console.error('WebSocket connection error:', error);
+        // Attempt to reconnect after a delay
+        setTimeout(() => connect(), 5000);
+      }
+    };
+    
+    connect();
+    
     return () => {
       WebSocketService.disconnect();
     };
@@ -126,6 +152,18 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const sendMessage = useCallback(async (message: Omit<Message, 'messageId' | 'sentAt'>) => {
     try {
+      // Optimistically update the UI
+      const tempMessage = {
+        ...message,
+        messageId: Date.now(), // Temporary ID
+        sentAt: new Date().toISOString(),
+      };
+      setMessages(prevMessages => ({
+        ...prevMessages,
+        [message.chatId]: [...(prevMessages[message.chatId] || []), tempMessage]
+      }));
+      
+      // Send the message to the server
       WebSocketService.sendMessage('/app/sendMessage', message);
     } catch (error) {
       console.error('Error sending message:', error);

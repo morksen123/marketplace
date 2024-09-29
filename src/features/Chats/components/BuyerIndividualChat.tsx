@@ -31,6 +31,13 @@ export const BuyerIndividualChat: React.FC = () => {
     }
   }, [selectedChat, fetchChatMessages]);
 
+  useEffect(() => {
+    if (selectedChat?.chatId && messages[selectedChat.chatId]) {
+      // Force a re-render
+      setMessage(prevMessage => prevMessage);
+    }
+  }, [messages, selectedChat]);
+
   const handleSendMessage = async () => {
     if ((message.trim() || images.length > 0) && selectedChat) {
       setIsSending(true);
@@ -203,9 +210,6 @@ export const BuyerIndividualChat: React.FC = () => {
                           </>
                         )}
                         {msg.text}
-                        {msg.isSending && (
-                          <CircularProgress size={16} className="ml-2" />
-                        )}
                       </span>
                     )}
                     {msg.images && msg.images.length > 0 && (

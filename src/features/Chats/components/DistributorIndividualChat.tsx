@@ -31,6 +31,14 @@ export const DistributorIndividualChat: React.FC = () => {
     }
   }, [selectedChat, fetchChatMessages]);
 
+  useEffect(() => {
+    // This effect will run whenever the messages state changes
+    if (selectedChat?.chatId && messages[selectedChat.chatId]) {
+      // Force a re-render by updating a state variable
+      setMessage(message => message);
+    }
+  }, [messages, selectedChat]);
+
   const handleSendMessage = async () => {
     if ((message.trim() || images.length > 0) && selectedChat) {
       setIsSending(true);
@@ -207,9 +215,6 @@ export const DistributorIndividualChat: React.FC = () => {
                           </>
                         )}
                         {msg.text}
-                        {msg.isSending && (
-                          <CircularProgress size={16} className="ml-2" />
-                        )}
                       </span>
                     )}
                     {msg.images && msg.images.length > 0 && (

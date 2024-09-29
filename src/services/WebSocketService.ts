@@ -24,7 +24,9 @@ class WebSocketService {
       this.stompClient = new Client({
         webSocketFactory: () => socket,
         debug: (str) => console.log(str),
-        reconnectDelay: 0,
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
       });
 
       this.stompClient.onConnect = () => {
@@ -45,6 +47,17 @@ class WebSocketService {
           reject(new Error('WebSocket connection timeout'));
         }
       }, 5000);
+    });
+  }
+
+  public reconnect(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.stompClient) {
+        this.stompClient.deactivate();
+      }
+      this.connect()
+        .then(resolve)
+        .catch(reject);
     });
   }
 
