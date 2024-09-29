@@ -5,23 +5,38 @@ import { usePromotions } from '../hooks/usePromotions';
 import { Promotion } from '../constants';
 import { Button } from '@/components/ui/button';
 import { PromotionForm } from './PromotionForm';
+import { ProductSelector } from './ProductSelector';
+import { useDistributor } from '@/features/DIstributorAccount/hooks/useDistributor';
+import { Product } from '@/features/ProductCatalogue/constants';
 
 const EditPromotion: React.FC = () => {
   const { promotionId } = useParams<{ promotionId: string }>();
   const navigate = useNavigate();
-  const { getPromotion, editPromotion } = usePromotions();
+  const { getPromotion, editPromotion, getPromotionProducts } = usePromotions();
   const {
     data: promotion,
-    isLoading,
-    isError,
+    isLoading :isPromotionLoading,
+    isError : isPromotionError,
   } = getPromotion(Number(promotionId));
+  const { activeProducts } = useDistributor();
+
   const [formData, setFormData] = useState<Promotion | null>(null);
+  const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
+  const [applicableProducts, setApplicableProducts] = useState<Product[]>([]);
+
 
   useEffect(() => {
     if (promotion) {
       setFormData(promotion);
+      setSelectedProductIds(promotion.productIds || []);
     }
   }, [promotion]);
+
+  useEffect(() => {
+    if(activeProducts) {
+      setApplicableProducts(activeProducts);
+    }
+  }, [activeProducts]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -32,6 +47,11 @@ const EditPromotion: React.FC = () => {
 
   const handleStatusChange = (newStatus: Promotion['status']) => {
     setFormData((prev) => (prev ? { ...prev, status: newStatus } : null));
+  };
+
+  const handleSelectedProductsChange = (newSelectedProductIds: number[]) => {
+    setSelectedProductIds(newSelectedProductIds);
+    setFormData((prev) => prev ? { ...prev, productIds: newSelectedProductIds } : null);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -47,8 +67,8 @@ const EditPromotion: React.FC = () => {
     navigate('/distributor/promotions');
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error loading promotion</div>;
+  if (isPromotionLoading) return <div>Loading...</div>;
+  if (isPromotionError) return <div>Error loading promotion or products</div>;
   if (!formData) return <div>Promotion not found</div>;
 
   return (
@@ -60,11 +80,19 @@ const EditPromotion: React.FC = () => {
           handleChange={handleChange}
           handleStatusChange={handleStatusChange}
         />
+        <ProductSelector
+          products={applicableProducts}
+          selectedProductIds={selectedProductIds}
+          isEdit={true}
+          onSelectedProductsChange={handleSelectedProductsChange}
+        />
         <div className="flex justify-end space-x-2">
           <Button variant="outline" onClick={handleBack}>
             Cancel
           </Button>
-          <Button type="submit" variant="secondary">Edit Promotion</Button>
+          <Button type="submit" variant="secondary">
+            Save Promotion Edits
+          </Button>
         </div>
       </form>
     </div>

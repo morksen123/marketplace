@@ -52,6 +52,10 @@ const ViewDistributorPromotions: React.FC = () => {
         return <Badge className="bg-yellow-500">Paused</Badge>;
       case 'COMPLETED':
         return <Badge className="bg-gray-500">Completed</Badge>;
+      case 'NOT_STARTED':
+        return <Badge className="bg-blue-500">Not Started</Badge>;
+      default:
+        return <Badge className="bg-gray-300">Unknown</Badge>;
     }
   };
 
@@ -67,7 +71,7 @@ const ViewDistributorPromotions: React.FC = () => {
         <CardContent>
           <div className="mb-4">
             <Button variant="secondary" onClick={handleCreatePromotion}>
-            <AddIcon className="mr-2" />
+              <AddIcon className="mr-2" />
               Create New Promotion
             </Button>
           </div>
@@ -121,7 +125,9 @@ const ViewDistributorPromotions: React.FC = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6}>No promotions found. Create a new one!</TableCell>
+                  <TableCell colSpan={6}>
+                    No promotions found. Create a new one!
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>

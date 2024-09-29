@@ -14,14 +14,22 @@ export const getPromotion = async (
   return get<Promotion>(`/promotions/promotion/${promotionId}`);
 };
 
-export const createPromotion = async (newPromo : Partial<Promotion>): Promise<ApiResponse<void>> => {
+export const createPromotion = async (
+  newPromo: Partial<Promotion>,
+): Promise<ApiResponse<void>> => {
   return post<void>('/promotions/create', newPromo);
 };
 
-
 export const editPromotion = async (
   promotionId: number,
-  editedPromo: Promotion
+  editedPromo: Promotion,
 ): Promise<ApiResponse<void>> => {
   return put<void>(`/promotions/promotion/${promotionId}`, editedPromo);
+};
+
+export const editPromotionStatus = async (
+  promotionId: number,
+  editedPromo: Promotion,
+): Promise<ApiResponse<void>> => {
+  return put<void>(`/promotions/promotion/${promotionId}/status`, editedPromo);
 };

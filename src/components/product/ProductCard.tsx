@@ -4,15 +4,11 @@ import {
 } from '@/features/ProductListing/constants';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import React from 'react';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import { Product } from '@/features/ProductCatalogue/constants';
 
 interface ProductCardProps {
-  product: {
-    productId: number;
-    listingTitle: string;
-    productPictures: string[];
-    foodCategory: string;
-    foodCondition: string;
-  };
+  product: Product;
   isFavourite: boolean | undefined;
   onProductClick: (productId: number) => void;
   onToggleFavourite: (productId: number) => void;
@@ -24,11 +20,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onProductClick,
   onToggleFavourite,
 }) => {
+  const isBoosted = product.boostStatus === 'ACTIVE';
+
   return (
     <div
       className="bg-white shadow rounded-lg p-4 cursor-pointer relative"
       onClick={() => onProductClick(product.productId)}
     >
+      {isBoosted && (
+        <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs flex items-center">
+          <RocketLaunchIcon style={{ fontSize: '14px', marginRight: '2px' }} />
+          Featured
+        </div>
+      )}
       <img
         src={
           product.productPictures.length > 0
@@ -47,7 +51,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             onToggleFavourite(product.productId);
           }}
           className="ml-2 flex items-center"
-          aria-label='Toggle Favourite'
+          aria-label="Toggle Favourite"
         >
           <FavoriteOutlinedIcon
             style={{

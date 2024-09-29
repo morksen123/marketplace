@@ -253,6 +253,13 @@ const routes: RouteObject[] = [
                   return { Component: TransactionsRoute };
                 },
               },
+              {
+                path: '/distributor/view-boosted-products',
+                lazy: async () => {
+                  const { ViewBoostedProductsRoute } = await import('./routes/promotions/view-boosted-products');
+                  return {Component: ViewBoostedProductsRoute}
+                }
+              }
             ],
           },
           // You can add more role-specific sections here

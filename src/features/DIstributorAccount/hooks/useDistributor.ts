@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
-import { getDistributorProfile, updateDistributorProfile, getAllProductsByDistributor, getAllActiveProductsByDistributor } from '../lib/distributor';
+import { getDistributorProfile, updateDistributorProfile, getAllProductsByDistributor, getAllActiveProductsByDistributor, getProductbyProductId } from '../lib/distributor';
 
 
 interface Distributor {
@@ -40,6 +40,15 @@ export function useDistributor() {
     },
   });
 
+  const getProductQuery = (productId: number) => useQuery({
+    queryKey: ['product', productId],
+    queryFn: async () => {
+      const { data, error } = await getProductbyProductId(productId);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const allProductsQuery = useQuery({
     queryKey: ['allDistributorProducts'],
     queryFn: async () => {
@@ -66,5 +75,6 @@ export function useDistributor() {
     isLoadingAllProducts: allProductsQuery.isLoading,
     activeProducts: activeProductsQuery.data,
     isLoadingActiveProducts: activeProductsQuery.isLoading,
+    getProduct: getProductQuery
   };
 }
