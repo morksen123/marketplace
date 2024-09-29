@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import AttachFileIcon from '@mui/icons-material/Upload';
 import SaveIcon from '@mui/icons-material/Save';
@@ -27,6 +27,19 @@ export const BuyerIndividualChat: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+
+  // Add this ref
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Add this useEffect
+  useEffect(() => {
+    scrollToBottom();
+  }, [selectedChat?.messages]);
+
+  // Add this function
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleSendMessage = async () => {
     if ((message.trim() || images.length > 0) && selectedChat) {
@@ -174,7 +187,7 @@ export const BuyerIndividualChat: React.FC = () => {
   return (
     <>
       {selectedChat ? (
-        <>
+        <div className="flex flex-col h-full"> {/* Add this wrapper */}
           <div className="p-4 border-b flex items-center">
             <h2 className="text-xl font-semibold">{selectedChat.distributorName ? selectedChat.distributorName : 'Administrator'}</h2>
           </div>
@@ -186,10 +199,10 @@ export const BuyerIndividualChat: React.FC = () => {
                   key={msg.messageId} 
                   className={`mb-2 ${isBuyerMessage ? 'flex justify-end' : 'flex justify-start'}`}
                 >
-                  <div className={`max-w-xs ${isBuyerMessage ? 'ml-auto' : 'mr-auto'}`}>
+                  <div className={`max-w-[70%] ${isBuyerMessage ? 'ml-auto' : 'mr-auto'}`}> {/* Adjust max-width */}
                     {msg.text && (
                       <span 
-                        className={`px-4 py-2 inline-block rounded text-sm ${
+                        className={`px-4 py-2 inline-block rounded text-sm break-words ${
                           isBuyerMessage ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'
                         }`}
                       >
@@ -230,7 +243,7 @@ export const BuyerIndividualChat: React.FC = () => {
                 </div>
               );
             })}
-            <div/>
+            <div ref={messagesEndRef} /> {/* Add this empty div */}
           </div>
           <div className="border-t p-4">
             {imagePreviews.length > 0 && (
@@ -277,7 +290,7 @@ export const BuyerIndividualChat: React.FC = () => {
               </button>
             </div>
           </div>
-        </>
+        </div>
       ) : (
         <div className="flex items-center justify-center h-full text-gray-500">
           Select a chat to start messaging

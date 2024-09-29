@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import AttachFileIcon from '@mui/icons-material/Upload';
 import SaveIcon from '@mui/icons-material/Save';
@@ -24,6 +24,19 @@ export const DistributorIndividualChat: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+
+  // Add this ref
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Add this useEffect
+  useEffect(() => {
+    scrollToBottom();
+  }, [selectedChat?.messages]);
+
+  // Add this function
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleSendMessage = async () => {
     if ((message.trim() || images.length > 0) && selectedChat) {
@@ -171,7 +184,7 @@ export const DistributorIndividualChat: React.FC = () => {
   return (
     <>
       {selectedChat ? (
-        <>
+        <div className="flex flex-col h-full"> {/* Add this wrapper */}
           <div className="p-4 border-b flex items-center">
             <h2 className="text-xl font-semibold">
               {selectedChat.firstName || selectedChat.lastName
@@ -187,10 +200,10 @@ export const DistributorIndividualChat: React.FC = () => {
                   key={msg.messageId} 
                   className={`mb-2 ${isDistributorMessage ? 'flex justify-end' : 'flex justify-start'}`}
                 >
-                  <div className={`max-w-xs ${isDistributorMessage ? 'ml-auto' : 'mr-auto'}`}>
+                  <div className={`max-w-[70%] ${isDistributorMessage ? 'ml-auto' : 'mr-auto'}`}> {/* Adjust max-width */}
                     {msg.text && (
                       <span 
-                        className={`px-4 py-2 inline-block rounded text-sm ${
+                        className={`px-4 py-2 inline-block rounded text-sm break-words ${
                           isDistributorMessage ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'
                         }`}
                       >
@@ -211,13 +224,13 @@ export const DistributorIndividualChat: React.FC = () => {
                               key={index} 
                               src={image} 
                               alt={`Message attachment ${index + 1}`} 
-                              className="max-w-xs rounded cursor-pointer border border-gray-300" 
+                              className="max-w-full h-auto rounded cursor-pointer border border-gray-300 mt-2" 
                               onClick={() => handleFileClick(image)}
                             />
                           ) : (
                             <div 
                               key={index}
-                              className={`flex items-center rounded p-2 mt-1 cursor-pointer ${isDistributorMessage ? 'bg-green-500 text-white': 'bg-gray-200'}`}
+                              className={`flex items-center rounded p-2 mt-2 cursor-pointer ${isDistributorMessage ? 'bg-green-500 text-white': 'bg-gray-200'}`}
                               onClick={() => handleFileClick(image)}
                             >
                               {getFileIcon(image)}
@@ -231,7 +244,7 @@ export const DistributorIndividualChat: React.FC = () => {
                 </div>
               );
             })}
-            <div/>
+            <div ref={messagesEndRef} /> {/* Add this empty div */}
           </div>
           <div className="border-t p-4">
             {imagePreviews.length > 0 && (
@@ -278,7 +291,7 @@ export const DistributorIndividualChat: React.FC = () => {
               </button>
             </div>
           </div>
-        </>
+        </div>
       ) : (
         <div className="flex items-center justify-center h-full text-gray-500">
           Select a chat to start messaging
