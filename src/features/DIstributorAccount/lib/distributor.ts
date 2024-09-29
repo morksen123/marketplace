@@ -12,6 +12,7 @@ interface Distributor {
   contactName: string;
   warehouseAddress: number;
   isApproved: Boolean;
+  boostCount: number;
 }
 
 export const getDistributorProfile = async (): Promise<ApiResponse<Distributor>> => {
@@ -30,4 +31,8 @@ export const getAllProductsByDistributor = async (): Promise<ApiResponse<Product
 
 export const getAllActiveProductsByDistributor = async (): Promise<ApiResponse<Product[]>> => {
   return get<Product[]>('/products/distributor/active');
+};
+
+export const getProductbyProductId = async (productId : number): Promise<ApiResponse<Product>> => {
+  return get<Product>(`/products/product/${productId}`);
 };

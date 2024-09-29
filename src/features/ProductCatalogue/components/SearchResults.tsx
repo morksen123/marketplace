@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ProductFilter from './ProductFilter';
 import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
+import { Product } from '../constants';
 
 const SearchResultsPage = () => {
   const location = useLocation();
@@ -27,15 +28,15 @@ const SearchResultsPage = () => {
   const [loading, setLoading] = useState(true);
   const { favourites, toggleFavourite, checkFavourite } = useFavourites();
 
-  interface Product {
-    productId: number
-    listingTitle: string;
-    productPictures: string[];
-    foodCategory: string;
-    foodCondition: string;
-    deliveryMethod : string;
-    price : number
-  }
+  // interface Product {
+  //   productId: number
+  //   listingTitle: string;
+  //   productPictures: string[];
+  //   foodCategory: string;
+  //   foodCondition: string;
+  //   deliveryMethod : string;
+  //   price : number
+  // }
   
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -49,16 +50,29 @@ const SearchResultsPage = () => {
             'Content-Type': 'application/json',
           },
         });
+        if (response.ok) {
+          const data: Product[] = await response.json();
+          
+          // Sort products
+          const sortedProducts = data.sort((a, b) => {
+            // First, prioritize boosted products
+            if (a.boostStatus === 'ACTIVE' && b.boostStatus !== 'ACTIVE') return -1;
+            if (b.boostStatus === 'ACTIVE' && a.boostStatus !== 'ACTIVE') return 1;
+            
+            // Then, sort by bestBeforeDate of the first batch
+            const aDate = new Date(a.batches[0]?.bestBeforeDate || '');
+            const bDate = new Date(b.batches[0]?.bestBeforeDate || '');
+            return aDate.getTime() - bDate.getTime();
+          });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          setSearchResults(sortedProducts);
+          console.log(sortedProducts);
+          sortedProducts.forEach((product: Product) => {
+            checkFavourite(product.productId);
+          });
+        } else {
+          console.error('Failed to fetch products');
         }
-
-        const responseData = await response.json();
-        setSearchResults(responseData);
-        responseData.forEach((product : Product) => {
-          checkFavourite(product.productId);
-        });
       } catch (error) {
         console.log(searchQuery)
         console.error('Error fetching search results:', error);

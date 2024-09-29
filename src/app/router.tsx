@@ -202,6 +202,13 @@ const routes: RouteObject[] = [
                   const { CreateDistributorPromotionsRoute } = await import('./routes/promotions/create-promotion');
                   return {Component: CreateDistributorPromotionsRoute}
                 }
+              },
+              {
+                path: '/distributor/view-boosted-products',
+                lazy: async () => {
+                  const { ViewBoostedProductsRoute } = await import('./routes/promotions/view-boosted-products');
+                  return {Component: ViewBoostedProductsRoute}
+                }
               }
             ],
           },

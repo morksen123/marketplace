@@ -19,11 +19,13 @@ export const foodCategoryMapping: Record<string, string> = {
   };
 
   export interface Distributor {
-    distributorName: string;
-    address: number;
-    email: string;
-    name: string;
-    contactName: string;
-    warehouseAddress: number;
-    isApproved: Boolean;
+      distributorId: number;
+      distributorName: string;
+      address: number;
+      email: string;
+      name: string;
+      contactName: string;
+      warehouseAddress: number;
+      isApproved: Boolean;
+      boostCount: number;
   }

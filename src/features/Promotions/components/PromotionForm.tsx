@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Promotion } from '../constants';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,11 +17,17 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
   handleChange,
   handleStatusChange,
 }) => {
-  const [minEndDate, setMinEndDate] = useState<string>('');
+  // Function to get today's date in YYYY-MM-DD format
+  const getTodayDate = (): string => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
-  // Get today's date in YYYY-MM-DD format
-  const today = new Date().toISOString().split('T')[0];
-  
+  const [minEndDate, setMinEndDate] = useState<string>(getTodayDate());
+
   useEffect(() => {
     // Update minEndDate when startDate changes
     if (formData && formData.startDate) {
@@ -34,7 +40,6 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
     setMinEndDate(e.target.value);
   };
 
-  
   return (
     <>
       <div className="space-y-2">
@@ -86,7 +91,7 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
           type="date"
           value={formData ? formData.startDate : ''}
           onChange={handleStartDateChange}
-          min={today}
+          min={getTodayDate()}
           required
         />
       </div>
@@ -104,13 +109,13 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
         />
       </div>
 
-      {/* <div className="space-y-2">
+      <div className="space-y-2">
         <Label htmlFor="status">Status</Label>
-        <PromotionStatusSelect
+        {/* <PromotionStatusSelect
           value={formData.status}
           onChange={handleStatusChange}
-        />
-      </div> */}
+        /> */}
+      </div>
     </>
   );
 };

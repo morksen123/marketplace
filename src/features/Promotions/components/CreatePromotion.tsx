@@ -34,7 +34,7 @@ const CreatePromotion: React.FC = () => {
       setFormData((prev) => ({
         ...prev,
         productIds: activeProducts.map((product) => product.productId),
-        distributorId: distributorProfile?.distributorId ?? 0
+        distributorId: distributorProfile?.distributorId ?? 0,
       }));
     }
   }, [activeProducts]);
@@ -51,12 +51,30 @@ const CreatePromotion: React.FC = () => {
   };
 
   const handleSelectedProductsChange = (selectedProductIds: number[]) => {
-    setFormData(prev => ({ ...prev, productIds: selectedProductIds }));
+    setFormData((prev) => ({ ...prev, productIds: selectedProductIds }));
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    createPromotion(formData);
+
+    // Parse the dates
+    const startDateTime = new Date(formData.startDate);
+    const endDateTime = new Date(formData.endDate);
+
+    // Set start time to 00:00:00
+    startDateTime.setHours(0, 0, 0, 0);
+
+    // Set end time to 23:59:59
+    endDateTime.setHours(23, 59, 59, 999);
+
+    // Create a new promotion object with adjusted dates
+    const adjustedPromotion = {
+      ...formData,
+      startDate: startDateTime.toISOString(),
+      endDate: endDateTime.toISOString(),
+    };
+    console.log(adjustedPromotion);
+    createPromotion(adjustedPromotion);
     navigate('/distributor/promotions');
   };
 
@@ -76,7 +94,9 @@ const CreatePromotion: React.FC = () => {
         <div className="space-y-2">
           <h2 className="text-lg font-semibold">Select Applicable Products</h2>
           <ProductSelector
+            isEdit={false}
             products={applicableProducts}
+            selectedProductIds={[]}
             onSelectedProductsChange={handleSelectedProductsChange}
           />
         </div>
