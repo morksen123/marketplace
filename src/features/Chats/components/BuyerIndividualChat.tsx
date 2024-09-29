@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import AttachFileIcon from '@mui/icons-material/Upload';
 import SaveIcon from '@mui/icons-material/Save';
@@ -19,7 +19,7 @@ import { selectedChatAtom } from '@/atoms/chatAtoms';
 export const BuyerIndividualChat: React.FC = () => {
   const [message, setMessage] = useState('');
   const [selectedChat] = useAtom(selectedChatAtom);
-  const { sendMessage, fetchChatMessages } = useGlobalChat();
+  const { sendMessage } = useGlobalChat();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<{ type: string; content: string }[]>([]);
@@ -27,13 +27,6 @@ export const BuyerIndividualChat: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
-
-  useEffect(() => {
-    if (selectedChat?.chatId) {
-      console.log('selectedChat', selectedChat);
-      fetchChatMessages(selectedChat.chatId);
-    }
-  }, [selectedChat, fetchChatMessages]);
 
   const handleSendMessage = async () => {
     if ((message.trim() || images.length > 0) && selectedChat) {

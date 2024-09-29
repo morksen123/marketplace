@@ -17,7 +17,7 @@ const GlobalChatContext = createContext<GlobalChatContextType | undefined>(undef
 export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [chats, setChats] = useAtom(chatsAtom);
   const [messages, setMessages] = useAtom(messagesAtom);
-  const [announcements, setAnnouncements] = useAtom(announcementsAtom);
+  const [announcements] = useAtom(announcementsAtom);
   const [selectedChat, setSelectedChat] = useAtom(selectedChatAtom);
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
   const [error, setError] = useAtom(errorAtom);

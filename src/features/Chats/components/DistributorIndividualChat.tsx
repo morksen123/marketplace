@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import AttachFileIcon from '@mui/icons-material/Upload';
 import SaveIcon from '@mui/icons-material/Save';
@@ -16,7 +16,7 @@ import { Message } from '@/types/chat';
 
 export const DistributorIndividualChat: React.FC = () => {
   const [message, setMessage] = useState('');
-  const { selectedChat, messages, sendMessage, fetchChatMessages } = useGlobalChat();
+  const { selectedChat, sendMessage } = useGlobalChat();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<{ type: string; content: string }[]>([]);
@@ -24,20 +24,6 @@ export const DistributorIndividualChat: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
-
-  useEffect(() => {
-    if (selectedChat?.chatId) {
-      fetchChatMessages(selectedChat.chatId);
-    }
-  }, [selectedChat, fetchChatMessages]);
-
-  useEffect(() => {
-    // This effect will run whenever the messages state changes
-    if (selectedChat?.chatId && messages[selectedChat.chatId]) {
-      // Force a re-render by updating a state variable
-      setMessage(message => message);
-    }
-  }, [messages, selectedChat]);
 
   const handleSendMessage = async () => {
     if ((message.trim() || images.length > 0) && selectedChat) {
@@ -194,7 +180,7 @@ export const DistributorIndividualChat: React.FC = () => {
             </h2>
           </div>
           <div className="flex-grow overflow-y-auto p-4">
-            {messages[selectedChat.chatId]?.map((msg) => {
+            {selectedChat.messages?.map((msg) => {
               const isDistributorMessage = msg.senderRole === 'distributor';
               return (
                 <div 
