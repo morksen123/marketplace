@@ -13,10 +13,14 @@ import { Dialog, DialogContent, DialogActions } from '@mui/material';
 import Button from '@mui/material/Button';
 import { useGlobalChat } from '@/contexts/GlobalChatContext';
 import { Message } from '@/types/chat';
+import { useAtom } from 'jotai';
+import { selectedChatAtom, messagesAtom } from '@/atoms/chatAtoms';
 
 export const BuyerIndividualChat: React.FC = () => {
   const [message, setMessage] = useState('');
-  const { selectedChat, messages, sendMessage, fetchChatMessages } = useGlobalChat();
+  const [selectedChat] = useAtom(selectedChatAtom);
+  const [messages] = useAtom(messagesAtom);
+  const { sendMessage, fetchChatMessages } = useGlobalChat();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<{ type: string; content: string }[]>([]);

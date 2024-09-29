@@ -1,17 +1,26 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useCallback, useEffect } from 'react';
+import { useAtom } from 'jotai';
 import WebSocketService from '@/services/WebSocketService';
 import { Chat, Message, Announcement, GlobalChatContextType } from '@/types/chat';
 import { toast } from '@/hooks/use-toast';
+import {
+  chatsAtom,
+  messagesAtom,
+  announcementsAtom,
+  selectedChatAtom,
+  isLoadingAtom,
+  errorAtom,
+} from '@/atoms/chatAtoms';
 
 const GlobalChatContext = createContext<GlobalChatContextType | undefined>(undefined);
 
 export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [messages, setMessages] = useState<{ [chatId: number]: Message[] }>({});
-  const [announcements, setAnnouncements] = useState<{ [chatId: number]: Announcement[] }>({});
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [chats, setChats] = useAtom(chatsAtom);
+  const [messages, setMessages] = useAtom(messagesAtom);
+  const [announcements, setAnnouncements] = useAtom(announcementsAtom);
+  const [selectedChat, setSelectedChat] = useAtom(selectedChatAtom);
+  const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
+  const [error, setError] = useAtom(errorAtom);
 
   const handleChatUpdate = useCallback((message: any) => {
     const updatedChat = JSON.parse(message.body);
@@ -25,29 +34,41 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const handleChatMessage = useCallback((message: any) => {
     const data = JSON.parse(message.body);
     console.log('Received message:', data);
-  
+
     if (data.messageType === 'MESSAGE') {
-      setMessages((prevMessages) => {
-        const updatedMessages = {
-          ...prevMessages,
-          [data.chatId]: [...(prevMessages[data.chatId] || []), data],
-        };
-        return updatedMessages;
-      });
-  
-      setChats((prevChats) => {
-        const updatedChats = prevChats.map((chat) => 
+      setMessages((prevMessages) => ({
+        ...prevMessages,
+        [data.chatId]: [...(prevMessages[data.chatId] || []), data],
+      }));
+
+      setChats((prevChats) => 
+        prevChats.map((chat) => 
           chat.chatId === data.chatId 
-            ? { ...chat, lastMessage: data.text } 
+            ? { 
+                ...chat, 
+                lastMessage: data.text,
+              } 
             : chat
-        );
-        return updatedChats;
-      });
+        )
+      );
     } else if (data.messageType === 'ANNOUNCEMENT') {
       setAnnouncements((prevAnnouncements) => ({
         ...prevAnnouncements,
         [data.chatId]: [...(prevAnnouncements[data.chatId] || []), data],
       }));
+
+      // Optionally update chats for announcements as well
+      setChats((prevChats) => 
+        prevChats.map((chat) => 
+          chat.chatId === data.chatId 
+            ? { 
+                ...chat, 
+                lastAnnouncement: data.text,
+                lastAnnouncementTimestamp: data.sentAt // Assuming the server sends a sentAt field
+              } 
+            : chat
+        )
+      );
     }
   }, []);
 

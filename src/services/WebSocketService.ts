@@ -24,9 +24,7 @@ class WebSocketService {
       this.stompClient = new Client({
         webSocketFactory: () => socket,
         debug: (str) => console.log(str),
-        reconnectDelay: 5000,
-        heartbeatIncoming: 4000,
-        heartbeatOutgoing: 4000,
+        reconnectDelay: 0,
       });
 
       this.stompClient.onConnect = () => {

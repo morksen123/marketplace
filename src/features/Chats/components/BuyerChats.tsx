@@ -1,29 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import { BuyerIndividualChat } from './BuyerIndividualChat';
-import { useGlobalChat } from '@/contexts/GlobalChatContext';
 import { Chat } from '@/types/chat';
+import { useAtom } from 'jotai';
+import { searchTermAtom, sortedChatsAtom, selectedChatAtom } from '@/atoms/chatAtoms';
 
 export const BuyerChats: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const { chats, setSelectedChat } = useGlobalChat();
-  const [localChats, setLocalChats] = useState(chats);
-
-  useEffect(() => {
-    setLocalChats(chats);
-  }, [chats]);
-
-  const filteredChats = localChats.filter((chat) =>
-    chat.distributorName && searchTerm
-      ? chat.distributorName.toLowerCase().includes(searchTerm.toLowerCase())
-      : true
-  );
-   
-  const sortedChats = [...filteredChats].sort((a, b) => {
-    if (a.administratorId && !b.administratorId) return -1;
-    if (!a.administratorId && b.administratorId) return 1;
-    return 0;
-  });
+  const [searchTerm, setSearchTerm] = useAtom(searchTermAtom);
+  const [sortedChats] = useAtom(sortedChatsAtom);
+  const [, setSelectedChat] = useAtom(selectedChatAtom);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);

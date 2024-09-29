@@ -18,18 +18,18 @@ function App() {
   );
 
   return (
-    <GlobalChatProvider>
-      <Suspense fallback={<div className="wrapper">Loading...</div>}>
-        <ErrorBoundary fallbackRender={ErrorFallback}>
-          <QueryClientProvider client={queryClient}>
-            <JotaiProvider>
+    <JotaiProvider>
+      <GlobalChatProvider>
+        <Suspense fallback={<div className="wrapper">Loading...</div>}>
+          <ErrorBoundary fallbackRender={ErrorFallback}>
+            <QueryClientProvider client={queryClient}>
               <Toaster />
               <AppRouter />
-            </JotaiProvider>
-          </QueryClientProvider>
-        </ErrorBoundary>
-      </Suspense>
-    </GlobalChatProvider>
+            </QueryClientProvider>
+          </ErrorBoundary>
+        </Suspense>
+      </GlobalChatProvider>
+    </JotaiProvider>
   );
 }
 
