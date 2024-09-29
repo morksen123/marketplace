@@ -13,7 +13,7 @@ interface ProductCardProps {
     foodCategory: string;
     foodCondition: string;
   };
-  isFavourite: boolean;
+  isFavourite: boolean | undefined;
   onProductClick: (productId: number) => void;
   onToggleFavourite: (productId: number) => void;
 }
@@ -47,6 +47,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             onToggleFavourite(product.productId);
           }}
           className="ml-2 flex items-center"
+          aria-label='Toggle Favourite'
         >
           <FavoriteOutlinedIcon
             style={{

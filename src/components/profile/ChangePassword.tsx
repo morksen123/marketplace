@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ChangePasswordProps {
   onSubmit: (currentPassword: string, newPassword: string) => void;
@@ -29,59 +28,59 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
+    <div className="flex justify-center">
+      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold mb-6 text-center">{title}</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Current Password
             </label>
             <Input
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="mt-1 block w-full"
+              className="w-full"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               New Password
             </label>
             <Input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="mt-1 block w-full"
+              className="w-full"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Confirm New Password
             </label>
             <Input
               type="password"
               value={confirmNewPassword}
               onChange={(e) => setConfirmNewPassword(e.target.value)}
-              className="mt-1 block w-full"
+              className="w-full"
               required
             />
           </div>
 
           {passwordMismatch && (
-            <Alert variant="destructive" className="">
+            <Alert variant="destructive">
               <AlertDescription>
                 New passwords do not match. Please try again.
               </AlertDescription>
             </Alert>
           )}
 
-          <Button type="submit" variant="secondary" className="w-full">
+          <Button type="submit" variant="secondary" className="w-full mt-4">
             Change Password
           </Button>
         </form>

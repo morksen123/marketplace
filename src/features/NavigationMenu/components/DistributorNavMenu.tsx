@@ -1,13 +1,51 @@
 import logo from '@/assets/gudfood-logo.png';
 import { Button } from '@/components/ui/button';
+import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirectoryOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
+
 
 export const DistributorNavMenu = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuthActions();
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Handle account dropdown toggle
+  const toggleAccountDropdown = () => {
+    setShowAccountDropdown(!showAccountDropdown);
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
+  // Handle clicking outside of dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowAccountDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <nav className="bg-white shadow-md w-full">
       <div className="w-full p-4">
@@ -28,16 +66,16 @@ export const DistributorNavMenu = () => {
               <SupportAgentOutlinedIcon className="mr-1" /> FAQ
             </Link>
             <Link
-              to="/chats"
+              to="/inventory-management"
+              className="text-black hover:text-gray-600 flex items-center"
+            >
+              <InventoryOutlinedIcon className="mr-1" /> Inventory
+            </Link>
+            <Link
+              to="/distributor/profile/chats"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <SmsOutlinedIcon className="mr-1" /> Chats
-            </Link>
-            <Link
-              to="/distributor/profile"
-              className="text-black hover:text-gray-600 flex items-center"
-            >
-              <PersonOutlineOutlinedIcon className="mr-1" /> Account
             </Link>
             <Link
               to="/account"
@@ -45,6 +83,41 @@ export const DistributorNavMenu = () => {
             >
               <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
             </Link>
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={toggleAccountDropdown}
+                className="text-black hover:text-gray-600 flex items-center"
+              >
+                <PersonOutlineOutlinedIcon className="mr-1" /> Account
+                <ArrowDropDownIcon
+                  className={`transition-transform duration-300 ${
+                    showAccountDropdown ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              {showAccountDropdown && (
+                <div className="absolute right-0 mt-2 w-36 bg-white rounded-md shadow-lg z-10">
+                  {window.location.pathname !== '/distributor/profile' ? (
+                    <Link
+                      to="/distributor/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-center"
+                    >
+                      My Profile
+                    </Link>
+                  ) : (
+                    <span className="block px-4 py-2 text-sm text-gray-400 text-center cursor-default">
+                      My Profile
+                    </span>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
             <Link to="/distributor/home">
               <Button variant="secondary">
                 <StoreMallDirectoryOutlinedIcon className="mr-2" /> Store

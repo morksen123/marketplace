@@ -1,7 +1,6 @@
 import React from 'react';
 import ProfileManagement from '@/components/profile/ProfileManagement';
 import { distributorProfileDefaultValues } from '../constants';
-import { DistributorNavMenu } from '@/features/NavigationMenu/components/DistributorNavMenu';
 
 const DistributorProfileManagement: React.FC = () => {
   const API_BASE_URL = 'http://localhost:8080/api';
@@ -94,20 +93,6 @@ const DistributorProfileManagement: React.FC = () => {
     },
   ];
 
-  const links = [
-    { text: 'Change Password', path: '/distributor/profile/change-password' },
-    { text: 'Notifications', path: '/distributor/profile/notifications' },
-    {
-      text: 'Listing Preferences',
-      path: '/distributor/profile/listing-preferences',
-    },
-    {
-      text: 'Account Deactivation',
-      path: '/distributor/profile/account-deactivation',
-    },
-    {text: 'Logout', path: '/logout'}
-  ];
-
   const greeting = (profile: any) => `${profile.distributorName} Profile`;
 
   return (
@@ -116,7 +101,6 @@ const DistributorProfileManagement: React.FC = () => {
         fetchProfile={fetchProfile}
         updateProfile={updateProfile}
         profileFields={profileFields}
-        links={links}
         greeting={greeting}
         hasProfilePicture={false}
       />

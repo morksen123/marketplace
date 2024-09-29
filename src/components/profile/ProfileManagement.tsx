@@ -3,7 +3,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ProfileForm from './ProfileForm';
-import ProfileLinks from './ProfileLinks';
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 
@@ -20,7 +19,6 @@ interface ProfileManagementProps {
   fetchProfile: () => Promise<any>;
   updateProfile: (profile: any) => Promise<void>;
   profileFields: Array<{label: string, name: string, type: string, editable: boolean}>;
-  links: Array<{text: string, path: string}>;
   greeting?: (profile: any) => string;
   hasProfilePicture?: boolean;
 }
@@ -29,7 +27,6 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({
   fetchProfile,
   updateProfile,
   profileFields,
-  links,
   greeting,
   hasProfilePicture = false
 }) => {
@@ -191,9 +188,6 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({
             onChange={setEditedProfile}
             onNonEditableFieldClick={handleNonEditableFieldClick}
           />
-
-          {/* Profile Links */}
-          <ProfileLinks links={links} />
         </div>
       </div>
     </div>

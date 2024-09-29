@@ -1,13 +1,15 @@
 import logo from '@/assets/gudfood-logo.png';
 import { Button } from '@/components/ui/button';
+import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
 import { useCart } from '@/features/Cart/hooks/useCart';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface BuyerNavMenuProps {
@@ -19,8 +21,11 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
 }) => {
   const [selectedTab, setSelectedTab] = useState('Home');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const { cartQuantity } = useCart();
   const navigate = useNavigate();
+  const { logout } = useAuthActions();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
     'Home',
@@ -44,15 +49,43 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
     }
   };
 
+  // Handle account dropdown toggle
+  const toggleAccountDropdown = () => {
+    setShowAccountDropdown(!showAccountDropdown);
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // Handle clicking outside of dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowAccountDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <nav className="bg-white shadow-md w-full">
       <div className="w-full p-4">
         <div className="flex justify-between items-center">
           {/* Logo Section */}
           <div className="pl-6">
-            <a href="/buyer/home">
+            <Link to="/buyer/home">
               <img src={logo} alt="GudFood Logo" className="h-12" />
-            </a>
+            </Link>
           </div>
 
           {/* Search Bar */}
@@ -65,10 +98,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
                 onChange={handleInputChange}
                 className="w-full py-2 px-4 rounded-lg focus:outline-none border border-gray-300 bg-gray-100 text-black"
               />
-              <button
-                type="submit"
-                className="absolute right-0 top-0 mt-1.5 mr-2"
-              >
+              <button type="submit" className="absolute right-0 top-0 mt-1.5 mr-2" aria-label="Search">
                 <SearchIcon className="w-6 h-6 text-gray-600" />
               </button>
             </form>
@@ -83,16 +113,10 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
               <SupportAgentOutlinedIcon className="mr-1" /> FAQ
             </Link>
             <Link
-              to="/chats"
+              to="/buyer/profile/chats"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <SmsOutlinedIcon className="mr-1" /> Chats
-            </Link>
-            <Link
-              to="/buyer/profile"
-              className="text-black hover:text-gray-600 flex items-center"
-            >
-              <PersonOutlineOutlinedIcon className="mr-1" /> Account
             </Link>
             <Link
               to="/account"
@@ -100,6 +124,41 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
             >
               <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
             </Link>
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={toggleAccountDropdown}
+                className="text-black hover:text-gray-600 flex items-center"
+              >
+                <PersonOutlineOutlinedIcon className="mr-1" /> Account
+                <ArrowDropDownIcon
+                  className={`transition-transform duration-300 ${
+                    showAccountDropdown ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              {showAccountDropdown && (
+                <div className="absolute right-0 mt-2 w-36 bg-white rounded-md shadow-lg z-10">
+                  {window.location.pathname !== '/buyer/profile' ? (
+                    <Link
+                      to="/buyer/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-center"
+                    >
+                      My Profile
+                    </Link>
+                  ) : (
+                    <span className="block px-4 py-2 text-sm text-gray-400 text-center cursor-default">
+                      My Profile
+                    </span>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
             <Link to="/buyer/cart">
               <Button variant="secondary" className="relative">
                 <ShoppingCartOutlinedIcon className="mr-2 h-4 w-4" />
