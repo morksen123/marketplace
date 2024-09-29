@@ -14,12 +14,11 @@ import Button from '@mui/material/Button';
 import { useGlobalChat } from '@/contexts/GlobalChatContext';
 import { Message } from '@/types/chat';
 import { useAtom } from 'jotai';
-import { selectedChatAtom, messagesAtom } from '@/atoms/chatAtoms';
+import { selectedChatAtom } from '@/atoms/chatAtoms';
 
 export const BuyerIndividualChat: React.FC = () => {
   const [message, setMessage] = useState('');
   const [selectedChat] = useAtom(selectedChatAtom);
-  const [messages] = useAtom(messagesAtom);
   const { sendMessage, fetchChatMessages } = useGlobalChat();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<File[]>([]);
@@ -31,16 +30,10 @@ export const BuyerIndividualChat: React.FC = () => {
 
   useEffect(() => {
     if (selectedChat?.chatId) {
+      console.log('selectedChat', selectedChat);
       fetchChatMessages(selectedChat.chatId);
     }
   }, [selectedChat, fetchChatMessages]);
-
-  useEffect(() => {
-    if (selectedChat?.chatId && messages[selectedChat.chatId]) {
-      // Force a re-render
-      setMessage(prevMessage => prevMessage);
-    }
-  }, [messages, selectedChat]);
 
   const handleSendMessage = async () => {
     if ((message.trim() || images.length > 0) && selectedChat) {
@@ -193,7 +186,7 @@ export const BuyerIndividualChat: React.FC = () => {
             <h2 className="text-xl font-semibold">{selectedChat.distributorName ? selectedChat.distributorName : 'Administrator'}</h2>
           </div>
           <div className="flex-grow overflow-y-auto p-4">
-            {messages[selectedChat.chatId]?.map((msg) => {
+            {selectedChat.messages?.map((msg) => {
               const isBuyerMessage = msg.senderRole === 'buyer';
               return (
                 <div 

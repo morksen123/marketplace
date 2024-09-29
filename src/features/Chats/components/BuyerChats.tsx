@@ -7,7 +7,7 @@ import { searchTermAtom, sortedChatsAtom, selectedChatAtom } from '@/atoms/chatA
 
 export const BuyerChats: React.FC = () => {
   const [searchTerm, setSearchTerm] = useAtom(searchTermAtom);
-  const [sortedChats] = useAtom(sortedChatsAtom);
+  const [sortedChats] = useAtom(sortedChatsAtom); // buyer chats only use the sorted chats atom and the setselectedchat atom.
   const [, setSelectedChat] = useAtom(selectedChatAtom);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {

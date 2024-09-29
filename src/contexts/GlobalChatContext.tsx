@@ -22,55 +22,29 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
   const [error, setError] = useAtom(errorAtom);
 
-  const handleChatUpdate = useCallback((message: any) => {
-    const updatedChat = JSON.parse(message.body);
-    setChats(prevChats => 
-      prevChats.map(chat => 
-        chat.chatId === updatedChat.chatId ? { ...chat, ...updatedChat } : chat
-      )
-    );
-  }, []);
-
-  const handleChatMessage = useCallback((message: any) => {
-    const data = JSON.parse(message.body);
-    console.log('Received message:', data);
-
-    if (data.messageType === 'MESSAGE') {
-      setMessages((prevMessages) => ({
-        ...prevMessages,
-        [data.chatId]: [...(prevMessages[data.chatId] || []), data],
-      }));
-
-      setChats((prevChats) => 
-        prevChats.map((chat) => 
-          chat.chatId === data.chatId 
-            ? { 
-                ...chat, 
-                lastMessage: data.text,
-              } 
-            : chat
-        )
-      );
-    } else if (data.messageType === 'ANNOUNCEMENT') {
-      setAnnouncements((prevAnnouncements) => ({
-        ...prevAnnouncements,
-        [data.chatId]: [...(prevAnnouncements[data.chatId] || []), data],
-      }));
-
-      // Optionally update chats for announcements as well
-      setChats((prevChats) => 
-        prevChats.map((chat) => 
-          chat.chatId === data.chatId 
-            ? { 
-                ...chat, 
-                lastAnnouncement: data.text,
-                lastAnnouncementTimestamp: data.sentAt // Assuming the server sends a sentAt field
-              } 
-            : chat
-        )
-      );
+  const fetchChatMessages = useCallback(async (chatId: number) => {
+    if (!messages[chatId]) {
+      try {
+        const response = await fetch(`/api/chat/messages/${chatId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setMessages(prevMessages => ({
+            ...prevMessages,
+            [chatId]: data
+          }));
+        } else {
+          throw new Error('Failed to fetch chat messages');
+        }
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch chat messages. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
-  }, []);
+  }, [messages]);
 
   const fetchChats = useCallback(async () => {
     try {
@@ -88,6 +62,54 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       return [];
     }
   }, []);
+
+  const fetchSelectedChat = useCallback(async (chatId: number) => {
+    try {
+      const response = await fetch(`/api/chat/${chatId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedChat(data);
+        return data;
+      } else {
+        throw new Error('Failed to fetch selected chat');
+      }
+    } catch (error) {
+      console.error('Error fetching selected chat:', error);
+      setError('Failed to fetch selected chat. Please try again.');
+      return null;
+    }
+  }, []);
+
+  const handleChatUpdate = useCallback((message: any) => { // this isnt really being used. but i will clean it up later.
+    const updatedChat = JSON.parse(message.body);
+    setChats(prevChats => 
+      prevChats.map(chat => 
+        chat.chatId === updatedChat.chatId ? { ...chat, ...updatedChat } : chat
+      )
+    );
+  }, []);
+
+  const handleChatMessage = useCallback((message: any) => { // this is da key!
+    const data = JSON.parse(message.body);
+    console.log('Message received:', data);
+
+    const updatedChats = fetchChats();
+    // Update chats
+    const update = async () => {
+      const resolvedChats = await updatedChats;
+      setChats(resolvedChats);
+    };
+
+    const updateSelectedChat = async () => {
+      if (selectedChat?.chatId) {
+        const resolvedChat = await fetchSelectedChat(selectedChat.chatId);
+        setSelectedChat(resolvedChat);
+      }
+    };
+    
+    update();
+    updateSelectedChat();
+  }, [setChats, fetchSelectedChat, selectedChat]);
 
   const connectWebSocket = useCallback(async () => {
     const attemptConnection = async () => {
@@ -146,30 +168,6 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       WebSocketService.disconnect();
     };
   }, [connectWebSocket]);
-
-  const fetchChatMessages = useCallback(async (chatId: number) => {
-    if (!messages[chatId]) {
-      try {
-        const response = await fetch(`/api/chat/messages/${chatId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setMessages(prevMessages => ({
-            ...prevMessages,
-            [chatId]: data
-          }));
-        } else {
-          throw new Error('Failed to fetch chat messages');
-        }
-      } catch (error) {
-        console.error('Error fetching chat messages:', error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch chat messages. Please try again.",
-          variant: "destructive",
-        });
-      }
-    }
-  }, [messages]);
 
   const sendMessage = useCallback(async (message: Omit<Message, 'messageId' | 'sentAt'>) => {
     try {
