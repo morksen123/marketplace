@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useBuyerProfile } from '@/features/BuyerAccount/hooks/useBuyerProfile';
 import {
+  AddressElement,
+  LinkAuthenticationElement,
   PaymentElement,
   useElements,
   useStripe,
@@ -67,6 +69,7 @@ export const Checkout: React.FC = () => {
     await stripe.confirmPayment({
       elements,
       confirmParams: {
+        receipt_email: buyerProfile?.email,
         return_url: `${window.location.origin}/buyer/checkout/complete`,
         payment_method_data: {
           billing_details: {
@@ -134,23 +137,31 @@ export const Checkout: React.FC = () => {
                 <CardContent>
                   {/* <PaymentElement id="payment-element" /> */}
                   {buyerProfile && (
-                    <PaymentElement
-                      id="payment-element"
-                      options={{
-                        defaultValues: {
-                          billingDetails: {
-                            email: buyerProfile.email,
-                            name:
-                              buyerProfile.firstName +
-                              ' ' +
-                              buyerProfile.lastName,
-                            address: {
-                              postal_code: '100',
+                    <>
+                      <AddressElement
+                        options={{ mode: 'shipping', allowedCountries: ['SG'] }}
+                      />
+                      <LinkAuthenticationElement
+                        id="link-authentication-element"
+                        options={{
+                          defaultValues: { email: buyerProfile.email },
+                        }}
+                      />
+                      <PaymentElement
+                        id="payment-element"
+                        options={{
+                          defaultValues: {
+                            billingDetails: {
+                              email: buyerProfile.email,
+                              name:
+                                buyerProfile.firstName +
+                                ' ' +
+                                buyerProfile.lastName,
                             },
                           },
-                        },
-                      }}
-                    />
+                        }}
+                      />
+                    </>
                   )}
                 </CardContent>
               </Card>
