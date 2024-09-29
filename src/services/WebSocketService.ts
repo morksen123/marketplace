@@ -12,10 +12,19 @@ class WebSocketService {
       }
 
       const socket = new SockJS('http://localhost:8080/chat-websocket');
+      
+      socket.onclose = () => {
+        reject(new Error('SockJS connection closed'));
+      };
+
+      socket.onerror = (error) => {
+        reject(new Error(`SockJS connection error: ${error}`));
+      };
+
       this.stompClient = new Client({
         webSocketFactory: () => socket,
         debug: (str) => console.log(str),
-        reconnectDelay: 5000,
+        reconnectDelay: 0,
       });
 
       this.stompClient.onConnect = () => {
@@ -30,11 +39,21 @@ class WebSocketService {
       };
 
       this.stompClient.activate();
+
+      setTimeout(() => {
+        if (!this.stompClient?.connected) {
+          reject(new Error('WebSocket connection timeout'));
+        }
+      }, 5000);
     });
   }
 
   public isConnected(): boolean {
     return !!this.stompClient && this.stompClient.connected;
+  }
+
+  public isConnecting(): boolean {
+    return !!this.stompClient && this.stompClient.active && !this.stompClient.connected;
   }
 
   public subscribe(destination: string, callback: (message: IMessage) => void): void {
@@ -59,6 +78,7 @@ class WebSocketService {
   public disconnect(): void {
     if (this.stompClient) {
       this.stompClient.deactivate();
+      this.stompClient = null;
     }
   }
 }

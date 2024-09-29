@@ -21,29 +21,26 @@
     images: string[];
     title?: string;
   }
-  
-  export interface BuyerChat { //wanna remove this
+
+  export interface Announcement {
+    announcementId: number;
     chatId: number;
-    distributorName: string;  
-    distributorId: number;
-    lastMessage: string;
-    administratorId: string | null;
-  }
-  
-  export interface DistributorChat { //wanna remove this
-    chatId: number;
-    firstName: string;
-    lastName: string;
-    buyerId: string;
-    lastMessage: string;
-    administratorId: string | null;
+    senderId: number;
+    senderRole: string;
+    text: string;
+    sentAt: string;
   }
 
   export interface GlobalChatContextType {
     chats: Chat[];
     messages: { [chatId: number]: Message[] };
+    announcements: { [chatId: number]: Announcement[] };
     selectedChat: Chat | null;
     setSelectedChat: (chat: Chat | null) => void;
     sendMessage: (message: Omit<Message, 'messageId' | 'sentAt'>) => void;
+    sendAnnouncement: (announcement: Omit<Announcement, 'announcementId' | 'sentAt'>) => void;
+    reconnect: () => void;
+    isLoading: boolean;
+    error: string | null;
     fetchChatMessages: (chatId: number) => Promise<void>;
   }
