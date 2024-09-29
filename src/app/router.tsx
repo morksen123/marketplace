@@ -97,6 +97,15 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/buyer/transactions',
+                lazy: async () => {
+                  const { TransactionsRoute } = await import(
+                    './routes/buyerProfile/transactions'
+                  );
+                  return { Component: TransactionsRoute };
+                },
+              },
+              {
                 path: '/buyer/profile/change-password',
                 lazy: async () => {
                   const { ChangePasswordRoute } = await import(
