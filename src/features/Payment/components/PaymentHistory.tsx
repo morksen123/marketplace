@@ -28,16 +28,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { usePaginatedData } from '@/hooks/usePaginationData';
 import { formatDisplayDate, getUserRoleFromCookie } from '@/lib/utils';
 import { CreditCard, Package, SearchIcon } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { dummyData, ITEMS_PER_PAGE } from '../constants';
 import { usePayments } from '../hooks/usePayments';
 import { Transaction } from '../types/payment';
 
 export const PaymentHistory: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const userRole = getUserRoleFromCookie();
   const { userTransactions } = usePayments({ role: userRole });
   const { data: transactionData, isLoading } = userTransactions as {
@@ -45,22 +44,17 @@ export const PaymentHistory: React.FC = () => {
     isLoading: boolean;
   };
 
-  const filteredTransactions = useMemo(() => {
-    if (!transactionData) return [];
-    return transactionData.filter((transaction) =>
-      transaction.id.toString().includes(searchTerm),
-    );
-  }, [transactionData, searchTerm]);
-
-  const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
-  const paginatedTransactions = filteredTransactions.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
-  );
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+  const {
+    paginatedData: paginatedTransactions,
+    currentPage,
+    totalPages,
+    setCurrentPage,
+    setSearchTerm,
+  } = usePaginatedData({
+    data: transactionData || [],
+    itemsPerPage: ITEMS_PER_PAGE,
+    searchFields: ['id'],
+  });
 
   return (
     <Card className="wrapper mt-12">
@@ -76,7 +70,6 @@ export const PaymentHistory: React.FC = () => {
             <Input
               type="text"
               placeholder="Search by transaction ID"
-              value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
@@ -170,7 +163,9 @@ export const PaymentHistory: React.FC = () => {
                             <Separator className="my-4" />
                             <div className="flex justify-between items-center font-semibold">
                               <span>Total</span>
-                              <span>${transaction.amount.toFixed(2)}</span>
+                              <span>
+                                ${(transaction.amount / 100).toFixed(2)}
+                              </span>
                             </div>
                           </div>
                         </DialogContent>
@@ -186,13 +181,13 @@ export const PaymentHistory: React.FC = () => {
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               />
             </PaginationItem>
             {[...Array(totalPages)].map((_, index) => (
               <PaginationItem key={index}>
                 <PaginationLink
-                  onClick={() => handlePageChange(index + 1)}
+                  onClick={() => setCurrentPage(index + 1)}
                   isActive={currentPage === index + 1}
                 >
                   {index + 1}
@@ -202,7 +197,7 @@ export const PaymentHistory: React.FC = () => {
             <PaginationItem>
               <PaginationNext
                 onClick={() =>
-                  handlePageChange(Math.min(totalPages, currentPage + 1))
+                  setCurrentPage(Math.min(totalPages, currentPage + 1))
                 }
               />
             </PaginationItem>
