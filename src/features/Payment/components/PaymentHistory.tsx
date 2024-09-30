@@ -120,7 +120,9 @@ export const PaymentHistory: React.FC = () => {
                     <TableCell>
                       {formatDisplayDate(transaction.createdDateTime)}
                     </TableCell>
-                    <TableCell>${transaction.amount.toFixed(2)}</TableCell>
+                    <TableCell>
+                      ${(transaction.amount / 100).toFixed(2)}
+                    </TableCell>
                     {userRole === 'DISTRIBUTOR' && (
                       <TableCell>
                         <Badge
