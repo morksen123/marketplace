@@ -11,6 +11,7 @@ import {
   isLoadingAtom,
   errorAtom,
 } from '@/atoms/chatAtoms';
+import { useAuthStatus } from '@/features/Authentication/hooks/useAuthStatus';
 
 const GlobalChatContext = createContext<GlobalChatContextType | undefined>(undefined);
 
@@ -21,7 +22,7 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [selectedChat, setSelectedChat] = useAtom(selectedChatAtom);
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
   const [error, setError] = useAtom(errorAtom);
-
+  const { isAuthenticated } = useAuthStatus();
   const fetchChatMessages = useCallback(async (chatId: number) => {
     if (!messages[chatId]) {
       try {
@@ -112,6 +113,11 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [setChats, fetchSelectedChat, selectedChat]);
 
   const connectWebSocket = useCallback(async () => {
+    if (!isAuthenticated) {
+      console.log('User is not authenticated. Skipping WebSocket connection.');
+      return;
+    }
+
     const attemptConnection = async () => {
       if (WebSocketService.isConnected()) {
         return true;
@@ -149,10 +155,11 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (connected) break;
       await new Promise(resolve => setTimeout(resolve, 500)); // Wait for 0.5 second before retrying
     }
-  }, [fetchChats, handleChatUpdate, handleChatMessage]);
+  }, [fetchChats, handleChatUpdate, handleChatMessage, isAuthenticated]);
 
   useEffect(() => {
-    const connect = async () => {
+    if (isAuthenticated) {
+      const connect = async () => {
       try {
         await connectWebSocket();
       } catch (error) {
@@ -166,8 +173,9 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     return () => {
       WebSocketService.disconnect();
-    };
-  }, [connectWebSocket]);
+      };
+    }
+  }, [connectWebSocket, isAuthenticated]);
 
   const sendMessage = useCallback(async (message: Omit<Message, 'messageId' | 'sentAt'>) => {
     try {
@@ -220,7 +228,8 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         fetchChatMessages,
         isLoading,
         error,
-        reconnect: connectWebSocket
+        reconnect: connectWebSocket,
+        isAuthenticated: isAuthenticated as boolean
       }}
     >
       {children}

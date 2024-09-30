@@ -43,4 +43,5 @@
     isLoading: boolean;
     error: string | null;
     fetchChatMessages: (chatId: number) => Promise<void>;
+    isAuthenticated: boolean;
   }

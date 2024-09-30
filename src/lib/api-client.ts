@@ -59,9 +59,12 @@ export async function apiClient<T>(
   try {
     const response = await fetch(`${API_URL}${endpoint}`, options);
 
-    // if (response.status === 401) {
-    //   throw new Error('Session expired. Please login again.');
-    // }
+    if (response.status === 401) {
+      // Handle unauthorized error
+      const error = new Error('Unauthorized: Please log in again') as ApiError;
+      error.status = 401;
+      throw error;
+    }
 
     const data = await handleResponse<T>(response);
     return { data, error: null };
