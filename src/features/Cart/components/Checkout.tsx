@@ -6,8 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useBuyerProfile } from '@/features/BuyerAccount/hooks/useBuyerProfile';
 import {
@@ -19,43 +17,15 @@ import {
 } from '@stripe/react-stripe-js';
 import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
-import { AddressForm, AddressFormState } from './AddressForm';
-
-const initialAddressState: AddressFormState = {
-  firstName: '',
-  lastName: '',
-  address: '',
-  zipCode: '',
-  country: '',
-};
 
 export const Checkout: React.FC = () => {
   const stripe = useStripe();
   const elements = useElements();
   const { cart, cartPrice } = useCart();
 
-  const [shippingAddress, setShippingAddress] =
-    useState<AddressFormState>(initialAddressState);
-  const [billingAddress, setBillingAddress] =
-    useState<AddressFormState>(initialAddressState);
-  const [useShippingForBilling, setUseShippingForBilling] = useState(true);
   const [shippingFee] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const { buyerProfile } = useBuyerProfile();
-
-  const handleShippingChange = (
-    field: keyof AddressFormState,
-    value: string,
-  ) => {
-    setShippingAddress((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleBillingChange = (
-    field: keyof AddressFormState,
-    value: string,
-  ) => {
-    setBillingAddress((prev) => ({ ...prev, [field]: value }));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,17 +41,6 @@ export const Checkout: React.FC = () => {
       confirmParams: {
         receipt_email: buyerProfile?.email,
         return_url: `${window.location.origin}/buyer/checkout/complete`,
-        payment_method_data: {
-          billing_details: {
-            name: `${billingAddress.firstName} ${billingAddress.lastName}`,
-            address: {
-              line1: billingAddress.address,
-              postal_code: billingAddress.zipCode,
-              country: billingAddress.country,
-              city: billingAddress.country,
-            },
-          },
-        },
       },
     });
 
@@ -97,39 +56,6 @@ export const Checkout: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-2 space-y-6">
-              <AddressForm
-                title="Shipping Address"
-                state={shippingAddress}
-                onChange={handleShippingChange}
-              />
-
-              <div className="flex items-center space-x-2 bg-white p-4 rounded-lg ">
-                <Checkbox
-                  id="useShippingForBilling"
-                  checked={useShippingForBilling}
-                  onCheckedChange={(checked: boolean) => {
-                    setUseShippingForBilling(checked);
-                    if (checked) {
-                      setBillingAddress(shippingAddress);
-                    }
-                  }}
-                />
-                <Label
-                  htmlFor="useShippingForBilling"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Use this address for billing
-                </Label>
-              </div>
-
-              {!useShippingForBilling && (
-                <AddressForm
-                  title="Billing Address"
-                  state={billingAddress}
-                  onChange={handleBillingChange}
-                />
-              )}
-
               <Card>
                 <CardHeader>
                   <CardTitle>Payment Details</CardTitle>
@@ -140,6 +66,7 @@ export const Checkout: React.FC = () => {
                     <>
                       <AddressElement
                         options={{ mode: 'shipping', allowedCountries: ['SG'] }}
+                        onChange={(event) => console.log(event)}
                       />
                       <LinkAuthenticationElement
                         id="link-authentication-element"
@@ -149,6 +76,7 @@ export const Checkout: React.FC = () => {
                       />
                       <PaymentElement
                         id="payment-element"
+                        onChange={(event) => console.log(event)}
                         options={{
                           defaultValues: {
                             billingDetails: {
@@ -160,6 +88,9 @@ export const Checkout: React.FC = () => {
                             },
                           },
                         }}
+                      />
+                      <AddressElement
+                        options={{ mode: 'billing', allowedCountries: ['SG'] }}
                       />
                     </>
                   )}
