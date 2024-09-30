@@ -5,10 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Product } from '@/features/ProductListing/constants';
+import BoostExplanation from './BoostExplanation';
 
 const ViewBoostedProducts: React.FC = () => {
-  const { boostedProducts, isLoading, pauseBoost, reactivateBoost, updateBoost } =
-    useProductBoosts();
+  const {
+    boostedProducts,
+    isLoading,
+    pauseBoost,
+    reactivateBoost,
+    updateBoost,
+  } = useProductBoosts();
   const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [newEndDate, setNewEndDate] = useState<string>('');
@@ -21,12 +27,14 @@ const ViewBoostedProducts: React.FC = () => {
   };
 
   const handlePauseResumeBoost = (productId: number, product: Product) => {
-    product.boostStatus === 'ACTIVE' ? pauseBoost(productId) : reactivateBoost(productId);
+    product.boostStatus === 'ACTIVE'
+      ? pauseBoost(productId)
+      : reactivateBoost(productId);
   };
 
   const handleUpdateBoost = (productId: number) => {
     setSelectedProduct(productId);
-    setNewEndDate(getTodayDate()); 
+    setNewEndDate(getTodayDate());
     setIsUpdateDialogOpen(true);
   };
 
@@ -67,6 +75,9 @@ const ViewBoostedProducts: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Your Boosted Products</h1>
+      <div className="container mx-auto my-auto pb-8">
+        <BoostExplanation />
+      </div>
       {boostedProducts && boostedProducts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {boostedProducts.map((product) => (

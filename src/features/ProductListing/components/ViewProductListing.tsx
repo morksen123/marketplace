@@ -35,7 +35,6 @@ import {
 import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
 import { useProductBoosts } from '@/features/Promotions/hooks/useProductBoost';
 import BoostProductModal from './BoostProductModal';
-import { reactivateProductBoost } from '@/features/Promotions/lib/productboost';
 import { Distributor } from '@/features/Home/constants';
 import { useDistributor } from '@/features/DIstributorAccount/hooks/useDistributor';
 
@@ -57,7 +56,7 @@ export const ViewProductListing = () => {
     maxQuantity: '',
     price: '',
   });
-  const { createBoost } = useProductBoosts();
+  const { createBoost, updateBoost, reactivateBoost } = useProductBoosts();
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
   const { distributorProfile } = useDistributor();
 
@@ -331,6 +330,8 @@ export const ViewProductListing = () => {
         return 'Boost Paused';
       case 'COMPLETED':
         return 'Boost Again';
+      case 'NOT_STARTED':
+        return 'Boost has not started';
       case 'NONE':
       case null:
       default:
@@ -353,33 +354,45 @@ export const ViewProductListing = () => {
     }
   };
 
-  const handleBoostProduct = (startDate: string, endDate: string) => {
+  const handleBoostProduct = (startDate: string) => {
     if (productId) {
       if (product?.boostStatus === 'PAUSED') {
-        reactivateProductBoost(parseInt(productId));
+        reactivateBoost(parseInt(productId));
       } else {
         // Parse the dates
         const startDateTime = new Date(startDate);
-        const endDateTime = new Date(endDate);
 
         // Set start time to 00:00:00
         startDateTime.setHours(0, 0, 0, 0);
 
+        // Calculate end date (30 days from start date)
+        const endDateTime = new Date(startDateTime);
+        endDateTime.setDate(endDateTime.getDate() + 30);
         // Set end time to 23:59:59
         endDateTime.setHours(23, 59, 59, 999);
 
         // Convert to ISO strings
         const startDateISOString = startDateTime.toISOString();
         const endDateISOString = endDateTime.toISOString();
-        createBoost({
-          productId: parseInt(productId),
-          boostData: {
-            startDate: startDateISOString,
-            endDate: endDateISOString,
-          },
-        });
-      }
 
+        if (product?.boostStatus === 'NONE') {
+          createBoost({
+            productId: parseInt(productId),
+            boostData: {
+              startDate: startDateISOString,
+              endDate: endDateISOString,
+            },
+          });
+        } else if (product?.boostStatus === 'NOT_STARTED') {
+            updateBoost({
+              productId: parseInt(productId),
+              boostData: {
+                startDate:startDateISOString,
+                endDate: endDateISOString,
+              }
+            })
+        }
+      }
       // Refresh the page after 1 second
       setTimeout(() => {
         navigate(0);

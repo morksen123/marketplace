@@ -8,7 +8,7 @@ export interface ProductBoostDto {
 }
 
 export interface UpdateProductBoostDto {
-    endDate: string;
+    startDate: string;
 }
   
 
