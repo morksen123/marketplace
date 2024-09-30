@@ -12,8 +12,8 @@ export interface Transaction {
   date: string;
   amount: number;
   status: 'COMPLETED' | 'PENDING' | 'TRANSFERRED' | 'FAILED';
-  orderItems: OrderItem[];
-  paymentIntentId: string;
-  applicationFee: string;
   createdDateTime: string;
+  orderItems: OrderItem[];
+  paymentIntentId?: string;
+  applicationFee?: string;
 }

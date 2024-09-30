@@ -93,7 +93,7 @@ export const PaymentHistory: React.FC = () => {
                 <TableHead>Transaction ID</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
+                {userRole === 'DISTRIBUTOR' && <TableHead>Status</TableHead>}
                 <TableHead>Order Details</TableHead>
               </TableRow>
             </TableHeader>
@@ -121,19 +121,21 @@ export const PaymentHistory: React.FC = () => {
                       {formatDisplayDate(transaction.createdDateTime)}
                     </TableCell>
                     <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          transaction.status === 'COMPLETED'
-                            ? 'secondary'
-                            : transaction.status === 'PENDING'
-                            ? 'warning'
-                            : 'destructive'
-                        }
-                      >
-                        {transaction.status}
-                      </Badge>
-                    </TableCell>
+                    {userRole === 'DISTRIBUTOR' && (
+                      <TableCell>
+                        <Badge
+                          variant={
+                            transaction.status === 'COMPLETED'
+                              ? 'secondary'
+                              : transaction.status === 'PENDING'
+                              ? 'warning'
+                              : 'destructive'
+                          }
+                        >
+                          {transaction.status}
+                        </Badge>
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Dialog>
                         <DialogTrigger asChild>

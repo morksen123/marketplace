@@ -68,7 +68,6 @@ export async function changePasswordAfterReset(
   token: string,
 ) {
   const roleRoute = role.toLowerCase();
-  console.log(roleRoute)
   await post(
     `/${roleRoute}/reset-password?token=${encodeURIComponent(token)}`,
     {
@@ -95,7 +94,7 @@ export const AuthGuard = () => {
 export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles }) => {
   const userRole = getUserRoleFromCookie();
 
-  if (!userRole || !allowedRoles.includes(userRole as RoleTypes)) {
+  if (!userRole || !allowedRoles.includes(userRole)) {
     return <Navigate to="/unauthorized" replace />; // TODO: create unauthorized page
   }
 
