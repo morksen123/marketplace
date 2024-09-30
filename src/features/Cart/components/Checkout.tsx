@@ -60,38 +60,65 @@ export const Checkout: React.FC = () => {
                 <CardHeader>
                   <CardTitle>Payment Details</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  {/* <PaymentElement id="payment-element" /> */}
+                <CardContent className="space-y-6 text-left">
                   {buyerProfile && (
                     <>
-                      <AddressElement
-                        options={{ mode: 'shipping', allowedCountries: ['SG'] }}
-                        onChange={(event) => console.log(event)}
-                      />
-                      <LinkAuthenticationElement
-                        id="link-authentication-element"
-                        options={{
-                          defaultValues: { email: buyerProfile.email },
-                        }}
-                      />
-                      <PaymentElement
-                        id="payment-element"
-                        onChange={(event) => console.log(event)}
-                        options={{
-                          defaultValues: {
-                            billingDetails: {
-                              email: buyerProfile.email,
-                              name:
-                                buyerProfile.firstName +
-                                ' ' +
-                                buyerProfile.lastName,
+                      {/* Shipping Address */}
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-2">
+                          Shipping Address
+                        </h3>
+                        <AddressElement
+                          options={{
+                            mode: 'shipping',
+                            allowedCountries: ['SG'],
+                          }}
+                        />
+                      </div>
+
+                      {/* Link Authentication */}
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-2">
+                          Link Account
+                        </h3>
+                        <LinkAuthenticationElement
+                          id="link-authentication-element"
+                          options={{
+                            defaultValues: { email: buyerProfile.email },
+                          }}
+                        />
+                      </div>
+
+                      {/* Payment Details */}
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-2">
+                          Payment Details
+                        </h3>
+                        <PaymentElement
+                          id="payment-element"
+                          options={{
+                            defaultValues: {
+                              billingDetails: {
+                                email: buyerProfile.email,
+                                name: `${buyerProfile.firstName} ${buyerProfile.lastName}`,
+                              },
                             },
-                          },
-                        }}
-                      />
-                      <AddressElement
-                        options={{ mode: 'billing', allowedCountries: ['SG'] }}
-                      />
+                          }}
+                        />
+                      </div>
+
+                      {/* Billing Address */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">
+                          Billing Address
+                        </h3>
+                        <AddressElement
+                          options={{
+                            mode: 'billing',
+                            allowedCountries: ['SG'],
+                          }}
+                        />
+                      </div>
                     </>
                   )}
                 </CardContent>
