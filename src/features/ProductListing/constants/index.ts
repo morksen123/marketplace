@@ -71,4 +71,5 @@ export interface Product {
   bulkPricings?: BulkPricing[];
   distributorId: number;
   productId: string;
+  distributorId: string;
 }

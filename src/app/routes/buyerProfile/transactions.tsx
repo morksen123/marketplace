@@ -1,11 +1,11 @@
-import { Checkout } from '@/features/Cart/components/Checkout';
 import { BuyerNavMenu } from '@/features/NavigationMenu/components/BuyerNavMenu';
+import { PaymentHistory } from '@/features/Payment/components/PaymentHistory';
 
-export const CheckoutRoute = () => {
+export const TransactionsRoute = () => {
   return (
     <>
       <BuyerNavMenu showTabs={false} />
-      <Checkout />
+      <PaymentHistory />
     </>
   );
 };

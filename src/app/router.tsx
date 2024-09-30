@@ -1,5 +1,6 @@
 import { ROLES } from '@/features/Authentication/types/auth';
 import { AuthGuard, RoleGuard } from '@/lib/auth';
+import { StripeWrapper } from '@/lib/stripe';
 import {
   createBrowserRouter,
   RouteObject,
@@ -96,6 +97,15 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/buyer/transactions',
+                lazy: async () => {
+                  const { TransactionsRoute } = await import(
+                    './routes/buyerProfile/transactions'
+                  );
+                  return { Component: TransactionsRoute };
+                },
+              },
+              {
                 path: '/buyer/profile/change-password',
                 lazy: async () => {
                   const { ChangePasswordRoute } = await import(
@@ -122,12 +132,27 @@ const routes: RouteObject[] = [
               },
               {
                 path: '/buyer/checkout',
-                lazy: async () => {
-                  const { CheckoutRoute } = await import(
-                    './routes/payment/checkout'
-                  );
-                  return { Component: CheckoutRoute };
-                },
+                element: <StripeWrapper />,
+                children: [
+                  {
+                    index: true,
+                    lazy: async () => {
+                      const { CheckoutRoute } = await import(
+                        './routes/payment/checkout'
+                      );
+                      return { Component: CheckoutRoute };
+                    },
+                  },
+                  {
+                    path: 'complete',
+                    lazy: async () => {
+                      const { CheckoutComplete } = await import(
+                        './routes/payment/checkout-complete'
+                      );
+                      return { Component: CheckoutComplete };
+                    },
+                  },
+                ],
               },
               {
                 path: '/buyer/profile/favourites',
@@ -198,10 +223,28 @@ const routes: RouteObject[] = [
                   return { Component: ChatsRoute };
                 },
               },
+              {
+                path: '/distributor/transactions',
+                lazy: async () => {
+                  const { TransactionsRoute } = await import(
+                    './routes/distributorProfile/transactions'
+                  );
+                  return { Component: TransactionsRoute };
+                },
+              },
             ],
           },
           // You can add more role-specific sections here
         ],
+      },
+      {
+        path: '/transactions/:transactionId',
+        lazy: async () => {
+          const { TransactionDetails } = await import(
+            './routes/payment/transaction-details'
+          );
+          return { Component: TransactionDetails };
+        },
       },
     ],
   },

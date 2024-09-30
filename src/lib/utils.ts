@@ -1,3 +1,4 @@
+import { RoleTypes } from '@/features/Authentication/types/auth';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import Cookies from 'universal-cookie';
@@ -14,5 +15,18 @@ export function capitalizeFirstLetter(str: string): string {
 export function getUserRoleFromCookie() {
   const cookies = new Cookies();
   const userRole = cookies.get('user_role');
-  return userRole;
+  return userRole as RoleTypes;
+}
+
+export function formatDisplayDate(dateString: string) {
+  if (!dateString) return '';
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  };
+
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-GB', options); // en-GB for British date formatting
 }
