@@ -16,3 +16,16 @@ export function getUserRoleFromCookie() {
   const userRole = cookies.get('user_role');
   return userRole;
 }
+
+export function formatDisplayDate(dateString: string) {
+  if (!dateString) return '';
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  };
+
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-GB', options); // en-GB for British date formatting
+}

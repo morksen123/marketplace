@@ -1,5 +1,5 @@
 import { BuyerNavMenu } from '@/features/NavigationMenu/components/BuyerNavMenu';
-import { PaymentHistory } from '@/features/Payment/payment-history';
+import { PaymentHistory } from '@/features/Payment/components/PaymentHistory';
 
 export const TransactionsRoute = () => {
   return (
