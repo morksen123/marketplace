@@ -237,6 +237,15 @@ const routes: RouteObject[] = [
           // You can add more role-specific sections here
         ],
       },
+      {
+        path: '/transactions/:transactionId',
+        lazy: async () => {
+          const { TransactionDetails } = await import(
+            './routes/payment/transaction-details'
+          );
+          return { Component: TransactionDetails };
+        },
+      },
     ],
   },
   {
