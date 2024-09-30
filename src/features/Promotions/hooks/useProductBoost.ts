@@ -25,6 +25,7 @@ export function useProductBoosts() {
       handleSuccessApi('Boost Created', 'New product boost has been created successfully.');
     },
     onError: (error: Error) => {
+      console.log(error.message)
       handleErrorApi('Error', error.message);
     },
   });
@@ -59,7 +60,7 @@ export function useProductBoosts() {
   });
 
   const updateBoostMutation = useMutation({
-    mutationFn: async ({ productId, boostData }: { productId: number; boostData: UpdateProductBoostDto  }) => {
+    mutationFn: async ({ productId, boostData }: { productId: number; boostData: ProductBoostDto  }) => {
       const { error } = await updateProductBoost(productId, boostData);
       if (error) throw error;
     },

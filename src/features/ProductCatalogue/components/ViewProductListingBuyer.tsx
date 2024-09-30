@@ -145,10 +145,10 @@ export const ViewProductListingBuyer: React.FC<
   const calculatePromotionalDiscount = (product: Product): number => {
     if (!product.promotions || product.promotions.length === 0) return 0;
 
-    const now = new Date();
+    // const now = new Date();
     const activePromotions = product.promotions.filter(
       (promo) =>
-        new Date(promo.startDate) <= now && new Date(promo.endDate) >= now,
+        promo.status === 'ACTIVE'
     );
 
     if (activePromotions.length === 0) return 0;

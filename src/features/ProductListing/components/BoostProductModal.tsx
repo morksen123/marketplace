@@ -8,7 +8,7 @@ interface BoostProductModalProps {
   boostStatus: string | null;
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (startDate: string, endDate: string) => void;
+  onSubmit: (startDate: string) => void;
   productName: string;
 }
 
@@ -20,11 +20,11 @@ const BoostProductModal: React.FC<BoostProductModalProps> = ({
   productName,
 }) => {
   const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  // const [endDate, setEndDate] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(startDate, endDate);
+    onSubmit(startDate);
     onClose();
   };
 
@@ -45,6 +45,7 @@ const BoostProductModal: React.FC<BoostProductModalProps> = ({
         <form onSubmit={handleSubmit}>
           {(boostStatus === 'NONE' ||
             boostStatus === 'COMPLETE' ||
+            boostStatus === 'NOT_STARTED' ||
             boostStatus === null) && (
             <>
               <div className="mb-4">
@@ -52,7 +53,7 @@ const BoostProductModal: React.FC<BoostProductModalProps> = ({
                   htmlFor="start-date"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Start Date
+                  {boostStatus === 'NOT_STARTED' ? 'Change Start Date' : 'Start Date'}
                 </label>
                 <Input
                   id="start-date"
@@ -64,7 +65,7 @@ const BoostProductModal: React.FC<BoostProductModalProps> = ({
                   className="w-full"
                 />
               </div>
-              <div className="mb-6">
+              {/* <div className="mb-6">
                 <label
                   htmlFor="end-date"
                   className="block text-sm font-medium text-gray-700 mb-1"
@@ -80,7 +81,7 @@ const BoostProductModal: React.FC<BoostProductModalProps> = ({
                   required
                   className="w-full"
                 />
-              </div>
+              </div> */}
             </>
           )}
           <div className="flex justify-end space-x-2">
