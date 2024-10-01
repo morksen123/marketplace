@@ -15,13 +15,14 @@ import {
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
+import { MapPin } from 'lucide-react';
 import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
 
 export const Checkout: React.FC = () => {
   const stripe = useStripe();
   const elements = useElements();
-  const { cart, cartPrice } = useCart();
+  const { cart, cartPrice, isShippingAddressRequired } = useCart();
 
   const [shippingFee] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,23 +64,10 @@ export const Checkout: React.FC = () => {
                 <CardContent className="space-y-6 text-left">
                   {buyerProfile && (
                     <>
-                      {/* Shipping Address */}
-                      <div className="mb-6">
-                        <h3 className="text-lg font-semibold mb-2">
-                          Shipping Address
-                        </h3>
-                        <AddressElement
-                          options={{
-                            mode: 'shipping',
-                            allowedCountries: ['SG'],
-                          }}
-                        />
-                      </div>
-
                       {/* Link Authentication */}
                       <div className="mb-6">
                         <h3 className="text-lg font-semibold mb-2">
-                          Link Account
+                          Account Information
                         </h3>
                         <LinkAuthenticationElement
                           id="link-authentication-element"
@@ -89,8 +77,62 @@ export const Checkout: React.FC = () => {
                         />
                       </div>
 
-                      {/* Payment Details */}
+                      {/* Shipping Address */}
                       <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-2">
+                          Shipping Address
+                        </h3>
+                        {isShippingAddressRequired ? (
+                          <AddressElement
+                            options={{
+                              mode: 'shipping',
+                              allowedCountries: ['SG'],
+                              fields: {
+                                phone: 'always',
+                              },
+                              defaultValues: {
+                                name: `${buyerProfile.firstName} ${buyerProfile.lastName}`,
+                              },
+                            }}
+                          />
+                        ) : (
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-sm">
+                            <div className="flex items-center">
+                              <div className="bg-green-100 rounded-full p-2 mr-4">
+                                <MapPin className="text-secondary" size={24} />
+                              </div>
+                              <div>
+                                <p className="text-secondary font-medium text-sm">
+                                  Self Pick-up
+                                </p>
+                                <p className="text-secondary text-xs mt-1">
+                                  All items in your order are available for self
+                                  pick-up
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Billing Address */}
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-2">
+                          Billing Address
+                        </h3>
+                        <AddressElement
+                          options={{
+                            mode: 'billing',
+                            allowedCountries: ['SG'],
+                            defaultValues: {
+                              name: `${buyerProfile.firstName} ${buyerProfile.lastName}`,
+                            },
+                          }}
+                        />
+                      </div>
+
+                      {/* Payment Details */}
+                      <div>
                         <h3 className="text-lg font-semibold mb-2">
                           Payment Details
                         </h3>
@@ -103,19 +145,6 @@ export const Checkout: React.FC = () => {
                                 name: `${buyerProfile.firstName} ${buyerProfile.lastName}`,
                               },
                             },
-                          }}
-                        />
-                      </div>
-
-                      {/* Billing Address */}
-                      <div>
-                        <h3 className="text-lg font-semibold mb-2">
-                          Billing Address
-                        </h3>
-                        <AddressElement
-                          options={{
-                            mode: 'billing',
-                            allowedCountries: ['SG'],
                           }}
                         />
                       </div>

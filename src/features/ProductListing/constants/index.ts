@@ -71,5 +71,6 @@ export interface Product {
   bulkPricings?: BulkPricing[];
   distributorId: number;
   productId: string;
-  distributorId: string;
 }
+
+export type deliveryMethod = 'SELF_PICK_UP' | 'DOORSTEP_DELIVERY';
