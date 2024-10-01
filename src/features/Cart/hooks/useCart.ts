@@ -70,6 +70,10 @@ export const useCart = () => {
   const cartQuantity =
     cart?.cartLineItems.reduce((total, item) => total + item.quantity, 0) ?? 0;
 
+  const isShippingAddressRequired = cart?.cartLineItems.some(
+    (item) => item.product.deliveryMethod === 'DOORSTEP_DELIVERY',
+  );
+
   return {
     cart,
     addToCart,
@@ -77,5 +81,6 @@ export const useCart = () => {
     updateQuantity,
     cartPrice,
     cartQuantity,
+    isShippingAddressRequired,
   };
 };

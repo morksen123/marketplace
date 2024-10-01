@@ -76,3 +76,5 @@ export interface Product {
   productId: string;
   boostStatus: string | null;
 }
+
+export type deliveryMethod = 'SELF_PICK_UP' | 'DOORSTEP_DELIVERY';
