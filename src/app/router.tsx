@@ -240,10 +240,10 @@ const routes: RouteObject[] = [
       {
         path: '/transactions/:transactionId',
         lazy: async () => {
-          const { TransactionDetails } = await import(
+          const { TransactionDetailsPage } = await import(
             './routes/payment/transaction-details'
           );
-          return { Component: TransactionDetails };
+          return { Component: TransactionDetailsPage };
         },
       },
     ],

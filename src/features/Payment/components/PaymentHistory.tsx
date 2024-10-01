@@ -30,18 +30,24 @@ import {
 } from '@/components/ui/table';
 import { usePaginatedData } from '@/hooks/usePaginationData';
 import { formatDisplayDate, getUserRoleFromCookie } from '@/lib/utils';
-import { CreditCard, Package, SearchIcon } from 'lucide-react';
+import { CreditCard, Info, Package, SearchIcon } from 'lucide-react';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { dummyData, ITEMS_PER_PAGE } from '../constants';
 import { usePayments } from '../hooks/usePayments';
 import { Transaction } from '../types/payment';
 
 export const PaymentHistory: React.FC = () => {
   const userRole = getUserRoleFromCookie();
-  const { userTransactions } = usePayments({ role: userRole });
-  const { data: transactionData, isLoading } = userTransactions as {
+  const { userTransactionsQuery } = usePayments();
+  const { data: transactionData, isLoading } = userTransactionsQuery as {
     data: Transaction[];
     isLoading: boolean;
+  };
+  const navigate = useNavigate();
+
+  const handleTransactionClick = (transactionId: number) => {
+    navigate(`/transactions/${transactionId}`);
   };
 
   const {
@@ -87,7 +93,8 @@ export const PaymentHistory: React.FC = () => {
                 <TableHead>Date</TableHead>
                 <TableHead>Amount</TableHead>
                 {userRole === 'DISTRIBUTOR' && <TableHead>Status</TableHead>}
-                <TableHead>Order Details</TableHead>
+                <TableHead>Order</TableHead>
+                <TableHead>More Info</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -170,6 +177,14 @@ export const PaymentHistory: React.FC = () => {
                           </div>
                         </DialogContent>
                       </Dialog>
+                    </TableCell>
+                    <TableCell
+                      onClick={() => handleTransactionClick(transaction.id)}
+                      className="cursor-pointer"
+                    >
+                      <Button variant="ghost" size="sm" className="p-0">
+                        <Info className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
