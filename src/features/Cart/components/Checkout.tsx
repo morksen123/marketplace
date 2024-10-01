@@ -49,7 +49,7 @@ export const Checkout: React.FC = () => {
   };
 
   return (
-    <div className="wrapper">
+    <div className="wrapper mb-12">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-extrabold text-center text-gray-900 mb-8">
           Checkout

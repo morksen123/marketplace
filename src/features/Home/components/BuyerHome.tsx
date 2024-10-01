@@ -1,8 +1,8 @@
+import ProductCard from '@/components/product/ProductCard';
+import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import bannerImage from '../../../assets/buyer-homepage-banner.png';
-import ProductCard from '@/components/product/ProductCard';
-import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 
 export const BuyerHome = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -10,7 +10,7 @@ export const BuyerHome = () => {
   const { favourites, toggleFavourite, checkFavourite } = useFavourites();
 
   interface Product {
-    productId: number
+    productId: number;
     listingTitle: string;
     productPictures: string[];
     foodCategory: string;
@@ -30,8 +30,8 @@ export const BuyerHome = () => {
         if (response.ok) {
           const data = await response.json();
           setProducts(data); // Store products from API response
-          console.log(data)
-          data.forEach((product : Product) => {
+          console.log(data);
+          data.forEach((product: Product) => {
             checkFavourite(product.productId); // Check favourited status for each product
           });
         } else {
@@ -45,15 +45,13 @@ export const BuyerHome = () => {
     fetchProducts();
   }, []);
 
- 
   // Function to handle navigation to the product detail page
   const handleProductClick = (productId: number) => {
     navigate(`/buyer/view-product/${productId}`);
   };
 
-
   return (
-    <div>
+    <div className="pb-12">
       {/* Hero Section */}
       <section className="relative">
         <img src={bannerImage} alt="GudFood Banner" className="w-full h-auto" />
