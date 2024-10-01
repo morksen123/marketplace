@@ -1,3 +1,4 @@
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useEffect, useState } from 'react';
@@ -52,7 +53,7 @@ export const StripeWrapper = () => {
   };
 
   if (!clientSecret) {
-    return <div>Loading Stripe Client...</div>;
+    return <LoadingSpinner />;
   }
 
   return (
