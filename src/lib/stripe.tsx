@@ -41,6 +41,9 @@ export const StripeWrapper = () => {
 
   const appearance = {
     theme: 'stripe' as const,
+    variables: {
+      colorPrimary: '#017A37', // Set the primary color as --secondary green
+    },
   };
 
   const options = {
