@@ -258,73 +258,86 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
     setImagePreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index));
   };
 
+  const formatDate = (date: string) => {
+    return new Intl.DateTimeFormat('en-US', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).format(new Date(date));
+  };
+
+  const formatTime = (date: string) => {
+    return new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    }).format(new Date(date));
+  };
+
   return (
     <>
       {selectedChat ? (
         <>
-          <div className="p-4 border-b flex items-center">
-            <h2 className="text-xl font-semibold">
+          <div className="flex items-center p-4 bg-white border-b h-[93px]">
+            <h2 className="text-xl font-semibold text-gray-800">
               {selectedChat.firstName || selectedChat.lastName
                 ? `${selectedChat.firstName || ''} ${selectedChat.lastName || ''}`
                 : 'Administrator'}
             </h2>
           </div>
-          <div className="flex-grow overflow-y-auto p-4">
-            {messages.map((msg) => {
+          <div className="h-[600px] overflow-y-auto p-4">
+            {messages.reduce((acc: JSX.Element[], msg, index, array) => {
+              const currentDate = formatDate(msg.sentAt);
+              if (index === 0 || currentDate !== formatDate(array[index - 1].sentAt)) {
+                acc.push(
+                  <div key={`date-${msg.messageId}`} className="flex items-center justify-center my-5">
+                    <span className="flex-grow h-px bg-gray-200"></span>
+                    <span className="px-2 text-sm text-gray-500 whitespace-nowrap">{currentDate}</span>
+                    <span className="flex-grow h-px bg-gray-200"></span>
+                  </div>
+                );
+              }
+              
               const isDistributorMessage = msg.senderId === senderId && msg.senderRole === 'distributor';
-              return (
-                <div 
-                  key={msg.messageId} 
-                  className={`mb-2 ${isDistributorMessage ? 'flex justify-end' : 'flex justify-start'}`}
-                >
-                  <div className={`max-w-xs ${isDistributorMessage ? 'ml-auto' : 'mr-auto'}`}>
-                    {msg.text && (
-                      <span 
-                        className={`px-4 py-2 inline-block rounded text-sm ${
-                          isDistributorMessage ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'
-                        }`}
-                      >
-                        {msg.title && (
-                          <>
-                            <strong>ANNOUNCEMENT: {msg.title}</strong>
-                            <br />
-                          </>
-                        )}
-                        {msg.text}
-                        {msg.isSending && (
-                          <CircularProgress size={16} className="ml-2" />
-                        )}
-                      </span>
-                    )}
-                    {msg.images && msg.images.length > 0 && (
-                      <div className={`${isDistributorMessage ? 'text-right' : 'text-left'}`}>
-                        {msg.images.map((image, index) => (
-                          image.match(/\.(jpeg|jpg|gif|png)$/i) ? (
-                            <img 
-                              key={index} 
-                              src={image} 
-                              alt={`Message attachment ${index + 1}`} 
-                              className="max-w-xs rounded cursor-pointer border border-gray-300" 
-                              onClick={() => handleFileClick(image)}
-                            />
-                          ) : (
-                            <div 
-                              key={index}
-                              className={`flex items-center rounded p-2 mt-1 cursor-pointer ${isDistributorMessage ? 'bg-green-500 text-white': 'bg-gray-200'}`}
-                              onClick={() => handleFileClick(image)}
-                            >
-                              {getFileIcon(image)}
-                              <span className="ml-2 text-sm">{getFileName(image)}</span>
+              acc.push(
+                <div key={msg.messageId} className={`mb-4 flex ${isDistributorMessage ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[70%] flex flex-col ${isDistributorMessage ? 'items-end' : 'items-start'}`}>
+                    <div className={`p-3 rounded-lg shadow-sm ${isDistributorMessage ? 'bg-[#017A37] text-white' : 'bg-gray-200 text-black'}`}>
+                      {msg.title && (
+                        <div className="font-bold text-center">
+                          <span className="text-black">ANNOUNCEMENT: </span>
+                          {msg.title}
+                        </div>
+                      )}
+                      {msg.text && <div className="text-sm">{msg.text}</div>}
+                      {msg.images && msg.images.length > 0 && (
+                        <div className={`mt-2 ${isDistributorMessage ? 'text-right' : 'text-left'}`}>
+                          {msg.images.map((image, index) => (
+                            <div key={index} className="cursor-pointer" onClick={() => handleFileClick(image)}>
+                              {image.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+                                <img src={image} alt="Message attachment" className="max-w-full rounded border border-gray-300" />
+                              ) : (
+                                <div className={`flex items-center p-2 mt-1 rounded ${isDistributorMessage ? 'bg-[#017A37]' : 'bg-gray-200'}`}>
+                                  {getFileIcon(image)}
+                                  <span className="ml-2 text-sm">{getFileName(image)}</span>
+                                </div>
+                              )}
                             </div>
-                          )
-                        ))}
-                      </div>
-                    )}
+                          ))}
+                        </div>
+                      )}
+                      {msg.isSending && (
+                        <CircularProgress size={16} className="ml-2" />
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1 italic">
+                      {formatTime(msg.sentAt)}
+                    </div>
                   </div>
                 </div>
               );
-            })}
-            <div/>
+              return acc;
+            }, [])}
           </div>
           <div className="border-t p-4">
             {imagePreviews.length > 0 && (
@@ -349,22 +362,22 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
                 ))}
               </div>
             )}
-            <div className="flex items-center">
+            <div className="flex items-center bg-white rounded-full shadow-md p-2">
               <input
                 type="text"
-                className="flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-grow px-4 py-2 focus:outline-none"
                 placeholder="Type a message..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                onKeyPress={(e) => e.key === 'Enter' && !isSending && handleSendMessage()}
               />
-              <button onClick={handleAttachment} className="ml-2 p-2 focus:outline-none button button-green">
+              <button onClick={handleAttachment} className="p-2 text-[#017A37] hover:text-[#015A27] focus:outline-none">
                 <AttachFileIcon className="w-5 h-5" />
               </button>
               <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} multiple />
               <button 
                 onClick={handleSendMessage} 
-                className="ml-2 p-2 button button-green rounded-full"
+                className="ml-2 p-2 bg-[#017A37] text-white rounded-full hover:bg-[#015A27] focus:outline-none"
                 disabled={isSending}
               >
                 {isSending ? <CircularProgress size={24} /> : <SendIcon className="w-5 h-5" />}
