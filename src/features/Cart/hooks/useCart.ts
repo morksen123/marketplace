@@ -61,11 +61,6 @@ export const useCart = () => {
     removeFromCartMutation.mutate(productId);
   };
 
-  const clearCart = () => {
-    // Implement clearCart functionality if needed
-    // You might need to add a new API endpoint for this
-  };
-
   const cartPrice =
     cart?.cartLineItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -80,7 +75,6 @@ export const useCart = () => {
     addToCart,
     removeFromCart,
     updateQuantity,
-    clearCart,
     cartPrice,
     cartQuantity,
   };

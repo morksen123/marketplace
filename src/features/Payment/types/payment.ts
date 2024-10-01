@@ -13,7 +13,16 @@ export interface Transaction {
   amount: number;
   status: 'COMPLETED' | 'PENDING' | 'TRANSFERRED' | 'FAILED';
   createdDateTime: string;
-  orderItems: OrderItem[];
-  paymentIntentId?: string;
-  applicationFee?: string;
+  orderItems?: OrderItem[];
+  paymentIntentId: string;
+  applicationFee: number;
+  shippingDetails?: {
+    city: string;
+    country: string;
+    line1: string;
+    line2: string;
+    name: string;
+    postalCode: string;
+    state?: string;
+  };
 }

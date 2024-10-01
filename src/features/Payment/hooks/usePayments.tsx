@@ -1,22 +1,21 @@
-import { RoleTypes } from '@/features/Authentication/types/auth';
+import { getUserRoleFromCookie } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
-import { getUserTransactions } from '../api/payments';
+import { getTransaction, getUserTransactions } from '../api/payments';
+import { Transaction } from '../types/payment';
 
-interface UsePaymentsProps {
-  role: RoleTypes;
-}
+export const usePayments = (transactionId?: number) => {
+  const role = getUserRoleFromCookie();
+  const transactionQuery = useQuery<Transaction | null>({
+    queryKey: ['transaction', transactionId],
+    queryFn: () => (transactionId ? getTransaction(transactionId) : null),
+    enabled: !!transactionId,
+  });
 
-export const usePayments = ({ role }: UsePaymentsProps) => {
   const userTransactionsQuery = useQuery({
     queryKey: ['userTransactions', role],
-    queryFn: () => getUserTransactions(role),
+    queryFn: () => (role ? getUserTransactions(role) : []),
     enabled: !!role,
   });
 
-  // Add other payment-related hooks or logic here if needed
-
-  return {
-    userTransactions: userTransactionsQuery,
-    // Other payment-related queries or mutations can go here
-  };
+  return { transactionQuery, userTransactionsQuery };
 };
