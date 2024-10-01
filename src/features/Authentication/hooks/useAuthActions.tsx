@@ -4,11 +4,11 @@ import { handleSuccessApi } from '@/lib/api-client';
 import {
   buyerRegister,
   changePasswordAfterReset,
+  checkTokenValidity,
   distributorRegister,
   login,
   logout,
   resetPassword,
-  checkTokenValidity,
 } from '@/lib/auth';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -95,7 +95,7 @@ export function useAuthActions() {
     },
     onSuccess: (data) => {
       if (data) {
-        navigate('/');
+        // navigate('/');
         handleSuccessApi(
           'Account Created',
           'Your account has been successfully created. You can now log in.',
