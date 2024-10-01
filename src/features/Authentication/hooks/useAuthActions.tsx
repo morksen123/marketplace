@@ -8,6 +8,7 @@ import {
   login,
   logout,
   resetPassword,
+  checkTokenValidity,
 } from '@/lib/auth';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -69,6 +70,10 @@ export function useAuthActions() {
     }) => changePasswordAfterReset(data, role, token),
   });
 
+  const checkTokenValidityMutation = useMutation({
+    mutationFn: (token: string) => checkTokenValidity(token),
+  });
+
   const registerBuyerMutation = useMutation({
     mutationFn: (data: BuyerRegisterForm) => {
       return buyerRegister(data);
@@ -106,5 +111,6 @@ export function useAuthActions() {
     registerDistributor: registerDistributorMutation.mutate,
     resetPassword: resetPasswordMutation.mutate,
     changePasswordAfterReset: changePasswordAfterResetMutation.mutate,
+    checkTokenValidity: checkTokenValidityMutation.mutateAsync,
   };
 }

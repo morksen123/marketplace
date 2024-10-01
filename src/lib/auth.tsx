@@ -76,6 +76,11 @@ export async function changePasswordAfterReset(
   );
 }
 
+export async function checkTokenValidity(token: string) {
+  const { data } = await get(`/buyer/check-token-validity/${encodeURIComponent(token)}`);
+  return data;
+}
+
 // guard
 export const AuthGuard = () => {
   const { isAuthenticated, isLoading } = useAuthStatus();
