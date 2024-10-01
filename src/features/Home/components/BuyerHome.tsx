@@ -4,6 +4,7 @@ import bannerImage from '../../../assets/buyer-homepage-banner.png';
 import ProductCard from '@/components/product/ProductCard';
 import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 import { Product } from '@/features/ProductCatalogue/constants';
+import BuyerHomeCarousel from './BuyerHomeCarousel';
 
 export const BuyerHome = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -71,7 +72,8 @@ export const BuyerHome = () => {
     <div>
       {/* Hero Section */}
       <section className="relative">
-        <img src={bannerImage} alt="GudFood Banner" className="w-full h-auto" />
+        {/* <img src={bannerImage} alt="GudFood Banner" className="w-full h-auto" /> */}
+        <BuyerHomeCarousel/>
       </section>
 
       <section className="wrapper mt-10">
