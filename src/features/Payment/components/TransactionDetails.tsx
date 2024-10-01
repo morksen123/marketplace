@@ -29,26 +29,22 @@ export const TransactionDetails: React.FC<{ transaction: Transaction }> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {transaction.paymentIntentId && (
-            <TableRow>
-              <TableCell className="font-medium text-gray-700">
-                Payment Intent ID
-              </TableCell>
-              <TableCell className="text-gray-900">
-                {transaction.paymentIntentId}
-              </TableCell>
-            </TableRow>
-          )}
-          {transaction.applicationFee && (
-            <TableRow>
-              <TableCell className="font-medium text-gray-700">
-                Application Fee
-              </TableCell>
-              <TableCell className="text-gray-900">
-                ${transaction.applicationFee}
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell className="font-medium text-gray-700">
+              Payment Intent ID
+            </TableCell>
+            <TableCell className="text-gray-900">
+              {transaction.paymentIntentId}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell className="font-medium text-gray-700">
+              Application Fee
+            </TableCell>
+            <TableCell className="text-gray-900">
+              ${(transaction.applicationFee / 100).toFixed(2)}
+            </TableCell>
+          </TableRow>
           {transaction.shippingDetails && (
             <TableRow>
               <TableCell className="font-medium text-gray-700">

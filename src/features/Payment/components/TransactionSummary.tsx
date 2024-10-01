@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Transaction } from '@/features/Payment/types/payment';
-import { formatDisplayDate } from '@/lib/utils';
+import { capitalizeFirstLetter, formatDisplayDate } from '@/lib/utils';
 import { Calendar, CreditCard, DollarSign, RefreshCw } from 'lucide-react';
 import React from 'react';
 
@@ -67,7 +67,7 @@ export const TransactionSummary: React.FC<{ transaction: Transaction }> = ({
             }
             className="text-sm"
           >
-            {transaction.status}
+            {capitalizeFirstLetter(transaction.status)}
           </Badge>
         </div>
       </div>
