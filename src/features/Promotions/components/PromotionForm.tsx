@@ -91,7 +91,7 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
           type="date"
           value={formData ? formData.startDate : ''}
           onChange={handleStartDateChange}
-          min={getTodayDate()}
+          min={formData && formData.startDate ? formData.startDate : getTodayDate()}
           required
         />
       </div>

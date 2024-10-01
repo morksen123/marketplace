@@ -18,7 +18,7 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import AddIcon from '@mui/icons-material/Add';
 
 import { Promotion } from '../constants';
@@ -39,10 +39,15 @@ const ViewDistributorPromotions: React.FC = () => {
     navigate(`${id}`);
   };
 
-  const handleDeletePromotion = (id: number) => {
-    // Implement delete functionality
-    console.log(`Delete promotion with id: ${id}`);
-  };
+  // const handlePausePromotion = (id: number) => {
+  //   // Implement delete functionality
+  //   console.log(`Pause promotion with id: ${id}`);
+  //   editPromotionStatus({ id, data: { status: 'PAUSED' } });
+  // };
+  // const handleResumePromotion = (id: number) => {
+  //   console.log(`Resume promotion with id: ${id}`);
+  //   editPromotionStatus({ id, data: { status: 'ACTIVE' } });
+  // };
 
   const getStatusBadge = (status: Promotion['status']) => {
     switch (status) {
@@ -110,15 +115,15 @@ const ViewDistributorPromotions: React.FC = () => {
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
+                        {/* <Button
                           variant="outline"
                           size="icon"
                           onClick={() =>
-                            handleDeletePromotion(promotion.promotionId)
+                            handlePausePromotion(promotion.promotionId)
                           }
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                          <PauseCircleIcon className="h-4 w-4" />
+                        </Button> */}
                       </div>
                     </TableCell>
                   </TableRow>
