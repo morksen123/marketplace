@@ -24,6 +24,13 @@ const routes: RouteObject[] = [
     },
   },
   {
+    path: '/auth/verify',
+    lazy: async () => {
+      const { EmailVerificationPageRoute } = await import('./routes/auth/email-verification-confirmation-route');
+      return { Component: EmailVerificationPageRoute };
+    },
+  },
+  {
     path: '/auth/forgot-password',
     lazy: async () => {
       const { ForgotPasswordRoute } = await import(

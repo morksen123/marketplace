@@ -83,7 +83,7 @@ export function useAuthActions() {
         navigate('/');
         handleSuccessApi(
           'Account Created',
-          'Your account has been successfully created. You can now log in.',
+          'Your account has been successfully created. Please verify your email before you log in.',
         );
       }
     },
