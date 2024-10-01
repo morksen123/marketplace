@@ -7,10 +7,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { createTransaction } from '@/features/Cart/api/api-cart';
 import { useStripe } from '@stripe/react-stripe-js';
 import { PaymentIntent } from '@stripe/stripe-js';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type Status = PaymentIntent['status'];
 
@@ -65,12 +67,37 @@ const STATUS_CONTENT_MAP: Record<
   },
 };
 
-export const CheckoutComplete = () => {
+const LoadingSkeleton = () => (
+  <div className="space-y-4">
+    <Skeleton className="h-8 w-3/4 mx-auto" />
+    <Skeleton className="h-4 w-full" />
+    <Skeleton className="h-4 w-full" />
+    <Separator />
+    <div className="space-y-2">
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-1/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-1/4" />
+        <Skeleton className="h-4 w-1/4" />
+      </div>
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-1/4" />
+        <Skeleton className="h-4 w-1/4" />
+      </div>
+    </div>
+  </div>
+);
+
+export const CheckoutComplete: React.FC = () => {
   const stripe = useStripe();
-  const [status, setStatus] = useState<Status | 'default'>('processing');
+  const [status, setStatus] = useState<Status | 'default'>('default');
   const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(
     null,
   );
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!stripe) {
@@ -82,6 +109,7 @@ export const CheckoutComplete = () => {
     );
 
     if (!clientSecret) {
+      setIsLoading(false);
       return;
     }
 
@@ -94,6 +122,7 @@ export const CheckoutComplete = () => {
           createTransaction(paymentIntent.id);
         }
       }
+      setIsLoading(false);
     });
   }, [stripe]);
 
@@ -107,40 +136,56 @@ export const CheckoutComplete = () => {
         </h1>
         <Card>
           <CardHeader>
-            <CardTitle className={`text-center ${statusContent.color}`}>
-              {statusContent.title}
+            <CardTitle
+              className={`text-center ${isLoading ? '' : statusContent.color}`}
+            >
+              {isLoading ? (
+                <Skeleton className="h-8 w-3/4 mx-auto" />
+              ) : (
+                statusContent.title
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-center">{statusContent.message}</p>
-            {paymentIntent && (
+            {isLoading ? (
+              <LoadingSkeleton />
+            ) : (
               <>
-                <Separator />
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Payment ID:</span>
-                    <span>{paymentIntent.id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Amount:</span>
-                    <span>${(paymentIntent.amount / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Status:</span>
-                    <span className="capitalize">{status}</span>
-                  </div>
-                </div>
+                <p className="text-center">{statusContent.message}</p>
+                {paymentIntent && (
+                  <>
+                    <Separator />
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium">Payment ID:</span>
+                        <span>{paymentIntent.id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Amount:</span>
+                        <span>${(paymentIntent.amount / 100).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Status:</span>
+                        <span className="capitalize">{status}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </>
             )}
           </CardContent>
-          <CardFooter className="flex justify-center space-x-4">
-            <Button
-              variant="outline"
-              onClick={() => (window.location.href = '/buyer/home')}
-            >
-              Return to Home
-            </Button>
-            {paymentIntent && <Button variant="secondary">View Details</Button>}
+          <CardFooter className="flex justify-center">
+            <div className="space-x-6">
+              <Button variant="outline" onClick={() => navigate('/buyer/home')}>
+                Return to Home
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => navigate('/buyer/transactions')}
+              >
+                View Transactions
+              </Button>
+            </div>
           </CardFooter>
         </Card>
       </div>
