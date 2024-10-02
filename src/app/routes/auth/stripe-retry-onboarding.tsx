@@ -37,7 +37,7 @@ export const RetryOnboarding = () => {
 
   if (loading) {
     return (
-      <div>
+      <div className="wrapper">
         <LoadingSpinner />
         Retrying your onboarding process...
       </div>
