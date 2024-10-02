@@ -53,6 +53,7 @@ export function usePromotions() {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
       queryClient.invalidateQueries({ queryKey: ['promotion', id] });
       handleSuccessApi('Promotion Updated', 'Promotion has been updated successfully.');
+      navigate('/distributor/promotions');
     },
     onError: (error: Error) => {
       handleErrorApi('Error', error.message);

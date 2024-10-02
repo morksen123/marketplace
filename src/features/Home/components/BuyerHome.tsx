@@ -3,8 +3,6 @@ import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import bannerImage from '../../../assets/buyer-homepage-banner.png';
-import ProductCard from '@/components/product/ProductCard';
-import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 import { Product } from '@/features/ProductCatalogue/constants';
 import BuyerHomeCarousel from './BuyerHomeCarousel';
 

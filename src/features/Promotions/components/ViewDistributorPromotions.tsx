@@ -22,6 +22,7 @@ import { Pencil } from 'lucide-react';
 import AddIcon from '@mui/icons-material/Add';
 
 import { Promotion } from '../constants';
+import { formatDisplayDate } from '@/lib/utils';
 
 const ViewDistributorPromotions: React.FC = () => {
   const { promotions, isLoading } = usePromotions();
@@ -74,7 +75,7 @@ const ViewDistributorPromotions: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4">
+          <div className="mb-4 flex justify-end">
             <Button variant="secondary" onClick={handleCreatePromotion}>
               <AddIcon className="mr-2" />
               Create New Promotion
@@ -94,14 +95,15 @@ const ViewDistributorPromotions: React.FC = () => {
             <TableBody>
               {promotions && promotions.length > 0 ? (
                 promotions?.map((promotion) => (
-                  <TableRow key={promotion.promotionId}>
+                  <TableRow key={promotion.promotionId} className='text-left'>
                     <TableCell>{promotion.promotionName}</TableCell>
                     <TableCell>{promotion.discountPercentage}%</TableCell>
                     <TableCell>
-                      {new Date(promotion.startDate).toLocaleDateString()}
+                      {/* {new Date(promotion.startDate).toLocaleDateString()} */}
+                      {formatDisplayDate(promotion.startDate)}
                     </TableCell>
                     <TableCell>
-                      {new Date(promotion.endDate).toLocaleDateString()}
+                    {formatDisplayDate(promotion.endDate)}
                     </TableCell>
                     <TableCell>{getStatusBadge(promotion.status)}</TableCell>
                     <TableCell>

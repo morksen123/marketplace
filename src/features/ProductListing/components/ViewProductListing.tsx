@@ -103,7 +103,7 @@ export const ViewProductListing = () => {
     };
 
     fetchProduct();
-  }, [productId]);
+  }, [productId, location]);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -322,7 +322,7 @@ export const ViewProductListing = () => {
   // Boost Product Functions
   const getButtonText = (status: string | null) => {
     if (distributorProfile?.boostCount === 0) return 'No More Boost';
-
+    console.log(status);
     switch (status) {
       case 'ACTIVE':
         return 'Currently Boosted';

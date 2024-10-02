@@ -58,8 +58,7 @@ const EditPromotion: React.FC = () => {
     e.preventDefault();
     console.log(formData);
     if (formData) {
-      editPromotion({ id: Number(promotionId), data: formData });
-      navigate('/distributor/promotions');
+      editPromotion({ id: Number(promotionId), data: formData }); 
     }
   };
 
