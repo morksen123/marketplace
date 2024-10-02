@@ -1,3 +1,4 @@
+import { LoadingSpinnerSvg } from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -49,7 +50,7 @@ export const Checkout: React.FC = () => {
   };
 
   return (
-    <div className="wrapper">
+    <div className="wrapper mb-12">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-extrabold text-center text-gray-900 mb-8">
           Checkout
@@ -208,7 +209,11 @@ export const Checkout: React.FC = () => {
                     className="w-full"
                     disabled={isLoading || !stripe || !elements}
                   >
-                    {isLoading ? 'Processing...' : 'Place Order'}
+                    {isLoading ? (
+                      <LoadingSpinnerSvg size={24} />
+                    ) : (
+                      'Place Order'
+                    )}
                   </Button>
                 </CardFooter>
               </Card>

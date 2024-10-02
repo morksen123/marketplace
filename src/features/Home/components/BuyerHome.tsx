@@ -1,3 +1,5 @@
+import ProductCard from '@/components/product/ProductCard';
+import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import bannerImage from '../../../assets/buyer-homepage-banner.png';
@@ -10,14 +12,6 @@ export const BuyerHome = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const navigate = useNavigate();
   const { favourites, toggleFavourite, checkFavourite } = useFavourites();
-
-  // interface Product {
-  //   productId: number
-  //   listingTitle: string;
-  //   productPictures: string[];
-  //   foodCategory: string;
-  //   foodCondition: string;
-  // }
 
   // Fetch products from the API when the component mounts
   useEffect(() => {
@@ -61,15 +55,13 @@ export const BuyerHome = () => {
     fetchProducts();
   }, []);
 
- 
   // Function to handle navigation to the product detail page
   const handleProductClick = (productId: number) => {
     navigate(`/buyer/view-product/${productId}`);
   };
 
-
   return (
-    <div>
+    <div className="pb-12">
       {/* Hero Section */}
       <section className="relative">
         {/* <img src={bannerImage} alt="GudFood Banner" className="w-full h-auto" /> */}

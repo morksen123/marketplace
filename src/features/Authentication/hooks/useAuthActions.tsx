@@ -4,12 +4,14 @@ import { handleSuccessApi } from '@/lib/api-client';
 import {
   buyerRegister,
   changePasswordAfterReset,
+  checkTokenValidity,
   distributorRegister,
   login,
   logout,
   resetPassword,
-  checkTokenValidity,
 } from '@/lib/auth';
+import { emailModalOpenAtom, userEmailAtom } from '@/store/emailModalAtom';
+import { useAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import {
   BuyerRegisterForm,
@@ -23,6 +25,8 @@ import {
 export function useAuthActions() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [, setIsOpen] = useAtom(emailModalOpenAtom);
+  const [, setUserEmail] = useAtom(userEmailAtom);
 
   const loginMutation = useMutation({
     mutationFn: ({
@@ -95,10 +99,11 @@ export function useAuthActions() {
     },
     onSuccess: (data) => {
       if (data) {
-        navigate('/');
+        setUserEmail(data.email);
+        setIsOpen(true);
         handleSuccessApi(
           'Account Created',
-          'Your account has been successfully created. You can now log in.',
+          'Your account has been successfully created.',
         );
       }
     },
@@ -108,7 +113,7 @@ export function useAuthActions() {
     login: loginMutation.mutate, // change to mutateAsync if we need the data in the component
     logout: logoutMutation.mutate,
     registerBuyer: registerBuyerMutation.mutate,
-    registerDistributor: registerDistributorMutation.mutate,
+    registerDistributor: registerDistributorMutation.mutateAsync,
     resetPassword: resetPasswordMutation.mutate,
     changePasswordAfterReset: changePasswordAfterResetMutation.mutate,
     checkTokenValidity: checkTokenValidityMutation.mutateAsync,
