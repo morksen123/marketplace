@@ -12,8 +12,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import ElectricBolt from '@mui/icons-material/ElectricBolt';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
-import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import {
   Carousel,
   CarouselItem,
@@ -424,6 +424,10 @@ export const ViewProductListing = () => {
   const applyDiscount = (price: number, discount: number): number => {
     return price * (1 - discount / 100);
   };
+
+  const handleEditPromotion = (promotionId: number) => {
+    navigate(`/distributor/promotions/${promotionId}`);
+  }
 
   useEffect(() => {
     if (product) {
@@ -847,6 +851,46 @@ export const ViewProductListing = () => {
             </button>
           </DialogActions>
         </Dialog>
+
+        {/* Active Promotions Section */}
+        {product.promotions && product.promotions.length > 0 && (
+        <div className="mt-12">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold">Promotions</h2>
+            <Link 
+              to="/distributor/promotions" 
+              className="flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200"
+            >
+              <VisibilityIcon className="mr-2" />
+              View All Promotions
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {product.promotions.map((promo, index) => (
+              <Card key={index} className="hover:shadow-lg transition duration-300 ease-in-out">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-semibold text-lg">{promo.promotionName}</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEditPromotion(promo.promotionId)}
+                      className="text-gray-600 hover:text-blue-600"
+                    >
+                      <EditIcon fontSize="small" />
+                    </Button>
+                  </div>
+                  <p className="text-green-600 font-bold mb-2">{promo.discountPercentage}% off</p>
+                  <p className="text-sm text-gray-600">
+                    Valid from {new Date(promo.startDate).toLocaleDateString()} to{' '}
+                    {new Date(promo.endDate).toLocaleDateString()}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
         {/* Boost Product Dialog */}
         <BoostProductModal
