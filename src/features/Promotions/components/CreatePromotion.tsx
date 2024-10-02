@@ -75,7 +75,6 @@ const CreatePromotion: React.FC = () => {
     };
     console.log(adjustedPromotion);
     createPromotion(adjustedPromotion);
-    navigate('/distributor/promotions');
   };
 
   const handleBack = () => {

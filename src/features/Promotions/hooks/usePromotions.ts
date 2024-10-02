@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
 import { getAllPromotions, getPromotion, createPromotion, editPromotion, editPromotionStatus } from '../lib/promotions';
 import { getProductbyProductId } from '@/features/DIstributorAccount/lib/distributor';
@@ -7,6 +8,7 @@ import { Product } from '@/features/ProductCatalogue/constants';
 
 export function usePromotions() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const promotionsQuery = useQuery({
     queryKey: ['promotions'],
@@ -34,6 +36,7 @@ export function usePromotions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
       handleSuccessApi('Promotion Created', 'New promotion has been created successfully.');
+      navigate('/distributor/promotions');
     },
     onError: (error: Error) => {
       console.log(error.message)
