@@ -1,5 +1,5 @@
 import React from 'react';
-import { foodCategoryMapping, foodConditionMapping } from '@/features/ProductListing/constants';
+import { foodCategoryMapping, foodConditionMapping, boostStatusMapping } from '../constants';
 import { Product } from '@/features/ProductCatalogue/constants';
 
 interface DistributorProductCardProps {
@@ -44,9 +44,9 @@ const DistributorProductCard: React.FC<DistributorProductCardProps> = ({
           <i>{foodConditionMapping[product.foodCondition] || product.foodCondition}</i>
         </p>
         <div className="mb-3">
-          <p className="text-sm font-semibold">
+        <p className="text-sm font-semibold">
             Boost Status: <span className={`${product.boostStatus === 'ACTIVE' ? 'text-green-500' : 'text-red-500'}`}>
-              {product.boostStatus.charAt(0).toUpperCase() + product.boostStatus.slice(1)}
+              {boostStatusMapping[product.boostStatus] || product.boostStatus}
             </span>
           </p>
           <p className="text-sm">Boost End Date: {new Date(product.boostEndDate).toLocaleDateString()}</p>

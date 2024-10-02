@@ -29,3 +29,11 @@ export const foodCategoryMapping: Record<string, string> = {
       isApproved: Boolean;
       boostCount: number;
   }
+
+  export const boostStatusMapping: Record<string, string> = {
+    NONE: "None",
+    NOT_STARTED: "Not Started",
+    ACTIVE: "Active",
+    PAUSED: "Paused",
+    COMPLETED: "Completed"
+  };
