@@ -28,6 +28,7 @@ export const RetryOnboarding = () => {
         }
       } catch (err) {
         setError('Failed to retry onboarding. Please try again later.');
+        window.location.href = '/';
         setLoading(false);
       }
     };
