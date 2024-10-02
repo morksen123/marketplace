@@ -278,7 +278,7 @@ export const DistributorIndividualChat: React.FC<DistributorIndividualChatProps>
     <>
       {selectedChat ? (
         <>
-          <div className="flex items-center p-4 bg-white border-b h-[93px]">
+          <div className="flex items-center p-4 bg-white border-b">
             <h2 className="text-xl font-semibold text-gray-800">
               {selectedChat.firstName || selectedChat.lastName
                 ? `${selectedChat.firstName || ''} ${selectedChat.lastName || ''}`
