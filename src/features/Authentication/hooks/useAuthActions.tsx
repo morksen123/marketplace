@@ -112,7 +112,7 @@ export function useAuthActions() {
   return {
     login: loginMutation.mutate, // change to mutateAsync if we need the data in the component
     logout: logoutMutation.mutate,
-    registerBuyer: registerBuyerMutation.mutate,
+    registerBuyer: registerBuyerMutation.mutateAsync,
     registerDistributor: registerDistributorMutation.mutateAsync,
     resetPassword: resetPasswordMutation.mutate,
     changePasswordAfterReset: changePasswordAfterResetMutation.mutate,
