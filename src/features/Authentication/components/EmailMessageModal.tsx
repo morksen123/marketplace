@@ -25,14 +25,14 @@ export const EmailMessageModal = () => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center">
+          <DialogTitle className="text-center text-xl font-semibold">
             Complete Account Setup
           </DialogTitle>
           <DialogDescription className="text-center">
             We've emailed instructions for setting up your Stripe account.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-4">
           <div className="flex-shrink-0 bg-green-100 rounded-full p-2">
             <CreditCard className="h-6 w-6 text-green-600" />
           </div>
@@ -43,20 +43,21 @@ export const EmailMessageModal = () => {
             </p>
           </div>
         </div>
-        <div className="mt-4 space-y-2">
+        <div className="mt-4">
           <p className="text-sm text-gray-600 text-center">
             Follow the instructions to complete your account registration and
             start receiving payments.
           </p>
         </div>
-        <div className="mt-4 flex flex-col space-y-2">
+        <div className="mt-6 flex flex-col space-y-3">
           <Button
             variant="secondary"
             onClick={() => window.open('https://mail.google.com', '_blank')}
+            className="w-full"
           >
             Open Gmail
           </Button>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} className="w-full">
             I'll set up later
           </Button>
         </div>
