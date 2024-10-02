@@ -1,3 +1,5 @@
+import { Promotion } from "@/features/Promotions/constants";
+
 export const createProductListingDefaultValues = {
     listingTitle: '',
     foodCategory: '',
@@ -70,5 +72,7 @@ export const createProductListingDefaultValues = {
     minPurchaseQty: number;
     batches?: Batch[];
     bulkPricings?: BulkPricing[];
+    promotions: Promotion[];
     distributorId: number;
+    boostStatus: string;
   }

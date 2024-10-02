@@ -14,11 +14,12 @@ import {
   foodConditionMapping,
   Product,
   unitMapping,
+  BulkPricing,
 } from '@/features/ProductListing/constants';
+import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
-import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import StarIcon from '@mui/icons-material/Star';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -37,9 +38,13 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
     const [quantity, setQuantity] = useState(1);
     const [distributor, setDistributor] = useState(null);
     const [distributorId, setDistributorId] = useState<string | null>(null);
-    const [buyerId, setBuyerId] = useState<number | null>(0);
     const { toggleFavourite, favourites } = useFavourites();
     const isFavourite = favourites?.some(fav => fav.productId === Number(productId));
+    const [promotionalPrice, setPromotionalPrice] = useState<number | null>(null);
+    const [promotionalDiscount, setPromotionalDiscount] = useState<number>(0);
+    const [discountedBulkPricing, setDiscountedBulkPricing] = useState<
+      BulkPricing[]
+    >([]);
   
     const formatDisplayDate = (dateString) => {
       if (!dateString) return '';
@@ -137,6 +142,23 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
     // checkFavourited();
   }, [productId, isBuyer]);
 
+  useEffect(() => {    
+    if (product) {
+          const discount = calculatePromotionalDiscount(product);
+          setPromotionalDiscount(discount);
+          if (discount > 0) setPromotionalPrice(applyDiscount(product.price, discount));
+    
+          // Update bulk pricing with discounts
+          if (product.bulkPricings) {
+            const updatedBulkPricing = product.bulkPricings.map((pricing) => ({
+              ...pricing,
+              discountedPrice: applyDiscount(pricing.price, discount),
+            }));
+            setDiscountedBulkPricing(updatedBulkPricing);
+          }
+        }
+      }, [product]);
+
   // const handleToggleFavourite = async () => {
   //   if (!isBuyer) return;
 
@@ -215,6 +237,31 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
       }
     }
   };
+  
+  // Promotional methods here
+  // Function to calculate the promotional price
+  // Function to calculate the promotional discount
+  const calculatePromotionalDiscount = (product: Product): number => {
+    if (!product.promotions || product.promotions.length === 0) return 0;
+
+    // const now = new Date();
+    const activePromotions = product.promotions.filter(
+      (promo) =>
+        promo.status === 'ACTIVE'
+    );
+
+    if (activePromotions.length === 0) return 0;
+
+    // Apply the highest discount
+    return Math.max(
+      ...activePromotions.map((promo) => promo.discountPercentage),
+    );
+  };
+
+  // Function to apply discount to a price
+  const applyDiscount = (price: number, discount: number): number => {
+    return price * (1 - discount / 100);
+  };
 
   return (
     <div className="wrapper">
@@ -259,17 +306,39 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
               <h1 className="text-3xl font-bold text-left">
                 {product.listingTitle}
               </h1>
-              <p className="text-2xl text-[#017A37] font-semibold text-left">
-                ${product.price.toFixed(2)} per{' '}
-                {unitMapping[product.foodCategory] || 'unit'}
-              </p>
+              {/* Pricing - implement promotion price here */}
+              {promotionalPrice !== null ? (
+                <>
+                  <p className="text-2xl text-[#017A37] font-semibold text-left mr-2">
+                    ${promotionalPrice.toFixed(2)} per{' '}
+                    {unitMapping[product.foodCategory] || 'unit'}
+                  </p>
+                  <p className="text-xl text-gray-500 line-through">
+                    ${product.price.toFixed(2)} per{' '}
+                    {unitMapping[product.foodCategory] || 'unit'}
+                  </p>
+                </>
+              ) : (
+                <p className="text-2xl text-[#017A37] font-semibold text-left">
+                  ${product.price.toFixed(2)}
+                </p>
+              )}
             </div>
 
             {isBuyer && (
-              <button onClick={() => toggleFavourite(Number(productId))} className="flex items-center" aria-label='Toggle Favourite'>
-                <FavoriteOutlinedIcon style={{ color: isFavourite ? 'red' : 'gray', fontSize: '28px' }} />
-                </button>
-              )}
+              <button
+                onClick={() => toggleFavourite(Number(productId))}
+                className="flex items-center"
+                aria-label="Toggle Favourite"
+              >
+                <FavoriteOutlinedIcon
+                  style={{
+                    color: isFavourite ? 'red' : 'gray',
+                    fontSize: '28px',
+                  }}
+                />
+              </button>
+            )}
           </div>
 
           <div className="mt-4">
@@ -341,7 +410,7 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
       {/* Bulk Pricing Section */}
       <div className="mt-8">
         <h2 className="text-2xl font-semibold mb-4">Bulk Pricing</h2>
-        {product.bulkPricings && product.bulkPricings.length > 0 ? (
+        {discountedBulkPricing && discountedBulkPricing.length > 0 ? (
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
@@ -354,10 +423,15 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
                 <th className="border border-gray-300 px-4 py-2">
                   Price per {unitMapping[product.foodCategory] || 'unit'}
                 </th>
+                {promotionalDiscount > 0 && (
+                  <th className="border border-gray-300 px-4 py-2">
+                    Promotional Price
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
-              {product.bulkPricings.map((pricing, index) => (
+              {discountedBulkPricing.map((pricing, index) => (
                 <tr key={index}>
                   <td className="border border-gray-300 px-4 py-2">
                     {pricing.minQuantity}
@@ -366,8 +440,19 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
                     {pricing.maxQuantity || 'No limit'}
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
-                    ${pricing.price.toFixed(2)}
+                    {promotionalDiscount > 0 ? (
+                      <span className="text-gray-500 line-through">
+                        ${pricing.price.toFixed(2)}
+                      </span>
+                    ) : (
+                      `$${pricing.price.toFixed(2)}`
+                    )}
                   </td>
+                  {promotionalDiscount > 0 && (
+                    <td className="border border-gray-300 px-4 py-2 text-[#017A37] font-semibold">
+                      ${pricing.discountedPrice.toFixed(2)}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

@@ -3,19 +3,15 @@ import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import bannerImage from '../../../assets/buyer-homepage-banner.png';
+import ProductCard from '@/components/product/ProductCard';
+import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
+import { Product } from '@/features/ProductCatalogue/constants';
+import BuyerHomeCarousel from './BuyerHomeCarousel';
 
 export const BuyerHome = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const navigate = useNavigate();
   const { favourites, toggleFavourite, checkFavourite } = useFavourites();
-
-  interface Product {
-    productId: number;
-    listingTitle: string;
-    productPictures: string[];
-    foodCategory: string;
-    foodCondition: string;
-  }
 
   // Fetch products from the API when the component mounts
   useEffect(() => {
@@ -28,11 +24,25 @@ export const BuyerHome = () => {
           },
         });
         if (response.ok) {
-          const data = await response.json();
-          setProducts(data); // Store products from API response
-          console.log(data);
-          data.forEach((product: Product) => {
-            checkFavourite(product.productId); // Check favourited status for each product
+          const data: Product[] = await response.json();
+          
+          // Sort products
+          const sortedProducts = data.sort((a, b) => {
+            // First, prioritize boosted products
+            // First, prioritize boosted products
+            if (a.boostStatus === 'ACTIVE' && b.boostStatus !== 'ACTIVE') return -1;
+            if (b.boostStatus === 'ACTIVE' && a.boostStatus !== 'ACTIVE') return 1;
+            
+            // Then, sort by bestBeforeDate of the first batch
+            const aDate = new Date(a.batches[0]?.bestBeforeDate || '');
+            const bDate = new Date(b.batches[0]?.bestBeforeDate || '');
+            return aDate.getTime() - bDate.getTime();
+          });
+
+          setProducts(sortedProducts);
+          console.log(sortedProducts);
+          sortedProducts.forEach((product: Product) => {
+            checkFavourite(product.productId);
           });
         } else {
           console.error('Failed to fetch products');
@@ -54,7 +64,8 @@ export const BuyerHome = () => {
     <div className="pb-12">
       {/* Hero Section */}
       <section className="relative">
-        <img src={bannerImage} alt="GudFood Banner" className="w-full h-auto" />
+        {/* <img src={bannerImage} alt="GudFood Banner" className="w-full h-auto" /> */}
+        <BuyerHomeCarousel/>
       </section>
 
       <section className="wrapper mt-10">

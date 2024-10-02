@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
+import { Button } from '@/components/ui/button';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
+import AddIcon from '@mui/icons-material/Add';
+import ElectricBolt from '@mui/icons-material/ElectricBolt';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+
 import {
   Carousel,
   CarouselItem,
@@ -18,9 +21,8 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from '@/components/ui/carousel';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
-import AddIcon from '@mui/icons-material/Add';
 import {
   foodCategoryMapping,
   foodConditionMapping,
@@ -31,11 +33,16 @@ import {
   BulkPricing,
 } from '@/features/ProductListing/constants';
 import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
+import { useProductBoosts } from '@/features/Promotions/hooks/useProductBoost';
+import BoostProductModal from './BoostProductModal';
+import { Distributor } from '@/features/Home/constants';
+import { useDistributor } from '@/features/DIstributorAccount/hooks/useDistributor';
 
 export const ViewProductListing = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
+  const [distributor, setDistributor] = useState<Distributor | null>(null);
   const [batches, setBatches] = useState<Batch[]>([]);
   const [bulkPricings, setBulkPricings] = useState<BulkPricing[]>([]);
   const [open, setOpen] = useState(false);
@@ -49,8 +56,16 @@ export const ViewProductListing = () => {
     maxQuantity: '',
     price: '',
   });
+  const { createBoost, updateBoost, reactivateBoost } = useProductBoosts();
+  const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
+  const { distributorProfile } = useDistributor();
 
-  const buyerId = 1; // To change
+  const [promotionalDiscount, setPromotionalDiscount] = useState<number>(0);
+  const [discountedBulkPricing, setDiscountedBulkPricing] = useState<
+    BulkPricing[]
+  >([]);
+
+  // const buyerId = 1; // To change
 
   const getTodayDate = () => {
     const today = new Date();
@@ -304,6 +319,132 @@ export const ViewProductListing = () => {
     }
   };
 
+  // Boost Product Functions
+  const getButtonText = (status: string | null) => {
+    if (distributorProfile?.boostCount === 0) return 'No More Boost';
+
+    switch (status) {
+      case 'ACTIVE':
+        return 'Currently Boosted';
+      case 'PAUSED':
+        return 'Boost Paused';
+      case 'COMPLETED':
+        return 'Boost Again';
+      case 'NOT_STARTED':
+        return 'Boost has not started';
+      case 'NONE':
+      case null:
+      default:
+        return 'Boost This Product';
+    }
+  };
+
+  const getButtonDisabledBoolean = (status: string | null) => {
+    if (distributorProfile?.boostCount === 0) return true;
+
+    switch (status) {
+      case 'ACTIVE':
+        return true;
+      case 'PAUSED':
+      case 'COMPLETED':
+      case 'NONE':
+      case null:
+      default:
+        return false;
+    }
+  };
+
+  const handleBoostProduct = (startDate: string) => {
+    if (productId) {
+      if (product?.boostStatus === 'PAUSED') {
+        reactivateBoost(parseInt(productId));
+      } else {
+        // Parse the dates
+        const startDateTime = new Date(startDate);
+
+        // Set start time to 00:00:00
+        startDateTime.setHours(0, 0, 0, 0);
+
+        // Calculate end date (30 days from start date)
+        const endDateTime = new Date(startDateTime);
+        endDateTime.setDate(endDateTime.getDate() + 30);
+        // Set end time to 23:59:59
+        endDateTime.setHours(23, 59, 59, 999);
+
+        // Convert to ISO strings
+        const startDateISOString = startDateTime.toISOString();
+        const endDateISOString = endDateTime.toISOString();
+
+        if (product?.boostStatus === 'NONE') {
+          createBoost({
+            productId: parseInt(productId),
+            boostData: {
+              startDate: startDateISOString,
+              endDate: endDateISOString,
+            },
+          });
+        } else if (product?.boostStatus === 'NOT_STARTED') {
+            updateBoost({
+              productId: parseInt(productId),
+              boostData: {
+                startDate:startDateISOString,
+                endDate: endDateISOString,
+              }
+            })
+        }
+      }
+      // Refresh the page after 1 second
+      setTimeout(() => {
+        navigate(0);
+      }, 500);
+    }
+  };
+
+  // Promotional Functions
+  // Function to calculate the promotional discount
+  const calculatePromotionalDiscount = (product: Product): number => {
+    if (!product.promotions || product.promotions.length === 0) return 0;
+
+    const now = new Date();
+    const activePromotions = product.promotions.filter(
+      (promo) =>
+        new Date(promo.startDate) <= now && new Date(promo.endDate) >= now,
+    );
+
+    if (activePromotions.length === 0) return 0;
+    console.log(activePromotions);
+
+    // Apply the highest discount
+    return Math.max(
+      ...activePromotions.map((promo) => promo.discountPercentage),
+    );
+  };
+
+  // Function to apply discount to a price
+  const applyDiscount = (price: number, discount: number): number => {
+    return price * (1 - discount / 100);
+  };
+
+  const handleEditPromotion = (promotionId: number) => {
+    navigate(`/distributor/promotions/${promotionId}`);
+  }
+
+  useEffect(() => {
+    if (product) {
+      const discount = calculatePromotionalDiscount(product);
+      setPromotionalDiscount(discount);
+
+      // Update bulk pricing with discounts
+      if (product.bulkPricings) {
+        const updatedBulkPricing = product.bulkPricings.map((pricing) => ({
+          ...pricing,
+          discountedPrice: applyDiscount(pricing.price, discount),
+        }));
+        setDiscountedBulkPricing(updatedBulkPricing);
+      }
+    }
+  }, [product]);
+
   if (loading) {
     return <div className="wrapper">Loading...</div>;
   }
@@ -355,14 +496,32 @@ export const ViewProductListing = () => {
           <h1 className="text-3xl font-bold text-left">
             {product.listingTitle}
           </h1>
-          <p className="text-2xl text-green-600 font-semibold text-left">
-            ${product.price.toFixed(2)} per{' '}
-            {unitMapping[product.foodCategory] || 'unit'}
-          </p>
+          {/* Product Pricing */}
+          <div className="flex items-baseline">
+            {promotionalDiscount > 0 ? (
+              <>
+                <p className="text-2xl text-green-600 font-semibold text-left mr-2">
+                  $
+                  {applyDiscount(product.price, promotionalDiscount).toFixed(2)}
+                </p>
+                <p className="text-xl text-gray-500 line-through">
+                  ${product.price.toFixed(2)}
+                </p>
+              </>
+            ) : (
+              <p className="text-2xl text-green-600 font-semibold text-left">
+                ${product.price.toFixed(2)}
+              </p>
+            )}
+            <span className="ml-2">
+              per {unitMapping[product.foodCategory] || 'unit'}
+            </span>
+          </div>
         </div>
       </div>
       <div className="text-left">
         <hr className="border-gray-300 mb-6" />
+        {/* Product Details */}
         <div className="text-left space-y-4">
           <h2 className="text-2xl font-semibold">Details</h2>
 
@@ -403,13 +562,32 @@ export const ViewProductListing = () => {
           </p>
         </div>
 
-        <div className="mt-6 mb-6 flex justify-end space-x-2">
-          <button className="button button-orange" onClick={handleEdit}>
+        {/* Product Buttons */}
+        <div className="mt-6 mb-6 flex justify-end items-end space-x-2">
+          <Button className="button button-orange" onClick={handleEdit}>
             <EditIcon className="mr-2" /> Edit
-          </button>
-          <button className="button button-red" onClick={handleClickOpen}>
+          </Button>
+          <Button className="button button-red" onClick={handleClickOpen}>
             <DeleteIcon className="mr-2" /> Delete
-          </button>
+          </Button>
+          <div className="flex flex-col items-end">
+            <p className="text-s text-gray-600 mb-1">
+              <Link
+                to="/distributor/view-boosted-products"
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                Remaining Boosts: {distributorProfile?.boostCount ?? 0}
+              </Link>
+            </p>
+            <Button
+              variant="secondary"
+              onClick={() => setIsBoostModalOpen(true)}
+              disabled={getButtonDisabledBoolean(product.boostStatus)}
+            >
+              <ElectricBolt className="mr-2" />
+              {getButtonText(product.boostStatus)}
+            </Button>
+          </div>
         </div>
 
         {/* Bulk Pricing Section */}
@@ -428,13 +606,18 @@ export const ViewProductListing = () => {
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
                     Price per {unitMapping[product.foodCategory] || 'unit'}
                   </th>
+                  {promotionalDiscount > 0 && (
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                      Promotional Price
+                    </th>
+                  )}
                   <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600 w-20">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {bulkPricings.map((pricing, index) => (
+                {discountedBulkPricing.map((pricing, index) => (
                   <tr
                     key={index}
                     className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
@@ -446,8 +629,19 @@ export const ViewProductListing = () => {
                       {pricing.maxQuantity || 'No limit'}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-500">
-                      ${pricing.price.toFixed(2)}
+                      {promotionalDiscount > 0 ? (
+                        <span className="line-through">
+                          ${pricing.price.toFixed(2)}
+                        </span>
+                      ) : (
+                        `$${pricing.price.toFixed(2)}`
+                      )}
                     </td>
+                    {promotionalDiscount > 0 && (
+                      <td className="px-4 py-3 text-sm text-green-600 font-semibold">
+                        ${pricing.discountedPrice.toFixed(2)}
+                      </td>
+                    )}
                     <td className="px-4 py-3 text-sm text-gray-500 flex justify-center space-x-2">
                       <button
                         onClick={() => handleDeleteBulkPricing(pricing.id)}
@@ -633,7 +827,7 @@ export const ViewProductListing = () => {
           </div>
         </div>
 
-        {/* Dialog */}
+        {/* Delete Dialog */}
         <Dialog open={open} onClose={handleClose} className="wrapper">
           <DialogTitle>{'Confirm Deletion'}</DialogTitle>
           <DialogContent>
@@ -657,6 +851,55 @@ export const ViewProductListing = () => {
             </button>
           </DialogActions>
         </Dialog>
+
+        {/* Active Promotions Section */}
+        {product.promotions && product.promotions.length > 0 && (
+        <div className="mt-12">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold">Promotions</h2>
+            <Link 
+              to="/distributor/promotions" 
+              className="flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200"
+            >
+              <VisibilityIcon className="mr-2" />
+              View All Promotions
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {product.promotions.map((promo, index) => (
+              <Card key={index} className="hover:shadow-lg transition duration-300 ease-in-out">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-semibold text-lg">{promo.promotionName}</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEditPromotion(promo.promotionId)}
+                      className="text-gray-600 hover:text-blue-600"
+                    >
+                      <EditIcon fontSize="small" />
+                    </Button>
+                  </div>
+                  <p className="text-green-600 font-bold mb-2">{promo.discountPercentage}% off</p>
+                  <p className="text-sm text-gray-600">
+                    Valid from {new Date(promo.startDate).toLocaleDateString()} to{' '}
+                    {new Date(promo.endDate).toLocaleDateString()}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+        {/* Boost Product Dialog */}
+        <BoostProductModal
+          boostStatus={product.boostStatus}
+          isOpen={isBoostModalOpen}
+          onClose={() => setIsBoostModalOpen(false)}
+          onSubmit={handleBoostProduct}
+          productName={product.listingTitle}
+        />
       </div>
     </div>
   );
