@@ -9,6 +9,7 @@ interface Chat {
   chatId: number;
   distributorName: string;  
   distributorId: number;
+  distributorEmail: string; // Added distributorEmail
   lastMessage: string;
   administratorId: string | null;
 }
@@ -141,39 +142,40 @@ export const BuyerChats: React.FC = () => {
   });
 
   return (
-    <div className="flex h-full max-h-screen">
+    <div className="flex h-[80vh] bg-gray-100">
       {/* Left side - Chat list */}
-      <div className="w-1/3 border-r flex flex-col">
-        <div className="p-4">
-          <div className="flex items-center mb-4">
-            <div className="relative flex-grow">
-              <input
-                type="text"
-                className="w-full px-4 py-2 pl-10 pr-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Search distributors"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            </div>
+      <div className="w-1/3 border-r flex flex-col bg-white shadow-md">
+        <div className="p-5 bg-white border-b border-gray-200">
+          <div className="relative">
+            <input
+              type="text"
+              className="w-full px-4 py-2 pl-10 pr-4 bg-white border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Search distributors"
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
         </div>
         <ul className="overflow-y-auto flex-grow">
           {sortedChats.map((chat) => (
             <li
               key={chat.chatId}
-              className={`p-3 flex items-start hover:bg-gray-100 cursor-pointer ${
-                selectedChat?.chatId === chat.chatId ? 'bg-gray-200' : ''
+              className={`p-4 cursor-pointer transition-colors duration-300 ${
+                selectedChat?.chatId === chat.chatId
+                  ? 'bg-[#e8f5fe] border-l-4 border-[#017A37]'
+                  : 'hover:bg-gray-50'
               }`}
               onClick={() => handleSelectChat(chat)}
             >
-              <div className="flex-grow">
-                <h3 className="font-semibold text-left">
+              <div className="flex flex-col items-start w-full">
+                <h3 className="font-semibold text-gray-800">
                   {chat.administratorId ? 'Administrator' : chat.distributorName}
                 </h3>
-                <p className="text-sm text-gray-600 text-left truncate">
-                  {chat.lastMessage.slice(0, 60)}
-                  {chat.lastMessage.length > 60 ? '...' : ''}
+                <p className="text-xs italic text-[#017A37]">{chat.distributorEmail}</p>
+                <p className="text-sm text-gray-600 mt-1 w-full truncate text-left">
+                  {chat.lastMessage?.slice(0, 60)}
+                  {chat.lastMessage && chat.lastMessage.length > 60 ? '...' : ''}
                 </p>
               </div>
             </li>
@@ -181,8 +183,13 @@ export const BuyerChats: React.FC = () => {
         </ul>
       </div>
 
-      <div className="w-2/3 flex flex-col">
-        <BuyerIndividualChat selectedChat={selectedChat} stompClient={stompClient} senderId={senderId} />
+      {/* Right side - Individual chat */}
+      <div className="w-2/3 flex flex-col bg-white">
+        <BuyerIndividualChat
+          selectedChat={selectedChat}
+          stompClient={stompClient}
+          senderId={senderId}
+        />
       </div>
     </div>
   );
