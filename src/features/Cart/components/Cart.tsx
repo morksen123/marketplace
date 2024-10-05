@@ -27,9 +27,22 @@ export const Cart: React.FC = () => {
                   alt={item.product.listingTitle}
                   className="w-16 h-16 object-cover rounded"
                 />
-                <div>
+                <div className="text-left">
                   <h3 className="font-semibold">{item.product.listingTitle}</h3>
-                  <p className="text-gray-500">${item.price.toFixed(2)}</p>
+                  <div className="flex items-center space-x-2">
+                    {item.product.price > item.price ? (
+                      <>
+                        <p className="text-gray-500 line-through">
+                          ${item.product.price}
+                        </p>
+                        <p className="text-secondary font-semibold">
+                          ${item.price}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-gray-500">${item.price}</p>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -58,7 +71,7 @@ export const Cart: React.FC = () => {
                   </Button>
                 </div>
                 <Button
-                  variant="destructive"
+                  variant="ghost"
                   size="icon"
                   onClick={() => removeFromCart(item.product.productId)}
                 >

@@ -1,4 +1,5 @@
 import { Product } from '@/features/ProductListing/constants';
+import { calculatePromotionalDiscount } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import {
@@ -13,20 +14,23 @@ export const useCart = () => {
   const queryClient = useQueryClient();
 
   const calculateCartItemPrice = (cartItem: CartLineItem) => {
-    const itemPrice = cartItem.price;
-    let highestDiscountPromo = 0;
-    cartItem.product.promotions.forEach((promo) => {
-      if (promo.status === 'ACTIVE') {
-        highestDiscountPromo = Math.max(
-          highestDiscountPromo,
-          promo.discountPercentage,
-        );
-      }
-    });
+    const bulkPricings = cartItem.product.bulkPricings;
 
-    // TODO: bulk pricing
+    const applicableBulkPricing = bulkPricings?.find(
+      (pricing) =>
+        cartItem.quantity >= pricing.minQuantity &&
+        cartItem.quantity <= pricing.maxQuantity,
+    )?.price;
 
-    return (itemPrice * (100 - highestDiscountPromo)) / 100;
+    const itemPrice = applicableBulkPricing || cartItem.product.price;
+
+    const discount = calculatePromotionalDiscount(cartItem.product);
+
+    const discountedPrice = (itemPrice * (100 - discount)) / 100;
+
+    const roundedPrice = Math.round(discountedPrice * 100) / 100; // 2 dp
+
+    return roundedPrice;
   };
 
   const { data: originalCart = null } = useQuery({
@@ -39,7 +43,7 @@ export const useCart = () => {
 
     const cartLineItems = originalCart.cartLineItems.map((cartItem) => ({
       ...cartItem,
-      price: calculateCartItemPrice(cartItem),
+      price: calculateCartItemPrice(cartItem), // update cart item price
     }));
 
     return {
@@ -47,8 +51,6 @@ export const useCart = () => {
       cartLineItems,
     };
   }, [originalCart]);
-
-  console.log(cart);
 
   const addToCartMutation = useMutation({
     mutationFn: ({
