@@ -58,7 +58,7 @@ export const Cart: React.FC = () => {
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span className="px-4">{item.quantity}</span>
+                  <span className="w-10 text-center">{item.quantity}</span>
                   <Button
                     variant="ghost"
                     className="rounded-none"
