@@ -7,7 +7,7 @@ interface CartDto {
   cartLineItems: CartLineItem[];
 }
 
-interface CartLineItem {
+export interface CartLineItem {
   cartLineItemId: string;
   price: number;
   product: Product;

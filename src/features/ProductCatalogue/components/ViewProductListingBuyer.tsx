@@ -6,20 +6,21 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 import { useCart } from '@/features/Cart/hooks/useCart';
 import {
   Batch,
+  BulkPricing,
   deliveryMethodMapping,
   foodCategoryMapping,
   foodConditionMapping,
   Product,
   unitMapping,
-  BulkPricing,
 } from '@/features/ProductListing/constants';
-import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
+import { calculatePromotionalDiscount, formatDisplayDate } from '@/lib/utils';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import ChatIcon from '@mui/icons-material/Chat';
-import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
+import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import StarIcon from '@mui/icons-material/Star';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -28,30 +29,27 @@ interface ViewProductListingBuyerProps {
   isBuyer: boolean;
 }
 
-export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = ({ isBuyer }) => {
-    const navigate = useNavigate();
-    const { productId } = useParams();
-    const { addToCart } = useCart();
-    const [product, setProduct] = useState<Product | null>(null);
-    const [batches, setBatches] = useState<Batch[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [quantity, setQuantity] = useState(1);
-    const [distributor, setDistributor] = useState(null);
-    const [distributorId, setDistributorId] = useState<string | null>(null);
-    const { toggleFavourite, favourites } = useFavourites();
-    const isFavourite = favourites?.some(fav => fav.productId === Number(productId));
-    const [promotionalPrice, setPromotionalPrice] = useState<number | null>(null);
-    const [promotionalDiscount, setPromotionalDiscount] = useState<number>(0);
-    const [discountedBulkPricing, setDiscountedBulkPricing] = useState<
-      BulkPricing[]
-    >([]);
-  
-    const formatDisplayDate = (dateString) => {
-      if (!dateString) return '';
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-GB', options);
-    };
+export const ViewProductListingBuyer: React.FC<
+  ViewProductListingBuyerProps
+> = ({ isBuyer }) => {
+  const navigate = useNavigate();
+  const { productId } = useParams();
+  const { addToCart } = useCart();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
+  const [distributor, setDistributor] = useState(null);
+  const [distributorId, setDistributorId] = useState<string | null>(null);
+  const { toggleFavourite, favourites } = useFavourites();
+  const isFavourite = favourites?.some(
+    (fav) => fav.productId === Number(productId),
+  );
+  const [promotionalPrice, setPromotionalPrice] = useState<number | null>(null);
+  const [promotionalDiscount, setPromotionalDiscount] = useState<number>(0);
+  const [discountedBulkPricing, setDiscountedBulkPricing] = useState<
+    BulkPricing[]
+  >([]);
 
   useEffect(() => {
     const fetchDistributor = async () => {
@@ -142,22 +140,23 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
     // checkFavourited();
   }, [productId, isBuyer]);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (product) {
-          const discount = calculatePromotionalDiscount(product);
-          setPromotionalDiscount(discount);
-          if (discount > 0) setPromotionalPrice(applyDiscount(product.price, discount));
-    
-          // Update bulk pricing with discounts
-          if (product.bulkPricings) {
-            const updatedBulkPricing = product.bulkPricings.map((pricing) => ({
-              ...pricing,
-              discountedPrice: applyDiscount(pricing.price, discount),
-            }));
-            setDiscountedBulkPricing(updatedBulkPricing);
-          }
-        }
-      }, [product]);
+      const discount = calculatePromotionalDiscount(product);
+      setPromotionalDiscount(discount);
+      if (discount > 0)
+        setPromotionalPrice(applyDiscount(product.price, discount));
+
+      // Update bulk pricing with discounts
+      if (product.bulkPricings) {
+        const updatedBulkPricing = product.bulkPricings.map((pricing) => ({
+          ...pricing,
+          discountedPrice: applyDiscount(pricing.price, discount),
+        }));
+        setDiscountedBulkPricing(updatedBulkPricing);
+      }
+    }
+  }, [product]);
 
   // const handleToggleFavourite = async () => {
   //   if (!isBuyer) return;
@@ -236,26 +235,6 @@ export const ViewProductListingBuyer: React.FC<ViewProductListingBuyerProps> = (
         console.error('Error occurred while checking or creating chat:', error);
       }
     }
-  };
-  
-  // Promotional methods here
-  // Function to calculate the promotional price
-  // Function to calculate the promotional discount
-  const calculatePromotionalDiscount = (product: Product): number => {
-    if (!product.promotions || product.promotions.length === 0) return 0;
-
-    // const now = new Date();
-    const activePromotions = product.promotions.filter(
-      (promo) =>
-        promo.status === 'ACTIVE'
-    );
-
-    if (activePromotions.length === 0) return 0;
-
-    // Apply the highest discount
-    return Math.max(
-      ...activePromotions.map((promo) => promo.discountPercentage),
-    );
   };
 
   // Function to apply discount to a price
