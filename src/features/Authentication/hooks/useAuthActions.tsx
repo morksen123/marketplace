@@ -4,14 +4,11 @@ import { handleSuccessApi } from '@/lib/api-client';
 import {
   buyerRegister,
   changePasswordAfterReset,
-  checkTokenValidity,
   distributorRegister,
   login,
   logout,
   resetPassword,
 } from '@/lib/auth';
-import { emailModalOpenAtom, userEmailAtom } from '@/store/emailModalAtom';
-import { useAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import {
   BuyerRegisterForm,
@@ -25,8 +22,6 @@ import {
 export function useAuthActions() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [, setIsOpen] = useAtom(emailModalOpenAtom);
-  const [, setUserEmail] = useAtom(userEmailAtom);
 
   const loginMutation = useMutation({
     mutationFn: ({
@@ -74,10 +69,6 @@ export function useAuthActions() {
     }) => changePasswordAfterReset(data, role, token),
   });
 
-  const checkTokenValidityMutation = useMutation({
-    mutationFn: (token: string) => checkTokenValidity(token),
-  });
-
   const registerBuyerMutation = useMutation({
     mutationFn: (data: BuyerRegisterForm) => {
       return buyerRegister(data);
@@ -87,7 +78,7 @@ export function useAuthActions() {
         navigate('/');
         handleSuccessApi(
           'Account Created',
-          'Your account has been successfully created. Please verify your email before you log in.',
+          'Your account has been successfully created. You can now log in.',
         );
       }
     },
@@ -99,11 +90,10 @@ export function useAuthActions() {
     },
     onSuccess: (data) => {
       if (data) {
-        setUserEmail(data.email);
-        setIsOpen(true);
+        navigate('/');
         handleSuccessApi(
           'Account Created',
-          'Your account has been successfully created.',
+          'Your account has been successfully created. You can now log in.',
         );
       }
     },
@@ -112,10 +102,9 @@ export function useAuthActions() {
   return {
     login: loginMutation.mutate, // change to mutateAsync if we need the data in the component
     logout: logoutMutation.mutate,
-    registerBuyer: registerBuyerMutation.mutateAsync,
-    registerDistributor: registerDistributorMutation.mutateAsync,
+    registerBuyer: registerBuyerMutation.mutate,
+    registerDistributor: registerDistributorMutation.mutate,
     resetPassword: resetPasswordMutation.mutate,
     changePasswordAfterReset: changePasswordAfterResetMutation.mutate,
-    checkTokenValidity: checkTokenValidityMutation.mutateAsync,
   };
 }

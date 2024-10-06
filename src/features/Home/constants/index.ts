@@ -19,21 +19,11 @@ export const foodCategoryMapping: Record<string, string> = {
   };
 
   export interface Distributor {
-      distributorId: number;
-      distributorName: string;
-      address: number;
-      email: string;
-      name: string;
-      contactName: string;
-      warehouseAddress: number;
-      isApproved: Boolean;
-      boostCount: number;
+    distributorName: string;
+    address: number;
+    email: string;
+    name: string;
+    contactName: string;
+    warehouseAddress: number;
+    isApproved: Boolean;
   }
-
-  export const boostStatusMapping: Record<string, string> = {
-    NONE: "None",
-    NOT_STARTED: "Not Started",
-    ACTIVE: "Active",
-    PAUSED: "Paused",
-    COMPLETED: "Completed"
-  };

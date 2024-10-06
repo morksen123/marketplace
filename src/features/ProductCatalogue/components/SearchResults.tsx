@@ -2,23 +2,15 @@ import ProductCard from '@/components/product/ProductCard';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ProductFilter from './ProductFilter';
-import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
-import { Product } from '../constants';
 
 const SearchResultsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const searchQuery = new URLSearchParams(location.search).get('q');
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [filteredResults, setFilteredResults] = useState<Product[]>([]);
-  // const [favourites, setFavourites] = useState({});
-  const [filters, setFilters] = useState<{
-    categories: string[];
-    minPrice: number;
-    maxPrice: number;
-    conditions: string[]; 
-    deliveryMethods: string[];
-  }>({
+  const [searchResults, setSearchResults] = useState([]);
+  const [filteredResults, setFilteredResults] = useState([]);
+  const [favourites, setFavourites] = useState({});
+  const [filters, setFilters] = useState({
     categories: [],
     minPrice: 0,
     maxPrice: 1000,
@@ -26,56 +18,33 @@ const SearchResultsPage = () => {
     deliveryMethods: [],
   });
   const [loading, setLoading] = useState(true);
-  const { favourites, toggleFavourite, checkFavourite } = useFavourites();
+  const [error, setError] = useState(null);
+  const [buyerId, setBuyerId] = useState<number | null>(0);
 
-  // interface Product {
-  //   productId: number
-  //   listingTitle: string;
-  //   productPictures: string[];
-  //   foodCategory: string;
-  //   foodCondition: string;
-  //   deliveryMethod : string;
-  //   price : number
-  // }
-  
   useEffect(() => {
     const fetchSearchResults = async () => {
       setLoading(true);
       try {
-        const url = `http://localhost:8080/api/products/search?keyword=${searchQuery}`
+        const url = `http://localhost:8080/api/products/search?keyword=${searchQuery}`;
+        console.log('Fetching from URL:', url);
+
         const response = await fetch(url, {
           method: 'GET',
           credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
         });
-        if (response.ok) {
-          const data: Product[] = await response.json();
-          
-          // Sort products
-          const sortedProducts = data.sort((a, b) => {
-            // First, prioritize boosted products
-            if (a.boostStatus === 'ACTIVE' && b.boostStatus !== 'ACTIVE') return -1;
-            if (b.boostStatus === 'ACTIVE' && a.boostStatus !== 'ACTIVE') return 1;
-            
-            // Then, sort by bestBeforeDate of the first batch
-            const aDate = new Date(a.batches[0]?.bestBeforeDate || '');
-            const bDate = new Date(b.batches[0]?.bestBeforeDate || '');
-            return aDate.getTime() - bDate.getTime();
-          });
 
-          setSearchResults(sortedProducts);
-          console.log(sortedProducts);
-          sortedProducts.forEach((product: Product) => {
-            checkFavourite(product.productId);
-          });
-        } else {
-          console.error('Failed to fetch products');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const responseData = await response.json();
+        setSearchResults(responseData);
+        responseData.forEach((product) => {
+          checkFavourited(product.productId);
+        });
       } catch (error) {
-        console.log(searchQuery)
         console.error('Error fetching search results:', error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -84,7 +53,102 @@ const SearchResultsPage = () => {
     if (searchQuery) {
       fetchSearchResults();
     }
+    fetchBuyerId();
   }, [searchQuery]);
+
+  const fetchBuyerId = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/buyer/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setBuyerId(data.buyerId);
+      } else {
+        console.error('Failed to fetch buyer ID');
+      }
+    } catch (error) {
+      console.error('Error fetching buyer ID:', error);
+    }
+  };
+
+  const checkFavourited = async (productId) => {
+    try {
+      const response = await fetch(
+        `/api/buyer/favourites/check?productId=${productId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        },
+      );
+      if (response.ok) {
+        const isFavourited = await response.json();
+        setFavourites((prevFavourites) => ({
+          ...prevFavourites,
+          [productId]: isFavourited,
+        }));
+      } else {
+        console.error('Failed to check if product is favourited');
+      }
+    } catch (error) {
+      console.error('Error checking favourite status:', error);
+    }
+  };
+
+  const handleToggleFavourite = async (productId) => {
+    try {
+      const isFavourited = favourites[productId];
+      let response;
+      if (isFavourited) {
+        response = await fetch(
+          `/api/buyer/${buyerId}/favourites/${productId}/remove`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          },
+        );
+      } else {
+        response = await fetch(
+          `/api/buyer/${buyerId}/favourites/${productId}/add`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          },
+        );
+      }
+
+      if (response.ok) {
+        setFavourites((prevFavourites) => ({
+          ...prevFavourites,
+          [productId]: !isFavourited,
+        }));
+        // alert(isFavourited ? 'Removed from favourites' : 'Added to favourites');
+        console.log(
+          isFavourited ? 'Removed from favourites' : 'Added to favourites',
+        );
+      } else {
+        const errorMessage = await response.text();
+        console.error('Error:', errorMessage);
+        // to change to proper error message
+        // alert(`Failed to update favourites: ${errorMessage}`);
+      }
+    } catch (error) {
+      console.error('Error occurred while updating favourites:', error);
+    }
+  };
 
   useEffect(() => {
     const applyFilters = () => {
@@ -97,7 +161,7 @@ const SearchResultsPage = () => {
           product.price <= filters.maxPrice;
         const matchesCondition =
           filters.conditions.length === 0 ||
-          filters.conditions.includes(product.foodCondition); // Cast to string
+          filters.conditions.includes(product.foodCondition);
         const matchesDeliveryMethod =
           filters.deliveryMethods.length === 0 ||
           filters.deliveryMethods.includes(product.deliveryMethod);
@@ -115,20 +179,13 @@ const SearchResultsPage = () => {
     applyFilters();
   }, [searchResults, filters]);
 
-  const handleFilter = (newFilters: {
-    categories: string[];
-    minPrice: number;
-    maxPrice: number;
-    conditions: string[]; 
-    deliveryMethods: string[];
-  }) => {
+  const handleFilter = (newFilters) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
       ...newFilters,
     }));
   };
-
-  const handleProductClick = (productId : number) => {
+  const handleProductClick = (productId) => {
     navigate(`/buyer/view-product/${productId}`);
   };
 
@@ -159,12 +216,10 @@ const SearchResultsPage = () => {
               <ProductCard
                 key={product.productId}
                 product={product}
-                isFavourite={favourites?.some(
-                  (fav) => fav.productId === product.productId,
-                )}
-                onProductClick={handleProductClick}
+                isFavourite={favourites[product.productId]}
+                onProductClick={() => handleProductClick(product.productId)}
                 onToggleFavourite={() =>
-                  toggleFavourite(product.productId)
+                  handleToggleFavourite(product.productId)
                 }
               />
             ))}
@@ -172,8 +227,12 @@ const SearchResultsPage = () => {
 
           {filteredResults.length === 0 && (
             <p className="text-center text-gray-500 mt-8">
-              No results found. Try adjusting your filters or search keyword.
+              No results found. Try adjusting your filters.
             </p>
+          )}
+
+          {error && (
+            <p className="text-center text-red-500 mt-8">Error: {error}</p>
           )}
         </div>
       </div>

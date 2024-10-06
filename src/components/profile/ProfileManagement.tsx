@@ -188,6 +188,8 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({
             onChange={setEditedProfile}
             onNonEditableFieldClick={handleNonEditableFieldClick}
           />
+
+          {/* Profile Links */}
         </div>
       </div>
     </div>

@@ -35,15 +35,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
     error.status = response.status;
     throw error;
   }
-  // original:
-  // return response.json();
-
-  // can handle text response
-  const contentType = response.headers.get("content-type");
-  if (contentType?.includes("text/plain")) {
-    const text = await response.text();
-    return text as unknown as T;
-  }
   return response.json();
 }
 

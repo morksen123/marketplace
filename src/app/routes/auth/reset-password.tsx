@@ -18,20 +18,17 @@ import {
 } from '@/features/Authentication/types/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 export const ResetPasswordRoute = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const token = searchParams.get('token') as string;
   const role = searchParams.get('role') as RoleTypes;
 
-  const [isTokenValid, setIsTokenValid] = useState<boolean | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const { changePasswordAfterReset, checkTokenValidity } = useAuthActions();
+  const { changePasswordAfterReset } = useAuthActions();
 
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
@@ -42,33 +39,6 @@ export const ResetPasswordRoute = () => {
     await changePasswordAfterReset({ data, role, token });
     setIsSubmitted(true);
   };
-
-  useEffect(() => {
-    const validateToken = async () => {
-      if (token) {
-        try {
-          const isValid = await checkTokenValidity(token);
-          setIsTokenValid(isValid as boolean);
-        } catch (error) {
-          setIsTokenValid(false);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        navigate('/');
-      }
-    };
-
-    validateToken();
-  }, [token, checkTokenValidity, navigate]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="text-xl font-semibold">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -83,13 +53,7 @@ export const ResetPasswordRoute = () => {
 
         <h2 className="text-2xl font-bold mb-6 text-center">Reset Password</h2>
 
-        {!isTokenValid ? (
-          <Alert variant="destructive" className="mb-4">
-            <AlertDescription>
-              The token has expired or is invalid. Please request a new password reset.
-            </AlertDescription>
-          </Alert>
-        ) : isSubmitted ? (
+        {isSubmitted ? (
           <Alert className="mb-4">
             <AlertDescription>
               Your password has been successfully reset. You can now log in with

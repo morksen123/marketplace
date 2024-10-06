@@ -1,5 +1,4 @@
 import { FileUpload } from '@/components/common/FileUpload';
-import { LoadingSpinnerSvg } from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -22,7 +21,6 @@ import { distributorSignUpFormDefaultValues } from '../constants';
 import { useAuthActions } from '../hooks/useAuthActions';
 import { DistributorSignUpSchema } from '../schema';
 import { DistributorRegisterForm } from '../types/auth';
-import { EmailMessageModal } from './EmailMessageModal';
 
 export const DistributorSignUpForm = () => {
   const { registerDistributor } = useAuthActions();
@@ -349,11 +347,9 @@ export const DistributorSignUpForm = () => {
                     disabled={isFormSubmitting}
                     className="w-1/4 ml-auto"
                   >
-                    {isFormSubmitting ? (
-                      <LoadingSpinnerSvg size={24} />
-                    ) : (
-                      'Register as Distributor'
-                    )}
+                    {isFormSubmitting
+                      ? 'Processing...'
+                      : 'Register as Distributor'}
                   </Button>
                 )}
               </div>
@@ -361,7 +357,6 @@ export const DistributorSignUpForm = () => {
           </Form>
         </CardContent>
       </Card>
-      <EmailMessageModal />
     </div>
   );
 };

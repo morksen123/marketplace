@@ -1,5 +1,3 @@
-import { Promotion } from "@/features/Promotions/constants";
-
 export const createProductListingDefaultValues = {
   listingTitle: '',
   foodCategory: '',
@@ -71,10 +69,6 @@ export interface Product {
   minPurchaseQty: number;
   batches?: Batch[];
   bulkPricings?: BulkPricing[];
-  promotions: Promotion[];
-  distributorId: number | string;
+  distributorId: number;
   productId: string;
-  boostStatus: string | null;
 }
-
-export type deliveryMethod = 'SELF_PICK_UP' | 'DOORSTEP_DELIVERY';

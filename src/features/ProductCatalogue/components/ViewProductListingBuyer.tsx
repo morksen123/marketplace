@@ -6,18 +6,15 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 import { useCart } from '@/features/Cart/hooks/useCart';
 import {
   Batch,
-  BulkPricing,
   deliveryMethodMapping,
   foodCategoryMapping,
   foodConditionMapping,
   Product,
   unitMapping,
 } from '@/features/ProductListing/constants';
-import { calculatePromotionalDiscount, formatDisplayDate } from '@/lib/utils';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import ChatIcon from '@mui/icons-material/Chat';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
@@ -33,23 +30,27 @@ export const ViewProductListingBuyer: React.FC<
   ViewProductListingBuyerProps
 > = ({ isBuyer }) => {
   const navigate = useNavigate();
-  const { productId } = useParams();
   const { addToCart } = useCart();
+  const { productId } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [batches, setBatches] = useState<Batch[]>([]);
+  const [isFavourite, setIsFavourite] = useState(false);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [distributor, setDistributor] = useState(null);
   const [distributorId, setDistributorId] = useState<string | null>(null);
-  const { toggleFavourite, favourites } = useFavourites();
-  const isFavourite = favourites?.some(
-    (fav) => fav.productId === Number(productId),
-  );
-  const [promotionalPrice, setPromotionalPrice] = useState<number | null>(null);
-  const [promotionalDiscount, setPromotionalDiscount] = useState<number>(0);
-  const [discountedBulkPricing, setDiscountedBulkPricing] = useState<
-    BulkPricing[]
-  >([]);
+  const [buyerId, setBuyerId] = useState<number | null>(0);
+
+  const formatDisplayDate = (dateString: string) => {
+    if (!dateString) return '';
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', options);
+  };
 
   useEffect(() => {
     const fetchDistributor = async () => {
@@ -90,114 +91,96 @@ export const ViewProductListingBuyer: React.FC<
       }
     };
 
-    // const fetchBuyerId = async () => {
-    //   try {
-    //     const response = await fetch(
-    //       `http://localhost:8080/api/buyer/profile`,
-    //       {
-    //         method: 'GET',
-    //         headers: {
-    //           'Content-Type': 'application/json',
-    //         },
-    //         credentials: 'include',
-    //       },
-    //     );
-    //     if (response.ok) {
-    //       const data = await response.json();
-    //       setBuyerId(data.buyerId);
-    //     } else {
-    //       console.error('Failed to fetch buyer ID');
-    //     }
-    //   } catch (error) {
-    //     console.error('Error fetching buyer ID:', error);
-    //   }
-    // };
+    const fetchBuyerId = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/buyer/profile`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          },
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setBuyerId(data.buyerId);
+        } else {
+          console.error('Failed to fetch buyer ID');
+        }
+      } catch (error) {
+        console.error('Error fetching buyer ID:', error);
+      }
+    };
 
-    // const checkFavourited = async () => {
-    //   if (isBuyer) {
-    //     try {
-    //       const response = await fetch(
-    //         `/api/buyer/favourites/check?productId=${productId}`,
-    //         {
-    //           method: 'GET',
-    //           headers: {
-    //             'Content-Type': 'application/json',
-    //           },
-    //           credentials: 'include',
-    //         },
-    //       );
+    const checkFavourited = async () => {
+      if (isBuyer) {
+        try {
+          const response = await fetch(
+            `/api/buyer/favourites/check?productId=${productId}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+            },
+          );
 
-    //       const result = await response.json();
-    //       setIsFavourite(result);
-    //     } catch (error) {
-    //       console.error('Error checking if product is favourited:', error);
-    //     }
-    //   }
-    // };
+          const result = await response.json();
+          setIsFavourite(result);
+        } catch (error) {
+          console.error('Error checking if product is favourited:', error);
+        }
+      }
+    };
 
-    // fetchBuyerId();
+    fetchBuyerId();
     fetchProduct();
-    // checkFavourited();
+    checkFavourited();
   }, [productId, isBuyer]);
 
-  useEffect(() => {
-    if (product) {
-      const discount = calculatePromotionalDiscount(product);
-      setPromotionalDiscount(discount);
-      if (discount > 0)
-        setPromotionalPrice(applyDiscount(product.price, discount));
+  const handleToggleFavourite = async () => {
+    if (!isBuyer) return;
 
-      // Update bulk pricing with discounts
-      if (product.bulkPricings) {
-        const updatedBulkPricing = product.bulkPricings.map((pricing) => ({
-          ...pricing,
-          discountedPrice: applyDiscount(pricing.price, discount),
-        }));
-        setDiscountedBulkPricing(updatedBulkPricing);
+    try {
+      let response;
+      if (isFavourite) {
+        response = await fetch(
+          `/api/buyer/${buyerId}/favourites/${productId}/remove`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          },
+        );
+      } else {
+        response = await fetch(
+          `/api/buyer/${buyerId}/favourites/${productId}/add`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          },
+        );
       }
+
+      if (response.ok) {
+        setIsFavourite(!isFavourite);
+      } else {
+        const errorMessage = await response.text();
+        console.error('Error:', errorMessage);
+        alert(`Failed to update favourites: ${errorMessage}`);
+      }
+    } catch (error) {
+      console.error('Error occurred while updating favourites:', error);
     }
-  }, [product]);
-
-  // const handleToggleFavourite = async () => {
-  //   if (!isBuyer) return;
-
-  //   try {
-  //     let response;
-  //     if (isFavourite) {
-  //       response = await fetch(
-  //         `/api/buyer/${buyerId}/favourites/${productId}/remove`,
-  //         {
-  //           method: 'PUT',
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //           },
-  //           credentials: 'include',
-  //         },
-  //       );
-  //     } else {
-  //       response = await fetch(
-  //         `/api/buyer/${buyerId}/favourites/${productId}/add`,
-  //         {
-  //           method: 'PUT',
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //           },
-  //           credentials: 'include',
-  //         },
-  //       );
-  //     }
-
-  //     if (response.ok) {
-  //       setIsFavourite(!isFavourite);
-  //     } else {
-  //       const errorMessage = await response.text();
-  //       console.error('Error:', errorMessage);
-  //       alert(`Failed to update favourites: ${errorMessage}`);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error occurred while updating favourites:', error);
-  //   }
-  // };
+  };
 
   const handleAddToCart = (product: Product, quantity: number) => {
     addToCart(product, quantity);
@@ -235,11 +218,6 @@ export const ViewProductListingBuyer: React.FC<
         console.error('Error occurred while checking or creating chat:', error);
       }
     }
-  };
-
-  // Function to apply discount to a price
-  const applyDiscount = (price: number, discount: number): number => {
-    return price * (1 - discount / 100);
   };
 
   return (
@@ -285,30 +263,16 @@ export const ViewProductListingBuyer: React.FC<
               <h1 className="text-3xl font-bold text-left">
                 {product.listingTitle}
               </h1>
-              {/* Pricing - implement promotion price here */}
-              {promotionalPrice !== null ? (
-                <>
-                  <p className="text-2xl text-[#017A37] font-semibold text-left mr-2">
-                    ${promotionalPrice.toFixed(2)} per{' '}
-                    {unitMapping[product.foodCategory] || 'unit'}
-                  </p>
-                  <p className="text-xl text-gray-500 line-through">
-                    ${product.price.toFixed(2)} per{' '}
-                    {unitMapping[product.foodCategory] || 'unit'}
-                  </p>
-                </>
-              ) : (
-                <p className="text-2xl text-[#017A37] font-semibold text-left">
-                  ${product.price.toFixed(2)}
-                </p>
-              )}
+              <p className="text-2xl text-[#017A37] font-semibold text-left">
+                ${product.price.toFixed(2)} per{' '}
+                {unitMapping[product.foodCategory] || 'unit'}
+              </p>
             </div>
 
             {isBuyer && (
               <button
-                onClick={() => toggleFavourite(Number(productId))}
+                onClick={handleToggleFavourite}
                 className="flex items-center"
-                aria-label="Toggle Favourite"
               >
                 <FavoriteOutlinedIcon
                   style={{
@@ -389,7 +353,7 @@ export const ViewProductListingBuyer: React.FC<
       {/* Bulk Pricing Section */}
       <div className="mt-8">
         <h2 className="text-2xl font-semibold mb-4">Bulk Pricing</h2>
-        {discountedBulkPricing && discountedBulkPricing.length > 0 ? (
+        {product.bulkPricings && product.bulkPricings.length > 0 ? (
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
@@ -402,15 +366,10 @@ export const ViewProductListingBuyer: React.FC<
                 <th className="border border-gray-300 px-4 py-2">
                   Price per {unitMapping[product.foodCategory] || 'unit'}
                 </th>
-                {promotionalDiscount > 0 && (
-                  <th className="border border-gray-300 px-4 py-2">
-                    Promotional Price
-                  </th>
-                )}
               </tr>
             </thead>
             <tbody>
-              {discountedBulkPricing.map((pricing, index) => (
+              {product.bulkPricings.map((pricing, index) => (
                 <tr key={index}>
                   <td className="border border-gray-300 px-4 py-2">
                     {pricing.minQuantity}
@@ -419,19 +378,8 @@ export const ViewProductListingBuyer: React.FC<
                     {pricing.maxQuantity || 'No limit'}
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
-                    {promotionalDiscount > 0 ? (
-                      <span className="text-gray-500 line-through">
-                        ${pricing.price.toFixed(2)}
-                      </span>
-                    ) : (
-                      `$${pricing.price.toFixed(2)}`
-                    )}
+                    ${pricing.price.toFixed(2)}
                   </td>
-                  {promotionalDiscount > 0 && (
-                    <td className="border border-gray-300 px-4 py-2 text-[#017A37] font-semibold">
-                      ${pricing.discountedPrice.toFixed(2)}
-                    </td>
-                  )}
                 </tr>
               ))}
             </tbody>
