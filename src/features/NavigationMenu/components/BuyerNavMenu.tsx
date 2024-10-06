@@ -28,13 +28,21 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
-    'Home',
-    'Our Mission',
-    'Fruits & Vegetables',
-    'Canned Goods',
-    'Frozen',
-    'Sale',
+    { name: 'Home', route: '/buyer/home' },
+    { name: 'Sale', route: '/buyer/sale' },
+    { name: 'Fruits & Vegetables', route: '/buyer/fruits-vegetables' },
+    { name: 'Canned Goods', route: '/buyer/canned-goods' },
+    { name: 'Frozen', route: '/buyer/frozen' },
+    { name: 'Our Mission', route: '/buyer/mission' },
   ];
+
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    const currentTab = tabs.find(tab => tab.route === currentPath);
+    if (currentTab) {
+      setSelectedTab(currentTab.name);
+    }
+  }, []);
 
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,6 +85,11 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
     };
   }, []);
 
+  const handleTabClick = (tabName: string, route: string) => {
+    setSelectedTab(tabName);
+    navigate(route);
+  };
+
   return (
     <nav className="bg-white shadow-md w-full">
       <div className="w-full p-4">
@@ -98,10 +111,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
                 onChange={handleInputChange}
                 className="w-full py-2 px-4 rounded-lg focus:outline-none border border-gray-300 bg-gray-100 text-black"
               />
-              <button
-                type="submit"
-                className="absolute right-0 top-0 mt-1.5 mr-2"
-              >
+              <button type="submit" className="absolute right-0 top-0 mt-1.5 mr-2" aria-label="Search">
                 <SearchIcon className="w-6 h-6 text-gray-600" />
               </button>
             </form>
@@ -183,15 +193,15 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
           <div className="flex justify-between">
             {tabs.map((tab) => (
               <button
-                key={tab}
+                key={tab.name}
                 className={`py-4 px-4 text-black focus:outline-none flex-grow ${
-                  selectedTab === tab
+                  selectedTab === tab.name
                     ? 'border-b-2 border-green-500 text-green-500'
                     : 'hover:text-green-500'
                 }`}
-                onClick={() => setSelectedTab(tab)}
+                onClick={() => handleTabClick(tab.name, tab.route)}
               >
-                {tab}
+                {tab.name}
               </button>
             ))}
           </div>

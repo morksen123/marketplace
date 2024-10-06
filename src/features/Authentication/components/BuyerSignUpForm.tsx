@@ -1,3 +1,4 @@
+import { LoadingSpinnerSvg } from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -160,7 +161,11 @@ export const BuyerSignUpForm = () => {
                   disabled={isFormSubmitting}
                   className="w-full md:w-1/2"
                 >
-                  {isFormSubmitting ? 'Processing...' : 'Register as Buyer'}
+                  {isFormSubmitting ? (
+                    <LoadingSpinnerSvg size={24} />
+                  ) : (
+                    'Register as Buyer'
+                  )}
                 </Button>
               </div>
             </form>

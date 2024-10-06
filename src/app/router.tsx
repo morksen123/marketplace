@@ -1,5 +1,6 @@
 import { ROLES } from '@/features/Authentication/types/auth';
 import { AuthGuard, RoleGuard } from '@/lib/auth';
+import { StripeWrapper } from '@/lib/stripe';
 import {
   createBrowserRouter,
   RouteObject,
@@ -23,6 +24,15 @@ const routes: RouteObject[] = [
     },
   },
   {
+    path: '/auth/verify',
+    lazy: async () => {
+      const { EmailVerificationPageRoute } = await import(
+        './routes/auth/email-verification-confirmation-route'
+      );
+      return { Component: EmailVerificationPageRoute };
+    },
+  },
+  {
     path: '/auth/forgot-password',
     lazy: async () => {
       const { ForgotPasswordRoute } = await import(
@@ -38,6 +48,15 @@ const routes: RouteObject[] = [
         './routes/auth/reset-password'
       );
       return { Component: ResetPasswordRoute };
+    },
+  },
+  {
+    path: '/distributor/retry/:connectedAccountId',
+    lazy: async () => {
+      const { RetryOnboarding } = await import(
+        './routes/auth/stripe-retry-onboarding'
+      );
+      return { Component: RetryOnboarding };
     },
   },
   {
@@ -69,6 +88,15 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/buyer/sale',
+                lazy: async () => {
+                  const { BuyerSaleRoute } = await import(
+                    './routes/promotions/buyer-sale'
+                  );
+                  return { Component: BuyerSaleRoute };
+                },
+              },
+              {
                 path: '/buyer/view-product/:productId',
                 lazy: async () => {
                   const { ViewProductListingBuyerRoute } = await import(
@@ -93,6 +121,15 @@ const routes: RouteObject[] = [
                     './routes/buyerProfile/profile-management'
                   );
                   return { Component: ProfileManagementRoute };
+                },
+              },
+              {
+                path: '/buyer/transactions',
+                lazy: async () => {
+                  const { TransactionsRoute } = await import(
+                    './routes/buyerProfile/transactions'
+                  );
+                  return { Component: TransactionsRoute };
                 },
               },
               {
@@ -122,12 +159,27 @@ const routes: RouteObject[] = [
               },
               {
                 path: '/buyer/checkout',
-                lazy: async () => {
-                  const { CheckoutRoute } = await import(
-                    './routes/payment/checkout'
-                  );
-                  return { Component: CheckoutRoute };
-                },
+                element: <StripeWrapper />,
+                children: [
+                  {
+                    index: true,
+                    lazy: async () => {
+                      const { CheckoutRoute } = await import(
+                        './routes/payment/checkout'
+                      );
+                      return { Component: CheckoutRoute };
+                    },
+                  },
+                  {
+                    path: 'complete',
+                    lazy: async () => {
+                      const { CheckoutComplete } = await import(
+                        './routes/payment/checkout-complete'
+                      );
+                      return { Component: CheckoutComplete };
+                    },
+                  },
+                ],
               },
               {
                 path: '/buyer/profile/favourites',
@@ -172,6 +224,33 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/create-product-listing',
+                lazy: async () => {
+                  const { CreateProductListingRoute } = await import(
+                    './routes/create-product-listing'
+                  );
+                  return { Component: CreateProductListingRoute };
+                },
+              },
+              {
+                path: '/edit-product-listing/:productId',
+                lazy: async () => {
+                  const { EditProductListingRoute } = await import(
+                    './routes/edit-product-listing'
+                  );
+                  return { Component: EditProductListingRoute };
+                },
+              },
+              {
+                path: '/inventory-management',
+                lazy: async () => {
+                  const { InventoryManagementRoute } = await import(
+                    './routes/inventoryManagment/inventory-management'
+                  );
+                  return { Component: InventoryManagementRoute };
+                },
+              },
+              {
                 path: '/distributor/profile/change-password',
                 lazy: async () => {
                   const { ChangePasswordRoute } = await import(
@@ -198,10 +277,73 @@ const routes: RouteObject[] = [
                   return { Component: ChatsRoute };
                 },
               },
+              {
+                path: '/distributor/promotions',
+                lazy: async () => {
+                  const { ViewDistributorPromotionsRoute } = await import(
+                    './routes/promotions/view-distributor-promos'
+                  );
+                  return { Component: ViewDistributorPromotionsRoute };
+                },
+              },
+              {
+                path: '/distributor/promotions/:promotionId',
+                lazy: async () => {
+                  const { EditDistributorPromotionsRoute } = await import(
+                    './routes/promotions/edit-promotion'
+                  );
+                  return { Component: EditDistributorPromotionsRoute };
+                },
+              },
+              {
+                path: '/distributor/promotions/create-promotion',
+                lazy: async () => {
+                  const { CreateDistributorPromotionsRoute } = await import(
+                    './routes/promotions/create-promotion'
+                  );
+                  return { Component: CreateDistributorPromotionsRoute };
+                },
+              },
+              {
+                path: '/distributor/transactions',
+                lazy: async () => {
+                  const { TransactionsRoute } = await import(
+                    './routes/distributorProfile/transactions'
+                  );
+                  return { Component: TransactionsRoute };
+                },
+              },
+              {
+                path: '/distributor/view-boosted-products',
+                lazy: async () => {
+                  const { ViewBoostedProductsRoute } = await import(
+                    './routes/promotions/view-boosted-products'
+                  );
+                  return { Component: ViewBoostedProductsRoute };
+                },
+              },
             ],
           },
           // You can add more role-specific sections here
         ],
+      },
+      {
+        path: '/transactions/:transactionId',
+        lazy: async () => {
+          const { TransactionDetailsPage } = await import(
+            './routes/payment/transaction-details'
+          );
+          return { Component: TransactionDetailsPage };
+        },
+      },
+      {
+        path: '/view-product-listing/:productId',
+        lazy: async () => {
+          const { ViewProductListingRoute } = await import(
+            './routes/view-product-listing'
+          );
+          return { Component: ViewProductListingRoute };
+        },
       },
     ],
   },
@@ -210,42 +352,6 @@ const routes: RouteObject[] = [
     lazy: async () => {
       const { NotFoundRoute } = await import('./routes/not-found');
       return { Component: NotFoundRoute };
-    },
-  },
-  {
-    path: '/create-product-listing',
-    lazy: async () => {
-      const { CreateProductListingRoute } = await import(
-        './routes/create-product-listing'
-      );
-      return { Component: CreateProductListingRoute };
-    },
-  },
-  {
-    path: '/view-product-listing/:productId',
-    lazy: async () => {
-      const { ViewProductListingRoute } = await import(
-        './routes/view-product-listing'
-      );
-      return { Component: ViewProductListingRoute };
-    },
-  },
-  {
-    path: '/edit-product-listing/:productId',
-    lazy: async () => {
-      const { EditProductListingRoute } = await import(
-        './routes/edit-product-listing'
-      );
-      return { Component: EditProductListingRoute };
-    },
-  },
-  {
-    path: '/inventory-management',
-    lazy: async () => {
-      const { InventoryManagementRoute } = await import(
-        './routes/inventoryManagment/inventory-management'
-      );
-      return { Component: InventoryManagementRoute };
     },
   },
 ];

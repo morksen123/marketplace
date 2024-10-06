@@ -9,7 +9,7 @@ interface ProfileFormProps {
   editedProfile: any;
   isEditing: boolean;
   profileFields: Array<{label: string, name: string, type: string, editable: boolean}>;
-  onEdit: () => void;
+  onEdit: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onSave: () => void;
   onCancel: () => void;
   onChange: (newProfile: any) => void;
