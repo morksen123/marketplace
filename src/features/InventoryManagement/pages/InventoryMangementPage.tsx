@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { Product, Batch } from '@/features/ProductListing/constants';
 import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Tabs, Tab, TablePagination, TableSortLabel, styled, TableContainer } from '@mui/material';
-import { foodCategoryMapping, foodConditionMapping } from '@/features/Home/constants';
+import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping } from '@/features/Home/constants';
 import { Link } from 'react-router-dom';
 import { EditBatchModal } from '../components/EditBatchModal';
 import { AddBatchModal } from '../components/AddBatchModal';
@@ -259,7 +259,7 @@ export const InventoryManagementPage: React.FC = () => {
         'Batch ID': batch.batchId,
         'Best Before Date': new Date(batch.bestBeforeDate).toLocaleDateString(),
         'Batch Quantity': batch.quantity,
-        'Delivery Method': batch.product.deliveryMethod,
+        'Delivery Method': deliveryMethodMapping[batch.product.deliveryMethod] || batch.product.deliveryMethod,
         'Stock Value': batch.product.price * batch.quantity,
       }))
     );
@@ -355,7 +355,7 @@ export const InventoryManagementPage: React.FC = () => {
                   <TableCell>{batch.batchId}</TableCell>
                   <TableCell>{new Date(batch.bestBeforeDate).toLocaleDateString()}</TableCell>
                   <TableCell>{batch.quantity}</TableCell>
-                  <TableCell>{batch.product.deliveryMethod}</TableCell>
+                  <TableCell>{deliveryMethodMapping[batch.product.deliveryMethod] || batch.product.deliveryMethod}</TableCell>
                   <TableCell>${stockValue.toFixed(2)}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">

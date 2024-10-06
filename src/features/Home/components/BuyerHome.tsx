@@ -1,14 +1,15 @@
-import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
+import ProductCard from '@/components/product/ProductCard';
+import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import bannerImage from '../../../assets/buyer-homepage-banner.png';
-import { foodCategoryMapping, foodConditionMapping } from '../constants';
+import { Product } from '@/features/ProductCatalogue/constants';
+import BuyerHomeCarousel from './BuyerHomeCarousel';
 
 export const BuyerHome = () => {
-  const [products, setProducts] = useState([]);
-  const [favourites, setFavourites] = useState({}); // To store favourite status per product
+  const [products, setProducts] = useState<Product[]>([]);
   const navigate = useNavigate();
-  const [buyerId, setBuyerId] = useState<number | null>(0);
+  const { favourites, toggleFavourite, checkFavourite } = useFavourites();
 
   // Fetch products from the API when the component mounts
   useEffect(() => {
@@ -21,10 +22,25 @@ export const BuyerHome = () => {
           },
         });
         if (response.ok) {
-          const data = await response.json();
-          setProducts(data); // Store products from API response
-          data.forEach((product) => {
-            checkFavourited(product.productId); // Check favourited status for each product
+          const data: Product[] = await response.json();
+          
+          // Sort products
+          const sortedProducts = data.sort((a, b) => {
+            // First, prioritize boosted products
+            // First, prioritize boosted products
+            if (a.boostStatus === 'ACTIVE' && b.boostStatus !== 'ACTIVE') return -1;
+            if (b.boostStatus === 'ACTIVE' && a.boostStatus !== 'ACTIVE') return 1;
+            
+            // Then, sort by bestBeforeDate of the first batch
+            const aDate = new Date(a.batches[0]?.bestBeforeDate || '');
+            const bDate = new Date(b.batches[0]?.bestBeforeDate || '');
+            return aDate.getTime() - bDate.getTime();
+          });
+
+          setProducts(sortedProducts);
+          console.log(sortedProducts);
+          sortedProducts.forEach((product: Product) => {
+            checkFavourite(product.productId);
           });
         } else {
           console.error('Failed to fetch products');
@@ -34,116 +50,20 @@ export const BuyerHome = () => {
       }
     };
 
-    fetchBuyerId();
     fetchProducts();
   }, []);
-
-  const fetchBuyerId = async () => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/buyer/profile`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setBuyerId(data.buyerId);
-      } else {
-        console.error('Failed to fetch buyer ID');
-      }
-    } catch (error) {
-      console.error('Error fetching buyer ID:', error);
-    }
-  };
-
-  // Function to check if a product is favourited
-  const checkFavourited = async (productId: number) => {
-    try {
-      const response = await fetch(
-        `/api/buyer/favourites/check?productId=${productId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        },
-      );
-      if (response.ok) {
-        const isFavourited = await response.json();
-        setFavourites((prevFavourites) => ({
-          ...prevFavourites,
-          [productId]: isFavourited, // Update favourite status for the product
-        }));
-      } else {
-        console.error('Failed to check if product is favourited');
-      }
-    } catch (error) {
-      console.error('Error checking favourite status:', error);
-    }
-  };
 
   // Function to handle navigation to the product detail page
   const handleProductClick = (productId: number) => {
     navigate(`/buyer/view-product/${productId}`);
   };
 
-  // Function to toggle favourite status for a product
-  const handleToggleFavourite = async (productId: number) => {
-    try {
-      const isFavourited = favourites[productId];
-      let response;
-      if (isFavourited) {
-        response = await fetch(
-          `/api/buyer/${buyerId}/favourites/${productId}/remove`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-          },
-        );
-      } else {
-        response = await fetch(
-          `/api/buyer/${buyerId}/favourites/${productId}/add`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-          },
-        );
-      }
-
-      if (response.ok) {
-        setFavourites((prevFavourites) => ({
-          ...prevFavourites,
-          [productId]: !isFavourited, // Toggle favourite status
-        }));
-        // alert(isFavourited ? 'Removed from favourites' : 'Added to favourites');
-        console.log(
-          isFavourited ? 'Removed from favourites' : 'Added to favourites',
-        );
-      } else {
-        const errorMessage = await response.text();
-        console.error('Error:', errorMessage);
-        // to change to proper error message
-        // alert(`Failed to update favourites: ${errorMessage}`);
-      }
-    } catch (error) {
-      console.error('Error occurred while updating favourites:', error);
-    }
-  };
-
   return (
-    <div>
+    <div className="pb-12">
       {/* Hero Section */}
       <section className="relative">
-        <img src={bannerImage} alt="GudFood Banner" className="w-full h-auto" />
+        {/* <img src={bannerImage} alt="GudFood Banner" className="w-full h-auto" /> */}
+        <BuyerHomeCarousel/>
       </section>
 
       <section className="wrapper mt-10">
@@ -155,50 +75,15 @@ export const BuyerHome = () => {
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.length > 0 ? (
             products.map((product) => (
-              <div
+              <ProductCard
                 key={product.productId}
-                className="bg-white shadow rounded-lg p-4 cursor-pointer relative"
-                onClick={() => handleProductClick(product.productId)} // Navigate to product detail on click
-              >
-                {/* Displaying the first image from productPictures if available */}
-                <img
-                  src={
-                    product.productPictures.length > 0
-                      ? product.productPictures[0]
-                      : 'placeholder-image-url'
-                  }
-                  alt={product.listingTitle}
-                  className="w-full h-40 object-cover rounded"
-                />
-
-                <div className="flex justify-center items-center mt-4">
-                  <h3 className="text-lg font-bold">{product.listingTitle}</h3>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent navigating to product page
-                      handleToggleFavourite(product.productId); // Call function to toggle favourite
-                    }}
-                    className="ml-2 flex items-center"
-                  >
-                    <FavoriteOutlinedIcon
-                      style={{
-                        color: favourites[product.productId] ? 'red' : 'gray', // Set heart color based on favourite status
-                        fontSize: '16px',
-                      }}
-                    />
-                  </button>
-                </div>
-
-                <p className="text-gray-500">
-                  {foodCategoryMapping[product.foodCategory] ||
-                    product.foodCategory}
-                </p>
-                <p className="text-gray-500">
-                  Condition:{' '}
-                  {foodConditionMapping[product.foodCondition] ||
-                    product.foodCondition}
-                </p>
-              </div>
+                product={product}
+                isFavourite={favourites?.some(
+                  (fav) => fav.productId === product.productId,
+                )}
+                onToggleFavourite={() => toggleFavourite(product.productId)}
+                onProductClick={handleProductClick}
+              />
             ))
           ) : (
             <div className="col-span-full text-center">

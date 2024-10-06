@@ -9,24 +9,40 @@ export const Cart: React.FC = () => {
   return (
     <div className="wrapper">
       <h2 className="text-3xl font-bold mb-6">Your Cart</h2>
-      {cart.length === 0 ? (
+      {cart?.cartLineItems.length === 0 ? (
         <p className="text-gray-500">Your cart is empty.</p>
       ) : (
         <div className="space-y-6">
-          {cart.map((item) => (
+          {cart?.cartLineItems.map((item) => (
             <div
-              key={item.id}
+              key={item.cartLineItemId}
               className="flex items-center justify-between border-b border-gray-200 py-4"
             >
               <div className="flex items-center space-x-4">
                 <img
-                  src={item.imageUrl || '/src/assets/food-icon.png'}
-                  alt={item.name}
+                  src={
+                    item.product.productPictures[0] ||
+                    '/src/assets/food-icon.png'
+                  }
+                  alt={item.product.listingTitle}
                   className="w-16 h-16 object-cover rounded"
                 />
-                <div>
-                  <h3 className="font-semibold">{item.name}</h3>
-                  <p className="text-gray-500">${item.price.toFixed(2)}</p>
+                <div className="text-left">
+                  <h3 className="font-semibold">{item.product.listingTitle}</h3>
+                  <div className="flex items-center space-x-2">
+                    {item.product.price > item.price ? (
+                      <>
+                        <p className="text-gray-500 line-through">
+                          ${item.product.price}
+                        </p>
+                        <p className="text-secondary font-semibold">
+                          ${item.price}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-gray-500">${item.price}</p>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -35,25 +51,29 @@ export const Cart: React.FC = () => {
                     variant="ghost"
                     className="rounded-none"
                     size="icon"
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    onClick={() =>
+                      updateQuantity(item.product.productId, item.quantity - 1)
+                    }
                     disabled={item.quantity <= 1}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span className="px-4">{item.quantity}</span>
+                  <span className="w-10 text-center">{item.quantity}</span>
                   <Button
                     variant="ghost"
                     className="rounded-none"
                     size="icon"
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    onClick={() =>
+                      updateQuantity(item.product.productId, item.quantity + 1)
+                    }
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
                 <Button
-                  variant="destructive"
+                  variant="ghost"
                   size="icon"
-                  onClick={() => removeFromCart(item.id)}
+                  onClick={() => removeFromCart(item.product.productId)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

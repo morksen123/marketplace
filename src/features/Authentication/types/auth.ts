@@ -46,3 +46,10 @@ export interface DistributorRegisterForm {
 export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+
+export interface BuyerProfile {
+  firstName: string;
+  lastName: string;
+  email: string;
+  shippingAddresses: string[];
+}

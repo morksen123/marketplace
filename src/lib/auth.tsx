@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useAuthStatus } from '@/features/Authentication/hooks/useAuthStatus';
 import {
   BuyerRegisterForm,
@@ -68,7 +69,6 @@ export async function changePasswordAfterReset(
   token: string,
 ) {
   const roleRoute = role.toLowerCase();
-  console.log(roleRoute)
   await post(
     `/${roleRoute}/reset-password?token=${encodeURIComponent(token)}`,
     {
@@ -77,12 +77,19 @@ export async function changePasswordAfterReset(
   );
 }
 
+export async function checkTokenValidity(token: string) {
+  const { data } = await get(
+    `/buyer/check-token-validity/${encodeURIComponent(token)}`,
+  );
+  return data;
+}
+
 // guard
 export const AuthGuard = () => {
   const { isAuthenticated, isLoading } = useAuthStatus();
 
   if (isLoading) {
-    return <div className="wrapper">Loading...</div>; // change to a nicer spinner
+    return <LoadingSpinner />;
   }
 
   if (!isAuthenticated) {
@@ -95,7 +102,7 @@ export const AuthGuard = () => {
 export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles }) => {
   const userRole = getUserRoleFromCookie();
 
-  if (!userRole || !allowedRoles.includes(userRole as RoleTypes)) {
+  if (!userRole || !allowedRoles.includes(userRole)) {
     return <Navigate to="/unauthorized" replace />; // TODO: create unauthorized page
   }
 
