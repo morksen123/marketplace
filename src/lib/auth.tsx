@@ -77,9 +77,10 @@ export async function changePasswordAfterReset(
   );
 }
 
-export async function checkTokenValidity(token: string) {
+export async function checkTokenValidity(role: RoleTypes, token: string) {
+  const roleRoute = role.toLowerCase();
   const { data } = await get(
-    `/buyer/check-token-validity/${encodeURIComponent(token)}`,
+    `/${roleRoute}/check-token-validity/${encodeURIComponent(token)}`,
   );
   return data;
 }
