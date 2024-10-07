@@ -22,7 +22,7 @@ const FaqCategory: React.FC<{ category: FaqCategory }> = ({ category }) => {
           {faqCategoryMapping[category.category] || category.category}
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent className="pt-4 text-left">
         {category.faqs.map((faq, index) => (
           <FaqItem key={index} faq={faq} />
         ))}
@@ -61,7 +61,7 @@ export const Faq: React.FC = () => {
   useEffect(() => {
     const fetchFaqs = async () => {
       try {
-        const response = await fetch('/api/faq/active');
+        const response = await fetch('/api/faq/user');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
