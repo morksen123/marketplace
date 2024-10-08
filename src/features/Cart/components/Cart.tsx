@@ -1,5 +1,17 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Minus, Plus, Trash2 } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
+  getDaysUntilExpiry,
+  getEarliestBatchDate,
+  isDateClose,
+} from '@/lib/utils';
+import { AlertTriangle, Minus, Plus, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 
@@ -15,6 +27,12 @@ export const Cart: React.FC = () => {
         <div className="space-y-6">
           {cart?.cartLineItems.map((item) => {
             const subtotal = item.price * item.quantity;
+            const isCloseToExpiry = isDateClose(
+              getEarliestBatchDate(item.product.batches) || '',
+            );
+            const daysUntilExpiry = getDaysUntilExpiry(
+              getEarliestBatchDate(item.product.batches) || '',
+            );
             return (
               <div
                 key={item.cartLineItemId}
@@ -39,6 +57,26 @@ export const Cart: React.FC = () => {
                     <p>Subtotal: ${subtotal.toFixed(2)}</p>
                   </div>
                 </div>
+
+                {isCloseToExpiry && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Badge variant="warning" className="ml-2">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Consume Soon
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          Best before date is in <b>{daysUntilExpiry} day(s)</b>
+                          .
+                        </p>
+                        <p>Please consume soon after purchase.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
 
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center border rounded">

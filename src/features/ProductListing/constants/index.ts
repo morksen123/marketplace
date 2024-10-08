@@ -1,4 +1,4 @@
-import { Promotion } from "@/features/Promotions/constants";
+import { Promotion } from '@/features/Promotions/constants';
 
 export const createProductListingDefaultValues = {
   listingTitle: '',
@@ -49,6 +49,7 @@ export interface Batch {
   quantity: number;
   bestBeforeDate: string;
   batchId: number;
+  isActive: boolean;
 }
 
 export interface BulkPricing {
