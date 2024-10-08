@@ -29,20 +29,7 @@ export const Cart: React.FC = () => {
                 />
                 <div className="text-left">
                   <h3 className="font-semibold">{item.product.listingTitle}</h3>
-                  <div className="flex items-center space-x-2">
-                    {item.product.price > item.price ? (
-                      <>
-                        <p className="text-gray-500 line-through">
-                          ${item.product.price}
-                        </p>
-                        <p className="text-secondary font-semibold">
-                          ${item.price}
-                        </p>
-                      </>
-                    ) : (
-                      <p className="text-gray-500">${item.price}</p>
-                    )}
-                  </div>
+                  <p className="text-gray-500">${item.price}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
