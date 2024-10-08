@@ -1,5 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import ElectricBolt from '@mui/icons-material/ElectricBolt';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   Dialog,
   DialogActions,
@@ -7,36 +12,30 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
-import { Button } from '@/components/ui/button';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import ElectricBolt from '@mui/icons-material/ElectricBolt';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import { useEffect, useState } from 'react';
 
 import {
   Carousel,
-  CarouselItem,
   CarouselContent,
-  CarouselPrevious,
+  CarouselItem,
   CarouselNext,
+  CarouselPrevious,
 } from '@/components/ui/carousel';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import TextField from '@mui/material/TextField';
+import { useDistributor } from '@/features/DIstributorAccount/hooks/useDistributor';
+import { Distributor } from '@/features/Home/constants';
 import {
-  foodCategoryMapping,
-  foodConditionMapping,
-  deliveryMethodMapping,
-  unitMapping,
-  Product,
   Batch,
   BulkPricing,
+  deliveryMethodMapping,
+  foodCategoryMapping,
+  foodConditionMapping,
+  Product,
+  unitMapping,
 } from '@/features/ProductListing/constants';
-import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
 import { useProductBoosts } from '@/features/Promotions/hooks/useProductBoost';
+import { handleErrorApi, handleSuccessApi } from '@/lib/api-client';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import BoostProductModal from './BoostProductModal';
-import { Distributor } from '@/features/Home/constants';
-import { useDistributor } from '@/features/DIstributorAccount/hooks/useDistributor';
 
 export const ViewProductListing = () => {
   const navigate = useNavigate();
@@ -384,13 +383,13 @@ export const ViewProductListing = () => {
             },
           });
         } else if (product?.boostStatus === 'NOT_STARTED') {
-            updateBoost({
-              productId: parseInt(productId),
-              boostData: {
-                startDate:startDateISOString,
-                endDate: endDateISOString,
-              }
-            })
+          updateBoost({
+            productId: parseInt(productId),
+            boostData: {
+              startDate: startDateISOString,
+              endDate: endDateISOString,
+            },
+          });
         }
       }
       // Refresh the page after 1 second
@@ -427,7 +426,7 @@ export const ViewProductListing = () => {
 
   const handleEditPromotion = (promotionId: number) => {
     navigate(`/distributor/promotions/${promotionId}`);
-  }
+  };
 
   useEffect(() => {
     if (product) {
@@ -564,10 +563,10 @@ export const ViewProductListing = () => {
 
         {/* Product Buttons */}
         <div className="mt-6 mb-6 flex justify-end items-end space-x-2">
-          <Button className="button button-orange" onClick={handleEdit}>
+          <Button variant="orange" onClick={handleEdit}>
             <EditIcon className="mr-2" /> Edit
           </Button>
-          <Button className="button button-red" onClick={handleClickOpen}>
+          <Button variant="destructive" onClick={handleClickOpen}>
             <DeleteIcon className="mr-2" /> Delete
           </Button>
           <div className="flex flex-col items-end">
@@ -643,12 +642,12 @@ export const ViewProductListing = () => {
                       </td>
                     )}
                     <td className="px-4 py-3 text-sm text-gray-500 flex justify-center space-x-2">
-                      <button
+                      <Button
                         onClick={() => handleDeleteBulkPricing(pricing.id)}
                         className="text-red-600 hover:text-red-800"
                       >
                         <DeleteIcon fontSize="small" />
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -854,43 +853,51 @@ export const ViewProductListing = () => {
 
         {/* Active Promotions Section */}
         {product.promotions && product.promotions.length > 0 && (
-        <div className="mt-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold">Promotions</h2>
-            <Link 
-              to="/distributor/promotions" 
-              className="flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200"
-            >
-              <VisibilityIcon className="mr-2" />
-              View All Promotions
-            </Link>
+          <div className="mt-12">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold">Promotions</h2>
+              <Link
+                to="/distributor/promotions"
+                className="flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200"
+              >
+                <VisibilityIcon className="mr-2" />
+                View All Promotions
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {product.promotions.map((promo, index) => (
+                <Card
+                  key={index}
+                  className="hover:shadow-lg transition duration-300 ease-in-out"
+                >
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-lg">
+                        {promo.promotionName}
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditPromotion(promo.promotionId)}
+                        className="text-gray-600 hover:text-blue-600"
+                      >
+                        <EditIcon fontSize="small" />
+                      </Button>
+                    </div>
+                    <p className="text-green-600 font-bold mb-2">
+                      {promo.discountPercentage}% off
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Valid from{' '}
+                      {new Date(promo.startDate).toLocaleDateString()} to{' '}
+                      {new Date(promo.endDate).toLocaleDateString()}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {product.promotions.map((promo, index) => (
-              <Card key={index} className="hover:shadow-lg transition duration-300 ease-in-out">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-lg">{promo.promotionName}</h3>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleEditPromotion(promo.promotionId)}
-                      className="text-gray-600 hover:text-blue-600"
-                    >
-                      <EditIcon fontSize="small" />
-                    </Button>
-                  </div>
-                  <p className="text-green-600 font-bold mb-2">{promo.discountPercentage}% off</p>
-                  <p className="text-sm text-gray-600">
-                    Valid from {new Date(promo.startDate).toLocaleDateString()} to{' '}
-                    {new Date(promo.endDate).toLocaleDateString()}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
+        )}
 
         {/* Boost Product Dialog */}
         <BoostProductModal
