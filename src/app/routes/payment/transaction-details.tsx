@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { OrderDetails } from '@/features/Payment/components/OrderDetails';
 import { TransactionDetails } from '@/features/Payment/components/TransactionDetails';
 import { TransactionSummary } from '@/features/Payment/components/TransactionSummary';
 import { usePayments } from '@/features/Payment/hooks/usePayments';
@@ -49,10 +50,11 @@ export const TransactionDetailsPage: React.FC = () => {
             </Button>
           </Card>
         ) : (
-          <>
+          <div className="space-y-8">
             <TransactionSummary transaction={transaction} />
             <TransactionDetails transaction={transaction} />
-          </>
+            <OrderDetails orderIds={transaction.orderIds} />
+          </div>
         )}
       </div>
     </div>

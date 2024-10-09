@@ -1,4 +1,11 @@
 export type PaymentStatus = 'COMPLETED' | 'PENDING' | 'TRANSFERRED' | 'FAILED';
+export type OrderStatus =
+  | 'PENDING'
+  | 'ACCEPTED'
+  | 'CANCELLED'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'COMPLETED';
 
 export interface Transaction {
   amount: number;
@@ -27,6 +34,7 @@ interface OrderLineItem {
   quantity: number;
   price: number;
   productId: number;
+  productName: string;
   orderId: number;
 }
 
@@ -37,7 +45,7 @@ export interface OrderDto {
   orderId: number;
   orderLineItems: OrderLineItem[];
   orderTotal: number;
-  status: string;
+  status: OrderStatus;
   trackingNo: string | null;
   transactionId: number;
   updatedDateTime: string | null;

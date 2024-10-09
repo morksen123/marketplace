@@ -14,7 +14,7 @@ import React from 'react';
 export const TransactionSummary: React.FC<{ transaction: Transaction }> = ({
   transaction,
 }) => (
-  <Card className="mb-8 shadow-sm border border-gray-200">
+  <Card className="shadow-sm border border-gray-200">
     <CardHeader className="bg-gray-50 border-b border-gray-200">
       <CardTitle className="text-2xl font-semibold text-gray-800">
         Transaction Summary
