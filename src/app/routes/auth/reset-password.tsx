@@ -47,7 +47,7 @@ export const ResetPasswordRoute = () => {
     const validateToken = async () => {
       if (token) {
         try {
-          const isValid = await checkTokenValidity(token);
+          const isValid = await checkTokenValidity({ role, token });
           setIsTokenValid(isValid as boolean);
         } catch (error) {
           setIsTokenValid(false);
@@ -60,7 +60,7 @@ export const ResetPasswordRoute = () => {
     };
 
     validateToken();
-  }, [token, checkTokenValidity, navigate]);
+  }, [role, token, checkTokenValidity, navigate]);
 
   if (isLoading) {
     return (
@@ -86,7 +86,8 @@ export const ResetPasswordRoute = () => {
         {!isTokenValid ? (
           <Alert variant="destructive" className="mb-4">
             <AlertDescription>
-              The token has expired or is invalid. Please request a new password reset.
+              The token has expired or is invalid. Please request a new password
+              reset.
             </AlertDescription>
           </Alert>
         ) : isSubmitted ? (

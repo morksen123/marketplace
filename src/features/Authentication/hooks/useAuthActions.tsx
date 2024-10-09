@@ -75,7 +75,8 @@ export function useAuthActions() {
   });
 
   const checkTokenValidityMutation = useMutation({
-    mutationFn: (token: string) => checkTokenValidity(token),
+    mutationFn: ({ role, token }: { role: RoleTypes; token: string }) =>
+      checkTokenValidity(role, token),
   });
 
   const registerBuyerMutation = useMutation({
