@@ -13,10 +13,19 @@ export function useBuyerProfile() {
     queryFn: fetchProfile,
   });
 
+  const defaultShippingAddress = data?.shippingAddresses.find(
+    (address) => address.isDefaultShippingAddress,
+  );
+  const defaultBillingAddress = data?.shippingAddresses.find(
+    (address) => address.isDefaultBillingAddress,
+  );
+
   return {
     buyerProfile: data,
     isLoading,
     error,
     refetchProfile: refetch,
+    defaultShippingAddress,
+    defaultBillingAddress,
   };
 }

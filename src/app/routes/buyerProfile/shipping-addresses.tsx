@@ -1,6 +1,6 @@
+import AddressBook from '@/features/BuyerAccount/components/AddressBook';
 import { BuyerNavMenu } from '@/features/NavigationMenu/components/BuyerNavMenu';
-import { BuyerSideMenu } from "@/features/NavigationMenu/components/BuyerSideMenu";
-import ShippingAddresses from '../../../features/BuyerAccount/components/ShippingAddresses';
+import { BuyerSideMenu } from '@/features/NavigationMenu/components/BuyerSideMenu';
 
 export const ShippingAddressesPage = () => {
   return (
@@ -9,9 +9,9 @@ export const ShippingAddressesPage = () => {
       <div className="flex">
         <BuyerSideMenu />
         <div className="flex-1 p-8">
-          <ShippingAddresses />
+          <AddressBook />
         </div>
       </div>
     </>
   );
-}
+};

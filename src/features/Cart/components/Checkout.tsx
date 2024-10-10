@@ -1,4 +1,7 @@
-import { LoadingSpinnerSvg } from '@/components/common/LoadingSpinner';
+import {
+  LoadingSpinner,
+  LoadingSpinnerSvg,
+} from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -19,6 +22,7 @@ import {
 import { MapPin } from 'lucide-react';
 import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
+import { SaveAddressPrompt } from './SaveAddressPrompt';
 
 export const Checkout: React.FC = () => {
   const stripe = useStripe();
@@ -27,7 +31,12 @@ export const Checkout: React.FC = () => {
 
   const [shippingFee] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const { buyerProfile } = useBuyerProfile();
+  const {
+    buyerProfile,
+    isLoading: buyerProfileLoading,
+    defaultBillingAddress,
+    defaultShippingAddress,
+  } = useBuyerProfile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +58,12 @@ export const Checkout: React.FC = () => {
     setIsLoading(false);
   };
 
+  if (buyerProfileLoading) {
+    return <LoadingSpinner />;
+  }
+
+  const showSaveAddressPrompt = !defaultShippingAddress;
+
   return (
     <div className="wrapper mb-12">
       <div className="max-w-4xl mx-auto">
@@ -65,6 +80,7 @@ export const Checkout: React.FC = () => {
                 <CardContent className="space-y-6 text-left">
                   {buyerProfile && (
                     <>
+                      {showSaveAddressPrompt && <SaveAddressPrompt />}
                       {/* Link Authentication */}
                       <div className="mb-6">
                         <h3 className="text-lg font-semibold mb-2">
@@ -92,7 +108,15 @@ export const Checkout: React.FC = () => {
                                 phone: 'always',
                               },
                               defaultValues: {
-                                name: `${buyerProfile.firstName} ${buyerProfile.lastName}`,
+                                name: defaultShippingAddress?.buyerName,
+                                address: {
+                                  line1: defaultShippingAddress?.addressLine1,
+                                  line2: defaultShippingAddress?.addressLine2,
+                                  postal_code:
+                                    defaultShippingAddress?.postalCode,
+                                  country: 'SG',
+                                },
+                                phone: defaultShippingAddress?.phoneNumber,
                               },
                             }}
                           />
@@ -125,8 +149,18 @@ export const Checkout: React.FC = () => {
                           options={{
                             mode: 'billing',
                             allowedCountries: ['SG'],
+                            fields: {
+                              phone: 'always',
+                            },
                             defaultValues: {
-                              name: `${buyerProfile.firstName} ${buyerProfile.lastName}`,
+                              name: defaultBillingAddress?.buyerName,
+                              address: {
+                                line1: defaultBillingAddress?.addressLine1,
+                                line2: defaultBillingAddress?.addressLine2,
+                                postal_code: defaultBillingAddress?.postalCode,
+                                country: 'SG',
+                              },
+                              phone: defaultBillingAddress?.phoneNumber,
                             },
                           }}
                         />
