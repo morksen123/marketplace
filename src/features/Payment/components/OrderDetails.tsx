@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { capitalizeFirstLetter, formatDisplayDate } from '@/lib/utils';
+import { capitalizeFirstLetter } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { Package } from 'lucide-react';
 import React from 'react';
@@ -70,9 +70,6 @@ export const OrderDetails: React.FC<{ orderIds: number[] }> = ({
                     {capitalizeFirstLetter(order.status)}
                   </Badge>
                 </div>
-                <p className="text-sm text-gray-600 mb-2">
-                  Created: {formatDisplayDate(order.createdDateTime)}
-                </p>
                 <DistributorInformation distributorId={order.distributorId} />
 
                 <div className="mt-4">
