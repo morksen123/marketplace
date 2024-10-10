@@ -28,13 +28,18 @@ export default function AddressBook() {
     const newErrors: { [key: string]: string } = {};
 
     if (!formData.label) newErrors.label = 'Label is required';
-    if (!formData.phoneNumber)
-      newErrors.phoneNumber = 'Phone number is required';
     if (!formData.addressLine1)
       newErrors.addressLine1 = 'Address Line 1 is required';
     if (!formData.addressLine2)
       newErrors.addressLine2 = 'Unit Number is required';
     if (!formData.postalCode) newErrors.postalCode = 'Postal Code is required';
+
+    const phoneRegex = /^\d{8,}$/;
+    if (!formData.phoneNumber) {
+      newErrors.phoneNumber = 'Phone number is required';
+    } else if (!phoneRegex.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = 'Phone number must be at least 8 digits';
+    }
 
     const postalCodeRegex = /^\d{6}$/;
     if (formData.postalCode && !postalCodeRegex.test(formData.postalCode)) {
