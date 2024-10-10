@@ -32,36 +32,23 @@ export function useAddress() {
 
   const addAddressMutation = useMutation({
     mutationFn: (newAddress: Omit<Address, 'id'>) => addAddress(newAddress),
-    onSuccess: (newAddress: Address | null) => {
-      if (newAddress) {
-        queryClient.setQueryData<Address[]>(['addresses'], (old = []) => [
-          ...old,
-          newAddress,
-        ]);
-        handleSuccessApi(
-          'Address Added',
-          'Your new address has been successfully added.',
-        );
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
+      handleSuccessApi(
+        'Address Added',
+        'Your new address has been successfully added.',
+      );
     },
   });
 
   const updateAddressMutation = useMutation({
     mutationFn: (updatedAddress: Address) => updateAddress(updatedAddress),
-    onSuccess: (updatedAddress: Address | null) => {
-      if (updatedAddress) {
-        queryClient.setQueryData<Address[]>(['addresses'], (old = []) =>
-          old.map((address) =>
-            address.shippingAddressId === updatedAddress.shippingAddressId
-              ? updatedAddress
-              : address,
-          ),
-        );
-        handleSuccessApi(
-          'Address Updated',
-          'Your address has been successfully updated.',
-        );
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
+      handleSuccessApi(
+        'Address Updated',
+        'Your address has been successfully updated.',
+      );
     },
   });
 
