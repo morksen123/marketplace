@@ -9,7 +9,6 @@ import {
 import { Transaction } from '@/features/Payment/types/payment';
 import { capitalizeFirstLetter, formatDisplayDate } from '@/lib/utils';
 import { Calendar, CreditCard, DollarSign, RefreshCw } from 'lucide-react';
-import React from 'react';
 
 export const TransactionSummary: React.FC<{ transaction: Transaction }> = ({
   transaction,

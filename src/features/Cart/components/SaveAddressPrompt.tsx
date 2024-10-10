@@ -9,7 +9,7 @@ export const SaveAddressPrompt: React.FC = () => {
         <div className="p-2 mr-4">
           <InfoIcon className="h-5 w-5 text-secondary" />
         </div>
-        <p className="text-secondary text-sm">
+        <p className="text-secondary text-xs ">
           Pro tip: Save your shipping and billing addresses to your{' '}
           <Link
             to="/buyer/profile/my-addresses"

@@ -113,17 +113,27 @@ export const CheckoutComplete: React.FC = () => {
       return;
     }
 
-    stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
-      if (paymentIntent) {
-        setStatus(paymentIntent.status);
-        setPaymentIntent(paymentIntent);
+    stripe
+      .retrievePaymentIntent(clientSecret)
+      .then(({ paymentIntent }) => {
+        if (paymentIntent) {
+          setStatus(paymentIntent.status);
+          setPaymentIntent(paymentIntent);
 
-        if (paymentIntent.status === 'succeeded') {
-          createTransaction(paymentIntent.id);
+          if (paymentIntent.status === 'succeeded') {
+            return createTransaction(paymentIntent.id);
+          }
         }
-      }
-      setIsLoading(false);
-    });
+      })
+      .then(() => {
+        console.log('Payment process completed');
+      })
+      .catch((err) => {
+        console.error('Error processing payment intent:', err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, [stripe]);
 
   const statusContent = STATUS_CONTENT_MAP[status];
@@ -175,16 +185,28 @@ export const CheckoutComplete: React.FC = () => {
             )}
           </CardContent>
           <CardFooter className="flex justify-center">
-            <div className="space-x-6">
-              <Button variant="outline" onClick={() => navigate('/buyer/home')}>
-                Return to Home
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => navigate('/buyer/transactions')}
-              >
-                View Transactions
-              </Button>
+            <div className="space-x-6 flex">
+              {isLoading ? (
+                <>
+                  <Skeleton className="h-10 w-32" />
+                  <Skeleton className="h-10 w-32" />
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/buyer/home')}
+                  >
+                    Return to Home
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => navigate('/buyer/transactions')}
+                  >
+                    View Transactions
+                  </Button>
+                </>
+              )}
             </div>
           </CardFooter>
         </Card>
