@@ -1,3 +1,4 @@
+import { Address } from '@/features/BuyerAccount/hooks/useAddress';
 import { z } from 'zod';
 import {
   BuyerSignUpSchema,
@@ -51,5 +52,5 @@ export interface BuyerProfile {
   firstName: string;
   lastName: string;
   email: string;
-  shippingAddresses: string[];
+  shippingAddresses: Address[];
 }

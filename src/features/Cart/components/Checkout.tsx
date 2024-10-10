@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useAddress } from '@/features/BuyerAccount/hooks/useAddress';
 import { useBuyerProfile } from '@/features/BuyerAccount/hooks/useBuyerProfile';
 import {
   AddressElement,
@@ -32,12 +31,12 @@ export const Checkout: React.FC = () => {
 
   const [shippingFee] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const { buyerProfile, isLoading: buyerProfileLoading } = useBuyerProfile();
   const {
+    buyerProfile,
+    isLoading: buyerProfileLoading,
     defaultBillingAddress,
     defaultShippingAddress,
-    isLoading: addressLoading,
-  } = useAddress();
+  } = useBuyerProfile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +58,7 @@ export const Checkout: React.FC = () => {
     setIsLoading(false);
   };
 
-  if (addressLoading || buyerProfileLoading) {
+  if (buyerProfileLoading) {
     return <LoadingSpinner />;
   }
 
