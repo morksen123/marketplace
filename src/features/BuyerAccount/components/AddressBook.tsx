@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -203,32 +204,44 @@ export default function AddressBook() {
                 {existingAddresses.map((address) => (
                   <li
                     key={address.shippingAddressId}
-                    className={`border-b pb-4 last:border-b-0 ${
+                    className={`border-b p-4  ${
                       address.isDefaultShippingAddress ||
                       address.isDefaultBillingAddress
-                        ? 'bg-gray-50 p-2 rounded'
+                        ? 'bg-gray-50 p-2 rounded-lg'
                         : ''
                     }`}
                   >
                     <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-bold">{address.label}</p>
-                        <p>{address.phoneNumber}</p>
-                        <p>{address.addressLine1}</p>
-                        {address.addressLine2 && <p>{address.addressLine2}</p>}
-                        <p>{address.postalCode}</p>
-                        <div className="mt-2">
+                      <div className="space-y-2">
+                        <p className="font-bold text-lg">{address.label}</p>
+                        <p>
+                          <span className="font-medium">Phone:</span>{' '}
+                          {address.phoneNumber}
+                        </p>
+                        <p>
+                          <span className="font-medium">Address:</span>{' '}
+                          {address.addressLine1}
+                        </p>
+                        <p>
+                          <span className="font-medium">Unit:</span>{' '}
+                          {address.addressLine2}
+                        </p>
+                        <p>
+                          <span className="font-medium">Postal Code:</span>{' '}
+                          {address.postalCode}
+                        </p>
+                        <div className="mt-2 space-x-2">
                           {address.isDefaultShippingAddress && (
-                            <span className="inline-flex items-center text-sm text-green-600 mr-2">
+                            <Badge variant="shipping">
                               <Home className="h-4 w-4 mr-1" />
                               Default Shipping
-                            </span>
+                            </Badge>
                           )}
                           {address.isDefaultBillingAddress && (
-                            <span className="inline-flex items-center text-sm text-blue-600">
+                            <Badge variant="billing">
                               <CreditCard className="h-4 w-4 mr-1" />
                               Default Billing
-                            </span>
+                            </Badge>
                           )}
                         </div>
                       </div>
