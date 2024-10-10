@@ -8,7 +8,7 @@ import {
 } from '../lib/address';
 
 export interface Address {
-  shippingAddressId: number;
+  shippingAddressId?: number;
   label: string;
   phoneNumber: string;
   addressLine1: string;

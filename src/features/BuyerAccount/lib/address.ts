@@ -44,3 +44,23 @@ export async function setDefaultAddress(
   );
   return data;
 }
+
+export const initialFormState: Address = {
+  label: '',
+  phoneNumber: '',
+  addressLine1: '',
+  addressLine2: '',
+  postalCode: '',
+  isDefaultShippingAddress: false,
+  isDefaultBillingAddress: false,
+};
+
+export const sortAddresses = (addresses: Address[]) => {
+  return addresses.sort((a, b) => {
+    if (a.isDefaultShippingAddress && !b.isDefaultShippingAddress) return -1;
+    if (!a.isDefaultShippingAddress && b.isDefaultShippingAddress) return 1;
+    if (a.isDefaultBillingAddress && !b.isDefaultBillingAddress) return -1;
+    if (!a.isDefaultBillingAddress && b.isDefaultBillingAddress) return 1;
+    return 0;
+  });
+};

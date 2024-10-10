@@ -16,29 +16,28 @@ import { Switch } from '@/components/ui/switch';
 import { Book, CreditCard, Home, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Address, useAddress } from '../hooks/useAddress';
+import { initialFormState, sortAddresses } from '../lib/address';
 
 export default function AddressBook() {
-  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [formData, setFormData] = useState<Address>(initialFormState);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const { existingAddresses, addAddress, updateAddress, removeAddress } =
     useAddress();
 
-  const validateForm = (formData: FormData): boolean => {
+  const validateForm = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!formData.get('label')) newErrors.label = 'Label is required';
-    if (!formData.get('phoneNumber'))
+    if (!formData.label) newErrors.label = 'Label is required';
+    if (!formData.phoneNumber)
       newErrors.phoneNumber = 'Phone number is required';
-    if (!formData.get('addressLine1'))
+    if (!formData.addressLine1)
       newErrors.addressLine1 = 'Address Line 1 is required';
-    if (!formData.get('postalCode'))
-      newErrors.postalCode = 'Postal Code is required';
+    if (!formData.addressLine2)
+      newErrors.addressLine2 = 'Unit Number is required';
+    if (!formData.postalCode) newErrors.postalCode = 'Postal Code is required';
 
     const postalCodeRegex = /^\d{6}$/;
-    if (
-      formData.get('postalCode') &&
-      !postalCodeRegex.test(formData.get('postalCode') as string)
-    ) {
+    if (formData.postalCode && !postalCodeRegex.test(formData.postalCode)) {
       newErrors.postalCode = 'Postal Code must be exactly 6 digits';
     }
 
@@ -46,39 +45,40 @@ export default function AddressBook() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    if (!validateForm()) return;
 
-    if (!validateForm(formData)) return;
-
-    const newAddress: Address = {
-      shippingAddressId: editingAddress ? editingAddress.shippingAddressId : 0, // refactor
-      label: formData.get('label') as string,
-      phoneNumber: formData.get('phoneNumber') as string,
-      addressLine1: formData.get('addressLine1') as string,
-      addressLine2: formData.get('addressLine2') as string,
-      postalCode: formData.get('postalCode') as string,
-      isDefaultShippingAddress: formData.get('defaultShipping') === 'on',
-      isDefaultBillingAddress: formData.get('defaultBilling') === 'on',
-    };
-
-    if (editingAddress) {
-      await updateAddress(newAddress);
+    if (formData.shippingAddressId) {
+      await updateAddress(formData);
     } else {
-      await addAddress(newAddress);
+      await addAddress(formData);
     }
 
-    setEditingAddress(null);
-    e.currentTarget.reset();
+    setFormData(initialFormState);
   };
 
   const handleEdit = (address: Address) => {
-    setEditingAddress(address);
+    setFormData(address);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id?: number) => {
+    if (!id) {
+      return;
+    }
     await removeAddress(id);
+  };
+
+  const handleCancel = () => {
+    setFormData(initialFormState);
   };
 
   return (
@@ -91,10 +91,10 @@ export default function AddressBook() {
         <Card>
           <CardHeader>
             <CardTitle>
-              {editingAddress ? 'Edit Address' : 'Add New Address'}
+              {formData.shippingAddressId ? 'Edit Address' : 'Add New Address'}
             </CardTitle>
             <CardDescription>
-              {editingAddress
+              {formData.shippingAddressId
                 ? 'Update your address details'
                 : 'Enter your address details'}
             </CardDescription>
@@ -106,8 +106,9 @@ export default function AddressBook() {
                 <Input
                   id="label"
                   name="label"
+                  value={formData.label}
+                  onChange={handleInputChange}
                   placeholder="E.g., Home, Office, Parents' House"
-                  defaultValue={editingAddress?.label}
                   required
                 />
                 {errors.label && (
@@ -119,8 +120,9 @@ export default function AddressBook() {
                 <Input
                   id="phoneNumber"
                   name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
                   placeholder="E.g., 8123 4567"
-                  defaultValue={editingAddress?.phoneNumber}
                   required
                 />
                 {errors.phoneNumber && (
@@ -132,8 +134,9 @@ export default function AddressBook() {
                 <Input
                   id="addressLine1"
                   name="addressLine1"
+                  value={formData.addressLine1}
+                  onChange={handleInputChange}
                   placeholder="E.g., Blk 123 Clementi Avenue 1"
-                  defaultValue={editingAddress?.addressLine1}
                   required
                 />
                 {errors.addressLine1 && (
@@ -145,18 +148,23 @@ export default function AddressBook() {
                 <Input
                   id="addressLine2"
                   name="addressLine2"
+                  value={formData.addressLine2}
+                  onChange={handleInputChange}
                   placeholder="E.g., #12-34"
-                  defaultValue={editingAddress?.addressLine2}
                   required
                 />
+                {errors.addressLine2 && (
+                  <p className="text-red-500 text-sm">{errors.addressLine2}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="postalCode">Postal Code</Label>
                 <Input
                   id="postalCode"
                   name="postalCode"
+                  value={formData.postalCode}
+                  onChange={handleInputChange}
                   placeholder="E.g., 123456"
-                  defaultValue={editingAddress?.postalCode}
                   required
                 />
                 {errors.postalCode && (
@@ -165,29 +173,51 @@ export default function AddressBook() {
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="defaultShipping"
-                  name="defaultShipping"
-                  defaultChecked={editingAddress?.isDefaultShippingAddress}
+                  id="isDefaultShippingAddress"
+                  name="isDefaultShippingAddress"
+                  checked={formData.isDefaultShippingAddress}
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isDefaultShippingAddress: checked,
+                    }))
+                  }
                 />
-                <Label htmlFor="defaultShipping">
+                <Label htmlFor="isDefaultShippingAddress">
                   Set as default shipping address
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="defaultBilling"
-                  name="defaultBilling"
-                  defaultChecked={editingAddress?.isDefaultBillingAddress}
+                  id="isDefaultBillingAddress"
+                  name="isDefaultBillingAddress"
+                  checked={formData.isDefaultBillingAddress}
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isDefaultBillingAddress: checked,
+                    }))
+                  }
                 />
-                <Label htmlFor="defaultBilling">
+                <Label htmlFor="isDefaultBillingAddress">
                   Set as default billing address
                 </Label>
               </div>
             </CardContent>
             <CardFooter>
               <Button variant="secondary" type="submit">
-                {editingAddress ? 'Update Address' : 'Add Address'}
+                {formData.shippingAddressId ? 'Update Address' : 'Add Address'}
               </Button>
+              {formData.shippingAddressId && (
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={handleCancel}
+                  className="ml-2"
+                >
+                  Cancel
+                </Button>
+              )}
             </CardFooter>
           </form>
         </Card>
@@ -201,7 +231,7 @@ export default function AddressBook() {
               <p className="text-muted-foreground">No addresses saved yet.</p>
             ) : (
               <ul className="space-y-4">
-                {existingAddresses.map((address) => (
+                {sortAddresses(existingAddresses).map((address) => (
                   <li
                     key={address.shippingAddressId}
                     className={`border-b p-4  ${
@@ -254,6 +284,7 @@ export default function AddressBook() {
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
                         </Button>
+
                         <Button
                           variant="outline"
                           size="icon"
