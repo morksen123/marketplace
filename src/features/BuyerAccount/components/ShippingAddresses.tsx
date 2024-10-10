@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { PlusCircle, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -10,6 +7,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Pencil, PlusCircle, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const ShippingAddressesPage = () => {
   const API_BASE_URL = 'http://localhost:8080/api';
@@ -31,7 +31,7 @@ const ShippingAddressesPage = () => {
       setAddresses(data.shippingAddresses || []);
     } catch (error) {
       console.error('Error fetching addresses:', error);
-    //   toast.error('Failed to fetch addresses');
+      //   toast.error('Failed to fetch addresses');
     }
   };
 
@@ -46,10 +46,10 @@ const ShippingAddressesPage = () => {
       const addedAddress = await response.json();
       setAddresses([...addresses, addedAddress]);
       setIsAddDialogOpen(false);
-    //   toast.success('Address added successfully');
+      //   toast.success('Address added successfully');
     } catch (error) {
       console.error('Error adding address:', error);
-    //   toast.error('Failed to add address');
+      //   toast.error('Failed to add address');
     }
   };
 
@@ -69,25 +69,28 @@ const ShippingAddressesPage = () => {
       );
       setEditingAddress(null);
       console.log('Address updated successfully');
-    //   toast.success('Address updated successfully');
+      //   toast.success('Address updated successfully');
     } catch (error) {
       console.error('Error updating address:', error);
-    //   toast.error('Failed to update address');
+      //   toast.error('Failed to update address');
     }
   };
 
   const handleRemoveAddress = async (id) => {
     try {
-      const response = await fetch(`/api/buyer/shipping-address?shippingAddressId=${id}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `/api/buyer/shipping-address?shippingAddressId=${id}`,
+        {
+          method: 'DELETE',
+        },
+      );
       if (!response.ok) throw new Error('Failed to remove address');
       setAddresses(addresses.filter((addr) => addr.shippingAddressId !== id));
       console.log('Address removed successfully');
-    //   toast.success('Address removed successfully');
+      //   toast.success('Address removed successfully');
     } catch (error) {
       console.error('Error removing address:', error);
-    //   toast.error('Failed to remove address');
+      //   toast.error('Failed to remove address');
     }
   };
 
@@ -120,7 +123,9 @@ const ShippingAddressesPage = () => {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleRemoveAddress(address.shippingAddressId)}
+                      onClick={() =>
+                        handleRemoveAddress(address.shippingAddressId)
+                      }
                     >
                       <Trash2 className="w-4 h-4 mr-2" /> Remove
                     </Button>
