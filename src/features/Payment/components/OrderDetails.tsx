@@ -6,6 +6,7 @@ import { capitalizeFirstLetter } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { Package } from 'lucide-react';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { getOrderDetails } from '../api/payments';
 import { DistributorInformation } from './DistributorInformation';
 
@@ -47,9 +48,10 @@ export const OrderDetails: React.FC<{ orderIds: number[] }> = ({
             <Skeleton className="w-full h-56" />
           ) : (
             orders.map((order) => (
-              <div
+              <Link
+                to="/buyer/home"
                 key={order.orderId}
-                className="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
+                className="block rounded-lg transition-all duration-200 ease-in-out shadow-sm hover:shadow-md p-6 border border-gray-200"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
@@ -108,7 +110,7 @@ export const OrderDetails: React.FC<{ orderIds: number[] }> = ({
                   <span>Total</span>
                   <span>${order.orderTotal.toFixed(2)}</span>
                 </div>
-              </div>
+              </Link>
             ))
           )}
         </div>
