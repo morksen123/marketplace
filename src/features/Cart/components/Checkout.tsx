@@ -1,4 +1,7 @@
-import { LoadingSpinnerSvg } from '@/components/common/LoadingSpinner';
+import {
+  LoadingSpinner,
+  LoadingSpinnerSvg,
+} from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -8,6 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useAddress } from '@/features/BuyerAccount/hooks/useAddress';
 import { useBuyerProfile } from '@/features/BuyerAccount/hooks/useBuyerProfile';
 import {
   AddressElement,
@@ -27,7 +31,12 @@ export const Checkout: React.FC = () => {
 
   const [shippingFee] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const { buyerProfile } = useBuyerProfile();
+  const { buyerProfile, isLoading: buyerProfileLoading } = useBuyerProfile();
+  const {
+    defaultBillingAddress,
+    defaultShippingAddress,
+    isLoading: addressLoading,
+  } = useAddress();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +57,10 @@ export const Checkout: React.FC = () => {
 
     setIsLoading(false);
   };
+
+  if (addressLoading || buyerProfileLoading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="wrapper mb-12">
@@ -92,7 +105,15 @@ export const Checkout: React.FC = () => {
                                 phone: 'always',
                               },
                               defaultValues: {
-                                name: `${buyerProfile.firstName} ${buyerProfile.lastName}`,
+                                name: defaultShippingAddress?.buyerName,
+                                address: {
+                                  line1: defaultShippingAddress?.addressLine1,
+                                  line2: defaultShippingAddress?.addressLine2,
+                                  postal_code:
+                                    defaultShippingAddress?.postalCode,
+                                  country: 'SG',
+                                },
+                                phone: defaultShippingAddress?.phoneNumber,
                               },
                             }}
                           />
@@ -125,8 +146,18 @@ export const Checkout: React.FC = () => {
                           options={{
                             mode: 'billing',
                             allowedCountries: ['SG'],
+                            fields: {
+                              phone: 'always',
+                            },
                             defaultValues: {
-                              name: `${buyerProfile.firstName} ${buyerProfile.lastName}`,
+                              name: defaultBillingAddress?.buyerName,
+                              address: {
+                                line1: defaultBillingAddress?.addressLine1,
+                                line2: defaultBillingAddress?.addressLine2,
+                                postal_code: defaultBillingAddress?.postalCode,
+                                country: 'SG',
+                              },
+                              phone: defaultBillingAddress?.phoneNumber,
                             },
                           }}
                         />

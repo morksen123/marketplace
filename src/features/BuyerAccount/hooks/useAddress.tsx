@@ -16,6 +16,7 @@ export interface Address {
   postalCode: string;
   isDefaultShippingAddress: boolean;
   isDefaultBillingAddress: boolean;
+  buyerName: string;
 }
 
 export function useAddress() {
@@ -65,8 +66,17 @@ export function useAddress() {
     },
   });
 
+  const defaultShippingAddress = addresses.find(
+    (address) => address.isDefaultShippingAddress,
+  );
+  const defaultBillingAddress = addresses.find(
+    (address) => address.isDefaultBillingAddress,
+  );
+
   return {
     existingAddresses: addresses,
+    defaultShippingAddress,
+    defaultBillingAddress,
     isLoading,
     error,
     addAddress: addAddressMutation.mutateAsync,
