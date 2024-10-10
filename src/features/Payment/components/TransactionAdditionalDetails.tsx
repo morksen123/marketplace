@@ -7,13 +7,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { RoleTypes } from '@/features/Authentication/types/auth';
 import { Transaction } from '@/features/Payment/types/payment';
-import { Truck } from 'lucide-react';
 import React from 'react';
 
-export const TransactionDetails: React.FC<{ transaction: Transaction }> = ({
-  transaction,
-}) => (
+export const TransactionAdditionalDetails: React.FC<{
+  transaction: Transaction;
+  userRole: RoleTypes;
+}> = ({ transaction, userRole }) => (
   <Card className="shadow-sm border border-gray-200">
     <CardHeader className="bg-gray-50 border-b border-gray-200">
       <CardTitle className="text-xl font-semibold text-gray-800">
@@ -37,14 +38,16 @@ export const TransactionDetails: React.FC<{ transaction: Transaction }> = ({
               {transaction.paymentIntentId}
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="font-medium text-gray-700">
-              Application Fee
-            </TableCell>
-            <TableCell className="text-gray-900">
-              ${(transaction.applicationFee / 100).toFixed(2)}
-            </TableCell>
-          </TableRow>
+          {userRole === 'DISTRIBUTOR' && (
+            <TableRow>
+              <TableCell className="font-medium text-gray-700">
+                Application Fee
+              </TableCell>
+              <TableCell className="text-gray-900">
+                ${(transaction.applicationFee / 100).toFixed(2)}
+              </TableCell>
+            </TableRow>
+          )}
           {transaction.shippingDetails && (
             <TableRow>
               <TableCell className="font-medium text-gray-700">
@@ -52,22 +55,24 @@ export const TransactionDetails: React.FC<{ transaction: Transaction }> = ({
               </TableCell>
               <TableCell className="text-gray-900">
                 <div className="flex items-start">
-                  <Truck className="mr-2 mt-1 text-gray-500" size={16} />
                   <div>
+                    <span className="text-gray-700">Name:</span>{' '}
                     {transaction.shippingDetails.name}
                     <br />
+                    <span className="text-gray-700">Address 1:</span>{' '}
                     {transaction.shippingDetails.line1}
                     {transaction.shippingDetails.line2 && (
                       <>
                         <br />
+                        <span className="text-gray-700">Address 2:</span>{' '}
                         {transaction.shippingDetails.line2}
                       </>
                     )}
                     <br />
-                    {transaction.shippingDetails.city},{' '}
-                    {transaction.shippingDetails.state}{' '}
+                    <span className="text-gray-700">Postal Code:</span>{' '}
                     {transaction.shippingDetails.postalCode}
                     <br />
+                    <span className="text-gray-700">Country:</span>{' '}
                     {transaction.shippingDetails.country}
                   </div>
                 </div>
