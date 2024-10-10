@@ -29,6 +29,7 @@ export const StripeWrapper = () => {
         });
         if (response.ok) {
           const data = (await response.json()) as StripePaymentIntentData;
+          console.log(data);
           setClientSecret(data.clientSecret);
         } else {
           window.location.href = '/buyer/cart';
