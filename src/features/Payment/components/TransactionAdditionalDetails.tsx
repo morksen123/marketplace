@@ -26,7 +26,7 @@ export const TransactionAdditionalDetails: React.FC<{
         <TableHeader>
           <TableRow>
             <TableHead className="w-1/3 text-gray-600">Detail</TableHead>
-            <TableHead className="text-gray-600">Value</TableHead>
+            <TableHead className="text-gray-600">Information</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -48,7 +48,7 @@ export const TransactionAdditionalDetails: React.FC<{
               </TableCell>
             </TableRow>
           )}
-          {transaction.shippingDetails && (
+          {transaction.shippingDetails ? (
             <TableRow>
               <TableCell className="font-medium text-gray-700">
                 Shipping Address
@@ -76,6 +76,16 @@ export const TransactionAdditionalDetails: React.FC<{
                     {transaction.shippingDetails.country}
                   </div>
                 </div>
+              </TableCell>
+            </TableRow>
+          ) : (
+            <TableRow>
+              <TableCell className="font-medium text-gray-700">
+                Shipping Address
+              </TableCell>
+              <TableCell className="text-gray-900">
+                Self pick-up. The pick-up location can be found in the details
+                of each individual order item.
               </TableCell>
             </TableRow>
           )}
