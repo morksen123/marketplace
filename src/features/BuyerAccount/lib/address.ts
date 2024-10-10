@@ -51,6 +51,7 @@ export const initialFormState: Address = {
   addressLine1: '',
   addressLine2: '',
   postalCode: '',
+  buyerName: '',
   isDefaultShippingAddress: false,
   isDefaultBillingAddress: false,
 };

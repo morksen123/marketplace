@@ -23,6 +23,7 @@ import {
 import { MapPin } from 'lucide-react';
 import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
+import { SaveAddressPrompt } from './SaveAddressPrompt';
 
 export const Checkout: React.FC = () => {
   const stripe = useStripe();
@@ -62,6 +63,8 @@ export const Checkout: React.FC = () => {
     return <LoadingSpinner />;
   }
 
+  const showSaveAddressPrompt = !defaultShippingAddress;
+
   return (
     <div className="wrapper mb-12">
       <div className="max-w-4xl mx-auto">
@@ -78,6 +81,7 @@ export const Checkout: React.FC = () => {
                 <CardContent className="space-y-6 text-left">
                   {buyerProfile && (
                     <>
+                      {showSaveAddressPrompt && <SaveAddressPrompt />}
                       {/* Link Authentication */}
                       <div className="mb-6">
                         <h3 className="text-lg font-semibold mb-2">
