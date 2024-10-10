@@ -105,6 +105,7 @@ export default function AddressBook() {
                 <Input
                   id="label"
                   name="label"
+                  placeholder="E.g., Home, Office, Parents' House"
                   defaultValue={editingAddress?.label}
                   required
                 />
@@ -117,6 +118,7 @@ export default function AddressBook() {
                 <Input
                   id="phoneNumber"
                   name="phoneNumber"
+                  placeholder="E.g., 8123 4567"
                   defaultValue={editingAddress?.phoneNumber}
                   required
                 />
@@ -129,6 +131,7 @@ export default function AddressBook() {
                 <Input
                   id="addressLine1"
                   name="addressLine1"
+                  placeholder="E.g., Blk 123 Clementi Avenue 1"
                   defaultValue={editingAddress?.addressLine1}
                   required
                 />
@@ -137,11 +140,13 @@ export default function AddressBook() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="addressLine2">Address Line 2</Label>
+                <Label htmlFor="addressLine2">Unit Number</Label>
                 <Input
                   id="addressLine2"
                   name="addressLine2"
+                  placeholder="E.g., #12-34"
                   defaultValue={editingAddress?.addressLine2}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -149,6 +154,7 @@ export default function AddressBook() {
                 <Input
                   id="postalCode"
                   name="postalCode"
+                  placeholder="E.g., 123456"
                   defaultValue={editingAddress?.postalCode}
                   required
                 />
