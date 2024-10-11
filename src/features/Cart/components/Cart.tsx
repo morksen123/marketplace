@@ -68,10 +68,16 @@ export const Cart: React.FC = () => {
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>
-                          Best before date is in <b>{daysUntilExpiry} day(s)</b>
-                          .
-                        </p>
+                        {daysUntilExpiry === 0 ? (
+                          <p>
+                            Best before date is <b>TODAY</b>.
+                          </p>
+                        ) : (
+                          <p>
+                            Best before date is in{' '}
+                            <b>{daysUntilExpiry} day(s)</b>.
+                          </p>
+                        )}
                         <p>Please consume soon after purchase.</p>
                       </TooltipContent>
                     </Tooltip>
