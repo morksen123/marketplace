@@ -64,7 +64,7 @@ export const Cart: React.FC = () => {
                       <TooltipTrigger>
                         <Badge variant="warning" className="ml-2">
                           <AlertTriangle className="h-3 w-3 mr-1" />
-                          Consume Soon
+                          Expiring Soon
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
