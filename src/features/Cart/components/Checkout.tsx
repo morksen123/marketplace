@@ -127,7 +127,7 @@ export const Checkout: React.FC = () => {
                                 <MapPin className="text-secondary" size={24} />
                               </div>
                               <div>
-                                <p className="text-secondary font-medium text-sm">
+                                <p className="text-secondary font-semibold text-sm">
                                   Self Pick-up
                                 </p>
                                 <p className="text-secondary text-xs mt-1">
