@@ -23,11 +23,18 @@ import { MapPin } from 'lucide-react';
 import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
 import { SaveAddressPrompt } from './SaveAddressPrompt';
+import { SelfPickupItems } from './selfPickUpItems';
 
 export const Checkout: React.FC = () => {
   const stripe = useStripe();
   const elements = useElements();
-  const { cart, cartPrice, isShippingAddressRequired } = useCart();
+  const {
+    cart,
+    cartPrice,
+    isShippingAddressRequired,
+    cartItemsThatRequireSelfPickUp,
+    cartItemsExpiringSoon,
+  } = useCart();
 
   const [shippingFee] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -64,6 +71,11 @@ export const Checkout: React.FC = () => {
 
   const showSaveAddressPrompt = !defaultShippingAddress;
 
+  const showPickUpPrompt =
+    (cartItemsThatRequireSelfPickUp &&
+      cartItemsThatRequireSelfPickUp?.length > 0) ||
+    (cartItemsExpiringSoon && cartItemsExpiringSoon?.length > 0);
+
   return (
     <div className="wrapper mb-12">
       <div className="max-w-4xl mx-auto">
@@ -99,7 +111,22 @@ export const Checkout: React.FC = () => {
                         <h3 className="text-lg font-semibold mb-2">
                           Shipping Address
                         </h3>
-                        {isShippingAddressRequired ? (
+                        {showPickUpPrompt && (
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-sm mb-2">
+                            <div className="flex items-center">
+                              <div className="bg-green-100 rounded-full p-2 mr-4">
+                                <MapPin className="text-secondary" size={24} />
+                              </div>
+                              <div>
+                                <p className="text-secondary font-semibold text-sm">
+                                  Self Pick-up
+                                </p>
+                                <SelfPickupItems />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {isShippingAddressRequired && (
                           <AddressElement
                             options={{
                               mode: 'shipping',
@@ -120,23 +147,6 @@ export const Checkout: React.FC = () => {
                               },
                             }}
                           />
-                        ) : (
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-sm">
-                            <div className="flex items-center">
-                              <div className="bg-green-100 rounded-full p-2 mr-4">
-                                <MapPin className="text-secondary" size={24} />
-                              </div>
-                              <div>
-                                <p className="text-secondary font-semibold text-sm">
-                                  Self Pick-up
-                                </p>
-                                <p className="text-secondary text-xs mt-1">
-                                  All items in your order are available for self
-                                  pick-up
-                                </p>
-                              </div>
-                            </div>
-                          </div>
                         )}
                       </div>
 
