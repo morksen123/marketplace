@@ -59,7 +59,7 @@ export function getEarliestBatchDate(batches?: Batch[]): string | null {
   }
 
   return batches.reduce((earliestDate: string | null, currentBatch) => {
-    if (!currentBatch.isActive) {
+    if (!currentBatch.isActive || currentBatch.quantity <= 0) {
       return earliestDate;
     }
 
