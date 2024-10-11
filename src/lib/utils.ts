@@ -58,22 +58,23 @@ export function getEarliestBatchDate(batches?: Batch[]): string | null {
     return null;
   }
 
-  return batches.reduce((earliestDate: string | null, currentBatch) => {
-    if (!currentBatch.isActive) {
-      return earliestDate;
-    }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
 
-    if (earliestDate === null) {
-      return currentBatch.bestBeforeDate;
-    }
+  const validBatches = batches.filter((batch) => {
+    const batchDate = new Date(batch.bestBeforeDate);
+    return batch.isActive && batch.quantity > 0 && batchDate >= today;
+  });
 
-    const currentDate = new Date(currentBatch.bestBeforeDate);
-    const earliestDateObj = new Date(earliestDate);
+  if (validBatches.length === 0) {
+    return null;
+  }
 
-    return currentDate < earliestDateObj
-      ? currentBatch.bestBeforeDate
-      : earliestDate;
-  }, null);
+  return validBatches.sort((a, b) => {
+    const dateA = new Date(a.bestBeforeDate);
+    const dateB = new Date(b.bestBeforeDate);
+    return dateA.getTime() - dateB.getTime();
+  })[0].bestBeforeDate;
 }
 
 export const getDaysUntilExpiry = (dateString: string): number => {

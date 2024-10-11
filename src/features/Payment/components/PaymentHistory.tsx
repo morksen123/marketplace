@@ -2,14 +2,6 @@ import { SkeletonRow } from '@/components/common/SkeletonRow';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
   Pagination,
@@ -19,7 +11,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { Separator } from '@/components/ui/separator';
 import {
   Table,
   TableBody,
@@ -30,10 +21,10 @@ import {
 } from '@/components/ui/table';
 import { usePaginatedData } from '@/hooks/usePaginationData';
 import { formatDisplayDate, getUserRoleFromCookie } from '@/lib/utils';
-import { CreditCard, Info, Package, SearchIcon } from 'lucide-react';
+import { CreditCard, Package, SearchIcon } from 'lucide-react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { dummyData, ITEMS_PER_PAGE } from '../constants';
+import { ITEMS_PER_PAGE } from '../constants';
 import { usePayments } from '../hooks/usePayments';
 import { Transaction } from '../types/payment';
 
@@ -93,8 +84,7 @@ export const PaymentHistory: React.FC = () => {
                 <TableHead>Date</TableHead>
                 <TableHead>Amount</TableHead>
                 {userRole === 'DISTRIBUTOR' && <TableHead>Status</TableHead>}
-                <TableHead>Order</TableHead>
-                <TableHead>More Info</TableHead>
+                <TableHead>More Details</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -138,52 +128,15 @@ export const PaymentHistory: React.FC = () => {
                         </Badge>
                       </TableCell>
                     )}
+
                     <TableCell>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Package className="mr-2 h-4 w-4" />
-                            View Details
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                          <DialogHeader>
-                            <DialogTitle>Order Details</DialogTitle>
-                            <DialogDescription>Order Details</DialogDescription>
-                          </DialogHeader>
-                          <div className="mt-4">
-                            <h4 className="font-semibold mb-2">Items:</h4>
-                            {/* TODO: merge with transactions */}
-                            {dummyData[0].orderItems.map((item) => (
-                              <div
-                                key={item.id}
-                                className="flex justify-between items-center mb-2"
-                              >
-                                <span>
-                                  {item.name} (x{item.quantity})
-                                </span>
-                                <span>
-                                  ${(item.price * item.quantity).toFixed(2)}
-                                </span>
-                              </div>
-                            ))}
-                            <Separator className="my-4" />
-                            <div className="flex justify-between items-center font-semibold">
-                              <span>Total</span>
-                              <span>
-                                ${(transaction.amount / 100).toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </TableCell>
-                    <TableCell
-                      onClick={() => handleTransactionClick(transaction.id)}
-                      className="cursor-pointer"
-                    >
-                      <Button variant="ghost" size="sm" className="p-0">
-                        <Info className="h-4 w-4" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleTransactionClick(transaction.id)}
+                      >
+                        <Package className="mr-2 h-4 w-4" />
+                        View Details
                       </Button>
                     </TableCell>
                   </TableRow>

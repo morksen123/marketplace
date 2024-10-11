@@ -1,23 +1,25 @@
 export type PaymentStatus = 'COMPLETED' | 'PENDING' | 'TRANSFERRED' | 'FAILED';
-
-export interface OrderItem {
-  id: string;
-  name: string;
-  quantity: number;
-  price: number;
-}
+export type OrderStatus =
+  | 'PENDING'
+  | 'ACCEPTED'
+  | 'CANCELLED'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'COMPLETED';
 
 export interface Transaction {
-  id: number;
-  date: string;
   amount: number;
-  status: 'COMPLETED' | 'PENDING' | 'TRANSFERRED' | 'FAILED';
-  createdDateTime: string;
-  orderItems?: OrderItem[];
-  paymentIntentId: string;
   applicationFee: number;
+  buyerId: number;
+  currency: string;
+  id: number;
+  status: PaymentStatus;
+  createdDateTime: string;
+  orderIds: number[];
+  distributorAmountMapping: { [key: number]: number };
+  paymentIntentId: string;
   shippingDetails?: {
-    city: string;
+    city?: string;
     country: string;
     line1: string;
     line2: string;
@@ -25,4 +27,26 @@ export interface Transaction {
     postalCode: string;
     state?: string;
   };
+}
+
+interface OrderLineItem {
+  orderLineItemId: number;
+  quantity: number;
+  price: number;
+  productId: number;
+  productName: string;
+  orderId: number;
+}
+
+export interface OrderDto {
+  buyerId: number;
+  createdDateTime: string;
+  distributorId: number;
+  orderId: number;
+  orderLineItems: OrderLineItem[];
+  orderTotal: number;
+  status: OrderStatus;
+  trackingNo: string | null;
+  transactionId: number;
+  updatedDateTime: string | null;
 }
