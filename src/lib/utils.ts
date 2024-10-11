@@ -50,7 +50,7 @@ export const isDateClose = (dateString: string) => {
   const today = new Date();
   const diffTime = date.getTime() - today.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays <= 3 && diffDays >= 0;
+  return diffDays <= 2 && diffDays >= 0;
 };
 
 export function getEarliestBatchDate(batches?: Batch[]): string | null {
