@@ -46,7 +46,7 @@ export async function getDistributorOrderByStatus(status: OrderStatus): Promise<
 
 export async function acceptDistributorOrder(orderId: number): Promise<void> {
     try {
-        await put(`/distributor/orders/${orderId}/accept`, {});
+        await put(`/distributor/order/${orderId}/accept`, {});
     } catch (error) {
         if (error instanceof Error) {
             handleErrorApi(error.message, `Failed to accept order with ID ${orderId}`);
@@ -58,7 +58,7 @@ export async function acceptDistributorOrder(orderId: number): Promise<void> {
 
 export async function rejectDistributorOrder(orderId: number): Promise<void> {
     try {
-        await put(`/distributor/orders/${orderId}/reject`, {});
+        await put(`/distributor/order/${orderId}/reject`, {});
     } catch (error) {
         if (error instanceof Error) {
             handleErrorApi(error.message, `Failed to reject order with ID ${orderId}`);
@@ -70,7 +70,7 @@ export async function rejectDistributorOrder(orderId: number): Promise<void> {
 
 export async function shipDistributorOrder(orderId: number, trackingNo: string): Promise<void> {
     try {
-        await put(`/distributor/orders/${orderId}/shipped?trackingNo=${trackingNo}`, {});
+        await put(`/distributor/order/${orderId}/shipped?trackingNo=${trackingNo}`, {});
     } catch (error) {
         if (error instanceof Error) {
             handleErrorApi(error.message, `Failed to ship order with ID ${orderId}`);
@@ -82,12 +82,13 @@ export async function shipDistributorOrder(orderId: number, trackingNo: string):
 
 export async function deliverDistributorOrder(orderId: number): Promise<void> {
     try {
-        await put(`/distributor/orders/${orderId}/deliver`, {});
+        await put(`/distributor/order/${orderId}/delivered`, {});
     } catch (error) {
         if (error instanceof Error) {
-            handleErrorApi(error.message, `Failed to deliver order with ID ${orderId}`);
+            handleErrorApi(error.message, `Failed to set status to delivered for order with ID ${orderId}`);
         } else {
-            handleErrorApi('An unknown error occurred', `Failed to deliver order with ID ${orderId}`);
+            handleErrorApi('An unknown error occurred', `Failed to set status to delivered for order with ID ${orderId}`);
         }
     }
 }
+

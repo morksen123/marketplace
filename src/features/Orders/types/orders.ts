@@ -2,7 +2,7 @@ export type OrderStatus = 'PENDING' | 'ACCEPTED' | 'CANCELLED' | 'SHIPPED' | 'DE
 
 export interface Order {
     orderId: number;
-    orderStatus: OrderStatus;
+    status: OrderStatus;
     orderTotal: number;
     createdDateTime: string;
     updatedDateTime?: string;
