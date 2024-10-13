@@ -340,6 +340,13 @@ const routes: RouteObject[] = [
                   return { Component: DistributorFaqRoute };
                 },
               },
+              {
+                path: '/distributor/sales',
+                lazy: async () => {
+                  const { SalesRoute } = await import('./routes/payment/sales');
+                  return { Component: SalesRoute };
+                },
+              },
             ],
           },
           // You can add more role-specific sections here
