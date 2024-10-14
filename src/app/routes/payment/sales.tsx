@@ -56,7 +56,7 @@ export const SalesRoute = () => {
   };
 
   const topThreeProducts = salesData?.topThreeProducts;
-  const totalRevenueInDollars = salesData && salesData?.totalRevenue / 100;
+  const totalRevenueInDollars = salesData && salesData?.totalRevenue;
   const totalUnitsSold = salesData?.totalUnitsSold;
   const topProduct = salesData?.topProduct;
   const monthlySales = salesData?.monthlySales;
