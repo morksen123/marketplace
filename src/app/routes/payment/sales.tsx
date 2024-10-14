@@ -1,4 +1,7 @@
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import {
+  LoadingSpinner,
+  LoadingSpinnerSvg,
+} from '@/components/common/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { viewSalesData } from '@/features/Payment/api/sales';
+import { downloadSalesData, viewSalesData } from '@/features/Payment/api/sales';
 import { StatCard } from '@/features/Payment/components/StatCard';
 import { useQuery } from '@tanstack/react-query';
 import { Download, Package } from 'lucide-react';
@@ -32,21 +35,31 @@ export const SalesRoute = () => {
   const [endDate, setEndDate] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
 
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+
   const { data: salesData, isLoading } = useQuery({
     queryKey: ['sales'],
     queryFn: viewSalesData,
   });
+
+  const handleExport = async (type: 'pdf' | 'excel') => {
+    const setIsExporting =
+      type === 'excel' ? setIsExportingExcel : setIsExportingPdf;
+    setIsExporting(true);
+
+    try {
+      await downloadSalesData(type);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const topThreeProducts = salesData?.topThreeProducts;
   const totalRevenueInDollars = salesData && salesData?.totalRevenue / 100;
   const totalUnitsSold = salesData?.totalUnitsSold;
   const topProduct = salesData?.topProduct;
   const monthlySales = salesData?.monthlySales;
-
-  const handleExport = (format: 'excel' | 'pdf') => {
-    // Implement export functionality here
-    console.log(`Exporting as ${format}`);
-  };
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -198,17 +211,29 @@ export const SalesRoute = () => {
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
-              onClick={() => handleExport('excel')}
               className="border-gray-300 text-gray-700 hover:bg-gray-100"
+              onClick={() => handleExport('excel')}
+              disabled={isExportingExcel || isExportingPdf}
             >
-              <Download className="mr-2 h-4 w-4" /> Export as Excel
+              {isExportingExcel ? (
+                <LoadingSpinnerSvg />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Export as Excel
             </Button>
             <Button
               variant="outline"
-              onClick={() => handleExport('pdf')}
               className="border-gray-300 text-gray-700 hover:bg-gray-100"
+              onClick={() => handleExport('pdf')}
+              disabled={isExportingExcel || isExportingPdf}
             >
-              <Download className="mr-2 h-4 w-4" /> Export as PDF
+              {isExportingPdf ? (
+                <LoadingSpinnerSvg />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Export as PDF
             </Button>
           </div>
         </CardContent>
