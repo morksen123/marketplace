@@ -18,6 +18,7 @@ export const DistributorSideMenu: React.FC = () => {
       path: '/distributor/profile/account-deactivation',
     },
     { text: 'Transactions', path: '/distributor/transactions' },
+    { text: 'Sales', path: '/distributor/sales' },
   ];
 
   return (

@@ -1,16 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import { Product, Batch } from '@/features/ProductListing/constants';
-import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Tabs, Tab, TablePagination, TableSortLabel, styled, TableContainer } from '@mui/material';
-import { foodCategoryMapping, foodConditionMapping, deliveryMethodMapping } from '@/features/Home/constants';
-import { Link } from 'react-router-dom';
-import { EditBatchModal } from '../components/EditBatchModal';
-import { AddBatchModal } from '../components/AddBatchModal';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
-import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
+import {
+  deliveryMethodMapping,
+  foodCategoryMapping,
+  foodConditionMapping,
+} from '@/features/Home/constants';
+import { Batch, Product } from '@/features/ProductListing/constants';
+import { handleErrorApi, handleSuccessApi } from '@/lib/api-client';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import {
+  Paper,
+  styled,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  Tabs,
+} from '@mui/material';
+import { saveAs } from 'file-saver';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { AddBatchModal } from '../components/AddBatchModal';
+import { EditBatchModal } from '../components/EditBatchModal';
 
 interface BatchWithProduct extends Batch {
   product: Product;
@@ -57,15 +75,18 @@ export const InventoryManagementPage: React.FC = () => {
   const [categories, setCategories] = useState<string[]>(['All']);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortColumn, setSortColumn] = useState<SortColumn>('product.listingTitle');
+  const [sortColumn, setSortColumn] = useState<SortColumn>(
+    'product.listingTitle',
+  );
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [selectedBatch, setSelectedBatch] = useState<BatchWithProduct | null>(null);
+  const [selectedBatch, setSelectedBatch] = useState<BatchWithProduct | null>(
+    null,
+  );
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-
     const fetchProducts = async () => {
       try {
         const [productsResponse, categoriesResponse] = await Promise.all([
@@ -81,7 +102,7 @@ export const InventoryManagementPage: React.FC = () => {
             headers: {
               'Content-Type': 'application/json',
             },
-          })
+          }),
         ]);
 
         if (productsResponse.ok && categoriesResponse.ok) {
@@ -89,11 +110,12 @@ export const InventoryManagementPage: React.FC = () => {
           const allCategories: string[] = await categoriesResponse.json();
 
           setProducts(products);
-          const allBatches: BatchWithProduct[] = products.flatMap(product => 
-            product.batches?.map(batch => ({
-              ...batch,
-              product: product
-            })) ?? []
+          const allBatches: BatchWithProduct[] = products.flatMap(
+            (product) =>
+              product.batches?.map((batch) => ({
+                ...batch,
+                product: product,
+              })) ?? [],
           );
           setBatches(allBatches);
           setCategories(['All', ...allCategories]);
@@ -119,7 +141,9 @@ export const InventoryManagementPage: React.FC = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -156,31 +180,42 @@ export const InventoryManagementPage: React.FC = () => {
     return [...batches].sort(comparator);
   }, [batches, sortColumn, sortDirection]);
 
-  const filteredBatches = selectedTab === 'All' 
-    ? sortedBatches 
-    : sortedBatches.filter(batch => batch.product.foodCategory === selectedTab);
+  const filteredBatches =
+    selectedTab === 'All'
+      ? sortedBatches
+      : sortedBatches.filter(
+          (batch) => batch.product.foodCategory === selectedTab,
+        );
 
-  const paginatedBatches = filteredBatches.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedBatches = filteredBatches.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
 
   const handleEditClick = (batch: BatchWithProduct) => {
     setSelectedBatch(batch);
     setEditModalOpen(true);
   };
-  
+
   const handleEditSave = async (updatedBatch: Batch) => {
     try {
-      const response = await fetch(`/api/products/product/${selectedBatch?.product.productId}/batch`, { 
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/products/product/${selectedBatch?.product.productId}/batch`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(updatedBatch),
         },
-        credentials: 'include',
-        body: JSON.stringify(updatedBatch),
-      });
-  
+      );
+
       if (response.ok) {
-        const updatedBatches = batches.map(batch =>
-          batch.batchId === updatedBatch.batchId ? { ...batch, ...updatedBatch } : batch
+        const updatedBatches = batches.map((batch) =>
+          batch.batchId === updatedBatch.batchId
+            ? { ...batch, ...updatedBatch }
+            : batch,
         );
         setBatches(updatedBatches);
         handleSuccessApi('Success!', 'Batch has been updated.');
@@ -196,16 +231,21 @@ export const InventoryManagementPage: React.FC = () => {
 
   const handleDeleteBatch = async (batch: BatchWithProduct) => {
     try {
-      const response = await fetch(`/api/products/product/${batch.product.productId}/batch?batchId=${batch.batchId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/products/product/${batch.product.productId}/batch?batchId=${batch.batchId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
         },
-        credentials: 'include',
-      });
+      );
 
       if (response.ok) {
-        setBatches(prevBatches => prevBatches.filter(b => b.batchId !== batch.batchId));
+        setBatches((prevBatches) =>
+          prevBatches.filter((b) => b.batchId !== batch.batchId),
+        );
         handleSuccessApi('Success!', 'Batch has been deleted.');
       } else {
         handleErrorApi('Error!', 'Failed to delete batch.');
@@ -216,7 +256,11 @@ export const InventoryManagementPage: React.FC = () => {
     }
   };
 
-  const handleAddBatch = async (productId: string, quantity: number, bestBeforeDate: string) => {
+  const handleAddBatch = async (
+    productId: string,
+    quantity: number,
+    bestBeforeDate: string,
+  ) => {
     try {
       const response = await fetch(`/api/products/product/${productId}/batch`, {
         method: 'POST',
@@ -229,13 +273,13 @@ export const InventoryManagementPage: React.FC = () => {
 
       if (response.ok) {
         const newBatch: Batch = await response.json();
-        const product = products.find(p => p.productId === productId);
+        const product = products.find((p) => p.productId === productId);
         if (product) {
           const newBatchWithProduct: BatchWithProduct = {
             ...newBatch,
             product: product,
           };
-          setBatches(prevBatches => [...prevBatches, newBatchWithProduct]);
+          setBatches((prevBatches) => [...prevBatches, newBatchWithProduct]);
         }
         handleSuccessApi('Success!', 'New batch has been added.');
       } else {
@@ -249,33 +293,44 @@ export const InventoryManagementPage: React.FC = () => {
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
-      batches.map(batch => ({
+      batches.map((batch) => ({
         'Product ID': batch.product.productId,
         'Product Name': batch.product.listingTitle,
-        'Category': foodCategoryMapping[batch.product.foodCategory] || batch.product.foodCategory,
-        'Condition': foodConditionMapping[batch.product.foodCondition] || batch.product.foodCondition,
+        Category:
+          foodCategoryMapping[batch.product.foodCategory] ||
+          batch.product.foodCategory,
+        Condition:
+          foodConditionMapping[batch.product.foodCondition] ||
+          batch.product.foodCondition,
         'Unit Price': batch.product.price,
         'Min Purchase Qty': batch.product.minPurchaseQty,
         'Batch ID': batch.batchId,
         'Best Before Date': new Date(batch.bestBeforeDate).toLocaleDateString(),
         'Batch Quantity': batch.quantity,
-        'Delivery Method': deliveryMethodMapping[batch.product.deliveryMethod] || batch.product.deliveryMethod,
+        'Delivery Method':
+          deliveryMethodMapping[batch.product.deliveryMethod] ||
+          batch.product.deliveryMethod,
         'Stock Value': batch.product.price * batch.quantity,
-      }))
+      })),
     );
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventory');
 
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+    const data = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
     saveAs(data, 'inventory.xlsx');
     handleSuccessApi('Success!', 'Inventory has been exported to Excel.');
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   return (
@@ -283,25 +338,31 @@ export const InventoryManagementPage: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Inventory Management</h1>
         <div>
-          <Button onClick={() => setAddModalOpen(true)} variant="outline" className="mr-2">
+          <Button
+            onClick={() => setAddModalOpen(true)}
+            variant="outline"
+            className="mr-2"
+          >
             Add Batch
           </Button>
-          <Button onClick={exportToExcel} variant="secondary">Export to Excel</Button>
+          <Button onClick={exportToExcel} variant="secondary">
+            Export to Excel
+          </Button>
         </div>
       </div>
-      
-      <StyledTabs 
-        value={selectedTab} 
-        onChange={handleTabChange} 
+
+      <StyledTabs
+        value={selectedTab}
+        onChange={handleTabChange}
         className="mb-4"
         variant="scrollable"
         scrollButtons="auto"
       >
         {categories.map((category) => (
-          <StyledTab 
-            key={category} 
-            label={foodCategoryMapping[category] || category} 
-            value={category} 
+          <StyledTab
+            key={category}
+            label={foodCategoryMapping[category] || category}
+            value={category}
           />
         ))}
       </StyledTabs>
@@ -341,28 +402,45 @@ export const InventoryManagementPage: React.FC = () => {
               return (
                 <StyledTableRow key={batch.batchId}>
                   <TableCell>
-                    <Link 
+                    <Link
                       to={`/view-product-listing/${batch.product.productId}`}
                       className="text-green-600 hover:underline"
                     >
                       {batch.product.listingTitle}
                     </Link>
                   </TableCell>
-                  <TableCell>{foodCategoryMapping[batch.product.foodCategory] || batch.product.foodCategory}</TableCell>
-                  <TableCell>{foodConditionMapping[batch.product.foodCondition] || batch.product.foodCondition}</TableCell>
+                  <TableCell>
+                    {foodCategoryMapping[batch.product.foodCategory] ||
+                      batch.product.foodCategory}
+                  </TableCell>
+                  <TableCell>
+                    {foodConditionMapping[batch.product.foodCondition] ||
+                      batch.product.foodCondition}
+                  </TableCell>
                   <TableCell>${batch.product.price.toFixed(2)}</TableCell>
                   <TableCell>{batch.product.minPurchaseQty}</TableCell>
                   <TableCell>{batch.batchId}</TableCell>
-                  <TableCell>{new Date(batch.bestBeforeDate).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {new Date(batch.bestBeforeDate).toLocaleDateString()}
+                  </TableCell>
                   <TableCell>{batch.quantity}</TableCell>
-                  <TableCell>{deliveryMethodMapping[batch.product.deliveryMethod] || batch.product.deliveryMethod}</TableCell>
+                  <TableCell>
+                    {deliveryMethodMapping[batch.product.deliveryMethod] ||
+                      batch.product.deliveryMethod}
+                  </TableCell>
                   <TableCell>${stockValue.toFixed(2)}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      <Button onClick={() => handleEditClick(batch)} className="text-green-600 hover:text-green-800 bg-transparent">
+                      <Button
+                        onClick={() => handleEditClick(batch)}
+                        className="text-green-600 hover:text-green-800 bg-transparent"
+                      >
                         <EditIcon fontSize="small" />
                       </Button>
-                      <Button onClick={() => handleDeleteBatch(batch)} className="text-red-600 hover:text-red-800 bg-transparent">
+                      <Button
+                        onClick={() => handleDeleteBatch(batch)}
+                        className="text-red-600 hover:text-red-800 bg-transparent"
+                      >
                         <DeleteIcon fontSize="small" />
                       </Button>
                     </div>
@@ -381,7 +459,9 @@ export const InventoryManagementPage: React.FC = () => {
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        labelDisplayedRows={({ from, to, count }) => `${from}-${to} of ${count}`}
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}-${to} of ${count}`
+        }
         labelRowsPerPage="Records per page:"
       />
       <AddBatchModal
