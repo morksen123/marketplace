@@ -7,14 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { getAllProductsByDistributor } from '@/features/DIstributorAccount/lib/distributor';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { downloadSalesData, viewSalesData } from '@/features/Payment/api/sales';
+  downloadSalesData,
+  fetchDashboardData,
+} from '@/features/Payment/api/sales';
 import { StatCard } from '@/features/Payment/components/StatCard';
 import { useQuery } from '@tanstack/react-query';
 import { Download, Package } from 'lucide-react';
@@ -33,14 +31,32 @@ import {
 export const SalesRoute = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState('');
 
   const [isExportingExcel, setIsExportingExcel] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
-  const { data: salesData, isLoading } = useQuery({
+  const {
+    data: salesData,
+    isLoading: isSalesDataLoading,
+    refetch: refetchSalesData,
+  } = useQuery({
     queryKey: ['sales'],
-    queryFn: viewSalesData,
+    queryFn: () => fetchDashboardData(startDate, endDate, selectedProducts),
+  });
+  console.log(salesData);
+
+  const handleApplyFilters = async () => {
+    await refetchSalesData();
+  };
+
+  const handleProductChange = (selected: string[]) => {
+    setSelectedProducts(selected);
+  };
+
+  const { data: distributorProducts, isLoading: isProductLoading } = useQuery({
+    queryKey: ['distributorProducts'],
+    queryFn: getAllProductsByDistributor,
   });
 
   const handleExport = async (type: 'pdf' | 'excel') => {
@@ -61,7 +77,7 @@ export const SalesRoute = () => {
   const topProduct = salesData?.topProduct;
   const monthlySales = salesData?.monthlySales;
 
-  if (isLoading) {
+  if (isSalesDataLoading || isProductLoading) {
     return <LoadingSpinner />;
   }
 
@@ -120,7 +136,7 @@ export const SalesRoute = () => {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="border-gray-300 focus:border-secondary focus:ring-secondary"
+                className="border-gray-300"
               />
             </div>
             <div className="space-y-2 text-left">
@@ -130,32 +146,30 @@ export const SalesRoute = () => {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="border-gray-300 focus:border-secondary focus:ring-secondary"
+                className="border-gray-300"
               />
             </div>
             <div className="space-y-2 text-left">
               <Label htmlFor="product">Product</Label>
-              <Select
-                value={selectedProduct}
-                onValueChange={setSelectedProduct}
-              >
-                <SelectTrigger
-                  id="product"
-                  className="border-gray-300 focus:border-secondary focus:ring-secondary"
-                >
-                  <SelectValue placeholder="Select a product" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="product-a">Product A</SelectItem>
-                  <SelectItem value="product-b">Product B</SelectItem>
-                  <SelectItem value="product-c">Product C</SelectItem>
-                </SelectContent>
-              </Select>
+              <MultiSelect
+                id="products"
+                placeholder="Select products"
+                defaultValue={selectedProducts} // changed from 'selected'
+                options={
+                  distributorProducts?.data?.map((product) => ({
+                    label: product.listingTitle,
+                    value: product.productId.toString(),
+                  })) || []
+                }
+                onValueChange={handleProductChange}
+                className="border-gray-300"
+              />
             </div>
           </div>
           <Button
             variant="secondary"
             className="mt-4 w-full bg-secondary text-secondary-foreground hover:bg-secondary/90"
+            onClick={handleApplyFilters}
           >
             Apply Filters
           </Button>

@@ -31,6 +31,29 @@ export async function viewSalesData() {
   return data;
 }
 
+export const fetchDashboardData = async (
+  startDate?: string,
+  endDate?: string,
+  selectedProducts?: string[],
+) => {
+  const params = new URLSearchParams();
+
+  if (startDate) params.append('startDate', startDate);
+  if (endDate) params.append('endDate', endDate);
+
+  // Handle selectedProducts array
+  if (selectedProducts && selectedProducts.length > 0) {
+    selectedProducts.forEach((productId) => {
+      params.append('productIds', productId);
+    });
+  }
+
+  const { data } = await get<SalesDataDto>(
+    `/transactions/distributor-dashboard?${params.toString()}`,
+  );
+  return data;
+};
+
 export async function downloadSalesData(type: 'pdf' | 'excel') {
   const endpoint =
     type === 'excel'
