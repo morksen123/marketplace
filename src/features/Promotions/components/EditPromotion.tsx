@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { usePromotions } from '../hooks/usePromotions';
 import { Promotion } from '../constants';
@@ -12,18 +12,18 @@ import { Product } from '@/features/ProductCatalogue/constants';
 const EditPromotion: React.FC = () => {
   const { promotionId } = useParams<{ promotionId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { getPromotion, editPromotion, getPromotionProducts } = usePromotions();
   const {
     data: promotion,
-    isLoading :isPromotionLoading,
-    isError : isPromotionError,
+    isLoading: isPromotionLoading,
+    isError: isPromotionError,
   } = getPromotion(Number(promotionId));
   const { activeProducts } = useDistributor();
 
   const [formData, setFormData] = useState<Promotion | null>(null);
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [applicableProducts, setApplicableProducts] = useState<Product[]>([]);
-
 
   useEffect(() => {
     if (promotion) {
@@ -54,16 +54,20 @@ const EditPromotion: React.FC = () => {
     setFormData((prev) => prev ? { ...prev, productIds: newSelectedProductIds } : null);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log(formData);
-    if (formData) {
-      editPromotion({ id: Number(promotionId), data: formData }); 
+  const handleBack = () => {
+    if (location.state?.from === 'product') {
+      navigate(`/view-product-listing/${location.state.productId}`);
+    } else {
+      navigate('/distributor/promotions');
     }
   };
 
-  const handleBack = () => {
-    navigate('/distributor/promotions');
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log(formData);
+    if (formData) {
+      await editPromotion({ id: Number(promotionId), data: formData });
+    }
   };
 
   if (isPromotionLoading) return <div>Loading...</div>;

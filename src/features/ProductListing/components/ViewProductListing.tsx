@@ -36,6 +36,8 @@ import { useProductBoosts } from '@/features/Promotions/hooks/useProductBoost';
 import { handleErrorApi, handleSuccessApi } from '@/lib/api-client';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import BoostProductModal from './BoostProductModal';
+import { EditBatchModal } from '@/features/InventoryManagement/components/EditBatchModal';
+import { Badge } from '@/components/ui/badge';
 
 export const ViewProductListing = () => {
   const navigate = useNavigate();
@@ -63,6 +65,9 @@ export const ViewProductListing = () => {
   const [discountedBulkPricing, setDiscountedBulkPricing] = useState<
     BulkPricing[]
   >([]);
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
 
   // const buyerId = 1; // To change
 
@@ -425,7 +430,7 @@ export const ViewProductListing = () => {
   };
 
   const handleEditPromotion = (promotionId: number) => {
-    navigate(`/distributor/promotions/${promotionId}`);
+    navigate(`/distributor/promotions/${promotionId}`, { state: { from: 'product', productId } });
   };
 
   useEffect(() => {
@@ -443,6 +448,40 @@ export const ViewProductListing = () => {
       }
     }
   }, [product]);
+
+  const handleEditClick = (batch: Batch) => {
+    setSelectedBatch(batch);
+    setEditModalOpen(true);
+  };
+  
+  const handleEditSave = async (updatedBatch: Batch) => {
+    try {
+      const response = await fetch(`/api/products/product/${productId}/batch`, { 
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(updatedBatch),
+      });
+  
+      if (response.ok) {
+        const updatedBatches = batches.map(batch =>
+          batch.batchId === updatedBatch.batchId ? updatedBatch : batch
+        );
+        setBatches(updatedBatches);
+        handleSuccessApi('Success!', 'Batch has been updated.');
+      } else {
+        console.error('Failed to update batch');
+        handleErrorApi('Error!', 'Failed to update batch.');
+      }
+    } catch (error) {
+      console.error('Error updating batch:', error);
+      handleErrorApi('Error!', 'Failed to update batch.');
+    } finally {
+      setEditModalOpen(false);
+    }
+  };
 
   if (loading) {
     return <div className="wrapper">Loading...</div>;
@@ -638,7 +677,7 @@ export const ViewProductListing = () => {
                     </td>
                     {promotionalDiscount > 0 && (
                       <td className="px-4 py-3 text-sm text-green-600 font-semibold">
-                        ${pricing.discountedPrice.toFixed(2)}
+                        ${pricing.price * (1 - promotionalDiscount / 100).toFixed(2)}
                       </td>
                     )}
                     <td className="px-4 py-3 text-sm text-gray-500 flex justify-center space-x-2">
@@ -731,97 +770,144 @@ export const ViewProductListing = () => {
         {/* Batches Section */}
         <div className="mt-12">
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">Batches</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {batches.map((batch, index) => (
-              <Card
-                key={index}
-                className="hover:shadow-lg transition duration-300 ease-in-out relative"
+          <div className="overflow-hidden rounded-lg border border-gray-300 shadow-sm">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                    Total Quantity
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                    Best Before Date
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                    Days to Expiry
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600 w-20">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {batches
+                  .sort((a, b) => {
+                    const aExpired = new Date(a.bestBeforeDate) < new Date();
+                    const bExpired = new Date(b.bestBeforeDate) < new Date();
+                    if (aExpired && !bExpired) return 1;
+                    if (!aExpired && bExpired) return -1;
+                    return new Date(a.bestBeforeDate).getTime() - new Date(b.bestBeforeDate).getTime();
+                  })
+                  .map((batch, index) => {
+                    const daysToExpiry = Math.ceil((new Date(batch.bestBeforeDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+                    let alertClass = '';
+                    let alertBadge = null;
+                    const isExpired = daysToExpiry <= 0;
+
+                    if (isExpired) {
+                      alertClass = 'text-gray-500';
+                      alertBadge = <Badge className="bg-gray-500 text-white">Not Available for Sale</Badge>;
+                    } else if (daysToExpiry <= 3) {
+                      alertClass = 'text-red-600 font-bold';
+                      alertBadge = <Badge className="bg-red-500 text-white">Urgent</Badge>;
+                    } else if (daysToExpiry <= 7) {
+                      alertClass = 'text-orange-600 font-bold';
+                      alertBadge = <Badge className="bg-orange-500 text-white">Warning</Badge>;
+                    } else if (daysToExpiry <= 14) {
+                      alertClass = 'text-yellow-600 font-bold';
+                      alertBadge = <Badge className="bg-yellow-500 text-white">Near Expiry</Badge>;
+                    } else {
+                      alertClass = 'text-gray-500';
+                    }
+
+                    return (
+                      <tr
+                        key={index}
+                        className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${isExpired ? 'text-gray-400' : ''}`}
+                      >
+                        <td className="px-4 py-3 text-sm text-gray-500">
+                          {batch.quantity} {unitMapping[product.foodCategory] || 'unit'}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-500">
+                          {batch.bestBeforeDate
+                            ? formatDisplayDate(batch.bestBeforeDate)
+                            : 'Not specified'}
+                        </td>
+                        <td className={`px-4 py-3 text-sm ${alertClass}`}>
+                          <div className="flex items-center space-x-2">
+                            <span>{isExpired ? 'Expired' : `${daysToExpiry} days`}</span>
+                            {alertBadge}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-500 flex justify-center space-x-2">
+                          <Button
+                            onClick={() => handleEditClick(batch)}
+                            className="text-blue-600 hover:text-blue-800"
+                            disabled={isExpired}
+                          >
+                            <EditIcon fontSize="small" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteBatch(batch.batchId)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                {openAddBatch && (
+                  <tr>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        value={newBatchQuantity}
+                        onChange={(e) => setNewBatchQuantity(e.target.value)}
+                        className="w-full p-2 border rounded"
+                        placeholder={`Quantity (${unitMapping[product.foodCategory] || 'unit'})`}
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="date"
+                        value={newBatchBestBeforeDate}
+                        onChange={handleDateChange}
+                        className="w-full p-2 border rounded"
+                        min={getTodayDate()}
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      {/* Placeholder for days to expiry */}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-center space-x-2 h-full">
+                        <button
+                          onClick={() => setOpenAddBatch(false)}
+                          className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleAddBatch}
+                          className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex justify-end">
+            {!openAddBatch && (
+              <button
+                onClick={() => setOpenAddBatch(true)}
+                className="mt-4 text-gray-700"
               >
-                <button
-                  onClick={() => handleDeleteBatch(batch.batchId)}
-                  className="absolute top-2 right-2 text-red-600 hover:text-red-800"
-                >
-                  <DeleteIcon />
-                </button>
-                <CardContent className="p-5">
-                  <div className="mb-3">
-                    <p className="text-sm text-gray-700 font-semibold">
-                      Total Quantity
-                    </p>
-                    <p className="text-lg  text-gray-500">
-                      {batch.quantity}{' '}
-                      {unitMapping[product.foodCategory] || 'unit'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-700 font-semibold">
-                      Best Before Date
-                    </p>
-                    <p className="text-lg text-gray-500">
-                      {batch.bestBeforeDate
-                        ? formatDisplayDate(batch.bestBeforeDate)
-                        : 'Not specified'}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            {!openAddBatch ? (
-              <Card className="hover:shadow-lg transition duration-300 ease-in-out flex items-center justify-center">
-                <CardContent className="p-5 w-full h-full">
-                  <button
-                    className="w-full h-full bg-white text-black rounded-lg ease-in-out flex items-center justify-center"
-                    onClick={() => setOpenAddBatch(true)}
-                  >
-                    <AddIcon className="mr-2" /> Add Batch
-                  </button>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="hover:shadow-lg transition duration-300 ease-in-out">
-                <CardContent className="p-5">
-                  <div className="mb-3">
-                    <p className="text-sm text-gray-700 font-semibold">
-                      Total Quantity
-                    </p>
-                    <input
-                      type="number"
-                      value={newBatchQuantity}
-                      onChange={(e) => setNewBatchQuantity(e.target.value)}
-                      className="w-full p-2 border rounded"
-                      placeholder={`Quantity (${
-                        unitMapping[product.foodCategory] || 'unit'
-                      })`}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <p className="text-sm text-gray-700 font-semibold">
-                      Best Before Date
-                    </p>
-                    <input
-                      type="date"
-                      value={newBatchBestBeforeDate}
-                      onChange={handleDateChange}
-                      className="w-full p-2 border rounded"
-                      min={getTodayDate()}
-                    />
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => setOpenAddBatch(false)}
-                      className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleAddBatch}
-                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                    >
-                      Add
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
+                <AddIcon /> Add Batch
+              </button>
             )}
           </div>
         </div>
@@ -864,37 +950,57 @@ export const ViewProductListing = () => {
                 View All Promotions
               </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {product.promotions.map((promo, index) => (
-                <Card
-                  key={index}
-                  className="hover:shadow-lg transition duration-300 ease-in-out"
-                >
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-lg">
+            <div className="overflow-hidden rounded-lg border border-gray-300 shadow-sm">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                      Promotion Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                      Discount
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                      Start Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                      End Date
+                    </th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600 w-20">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {product.promotions.map((promo, index) => (
+                    <tr
+                      key={index}
+                      className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+                    >
+                      <td className="px-4 py-3 text-sm text-gray-500">
                         {promo.promotionName}
-                      </h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditPromotion(promo.promotionId)}
-                        className="text-gray-600 hover:text-blue-600"
-                      >
-                        <EditIcon fontSize="small" />
-                      </Button>
-                    </div>
-                    <p className="text-green-600 font-bold mb-2">
-                      {promo.discountPercentage}% off
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Valid from{' '}
-                      {new Date(promo.startDate).toLocaleDateString()} to{' '}
-                      {new Date(promo.endDate).toLocaleDateString()}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-green-600 font-semibold">
+                        {promo.discountPercentage}% off
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500">
+                        {new Date(promo.startDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500">
+                        {new Date(promo.endDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500 flex justify-center">
+                        <Button
+                          onClick={() => handleEditPromotion(promo.promotionId)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <EditIcon fontSize="small" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
@@ -906,6 +1012,14 @@ export const ViewProductListing = () => {
           onClose={() => setIsBoostModalOpen(false)}
           onSubmit={handleBoostProduct}
           productName={product.listingTitle}
+        />
+
+        {/* Edit Batch Modal */}
+        <EditBatchModal
+          open={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          batch={selectedBatch}
+          onSave={handleEditSave}
         />
       </div>
     </div>
