@@ -11,16 +11,25 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  TableSortLabel,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Badge } from "@/components/ui/badge";
+import { TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import Tooltip from '@mui/material/Tooltip';
 
 export const DistributorHome = () => {
   const [foodCategories, setFoodCategories] = useState<string[]>([]);
   const [products, setProducts] = useState<Product>([]);
-  const [selectedTab, setSelectedTab] = useState('All');
   const [distributor, setDistributor] = useState<Distributor>([]);
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedExpiry, setSelectedExpiry] = useState('All');
+  const [selectedCondition, setSelectedCondition] = useState('All');
+  const [sortBy, setSortBy] = useState<'title' | 'category' | 'condition' | 'price' | 'expiry'>('expiry');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,7 +60,7 @@ export const DistributorHome = () => {
         console.log(categoryData);
         console.log(distributorData);
 
-        setFoodCategories(['All', ...categoryData]); // Adding "All" to the categories
+        setFoodCategories([...categoryData]); // Adding "All" to the categories
         setProducts(productsData);
         setDistributor(distributorData);
       } catch (error) {
@@ -67,12 +76,6 @@ export const DistributorHome = () => {
     navigate(`/view-product-listing/${productId}`);
   };
 
-  // Filter products based on selected tab
-  const filteredProducts =
-    selectedTab === 'All'
-      ? products
-      : products.filter((product) => product.foodCategory === selectedTab);
-
   // Dummy data for metrics and orders
   const metrics = [
     { label: 'Food Saved', value: '500kg' },
@@ -86,6 +89,79 @@ export const DistributorHome = () => {
     { id: 2, product: 'Frozen Peas', quantity: 200, status: 'Pending' },
     { id: 3, product: 'Tomatoes', quantity: 150, status: 'Shipped' },
   ];
+
+  // Function to get the days to earliest expiry and its urgency
+  const getEarliestExpiryInfo = (batches: any[]) => {
+    if (!batches || batches.length === 0) return { daysToExpiry: null};
+
+    const now = new Date();
+    const earliestBatch = batches.reduce((earliest, current) => {
+      const earliestDate = new Date(earliest.bestBeforeDate);
+      const currentDate = new Date(current.bestBeforeDate);
+      return currentDate < earliestDate ? current : earliest;
+    });
+
+    const expiryDate = new Date(earliestBatch.bestBeforeDate);
+    const daysToExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+  
+    return daysToExpiry;
+  };
+
+  const handleSort = (column: 'title' | 'category' | 'condition' | 'price' | 'expiry') => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
+
+  const filteredAndSortedProducts = products
+    .filter((product) => {
+      const matchesSearch = product.listingTitle.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === 'All' || product.foodCategory === selectedCategory;
+      const matchesCondition = selectedCondition === 'All' || product.foodCondition === selectedCondition;
+      
+      const daysToExpiry = getEarliestExpiryInfo(product.batches);
+      let matchesExpiry = true;
+      if (selectedExpiry === 'Urgent') {
+        matchesExpiry = typeof daysToExpiry === 'number' && daysToExpiry <= 3;
+      } else if (selectedExpiry === 'Warning') {
+        matchesExpiry = typeof daysToExpiry === 'number' && daysToExpiry > 3 && daysToExpiry <= 7;
+      } else if (selectedExpiry === 'Near Expiry') {
+        matchesExpiry = typeof daysToExpiry === 'number' && daysToExpiry > 7 && daysToExpiry <= 14;
+      }
+
+      return matchesSearch && matchesCategory && matchesCondition && matchesExpiry;
+    })
+    .sort((a, b) => {
+      const multiplier = sortOrder === 'asc' ? 1 : -1;
+      switch (sortBy) {
+        case 'title':
+          return multiplier * a.listingTitle.localeCompare(b.listingTitle);
+        case 'category':
+          return multiplier * a.foodCategory.localeCompare(b.foodCategory);
+        case 'condition':
+          return multiplier * a.foodCondition.localeCompare(b.foodCondition);
+        case 'price':
+          return multiplier * (a.price - b.price);
+        case 'expiry':
+          const aExpiry = getEarliestExpiryInfo(a.batches);
+          const bExpiry = getEarliestExpiryInfo(b.batches);
+          if (typeof aExpiry === 'number' && typeof bExpiry === 'number') {
+            return multiplier * (aExpiry - bExpiry);
+          }
+          return 0;
+        default:
+          return 0;
+      }
+    });
+
+  // Add this helper function to truncate text
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '...';
+  };
 
   return (
     <div className="wrapper">
@@ -172,51 +248,194 @@ export const DistributorHome = () => {
           )}
         </div>
       </div>
-
-      {/* Tabs Menu */}
+      {/* Product Listings Section */}
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4 text-left">Product Listings</h2>
         <div className="p-4 bg-white rounded-lg shadow">
-          {/* Products Listings */}
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
-                <div
-                  key={product.productId}
-                  className="bg-white shadow rounded-lg p-4 cursor-pointer" // Added cursor-pointer for better UX
-                  onClick={() => handleProductClick(product.productId)} // Navigate to product detail on click
-                >
-                  {/* Displaying the first image from productPictures if available */}
-                  <img
-                    src={
-                      product.productPictures.length > 0
-                        ? product.productPictures[0]
-                        : 'placeholder-image-url'
-                    }
-                    alt={product.listingTitle}
-                    className="w-full h-40 object-cover rounded"
-                  />
-                  <h3 className="text-lg font-bold mt-4">
-                    {product.listingTitle}
-                  </h3>
-                  <p className="text-gray-500">
-                    {foodCategoryMapping[product.foodCategory] ||
-                      product.foodCategory}
-                  </p>
-                  <p className="text-gray-500">
-                    <i>
-                      {foodConditionMapping[product.foodCondition] ||
-                        product.foodCondition}
-                    </i>
-                  </p>
-                </div>
-              ))
-            ) : (
-              <div className="col-span-full text-center">
-                <p className="text-gray-500">No Products</p>
-              </div>
-            )}
+          {/* Search and Filter Controls */}
+          <div className="flex items-center space-x-4 mb-6">
+            <TextField
+              label="Search by title"
+              variant="outlined"
+              size="small"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-64"
+            />
+            <FormControl variant="outlined" size="small" className="w-48 text-left">
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                label="Category"
+              >
+                <MenuItem value="All">All</MenuItem>
+                {foodCategories.map((category) => (
+                  <MenuItem key={category} value={category}>
+                    {foodCategoryMapping[category] || category}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl variant="outlined" size="small" className="w-40 text-left">
+              <InputLabel>Expiry</InputLabel>
+              <Select
+                value={selectedExpiry}
+                onChange={(e) => setSelectedExpiry(e.target.value)}
+                label="Expiry"
+              >
+                <MenuItem value="All">All</MenuItem>
+                <MenuItem value="Urgent">Urgent</MenuItem>
+                <MenuItem value="Warning">Warning</MenuItem>
+                <MenuItem value="Near Expiry">Near Expiry</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl variant="outlined" size="small" className="w-40 text-left">
+              <InputLabel>Condition</InputLabel>
+              <Select
+                value={selectedCondition}
+                onChange={(e) => setSelectedCondition(e.target.value)}
+                label="Condition"
+              >
+                <MenuItem value="All">All</MenuItem>
+                {Object.entries(foodConditionMapping).map(([key, value]) => (
+                  <MenuItem key={key} value={key}>
+                    {value}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </div>
+
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Image</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortBy === 'title'}
+                    direction={sortBy === 'title' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('title')}
+                  >
+                    Title
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortBy === 'category'}
+                    direction={sortBy === 'category' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('category')}
+                  >
+                    Category
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortBy === 'condition'}
+                    direction={sortBy === 'condition' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('condition')}
+                  >
+                    Condition
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortBy === 'price'}
+                    direction={sortBy === 'price' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('price')}
+                  >
+                    Price
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortBy === 'expiry'}
+                    direction={sortBy === 'expiry' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('expiry')}
+                  >
+                    Earliest Batch Expiry
+                  </TableSortLabel>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredAndSortedProducts.length > 0 ? (
+                filteredAndSortedProducts.map((product: any) => {
+                  let alertClass = ''
+                  let alertBadge = null;
+                  const daysToExpiry = getEarliestExpiryInfo(product.batches);
+
+                  if (typeof daysToExpiry === 'number') {
+                    if (daysToExpiry <= 0) {
+                      alertClass = 'text-gray-500';
+                      alertBadge = <Badge className="bg-gray-500 text-white">Not Available for Sale</Badge>;
+                    } else if (daysToExpiry <= 3) {
+                      alertClass = 'text-red-600 font-bold';
+                      alertBadge = <Badge className="bg-red-500 text-white">Urgent</Badge>;
+                    } else if (daysToExpiry <= 7) {
+                      alertClass = 'text-orange-600 font-bold';
+                      alertBadge = <Badge className="bg-orange-500 text-white">Warning</Badge>;
+                    } else if (daysToExpiry <= 14) {
+                      alertClass = 'text-yellow-600 font-bold';
+                      alertBadge = <Badge className="bg-yellow-500 text-white">Near Expiry</Badge>;
+                    }
+                  }
+                  
+                  return (
+                    <TableRow 
+                      key={product.productId} 
+                      onClick={() => handleProductClick(product.productId)}
+                      className="cursor-pointer hover:bg-gray-100"
+                    >
+                      <TableCell>
+                        <img
+                          src={
+                            product.productPictures.length > 0
+                              ? product.productPictures[0]
+                              : 'placeholder-image-url'
+                          }
+                          alt={product.listingTitle}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title={product.listingTitle} arrow>
+                          <span>{truncateText(product.listingTitle, 100)}</span>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title={foodCategoryMapping[product.foodCategory] || product.foodCategory} arrow>
+                          <span>{truncateText(foodCategoryMapping[product.foodCategory] || product.foodCategory, 30)}</span>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title={foodConditionMapping[product.foodCondition] || product.foodCondition} arrow>
+                          {truncateText(foodConditionMapping[product.foodCondition] || product.foodCondition, 30)}
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>${product.price.toFixed(2)}</TableCell>
+                      <TableCell>
+                        {typeof daysToExpiry === 'number' ? (
+                          <div className={`flex flex-col items-start ${alertClass}`}>
+                            <span>{daysToExpiry <= 0 ? 'Expired' : `${daysToExpiry} days`}</span>
+                            {alertBadge}
+                          </div>
+                        ) : (
+                          'N/A'
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center">
+                    <p className="text-gray-500">No Products</p>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
