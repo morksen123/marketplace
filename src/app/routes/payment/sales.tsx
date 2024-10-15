@@ -44,7 +44,6 @@ export const SalesRoute = () => {
     queryKey: ['sales'],
     queryFn: () => fetchDashboardData(startDate, endDate, selectedProducts),
   });
-  console.log(salesData);
 
   const handleApplyFilters = async () => {
     await refetchSalesData();
@@ -84,6 +83,7 @@ export const SalesRoute = () => {
   return (
     <div className="wrapper space-y-6">
       <h1 className="text-3xl font-bold mb-6 ">Sales Dashboard</h1>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
           stat="Total Revenue"
@@ -99,8 +99,8 @@ export const SalesRoute = () => {
         />
         <StatCard
           stat="Top Product"
-          value={topProduct?.productName}
-          description={`${topProduct?.unitsSold} units sold`}
+          value={topProduct?.productName || 'N.A'}
+          description={`${topProduct?.unitsSold || 0} units sold`}
           icon="trending"
         />
       </div>
