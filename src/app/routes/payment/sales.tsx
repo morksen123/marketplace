@@ -1,3 +1,4 @@
+import { CustomTooltip } from '@/components/common/CustomToolTip';
 import {
   LoadingSpinner,
   LoadingSpinnerSvg,
@@ -16,7 +17,7 @@ import {
 import { StatCard } from '@/features/Payment/components/StatCard';
 import { useQuery } from '@tanstack/react-query';
 import { Download, Package } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -44,6 +45,29 @@ export const SalesRoute = () => {
     queryKey: ['sales'],
     queryFn: () => fetchDashboardData(startDate, endDate, selectedProducts),
   });
+
+  useEffect(() => {
+    if (
+      startDate === '' &&
+      endDate === '' &&
+      selectedProducts.length === 0 &&
+      !isSalesDataLoading
+    ) {
+      refetchSalesData();
+    }
+  }, [
+    startDate,
+    endDate,
+    selectedProducts,
+    refetchSalesData,
+    isSalesDataLoading,
+  ]);
+
+  const handleClearFilters = () => {
+    setStartDate('');
+    setEndDate('');
+    setSelectedProducts([]);
+  };
 
   const handleApplyFilters = async () => {
     await refetchSalesData();
@@ -76,6 +100,28 @@ export const SalesRoute = () => {
   const topProduct = salesData?.topProduct;
   const monthlySales = salesData?.monthlySales;
 
+  const getGrowthDescription = (type: 'revenue' | 'units') => {
+    if (
+      !salesData ||
+      !Array.isArray(salesData.monthlySales) ||
+      salesData.monthlySales.length === 0
+    ) {
+      return 'No data available';
+    }
+
+    const numberOfMonths = salesData.monthlySales.length;
+    const firstMonth = salesData.monthlySales[0]?.name ?? 'Unknown';
+    const lastMonth =
+      salesData.monthlySales[numberOfMonths - 1]?.name ?? 'Unknown';
+
+    const typeLabel = type === 'revenue' ? 'Revenue' : 'Units sold';
+
+    return `${typeLabel} from ${firstMonth} to ${lastMonth}`;
+  };
+
+  const revenueSoldStatCardDescription = getGrowthDescription('revenue');
+  const unitsSoldStatCardDescription = getGrowthDescription('units');
+
   if (isSalesDataLoading || isProductLoading) {
     return <LoadingSpinner />;
   }
@@ -88,18 +134,18 @@ export const SalesRoute = () => {
         <StatCard
           stat="Total Revenue"
           value={totalRevenueInDollars?.toFixed(2)}
-          description={`+${salesData?.monthlyRevenueGrowth}% from last month`}
+          description={revenueSoldStatCardDescription}
           icon="dollar"
         />
         <StatCard
-          stat="Units Sold"
+          stat="Total Units Sold"
           value={totalUnitsSold?.toString()}
-          description={`+${salesData?.monthlyUnitsSoldGrowth}% from last month`}
+          description={unitsSoldStatCardDescription}
           icon="package"
         />
         <StatCard
           stat="Top Product"
-          value={topProduct?.productName || 'N.A'}
+          value={topProduct?.productName || '-'}
           description={`${topProduct?.unitsSold || 0} units sold`}
           icon="trending"
         />
@@ -115,7 +161,7 @@ export const SalesRoute = () => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip />
+              <Tooltip content={<CustomTooltip />} />
               <Legend />
               <Bar dataKey="sales" fill="hsl(147, 99%, 24%)" />
             </BarChart>
@@ -125,7 +171,7 @@ export const SalesRoute = () => {
 
       <Card className="shadow-md">
         <CardHeader className="border-b">
-          <CardTitle className=" text-left">Filter Sales Data</CardTitle>
+          <CardTitle className="text-left">Filter Sales Data</CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -145,7 +191,13 @@ export const SalesRoute = () => {
                 id="end-date"
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                min={startDate} // Ensures the end date can't be before start date
+                disabled={!startDate}
+                onChange={(e) => {
+                  if (new Date(e.target.value) >= new Date(startDate)) {
+                    setEndDate(e.target.value);
+                  }
+                }}
                 className="border-gray-300"
               />
             </div>
@@ -154,7 +206,7 @@ export const SalesRoute = () => {
               <MultiSelect
                 id="products"
                 placeholder="Select products"
-                defaultValue={selectedProducts} // changed from 'selected'
+                defaultValue={selectedProducts}
                 options={
                   distributorProducts?.data?.map((product) => ({
                     label: product.listingTitle,
@@ -166,13 +218,23 @@ export const SalesRoute = () => {
               />
             </div>
           </div>
-          <Button
-            variant="secondary"
-            className="mt-4 w-full bg-secondary text-secondary-foreground hover:bg-secondary/90"
-            onClick={handleApplyFilters}
-          >
-            Apply Filters
-          </Button>
+          <div className="flex justify-between mt-4 gap-2">
+            <Button
+              variant="outline"
+              className="w-full border-gray-300 text-gray-700 hover:bg-gray-100"
+              onClick={handleClearFilters}
+            >
+              Clear Filters
+            </Button>
+            <Button
+              variant="secondary"
+              className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90"
+              onClick={handleApplyFilters}
+              disabled={new Date(endDate) < new Date(startDate)}
+            >
+              Apply Filters
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
