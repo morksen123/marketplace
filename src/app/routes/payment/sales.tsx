@@ -153,24 +153,6 @@ export const SalesRoute = () => {
 
       <Card className="shadow-md">
         <CardHeader className="border-b">
-          <CardTitle className=" text-left">Sales Over Time</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={monthlySales}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar dataKey="sales" fill="hsl(147, 99%, 24%)" />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      <Card className="shadow-md">
-        <CardHeader className="border-b">
           <CardTitle className="text-left">Filter Sales Data</CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
@@ -235,6 +217,24 @@ export const SalesRoute = () => {
               Apply Filters
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-md">
+        <CardHeader className="border-b">
+          <CardTitle className=" text-left">Sales Over Time</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={monthlySales}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Bar dataKey="sales" fill="hsl(147, 99%, 24%)" />
+            </BarChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
