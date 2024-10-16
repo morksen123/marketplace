@@ -21,9 +21,9 @@ export const CustomTooltip = ({
     return (
       <div className="bg-white shadow-lg p-3 border rounded">
         <p className="label">{`Month: ${label}`}</p>
-        <p>{`Sales: $${sales}`}</p>
+        <p>{`Sales: $${sales.toFixed(2)}`}</p>
         {salesGrowth !== undefined ? (
-          <p>{`Monthly Growth: ${salesGrowth}%`}</p>
+          <p>{`Monthly Growth: ${salesGrowth.toFixed(2)}%`}</p>
         ) : null}
         <p>{`Units Sold: ${unitsSold}`}</p>
       </div>

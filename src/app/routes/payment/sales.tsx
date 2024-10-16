@@ -15,6 +15,7 @@ import {
   fetchDashboardData,
 } from '@/features/Payment/api/sales';
 import { StatCard } from '@/features/Payment/components/StatCard';
+import { formatDisplayDate } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { Download, Package } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -32,6 +33,9 @@ import {
 export const SalesRoute = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+
+  const [startDateLabel, setStartDateLabel] = useState('');
+  const [endDateLabel, setEndDateLabel] = useState('');
 
   const [isExportingExcel, setIsExportingExcel] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -66,10 +70,14 @@ export const SalesRoute = () => {
   const handleClearFilters = () => {
     setStartDate('');
     setEndDate('');
+    setStartDateLabel('');
+    setEndDateLabel('');
     setSelectedProducts([]);
   };
 
   const handleApplyFilters = async () => {
+    setStartDateLabel(startDate);
+    setEndDateLabel(endDate);
     await refetchSalesData();
   };
 
@@ -100,7 +108,11 @@ export const SalesRoute = () => {
   const topProduct = salesData?.topProduct;
   const monthlySales = salesData?.monthlySales;
 
-  const getGrowthDescription = (type: 'revenue' | 'units') => {
+  const getGrowthDescription = (
+    type: 'revenue' | 'units',
+    startDate: string,
+    endDate: string,
+  ) => {
     if (
       !salesData ||
       !Array.isArray(salesData.monthlySales) ||
@@ -108,19 +120,33 @@ export const SalesRoute = () => {
     ) {
       return 'No data available';
     }
-
-    const numberOfMonths = salesData.monthlySales.length;
-    const firstMonth = salesData.monthlySales[0]?.name ?? 'Unknown';
-    const lastMonth =
-      salesData.monthlySales[numberOfMonths - 1]?.name ?? 'Unknown';
-
     const typeLabel = type === 'revenue' ? 'Revenue' : 'Units sold';
 
-    return `${typeLabel} from ${firstMonth} to ${lastMonth}`;
+    if (!startDate && !endDate) {
+      return `${typeLabel} for current period`;
+    }
+
+    if (startDate && !endDate) {
+      return `${typeLabel} from ${startDate} onwards`;
+    }
+
+    if (!startDate && endDate) {
+      return `${typeLabel} up until ${endDate}`;
+    }
+
+    return `${typeLabel} from ${startDate} to ${endDate}`;
   };
 
-  const revenueSoldStatCardDescription = getGrowthDescription('revenue');
-  const unitsSoldStatCardDescription = getGrowthDescription('units');
+  const revenueSoldStatCardDescription = getGrowthDescription(
+    'revenue',
+    formatDisplayDate(startDateLabel),
+    formatDisplayDate(endDateLabel),
+  );
+  const unitsSoldStatCardDescription = getGrowthDescription(
+    'units',
+    formatDisplayDate(startDateLabel),
+    formatDisplayDate(endDateLabel),
+  );
 
   if (isSalesDataLoading || isProductLoading) {
     return <LoadingSpinner />;
@@ -150,24 +176,6 @@ export const SalesRoute = () => {
           icon="trending"
         />
       </div>
-
-      <Card className="shadow-md">
-        <CardHeader className="border-b">
-          <CardTitle className=" text-left">Sales Over Time</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={monthlySales}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar dataKey="sales" fill="hsl(147, 99%, 24%)" />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
 
       <Card className="shadow-md">
         <CardHeader className="border-b">
@@ -218,7 +226,7 @@ export const SalesRoute = () => {
               />
             </div>
           </div>
-          <div className="flex justify-between mt-4 gap-2">
+          <div className="flex justify-between mt-4 gap-4">
             <Button
               variant="outline"
               className="w-full border-gray-300 text-gray-700 hover:bg-gray-100"
@@ -235,6 +243,24 @@ export const SalesRoute = () => {
               Apply Filters
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-md">
+        <CardHeader className="border-b">
+          <CardTitle className=" text-left">Sales Over Time</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={monthlySales}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Bar dataKey="sales" fill="hsl(147, 99%, 24%)" />
+            </BarChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
