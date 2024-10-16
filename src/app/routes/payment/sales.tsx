@@ -226,7 +226,7 @@ export const SalesRoute = () => {
               />
             </div>
           </div>
-          <div className="flex justify-between mt-4 gap-2">
+          <div className="flex justify-between mt-4 gap-4">
             <Button
               variant="outline"
               className="w-full border-gray-300 text-gray-700 hover:bg-gray-100"
