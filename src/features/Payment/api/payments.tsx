@@ -1,5 +1,6 @@
 import { ROLES, RoleTypes } from '@/features/Authentication/types/auth';
 import { get, post } from '@/lib/api-client';
+import { getUserRoleFromCookie } from '@/lib/utils';
 import { OrderDto, Transaction } from '../types/payment';
 
 export async function getUserTransactions(role: RoleTypes) {
@@ -22,7 +23,8 @@ export async function getTransaction(
 export async function getOrderDetails(
   orderIds: number[],
 ): Promise<OrderDto[] | null> {
-  const { data } = await post<OrderDto[]>('/buyer/orders/multiple', {
+  const role = getUserRoleFromCookie().toLowerCase();
+  const { data } = await post<OrderDto[]>(`/${role}/orders/multiple`, {
     orderIds,
   });
   return data;
