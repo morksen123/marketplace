@@ -33,7 +33,6 @@ export const Checkout: React.FC = () => {
     cartPrice,
     isShippingAddressRequired,
     cartItemsThatRequireSelfPickUp,
-    cartItemsExpiringSoon,
   } = useCart();
 
   const [shippingFee] = useState(0);
@@ -72,9 +71,8 @@ export const Checkout: React.FC = () => {
   const showSaveAddressPrompt = !defaultShippingAddress;
 
   const showPickUpPrompt =
-    (cartItemsThatRequireSelfPickUp &&
-      cartItemsThatRequireSelfPickUp?.length > 0) ||
-    (cartItemsExpiringSoon && cartItemsExpiringSoon?.length > 0);
+    cartItemsThatRequireSelfPickUp &&
+    cartItemsThatRequireSelfPickUp?.length > 0;
 
   return (
     <div className="wrapper mb-12">
