@@ -11,7 +11,7 @@ import {
   getEarliestBatchDate,
   isDateClose,
 } from '@/lib/utils';
-import { AlertTriangle, Minus, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Minus, Plus, Tag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 
@@ -46,12 +46,39 @@ export const Cart: React.FC = () => {
                       '/src/assets/food-icon.png'
                     }
                     alt={item.product.listingTitle}
-                    className="w-16 h-16 object-cover rounded"
+                    className="w-20 h-20 object-cover rounded"
                   />
-                  <div className="text-left ">
-                    <h3 className="font-semibold">
-                      {item.product.listingTitle}
-                    </h3>
+                  <div className="text-left space-y-1">
+                    <div className="flex">
+                      <h3 className="font-semibold text-lg">
+                        {item.product.listingTitle}
+                      </h3>
+                      {isCloseToExpiry && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Badge variant="warning" className="ml-3">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                Expiring Soon
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {daysUntilExpiry === 0 ? (
+                                <p>
+                                  Best before date is <b>TODAY</b>.
+                                </p>
+                              ) : (
+                                <p>
+                                  Best before date is in{' '}
+                                  <b>{daysUntilExpiry} day(s)</b>.
+                                </p>
+                              )}
+                              <p>Please consume soon after purchase.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
                     <div className="flex items-center space-x-2">
                       {isDiscounted && (
                         <p className="text-sm text-gray-500 line-through">
@@ -75,32 +102,19 @@ export const Cart: React.FC = () => {
                     </p>
                   </div>
                 </div>
-
-                {isCloseToExpiry && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Badge variant="warning" className="ml-2">
-                          <AlertTriangle className="h-3 w-3 mr-1" />
-                          Expiring Soon
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {daysUntilExpiry === 0 ? (
-                          <p>
-                            Best before date is <b>TODAY</b>.
-                          </p>
-                        ) : (
-                          <p>
-                            Best before date is in{' '}
-                            <b>{daysUntilExpiry} day(s)</b>.
-                          </p>
-                        )}
-                        <p>Please consume soon after purchase.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                <div className="flex flex-col text-left">
+                  <p className="flex items-center text-green-600">
+                    <Tag className="h-3 w-3 mr-1" />
+                    Batch Discount: -$1.00
+                  </p>
+                  <p className="flex items-center text-green-600">
+                    <Tag className="h-3 w-3 mr-1" />
+                    Promo Discount: -$1.00
+                  </p>
+                  <p className="font-medium">
+                    Total Savings: ${(1).toFixed(2)}
+                  </p>
+                </div>
 
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center border rounded">
