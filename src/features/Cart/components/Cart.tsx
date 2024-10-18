@@ -18,6 +18,11 @@ import { useCart } from '../hooks/useCart';
 export const Cart: React.FC = () => {
   const { cart, removeFromCart, updateQuantity, cartPrice } = useCart();
 
+  const getCartItemSavings = (promoSavings: number, bulkSavings: number) => {
+    let savingsPerItem = promoSavings + bulkSavings;
+    return savingsPerItem.toFixed(2);
+  };
+
   return (
     <div className="wrapper">
       <h2 className="text-3xl font-bold mb-6">Your Cart</h2>
@@ -102,17 +107,26 @@ export const Cart: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-col text-left">
-                  <p className="flex items-center text-green-600">
-                    <Tag className="h-3 w-3 mr-1" />
-                    Batch Discount: -$1.00
-                  </p>
-                  <p className="flex items-center text-green-600">
-                    <Tag className="h-3 w-3 mr-1" />
-                    Promo Discount: -$1.00
-                  </p>
+                <div className="flex flex-col text-left min-w-[220px]">
+                  {item.bulkPricingDiscount > 0 && (
+                    <p className="flex items-center text-green-600">
+                      <Tag className="h-3 w-3 mr-1" />
+                      Bulk Discount: -${item.bulkPricingDiscount.toFixed(2)}
+                    </p>
+                  )}
+
+                  {item.promotionDiscount > 0 && (
+                    <p className="flex items-center text-green-600">
+                      <Tag className="h-3 w-3 mr-1" />
+                      Promo Discount: -${item.promotionDiscount.toFixed(2)}
+                    </p>
+                  )}
                   <p className="font-medium">
-                    Total Savings: ${(1).toFixed(2)}
+                    Total Savings: $
+                    {getCartItemSavings(
+                      item.bulkPricingDiscount,
+                      item.promotionDiscount,
+                    )}
                   </p>
                 </div>
 
