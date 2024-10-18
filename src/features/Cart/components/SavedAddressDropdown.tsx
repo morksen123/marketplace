@@ -6,10 +6,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useBuyerProfile } from '@/features/BuyerAccount/hooks/useBuyerProfile';
+import { SaveAddressPrompt } from './SaveAddressPrompt';
 
 type SavedAddressDropdownProps = {
   mode: 'shipping' | 'billing';
-  onAddressChange: (value: string) => void;
+  onAddressChange: (addressId: string) => void;
 };
 
 export const SavedAddressDropdown: React.FC<SavedAddressDropdownProps> = ({
@@ -21,6 +22,10 @@ export const SavedAddressDropdown: React.FC<SavedAddressDropdownProps> = ({
 
   const defaultAddress =
     mode === 'shipping' ? defaultShippingAddress : defaultBillingAddress;
+
+  const hasAddresses =
+    buyerProfile?.shippingAddresses &&
+    buyerProfile.shippingAddresses.length > 0;
 
   return (
     <>
@@ -35,6 +40,7 @@ export const SavedAddressDropdown: React.FC<SavedAddressDropdownProps> = ({
           <SelectValue placeholder="Choose an address" />
         </SelectTrigger>
         <SelectContent>
+          {!hasAddresses && <SaveAddressPrompt />}
           {buyerProfile?.shippingAddresses?.map((address) => (
             <SelectItem
               key={address.shippingAddressId}

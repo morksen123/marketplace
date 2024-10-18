@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Address } from '@/features/BuyerAccount/hooks/useAddress';
 import { useBuyerProfile } from '@/features/BuyerAccount/hooks/useBuyerProfile';
 import {
   AddressElement,
@@ -20,11 +21,10 @@ import {
   useStripe,
 } from '@stripe/react-stripe-js';
 import { MapPin } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCart } from '../hooks/useCart';
-import { SaveAddressPrompt } from './SaveAddressPrompt';
-import { SelfPickupItems } from './selfPickUpItems';
 import { SavedAddressDropdown } from './SavedAddressDropdown';
+import { SelfPickupItems } from './selfPickUpItems';
 
 export const Checkout: React.FC = () => {
   const stripe = useStripe();
@@ -45,12 +45,34 @@ export const Checkout: React.FC = () => {
 
   const [shippingFee] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedShippingAddress, setSelectedShippingAddress] = useState<
-    string | undefined
-  >();
-  const [selectedBillingAddress, setSelectedBillingAddress] = useState<
-    string | undefined
-  >();
+  const [selectedShippingAddress, setSelectedShippingAddress] =
+    useState<Address>();
+  const [selectedBillingAddress, setSelectedBillingAddress] =
+    useState<Address>();
+
+  useEffect(() => {
+    if (defaultBillingAddress) {
+      setSelectedBillingAddress(defaultBillingAddress);
+    }
+
+    if (defaultShippingAddress) {
+      setSelectedShippingAddress(defaultShippingAddress);
+    }
+  }, [defaultBillingAddress, defaultShippingAddress]);
+
+  const handleAddressChange =
+    (mode: 'shipping' | 'billing') => (addressId: string) => {
+      const selectedAddress = buyerProfile?.shippingAddresses?.find(
+        (addr) => addr.shippingAddressId?.toString() === addressId,
+      );
+      if (selectedAddress) {
+        if (mode === 'shipping') {
+          setSelectedShippingAddress(selectedAddress);
+        } else {
+          setSelectedBillingAddress(selectedAddress);
+        }
+      }
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,8 +98,6 @@ export const Checkout: React.FC = () => {
     return <LoadingSpinner />;
   }
 
-  const showSaveAddressPrompt = !defaultShippingAddress;
-
   const showPickUpPrompt =
     cartItemsThatRequireSelfPickUp &&
     cartItemsThatRequireSelfPickUp?.length > 0;
@@ -98,7 +118,6 @@ export const Checkout: React.FC = () => {
                 <CardContent className="space-y-6 text-left">
                   {buyerProfile && (
                     <>
-                      {showSaveAddressPrompt && <SaveAddressPrompt />}
                       {/* Link Authentication */}
                       <div className="mb-6">
                         <h3 className="text-lg font-semibold mb-2">
@@ -136,27 +155,31 @@ export const Checkout: React.FC = () => {
                           <>
                             <SavedAddressDropdown
                               mode="shipping"
-                              onAddressChange={(value) =>
-                                setSelectedShippingAddress(value)
-                              }
+                              onAddressChange={handleAddressChange('shipping')}
                             />
                             <AddressElement
+                              key={`shipping-${selectedShippingAddress?.shippingAddressId}`}
                               options={{
                                 mode: 'shipping',
                                 allowedCountries: ['SG'],
                                 fields: {
                                   phone: 'always',
                                 },
-                                defaultValues: {
-                                  name: defaultShippingAddress?.buyerName,
+                                defaultValues: selectedShippingAddress && {
+                                  name: selectedShippingAddress.buyerName || '',
                                   address: {
-                                    line1: defaultShippingAddress?.addressLine1,
-                                    line2: defaultShippingAddress?.addressLine2,
+                                    line1:
+                                      selectedShippingAddress.addressLine1 ||
+                                      '',
+                                    line2:
+                                      selectedShippingAddress.addressLine2 ||
+                                      '',
                                     postal_code:
-                                      defaultShippingAddress?.postalCode,
+                                      selectedShippingAddress.postalCode || '',
                                     country: 'SG',
                                   },
-                                  phone: defaultShippingAddress?.phoneNumber,
+                                  phone:
+                                    selectedShippingAddress.phoneNumber || '',
                                 },
                               }}
                             />
@@ -171,26 +194,25 @@ export const Checkout: React.FC = () => {
                         </h3>
                         <SavedAddressDropdown
                           mode="billing"
-                          onAddressChange={(value) =>
-                            setSelectedBillingAddress(value)
-                          }
+                          onAddressChange={handleAddressChange('billing')}
                         />
                         <AddressElement
+                          key={`billing-${selectedBillingAddress?.shippingAddressId}`}
                           options={{
                             mode: 'billing',
                             allowedCountries: ['SG'],
                             fields: {
                               phone: 'always',
                             },
-                            defaultValues: {
-                              name: defaultBillingAddress?.buyerName,
+                            defaultValues: selectedBillingAddress && {
+                              name: selectedBillingAddress?.buyerName,
                               address: {
-                                line1: defaultBillingAddress?.addressLine1,
-                                line2: defaultBillingAddress?.addressLine2,
-                                postal_code: defaultBillingAddress?.postalCode,
+                                line1: selectedBillingAddress?.addressLine1,
+                                line2: selectedBillingAddress?.addressLine2,
+                                postal_code: selectedBillingAddress?.postalCode,
                                 country: 'SG',
                               },
-                              phone: defaultBillingAddress?.phoneNumber,
+                              phone: selectedBillingAddress?.phoneNumber,
                             },
                           }}
                         />

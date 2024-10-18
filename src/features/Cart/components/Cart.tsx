@@ -19,7 +19,7 @@ export const Cart: React.FC = () => {
   const { cart, removeFromCart, updateQuantity, cartPrice } = useCart();
 
   const getCartItemSavings = (promoSavings: number, bulkSavings: number) => {
-    let savingsPerItem = promoSavings + bulkSavings;
+    const savingsPerItem = promoSavings + bulkSavings;
     return savingsPerItem.toFixed(2);
   };
 
