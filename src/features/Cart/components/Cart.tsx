@@ -33,6 +33,7 @@ export const Cart: React.FC = () => {
             const daysUntilExpiry = getDaysUntilExpiry(
               getEarliestBatchDate(item.product.batches) || '',
             );
+            const isDiscounted = item.product.price > item.price;
             return (
               <div
                 key={item.cartLineItemId}
@@ -47,14 +48,31 @@ export const Cart: React.FC = () => {
                     alt={item.product.listingTitle}
                     className="w-16 h-16 object-cover rounded"
                   />
-                  <div className="text-left">
+                  <div className="text-left ">
                     <h3 className="font-semibold">
                       {item.product.listingTitle}
                     </h3>
-                    <p className="text-sm text-gray-500">
-                      ${item.price.toFixed(2)} each
+                    <div className="flex items-center space-x-2">
+                      {isDiscounted && (
+                        <p className="text-sm text-gray-500 line-through">
+                          ${item.product.price.toFixed(2)}
+                        </p>
+                      )}
+                      <span
+                        className={`text-sm font-semibold ${
+                          isDiscounted ? 'text-secondary' : 'text-gray-700'
+                        }`}
+                      >
+                        ${item.price.toFixed(2)}
+                      </span>
+                      <span className="text-sm text-gray-500">each</span>
+                    </div>
+                    <p className="text-md text-gray-600">
+                      Subtotal:{' '}
+                      <span className="font-medium">
+                        ${subtotal.toFixed(2)}
+                      </span>
                     </p>
-                    <p>Subtotal: ${subtotal.toFixed(2)}</p>
                   </div>
                 </div>
 
