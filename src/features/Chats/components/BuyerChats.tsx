@@ -7,8 +7,8 @@ import { searchTermAtom, sortedChatsAtom, selectedChatAtom } from '@/atoms/chatA
 
 export const BuyerChats: React.FC = () => {
   const [searchTerm, setSearchTerm] = useAtom(searchTermAtom);
-  const [sortedChats] = useAtom(sortedChatsAtom); // buyer chats only use the sorted chats atom and the setselectedchat atom.
-  const [, setSelectedChat] = useAtom(selectedChatAtom);
+  const [sortedChats] = useAtom(sortedChatsAtom);
+  const [selectedChat, setSelectedChat] = useAtom(selectedChatAtom);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -38,16 +38,21 @@ export const BuyerChats: React.FC = () => {
           {sortedChats.map((chat) => (
             <li
               key={chat.chatId}
-              className={`p-3 flex items-start hover:bg-gray-100 cursor-pointer`}
+              className={`p-4 cursor-pointer transition-colors duration-300 ${
+                selectedChat?.chatId === chat.chatId
+                  ? 'bg-[#e8f5fe] border-l-4 border-[#017A37]'
+                  : 'hover:bg-gray-50'
+              }`}
               onClick={() => handleSelectChat(chat)}
             >
               <div className="flex flex-col items-start w-full">
                 <h3 className="font-semibold text-gray-800">
                   {chat.administratorId ? 'Administrator' : chat.distributorName}
                 </h3>
-                <p className="text-sm text-gray-600 text-left truncate">
-                  {chat.lastMessage.slice(0, 60)}
-                  {chat.lastMessage.length > 60 ? '...' : ''}
+                <p className="text-xs italic text-[#017A37]">{chat.distributorName}</p>
+                <p className="text-sm text-gray-600 mt-1 w-full truncate text-left">
+                  {chat.lastMessage?.slice(0, 60)}
+                  {chat.lastMessage && chat.lastMessage.length > 60 ? '...' : ''}
                 </p>
               </div>
             </li>
@@ -55,7 +60,8 @@ export const BuyerChats: React.FC = () => {
         </ul>
       </div>
 
-      <div className="w-2/3 flex flex-col">
+      {/* Right side - Individual chat */}
+      <div className="w-2/3 flex flex-col bg-white">
         <BuyerIndividualChat />
       </div>
     </div>
