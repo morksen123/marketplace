@@ -7,6 +7,7 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirectoryOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
@@ -70,6 +71,12 @@ export const DistributorNavMenu = () => {
               className="text-black hover:text-gray-600 flex items-center"
             >
               <InventoryOutlinedIcon className="mr-1" /> Inventory
+            </Link>
+            <Link
+              to="/distributor/orders"
+              className="text-black hover:text-gray-600 flex items-center"
+            >
+              <LocalShippingIcon className="mr-1" /> Orders
             </Link>
             <Link
               to="/distributor/promotions"
