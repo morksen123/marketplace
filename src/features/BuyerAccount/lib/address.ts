@@ -45,6 +45,10 @@ export async function setDefaultAddress(
   return data;
 }
 
+export async function setShippingAddressForOrder(id: number) {
+  await post(`/cart/set-shipping-address?shippingAddressId=${id}`, {});
+}
+
 export const initialFormState: Address = {
   label: '',
   phoneNumber: '',

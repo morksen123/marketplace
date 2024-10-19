@@ -1,5 +1,7 @@
 import { RoleTypes } from '@/features/Authentication/types/auth';
+import { Address } from '@/features/BuyerAccount/hooks/useAddress';
 import { Batch, Product } from '@/features/ProductListing/constants';
+import { StripeAddressElementChangeEvent } from '@stripe/stripe-js';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import Cookies from 'universal-cookie';
@@ -82,4 +84,22 @@ export const getDaysUntilExpiry = (dateString: string): number => {
   const today = new Date();
   const diffTime = date.getTime() - today.getTime();
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+// Transform stripe address fields to match our shipping address entity
+export const transformStripeAddressToAddress = (
+  stripeAddress: StripeAddressElementChangeEvent['value'],
+  prevAddress?: Address,
+): Address => {
+  return {
+    shippingAddressId: prevAddress?.shippingAddressId,
+    label: prevAddress?.label || 'New Address',
+    phoneNumber: stripeAddress.phone || '',
+    addressLine1: stripeAddress.address.line1 || '',
+    addressLine2: stripeAddress.address.line2 || '',
+    postalCode: stripeAddress.address.postal_code || '',
+    isDefaultShippingAddress: false, // default false
+    isDefaultBillingAddress: false, // default false
+    buyerName: stripeAddress.name || '',
+  };
 };

@@ -13,6 +13,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Address } from '@/features/BuyerAccount/hooks/useAddress';
 import { useBuyerProfile } from '@/features/BuyerAccount/hooks/useBuyerProfile';
+import { setShippingAddressForOrder } from '@/features/BuyerAccount/lib/address';
+import { transformStripeAddressToAddress } from '@/lib/utils';
 import {
   AddressElement,
   LinkAuthenticationElement,
@@ -20,6 +22,7 @@ import {
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
+import { StripeAddressElementChangeEvent } from '@stripe/stripe-js';
 import { MapPin } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useCart } from '../hooks/useCart';
@@ -60,7 +63,7 @@ export const Checkout: React.FC = () => {
     }
   }, [defaultBillingAddress, defaultShippingAddress]);
 
-  const handleAddressChange =
+  const handleAddressDropdownChange =
     (mode: 'shipping' | 'billing') => (addressId: string) => {
       const selectedAddress = buyerProfile?.shippingAddresses?.find(
         (addr) => addr.shippingAddressId?.toString() === addressId,
@@ -74,6 +77,27 @@ export const Checkout: React.FC = () => {
       }
     };
 
+  const handleAddressInputChange = (
+    e: StripeAddressElementChangeEvent,
+    mode: 'shipping' | 'billing',
+  ) => {
+    const setAddress =
+      mode === 'shipping'
+        ? setSelectedShippingAddress
+        : setSelectedBillingAddress;
+
+    setAddress((prev: Address | undefined) => {
+      if (e.complete) {
+        const transformedAddress = transformStripeAddressToAddress(
+          e.value,
+          prev,
+        );
+        return transformedAddress;
+      }
+      return prev;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -82,6 +106,12 @@ export const Checkout: React.FC = () => {
     }
 
     setIsLoading(true);
+
+    if (selectedShippingAddress && selectedShippingAddress.shippingAddressId) {
+      await setShippingAddressForOrder(
+        selectedShippingAddress.shippingAddressId,
+      );
+    }
 
     await stripe.confirmPayment({
       elements,
@@ -155,10 +185,15 @@ export const Checkout: React.FC = () => {
                           <>
                             <SavedAddressDropdown
                               mode="shipping"
-                              onAddressChange={handleAddressChange('shipping')}
+                              onAddressChange={handleAddressDropdownChange(
+                                'shipping',
+                              )}
                             />
                             <AddressElement
                               key={`shipping-${selectedShippingAddress?.shippingAddressId}`}
+                              onChange={(e) =>
+                                handleAddressInputChange(e, 'shipping')
+                              }
                               options={{
                                 mode: 'shipping',
                                 allowedCountries: ['SG'],
@@ -194,10 +229,15 @@ export const Checkout: React.FC = () => {
                         </h3>
                         <SavedAddressDropdown
                           mode="billing"
-                          onAddressChange={handleAddressChange('billing')}
+                          onAddressChange={handleAddressDropdownChange(
+                            'billing',
+                          )}
                         />
                         <AddressElement
                           key={`billing-${selectedBillingAddress?.shippingAddressId}`}
+                          onChange={(e) =>
+                            handleAddressInputChange(e, 'billing')
+                          }
                           options={{
                             mode: 'billing',
                             allowedCountries: ['SG'],
