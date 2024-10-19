@@ -12,6 +12,8 @@ export interface CartLineItem {
   price: number;
   product: Product;
   quantity: number;
+  bulkPricingDiscount: number;
+  promotionDiscount: number;
 }
 
 export async function viewCart(): Promise<CartDto | null> {

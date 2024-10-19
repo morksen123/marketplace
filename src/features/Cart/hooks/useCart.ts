@@ -86,7 +86,9 @@ export const useCart = () => {
   const cartItemsExpiringSoon = cart?.cartLineItems.filter(isItemExpiringSoon);
 
   const cartItemsThatRequireSelfPickUp = cart?.cartLineItems.filter(
-    (item) => item.product.deliveryMethod !== 'DOORSTEP_DELIVERY',
+    (item) =>
+      item.product.deliveryMethod !== 'DOORSTEP_DELIVERY' ||
+      isItemExpiringSoon(item),
   );
 
   return {

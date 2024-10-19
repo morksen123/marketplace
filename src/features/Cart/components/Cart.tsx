@@ -11,12 +11,17 @@ import {
   getEarliestBatchDate,
   isDateClose,
 } from '@/lib/utils';
-import { AlertTriangle, Minus, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Minus, Plus, Tag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 
 export const Cart: React.FC = () => {
   const { cart, removeFromCart, updateQuantity, cartPrice } = useCart();
+
+  const getCartItemSavings = (promoSavings: number, bulkSavings: number) => {
+    const savingsPerItem = promoSavings + bulkSavings;
+    return savingsPerItem.toFixed(2);
+  };
 
   return (
     <div className="wrapper">
@@ -33,6 +38,7 @@ export const Cart: React.FC = () => {
             const daysUntilExpiry = getDaysUntilExpiry(
               getEarliestBatchDate(item.product.batches) || '',
             );
+            const isDiscounted = item.product.price > item.price;
             return (
               <div
                 key={item.cartLineItemId}
@@ -45,44 +51,84 @@ export const Cart: React.FC = () => {
                       '/src/assets/food-icon.png'
                     }
                     alt={item.product.listingTitle}
-                    className="w-16 h-16 object-cover rounded"
+                    className="w-20 h-20 object-cover rounded"
                   />
-                  <div className="text-left">
-                    <h3 className="font-semibold">
-                      {item.product.listingTitle}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      ${item.price.toFixed(2)} each
+                  <div className="text-left space-y-1">
+                    <div className="flex">
+                      <h3 className="font-semibold text-lg">
+                        {item.product.listingTitle}
+                      </h3>
+                      {isCloseToExpiry && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Badge variant="warning" className="ml-3">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                Expiring Soon
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {daysUntilExpiry === 0 ? (
+                                <p>
+                                  Best before date is <b>TODAY</b>.
+                                </p>
+                              ) : (
+                                <p>
+                                  Best before date is in{' '}
+                                  <b>{daysUntilExpiry} day(s)</b>.
+                                </p>
+                              )}
+                              <p>Please consume soon after purchase.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {isDiscounted && (
+                        <p className="text-sm text-gray-500 line-through">
+                          ${item.product.price.toFixed(2)}
+                        </p>
+                      )}
+                      <span
+                        className={`text-sm font-semibold ${
+                          isDiscounted ? 'text-secondary' : 'text-gray-700'
+                        }`}
+                      >
+                        ${item.price.toFixed(2)}
+                      </span>
+                      <span className="text-sm text-gray-500">each</span>
+                    </div>
+                    <p className="text-md text-gray-600">
+                      Subtotal:{' '}
+                      <span className="font-medium">
+                        ${subtotal.toFixed(2)}
+                      </span>
                     </p>
-                    <p>Subtotal: ${subtotal.toFixed(2)}</p>
                   </div>
                 </div>
+                <div className="flex flex-col text-left min-w-[220px]">
+                  {item.bulkPricingDiscount > 0 && (
+                    <p className="flex items-center text-secondary">
+                      <Tag className="h-3 w-3 mr-1" />
+                      Bulk Discount: -${item.bulkPricingDiscount.toFixed(2)}
+                    </p>
+                  )}
 
-                {isCloseToExpiry && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Badge variant="warning" className="ml-2">
-                          <AlertTriangle className="h-3 w-3 mr-1" />
-                          Expiring Soon
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {daysUntilExpiry === 0 ? (
-                          <p>
-                            Best before date is <b>TODAY</b>.
-                          </p>
-                        ) : (
-                          <p>
-                            Best before date is in{' '}
-                            <b>{daysUntilExpiry} day(s)</b>.
-                          </p>
-                        )}
-                        <p>Please consume soon after purchase.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                  {item.promotionDiscount > 0 && (
+                    <p className="flex items-center text-secondary">
+                      <Tag className="h-3 w-3 mr-1" />
+                      Promo Discount: -${item.promotionDiscount.toFixed(2)}
+                    </p>
+                  )}
+                  <p className="font-medium">
+                    Total Savings: $
+                    {getCartItemSavings(
+                      item.bulkPricingDiscount,
+                      item.promotionDiscount,
+                    )}
+                  </p>
+                </div>
 
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center border rounded">
