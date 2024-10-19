@@ -1,11 +1,5 @@
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createTransaction } from '@/features/Cart/api/api-cart';
@@ -31,7 +25,7 @@ const STATUS_CONTENT_MAP: Record<
   },
   processing: {
     title: 'Payment Processing',
-    message: 'Your payment is being processed. Please wait...',
+    message: 'Your payment is being processed. Please do not leave the page...',
     color: 'text-blue-600',
   },
   requires_payment_method: {
@@ -67,12 +61,8 @@ const STATUS_CONTENT_MAP: Record<
   },
 };
 
-const LoadingSkeleton = () => (
-  <div className="space-y-4">
-    <Skeleton className="h-8 w-3/4 mx-auto" />
-    <Skeleton className="h-4 w-full" />
-    <Skeleton className="h-4 w-full" />
-    <Separator />
+const PaymentDetailsSkeleton = () => (
+  <>
     <div className="space-y-2">
       <div className="flex justify-between">
         <Skeleton className="h-4 w-1/4" />
@@ -87,12 +77,16 @@ const LoadingSkeleton = () => (
         <Skeleton className="h-4 w-1/4" />
       </div>
     </div>
-  </div>
+    <div className="flex justify-center space-x-6 mt-6">
+      <Skeleton className="h-10 w-32" />
+      <Skeleton className="h-10 w-32" />
+    </div>
+  </>
 );
 
 export const CheckoutComplete: React.FC = () => {
   const stripe = useStripe();
-  const [status, setStatus] = useState<Status | 'default'>('default');
+  const [status, setStatus] = useState<Status | 'default'>('processing');
   const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(
     null,
   );
@@ -141,74 +135,54 @@ export const CheckoutComplete: React.FC = () => {
   return (
     <div className="wrapper">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8">
-          Checkout Complete
-        </h1>
         <Card>
           <CardHeader>
-            <CardTitle
-              className={`text-center ${isLoading ? '' : statusContent.color}`}
-            >
-              {isLoading ? (
-                <Skeleton className="h-8 w-3/4 mx-auto" />
-              ) : (
-                statusContent.title
-              )}
+            <CardTitle className={`text-center ${statusContent.color}`}>
+              {statusContent.title}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <p className="text-center">{statusContent.message}</p>
+            <Separator />
             {isLoading ? (
-              <LoadingSkeleton />
+              <PaymentDetailsSkeleton />
             ) : (
               <>
-                <p className="text-center">{statusContent.message}</p>
                 {paymentIntent && (
-                  <>
-                    <Separator />
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="font-medium">Payment ID:</span>
-                        <span>{paymentIntent.id}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium">Amount:</span>
-                        <span>${(paymentIntent.amount / 100).toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium">Status:</span>
-                        <span className="capitalize">{status}</span>
-                      </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Payment ID:</span>
+                      <span>{paymentIntent.id}</span>
                     </div>
-                  </>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Amount:</span>
+                      <span>${(paymentIntent.amount / 100).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Status:</span>
+                      <span className="capitalize">{status}</span>
+                    </div>
+                  </div>
                 )}
-              </>
-            )}
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <div className="space-x-6 flex">
-              {isLoading ? (
-                <>
-                  <Skeleton className="h-10 w-32" />
-                  <Skeleton className="h-10 w-32" />
-                </>
-              ) : (
-                <>
+                <div className="flex justify-center space-x-6 mt-6">
                   <Button
                     variant="outline"
                     onClick={() => navigate('/buyer/home')}
+                    disabled={status === 'processing'}
                   >
                     Return to Home
                   </Button>
                   <Button
                     variant="secondary"
                     onClick={() => navigate('/buyer/transactions')}
+                    disabled={status === 'processing'}
                   >
                     View Transactions
                   </Button>
-                </>
-              )}
-            </div>
-          </CardFooter>
+                </div>
+              </>
+            )}
+          </CardContent>
         </Card>
       </div>
     </div>

@@ -109,14 +109,14 @@ export const Cart: React.FC = () => {
                 </div>
                 <div className="flex flex-col text-left min-w-[220px]">
                   {item.bulkPricingDiscount > 0 && (
-                    <p className="flex items-center text-green-600">
+                    <p className="flex items-center text-secondary">
                       <Tag className="h-3 w-3 mr-1" />
                       Bulk Discount: -${item.bulkPricingDiscount.toFixed(2)}
                     </p>
                   )}
 
                   {item.promotionDiscount > 0 && (
-                    <p className="flex items-center text-green-600">
+                    <p className="flex items-center text-secondary">
                       <Tag className="h-3 w-3 mr-1" />
                       Promo Discount: -${item.promotionDiscount.toFixed(2)}
                     </p>
