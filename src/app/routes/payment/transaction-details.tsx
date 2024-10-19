@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TransactionDetails } from '@/features/Payment/components/TransactionDetails';
+import { OrderDetails } from '@/features/Payment/components/OrderDetails';
+import { TransactionAdditionalDetails } from '@/features/Payment/components/TransactionAdditionalDetails';
 import { TransactionSummary } from '@/features/Payment/components/TransactionSummary';
 import { usePayments } from '@/features/Payment/hooks/usePayments';
 import { getUserRoleFromCookie } from '@/lib/utils';
@@ -49,10 +50,14 @@ export const TransactionDetailsPage: React.FC = () => {
             </Button>
           </Card>
         ) : (
-          <>
+          <div className="space-y-8">
             <TransactionSummary transaction={transaction} />
-            <TransactionDetails transaction={transaction} />
-          </>
+            <TransactionAdditionalDetails
+              userRole={userRole}
+              transaction={transaction}
+            />
+            <OrderDetails orderIds={transaction.orderIds} />
+          </div>
         )}
       </div>
     </div>

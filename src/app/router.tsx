@@ -199,6 +199,15 @@ const routes: RouteObject[] = [
                   return { Component: ChatsRoute };
                 },
               },
+              {
+                path: '/buyer/faq',
+                lazy: async () => {
+                  const { BuyerFaqRoute } = await import(
+                    './routes/faq/buyerFaq'
+                  );
+                  return { Component: BuyerFaqRoute };
+                },
+              },
             ],
           },
           {
@@ -320,6 +329,22 @@ const routes: RouteObject[] = [
                     './routes/promotions/view-boosted-products'
                   );
                   return { Component: ViewBoostedProductsRoute };
+                },
+              },
+              {
+                path: '/distributor/faq',
+                lazy: async () => {
+                  const { DistributorFaqRoute } = await import(
+                    './routes/faq/distributorFaq'
+                  );
+                  return { Component: DistributorFaqRoute };
+                },
+              },
+              {
+                path: '/distributor/sales',
+                lazy: async () => {
+                  const { SalesRoute } = await import('./routes/payment/sales');
+                  return { Component: SalesRoute };
                 },
               },
             ],

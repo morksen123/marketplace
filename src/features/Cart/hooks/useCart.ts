@@ -1,7 +1,9 @@
 import { Product } from '@/features/ProductListing/constants';
+import { getEarliestBatchDate, isDateClose } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   addItemToCart,
+  CartLineItem,
   removeItemFromCart,
   updateItemQuantity,
   viewCart,
@@ -70,8 +72,23 @@ export const useCart = () => {
   const cartQuantity =
     cart?.cartLineItems.reduce((total, item) => total + item.quantity, 0) ?? 0;
 
+  const isItemExpiringSoon = (item: CartLineItem): boolean => {
+    const earliestBatchDate = getEarliestBatchDate(item.product.batches);
+    return earliestBatchDate ? isDateClose(earliestBatchDate) : false;
+  };
+
   const isShippingAddressRequired = cart?.cartLineItems.some(
-    (item) => item.product.deliveryMethod === 'DOORSTEP_DELIVERY',
+    (item) =>
+      item.product.deliveryMethod === 'DOORSTEP_DELIVERY' &&
+      !isItemExpiringSoon(item),
+  );
+
+  const cartItemsExpiringSoon = cart?.cartLineItems.filter(isItemExpiringSoon);
+
+  const cartItemsThatRequireSelfPickUp = cart?.cartLineItems.filter(
+    (item) =>
+      item.product.deliveryMethod !== 'DOORSTEP_DELIVERY' ||
+      isItemExpiringSoon(item),
   );
 
   return {
@@ -82,5 +99,7 @@ export const useCart = () => {
     cartPrice,
     cartQuantity,
     isShippingAddressRequired,
+    cartItemsThatRequireSelfPickUp,
+    cartItemsExpiringSoon,
   };
 };

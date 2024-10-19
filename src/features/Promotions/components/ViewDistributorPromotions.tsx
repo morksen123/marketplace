@@ -37,7 +37,7 @@ const ViewDistributorPromotions: React.FC = () => {
   };
 
   const handleEditPromotion = (id: number) => {
-    navigate(`${id}`);
+    navigate(`${id}`, { state: { from: 'promotions' } });
   };
 
   // const handlePausePromotion = (id: number) => {

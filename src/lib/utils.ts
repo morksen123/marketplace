@@ -1,5 +1,7 @@
 import { RoleTypes } from '@/features/Authentication/types/auth';
-import { Product } from '@/features/ProductListing/constants';
+import { Address } from '@/features/BuyerAccount/hooks/useAddress';
+import { Batch, Product } from '@/features/ProductListing/constants';
+import { StripeAddressElementChangeEvent } from '@stripe/stripe-js';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import Cookies from 'universal-cookie';
@@ -43,4 +45,61 @@ export const calculatePromotionalDiscount = (product: Product): number => {
 
   // Apply the highest discount
   return Math.max(...activePromotions.map((promo) => promo.discountPercentage));
+};
+
+export const isDateClose = (dateString: string) => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const diffTime = date.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays <= 2 && diffDays >= 0;
+};
+
+export function getEarliestBatchDate(batches?: Batch[]): string | null {
+  if (!batches || batches.length === 0) {
+    return null;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+
+  const validBatches = batches.filter((batch) => {
+    const batchDate = new Date(batch.bestBeforeDate);
+    return batch.isActive && batch.quantity > 0 && batchDate >= today;
+  });
+
+  if (validBatches.length === 0) {
+    return null;
+  }
+
+  return validBatches.sort((a, b) => {
+    const dateA = new Date(a.bestBeforeDate);
+    const dateB = new Date(b.bestBeforeDate);
+    return dateA.getTime() - dateB.getTime();
+  })[0].bestBeforeDate;
+}
+
+export const getDaysUntilExpiry = (dateString: string): number => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const diffTime = date.getTime() - today.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+// Transform stripe address fields to match our shipping address entity
+export const transformStripeAddressToAddress = (
+  stripeAddress: StripeAddressElementChangeEvent['value'],
+  prevAddress?: Address,
+): Address => {
+  return {
+    shippingAddressId: prevAddress?.shippingAddressId,
+    label: prevAddress?.label || 'New Address',
+    phoneNumber: stripeAddress.phone || '',
+    addressLine1: stripeAddress.address.line1 || '',
+    addressLine2: stripeAddress.address.line2 || '',
+    postalCode: stripeAddress.address.postal_code || '',
+    isDefaultShippingAddress: false, // default false
+    isDefaultBillingAddress: false, // default false
+    buyerName: stripeAddress.name || '',
+  };
 };

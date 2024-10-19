@@ -120,7 +120,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
           {/* Navigation Links with Icons */}
           <div className="flex items-center space-x-12 pr-6">
             <Link
-              to="/faq"
+              to="/buyer/faq"
               className="text-black hover:text-gray-600 flex items-center"
             >
               <SupportAgentOutlinedIcon className="mr-1" /> FAQ

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
 import { getAllPromotions, getPromotion, createPromotion, editPromotion, editPromotionStatus } from '../lib/promotions';
 import { getProductbyProductId } from '@/features/DIstributorAccount/lib/distributor';
@@ -9,6 +9,7 @@ import { Product } from '@/features/ProductCatalogue/constants';
 export function usePromotions() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const promotionsQuery = useQuery({
     queryKey: ['promotions'],
@@ -53,7 +54,11 @@ export function usePromotions() {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
       queryClient.invalidateQueries({ queryKey: ['promotion', id] });
       handleSuccessApi('Promotion Updated', 'Promotion has been updated successfully.');
-      navigate('/distributor/promotions');
+      if (location.state?.from === 'product') {
+        navigate(`/view-product-listing/${location.state.productId}`);
+      } else {
+        navigate('/distributor/promotions');
+      }
     },
     onError: (error: Error) => {
       handleErrorApi('Error', error.message);

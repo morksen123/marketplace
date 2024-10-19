@@ -1,6 +1,7 @@
 import { ROLES, RoleTypes } from '@/features/Authentication/types/auth';
-import { get } from '@/lib/api-client';
-import { Transaction } from '../types/payment';
+import { get, post } from '@/lib/api-client';
+import { getUserRoleFromCookie } from '@/lib/utils';
+import { OrderDto, Transaction } from '../types/payment';
 
 export async function getUserTransactions(role: RoleTypes) {
   const endpoint =
@@ -17,4 +18,14 @@ export async function getTransaction(
     `/payments/get-transaction?transactionId=${transactionId}`,
   );
   return data || null;
+}
+
+export async function getOrderDetails(
+  orderIds: number[],
+): Promise<OrderDto[] | null> {
+  const role = getUserRoleFromCookie().toLowerCase();
+  const { data } = await post<OrderDto[]>(`/${role}/orders/multiple`, {
+    orderIds,
+  });
+  return data;
 }
