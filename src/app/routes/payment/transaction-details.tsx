@@ -51,7 +51,7 @@ export const TransactionDetailsPage: React.FC = () => {
           </Card>
         ) : (
           <div className="space-y-8">
-            <TransactionSummary transaction={transaction} />
+            <TransactionSummary userRole={userRole} transaction={transaction} />
             <TransactionAdditionalDetails
               userRole={userRole}
               transaction={transaction}
