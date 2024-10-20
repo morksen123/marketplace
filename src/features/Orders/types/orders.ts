@@ -11,6 +11,7 @@ export interface Order {
     buyerId: number;
     buyerEmail: string;
     distributorId: number;
+    distributorName: string;
     orderFees: number;
     orderLineItems: OrderLineItem[];
     shippingAddress: ShippingAddress;

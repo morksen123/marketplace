@@ -20,6 +20,7 @@ export const BuyerSideMenu: React.FC = () => {
       path: '/buyer/profile/account-deactivation',
     },
     { text: 'Transactions', path: '/buyer/transactions' },
+    { text: 'Orders', path: '/buyer/orders' },
   ];
 
   return (

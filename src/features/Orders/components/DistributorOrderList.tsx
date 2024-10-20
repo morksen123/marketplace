@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
-import { Loader2, Package, Search, ArrowUpDown, ArrowDown, ArrowUp } from 'lucide-react';
+import { Loader2, Package, Search, ArrowDown, ArrowUp } from 'lucide-react';
 
 interface DistributorOrderListProps {
   orders: Order[];
@@ -202,7 +202,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
             size="sm"
             disabled={loadingStates[order.orderId]}
           >
-            {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Awaiting Pickup'}
+            {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Ready for Pickup'}
           </Button>
         ) : (
           <Button 
@@ -215,7 +215,6 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
           </Button>
         );
       case 'SHIPPED':
-      case 'PICKUP':
         return (
           <Button 
             onClick={() => handleDeliverOrder(order.orderId)} 
@@ -266,7 +265,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">All Delivery Methods</SelectItem>
-                <SelectItem value="DOORSTEP_DELIVERY">Doorstep Delivery</SelectItem>
+                <SelectItem value="DOORSTEP_DELIVERY">Delivery</SelectItem>
                 <SelectItem value="SELF_PICK_UP">Self Pick-up</SelectItem>
               </SelectContent>
             </Select>
@@ -302,7 +301,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
                 variant={activeFilter === status ? 'default' : 'outline'}
                 size="sm"
               >
-                {status === 'PICKUP' ? 'Awaiting Pickup' : status.charAt(0) + status.slice(1).toLowerCase()} ({orderCounts[status]})
+                {status === 'PICKUP' ? 'Ready for Pickup' : status.charAt(0) + status.slice(1).toLowerCase()} ({orderCounts[status]})
               </Button>
             ))}
           </div>
@@ -310,32 +309,43 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
         
         <div className="space-y-2">
           {filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder).map((order) => (
-            <div key={order.orderId} className="grid grid-cols-12 gap-2 items-center p-4 bg-white border border-gray-200 rounded-md shadow-sm">
-              <div className="col-span-1 pr-2 ">
-                <Package className="text-gray-400" size={20} />
+            <div key={order.orderId} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-md shadow-sm">
+              <div className="flex items-center space-x-4 flex-grow">
+                <Package className="text-gray-400 flex-shrink-0" size={20} />
+                
+                <div className="flex items-center space-x-4 flex-grow text-left">
+                  <div>
+                    <h4 className="font-semibold">Order #{order.orderId}</h4>
+                    <p className="text-sm text-gray-500">Buyer: {order.buyerEmail}</p>
+                    <p className="text-sm text-gray-500">
+                      Delivery: {order.orderLineItems[0].deliveryMethod === 'DOORSTEP_DELIVERY' ? 'Doorstep' : 'Self Pick-up'}
+                    </p>
+                  </div>
+                  
+                  <div className="text-left">
+                    <p className="font-medium">Total: ${order.orderTotal.toFixed(2)}</p>
+                    <p className="text-sm text-gray-500">Date: {new Date(order.createdDateTime).toLocaleDateString()}</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-right">
+                    <p className="text-sm text-gray-500 mb-1">Status:</p>
+                    {getStatusBadge(order.status)}
+                  </div>
+                </div>
               </div>
-              <div className="col-span-4 pl-0 text-left">
-                <h4 className="font-semibold">Order #{order.orderId}</h4>
-                <p className="text-sm text-gray-500">
-                  <span className="font-medium">Buyer:</span> {order.buyerEmail}
-                </p>
-                <p className="text-sm text-gray-500">
-                  <span className="font-medium">Delivery:</span> {order.orderLineItems[0].deliveryMethod === 'DOORSTEP_DELIVERY' ? 'Doorstep Delivery' : 'Self Pick-up'}
-                </p>
-              </div>
-              <div className="col-span-2 text-right">
-                <p className="font-medium">
-                  <span className="text-sm text-gray-500">Total:</span> ${order.orderTotal.toFixed(2)}
-                </p>
-                <p className="text-sm text-gray-500">
-                  <span className="font-medium">Date:</span> {new Date(order.createdDateTime).toLocaleString()}
-                </p>
-              </div>
-              <div className="col-span-2 text-center">
-                <p className="text-sm text-gray-500 mb-1">Status:</p>
-                {getStatusBadge(order.status)}
-              </div>
-              <div className="col-span-3 flex justify-end space-x-2">
+
+                <div className="flex-shrink-0 text-left">
+                  <h5 className="text-sm font-medium text-gray-700">Order Items:</h5>
+                  <div className="text-xs text-gray-600">
+                    {order.orderLineItems.map((item, index) => (
+                      <div key={index}>
+                        {item.productName} - Qty: {item.quantity} | ${item.price.toFixed(2)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              
+              <div className="flex space-x-2 ml-4">
                 {renderActionButtons(order)}
                 <Link to={`/distributor/orders/${order.orderId}`}>
                   <Button variant="outline" size="sm">View</Button>
