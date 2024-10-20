@@ -21,12 +21,14 @@ import {
   ROLES,
   RoleTypes,
 } from '../types/auth';
+import { useUser } from '@/hooks/useUser';
 
 export function useAuthActions() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [, setIsOpen] = useAtom(emailModalOpenAtom);
   const [, setUserEmail] = useAtom(userEmailAtom);
+  const { setUserInfo: setUserInfoFromUser } = useUser();
 
   const loginMutation = useMutation({
     mutationFn: ({
@@ -39,8 +41,22 @@ export function useAuthActions() {
       return login(credentials, role);
     },
     onSuccess: (data) => {
+      // console.log('Login success data:', data);
+
       // Invalidate and refetch authCheck query
       queryClient.invalidateQueries({ queryKey: ['authCheck'] });
+      
+      // Set user info
+      const userInfo = {
+        role: data?.role as RoleTypes,
+        id: data?.role === ROLES.BUYER
+          ? Number((data as { buyerId?: string })?.buyerId)
+          : data?.role === ROLES.DISTRIBUTOR
+          ? Number((data as { distributorId?: string })?.distributorId)
+          : null
+      };
+      console.log('Setting user info:', userInfo);
+      setUserInfoFromUser(userInfo);
 
       if (data?.role === ROLES.BUYER) {
         navigate('/buyer/home');
