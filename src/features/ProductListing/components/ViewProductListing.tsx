@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
+import { Badge } from '@/components/ui/badge';
 import {
   Carousel,
   CarouselContent,
@@ -22,7 +23,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { useDistributor } from '@/features/DIstributorAccount/hooks/useDistributor';
-import { Distributor } from '@/features/Home/constants';
+import { EditBatchModal } from '@/features/InventoryManagement/components/EditBatchModal';
 import {
   Batch,
   BulkPricing,
@@ -36,14 +37,11 @@ import { useProductBoosts } from '@/features/Promotions/hooks/useProductBoost';
 import { handleErrorApi, handleSuccessApi } from '@/lib/api-client';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import BoostProductModal from './BoostProductModal';
-import { EditBatchModal } from '@/features/InventoryManagement/components/EditBatchModal';
-import { Badge } from '@/components/ui/badge';
 
 export const ViewProductListing = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
-  const [distributor, setDistributor] = useState<Distributor | null>(null);
   const [batches, setBatches] = useState<Batch[]>([]);
   const [bulkPricings, setBulkPricings] = useState<BulkPricing[]>([]);
   const [open, setOpen] = useState(false);
@@ -430,7 +428,9 @@ export const ViewProductListing = () => {
   };
 
   const handleEditPromotion = (promotionId: number) => {
-    navigate(`/distributor/promotions/${promotionId}`, { state: { from: 'product', productId } });
+    navigate(`/distributor/promotions/${promotionId}`, {
+      state: { from: 'product', productId },
+    });
   };
 
   useEffect(() => {
@@ -453,10 +453,10 @@ export const ViewProductListing = () => {
     setSelectedBatch(batch);
     setEditModalOpen(true);
   };
-  
+
   const handleEditSave = async (updatedBatch: Batch) => {
     try {
-      const response = await fetch(`/api/products/product/${productId}/batch`, { 
+      const response = await fetch(`/api/products/product/${productId}/batch`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -464,10 +464,10 @@ export const ViewProductListing = () => {
         credentials: 'include',
         body: JSON.stringify(updatedBatch),
       });
-  
+
       if (response.ok) {
-        const updatedBatches = batches.map(batch =>
-          batch.batchId === updatedBatch.batchId ? updatedBatch : batch
+        const updatedBatches = batches.map((batch) =>
+          batch.batchId === updatedBatch.batchId ? updatedBatch : batch,
         );
         setBatches(updatedBatches);
         handleSuccessApi('Success!', 'Batch has been updated.');
@@ -677,7 +677,9 @@ export const ViewProductListing = () => {
                     </td>
                     {promotionalDiscount > 0 && (
                       <td className="px-4 py-3 text-sm text-green-600 font-semibold">
-                        ${pricing.price * (1 - promotionalDiscount / 100).toFixed(2)}
+                        $
+                        {pricing.price *
+                          (1 - promotionalDiscount / 100).toFixed(2)}
                       </td>
                     )}
                     <td className="px-4 py-3 text-sm text-gray-500 flex justify-center space-x-2">
@@ -795,26 +797,47 @@ export const ViewProductListing = () => {
                     const bExpired = new Date(b.bestBeforeDate) < new Date();
                     if (aExpired && !bExpired) return 1;
                     if (!aExpired && bExpired) return -1;
-                    return new Date(a.bestBeforeDate).getTime() - new Date(b.bestBeforeDate).getTime();
+                    return (
+                      new Date(a.bestBeforeDate).getTime() -
+                      new Date(b.bestBeforeDate).getTime()
+                    );
                   })
                   .map((batch, index) => {
-                    const daysToExpiry = Math.ceil((new Date(batch.bestBeforeDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+                    const daysToExpiry = Math.ceil(
+                      (new Date(batch.bestBeforeDate).getTime() -
+                        new Date().getTime()) /
+                        (1000 * 3600 * 24),
+                    );
                     let alertClass = '';
                     let alertBadge = null;
                     const isExpired = daysToExpiry <= 0;
 
                     if (isExpired) {
                       alertClass = 'text-gray-500';
-                      alertBadge = <Badge className="bg-gray-500 text-white">Not Available for Sale</Badge>;
+                      alertBadge = (
+                        <Badge className="bg-gray-500 text-white">
+                          Not Available for Sale
+                        </Badge>
+                      );
                     } else if (daysToExpiry <= 3) {
                       alertClass = 'text-red-600 font-bold';
-                      alertBadge = <Badge className="bg-red-500 text-white">Urgent</Badge>;
+                      alertBadge = (
+                        <Badge className="bg-red-500 text-white">Urgent</Badge>
+                      );
                     } else if (daysToExpiry <= 7) {
                       alertClass = 'text-orange-600 font-bold';
-                      alertBadge = <Badge className="bg-orange-500 text-white">Warning</Badge>;
+                      alertBadge = (
+                        <Badge className="bg-orange-500 text-white">
+                          Warning
+                        </Badge>
+                      );
                     } else if (daysToExpiry <= 14) {
                       alertClass = 'text-yellow-600 font-bold';
-                      alertBadge = <Badge className="bg-yellow-500 text-white">Near Expiry</Badge>;
+                      alertBadge = (
+                        <Badge className="bg-yellow-500 text-white">
+                          Near Expiry
+                        </Badge>
+                      );
                     } else {
                       alertClass = 'text-gray-500';
                     }
@@ -822,10 +845,13 @@ export const ViewProductListing = () => {
                     return (
                       <tr
                         key={index}
-                        className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${isExpired ? 'text-gray-400' : ''}`}
+                        className={`${
+                          index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                        } ${isExpired ? 'text-gray-400' : ''}`}
                       >
                         <td className="px-4 py-3 text-sm text-gray-500">
-                          {batch.quantity} {unitMapping[product.foodCategory] || 'unit'}
+                          {batch.quantity}{' '}
+                          {unitMapping[product.foodCategory] || 'unit'}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-500">
                           {batch.bestBeforeDate
@@ -834,7 +860,9 @@ export const ViewProductListing = () => {
                         </td>
                         <td className={`px-4 py-3 text-sm ${alertClass}`}>
                           <div className="flex items-center space-x-2">
-                            <span>{isExpired ? 'Expired' : `${daysToExpiry} days`}</span>
+                            <span>
+                              {isExpired ? 'Expired' : `${daysToExpiry} days`}
+                            </span>
                             {alertBadge}
                           </div>
                         </td>
@@ -864,7 +892,9 @@ export const ViewProductListing = () => {
                         value={newBatchQuantity}
                         onChange={(e) => setNewBatchQuantity(e.target.value)}
                         className="w-full p-2 border rounded"
-                        placeholder={`Quantity (${unitMapping[product.foodCategory] || 'unit'})`}
+                        placeholder={`Quantity (${
+                          unitMapping[product.foodCategory] || 'unit'
+                        })`}
                       />
                     </td>
                     <td className="px-4 py-3">

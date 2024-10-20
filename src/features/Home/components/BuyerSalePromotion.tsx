@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Product } from '@/features/ProductCatalogue/constants';
 import ProductCard from '@/components/product/ProductCard';
-import ProductFilter from '@/features/ProductCatalogue/components/ProductFilter';
 import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
+import ProductFilter from '@/features/ProductCatalogue/components/ProductFilter';
+import { Product } from '@/features/ProductCatalogue/constants';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const BuyerSalePromotionPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -13,7 +13,7 @@ const BuyerSalePromotionPage = () => {
     categories: string[];
     minPrice: number;
     maxPrice: number;
-    conditions: string[]; 
+    conditions: string[];
     deliveryMethods: string[];
   }>({
     categories: [],
@@ -120,7 +120,7 @@ const BuyerSalePromotionPage = () => {
     categories: string[];
     minPrice: number;
     maxPrice: number;
-    conditions: string[]; 
+    conditions: string[];
     deliveryMethods: string[];
   }) => {
     setFilters((prevFilters) => ({
@@ -132,9 +132,6 @@ const BuyerSalePromotionPage = () => {
   return (
     <div>
       <section className="w-full px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Discounted Products
-        </h1>
         <div className="flex mb-6">
           {/* Filter */}
           <div className="w-1/4 pr-8 pl-8">
@@ -164,11 +161,10 @@ const BuyerSalePromotionPage = () => {
               )}
             </div>
             {filteredResults.length === 0 && (
-            <p className="text-center text-gray-500 mt-8">
-              No promotional products found. Try adjusting your filters.
-            </p>
-          )}
-
+              <p className=" text-gray-500 mt-8">
+                No promotional products found. Try adjusting your filters.
+              </p>
+            )}
           </div>
         </div>
       </section>
