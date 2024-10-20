@@ -29,31 +29,31 @@ import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { AddBatchModal } from '../components/AddBatchModal';
 import { EditBatchModal } from '../components/EditBatchModal';
+import { Badge } from "@/components/ui/badge";
 
 interface BatchWithProduct extends Batch {
   product: Product;
 }
 
-type SortColumn = keyof BatchWithProduct | `product.${keyof Product}`;
+type SortColumn = keyof BatchWithProduct | `product.${keyof Product}` | 'daysToExpiry';
 
 const StyledTabs = styled(Tabs)({
   '& .MuiTabs-indicator': {
-    backgroundColor: '#017A37', // Use the green color
+    backgroundColor: '#017A37',
   },
 });
 
 const StyledTab = styled(Tab)({
-  color: '#4B5563', // Default text color
+  color: '#4B5563',
   '&.Mui-selected': {
-    color: '#017A37', // Green color when selected
+    color: '#017A37',
   },
   '&:hover': {
-    color: '#015A27', // Darker green on hover
+    color: '#015A27',
   },
 });
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  fontWeight: 'bold',
   backgroundColor: theme.palette.common.white,
   color: theme.palette.common.black,
 }));
@@ -62,11 +62,17 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
     backgroundColor: theme.palette.action.hover,
   },
-  // hide last border
   '&:last-child td, &:last-child th': {
     border: 0,
   },
 }));
+
+const getDaysToExpiry = (bestBeforeDate: string) => {
+  const now = new Date();
+  const expiryDate = new Date(bestBeforeDate);
+  const timeDiff = expiryDate.getTime() - now.getTime();
+  return Math.ceil(timeDiff / (1000 * 3600 * 24));
+};
 
 export const InventoryManagementPage: React.FC = () => {
   const [batches, setBatches] = useState<BatchWithProduct[]>([]);
@@ -75,14 +81,10 @@ export const InventoryManagementPage: React.FC = () => {
   const [categories, setCategories] = useState<string[]>(['All']);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortColumn, setSortColumn] = useState<SortColumn>(
-    'product.listingTitle',
-  );
+  const [sortColumn, setSortColumn] = useState<SortColumn>('daysToExpiry');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [selectedBatch, setSelectedBatch] = useState<BatchWithProduct | null>(
-    null,
-  );
+  const [selectedBatch, setSelectedBatch] = useState<BatchWithProduct | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -141,9 +143,7 @@ export const InventoryManagementPage: React.FC = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -158,7 +158,10 @@ export const InventoryManagementPage: React.FC = () => {
     const comparator = (a: BatchWithProduct, b: BatchWithProduct) => {
       let aValue: any, bValue: any;
 
-      if (sortColumn.startsWith('product.')) {
+      if (sortColumn === 'daysToExpiry') {
+        aValue = getDaysToExpiry(a.bestBeforeDate);
+        bValue = getDaysToExpiry(b.bestBeforeDate);
+      } else if (sortColumn.startsWith('product.')) {
         const productKey = sortColumn.split('.')[1] as keyof Product;
         aValue = a.product[productKey];
         bValue = b.product[productKey];
@@ -180,12 +183,9 @@ export const InventoryManagementPage: React.FC = () => {
     return [...batches].sort(comparator);
   }, [batches, sortColumn, sortDirection]);
 
-  const filteredBatches =
-    selectedTab === 'All'
-      ? sortedBatches
-      : sortedBatches.filter(
-          (batch) => batch.product.foodCategory === selectedTab,
-        );
+  const filteredBatches = selectedTab === 'All'
+    ? sortedBatches
+    : sortedBatches.filter((batch) => batch.product.foodCategory === selectedTab);
 
   const paginatedBatches = filteredBatches.slice(
     page * rowsPerPage,
@@ -382,9 +382,10 @@ export const InventoryManagementPage: React.FC = () => {
                 { label: 'Batch Quantity', key: 'quantity' },
                 { label: 'Delivery Method', key: 'product.deliveryMethod' },
                 { label: 'Stock Value', key: 'stockValue' },
+                { label: 'Days to Expiry', key: 'daysToExpiry' },
                 { label: 'Actions', key: 'actions' },
-              ].map(({ label, key }) => (
-                <StyledTableCell key={key} align="left">
+              ].map(({ label, key, width }) => (
+                <StyledTableCell key={key} align="left" style={{ width }}>
                   <TableSortLabel
                     active={sortColumn === key}
                     direction={sortColumn === key ? sortDirection : 'asc'}
@@ -399,6 +400,27 @@ export const InventoryManagementPage: React.FC = () => {
           <TableBody>
             {paginatedBatches.map((batch) => {
               const stockValue = batch.product.price * batch.quantity;
+              const daysToExpiry = getDaysToExpiry(batch.bestBeforeDate);
+              let alertClass = '';
+              let alertBadge = null;
+
+              if (daysToExpiry <= 0) {
+                alertClass = 'text-gray-500';
+                alertBadge = <Badge className="bg-gray-500 text-white">Not Available for Sale</Badge>;
+              } else if (daysToExpiry <= 3) {
+                alertClass = 'text-red-600 font-bold';
+                alertBadge = <Badge className="bg-red-500 text-white">Urgent</Badge>;
+              } else if (daysToExpiry <= 7) {
+                alertClass = 'text-orange-600 font-bold';
+                alertBadge = <Badge className="bg-orange-500 text-white">Warning</Badge>;
+              } else if (daysToExpiry <= 14) {
+                alertClass = 'text-yellow-600 font-bold';
+                alertBadge = <Badge className="bg-yellow-500 text-white">Near Expiry</Badge>;
+              }
+
+              console.log('Debug - daysToExpiry:', daysToExpiry);
+              console.log('Debug - alertBadge:', alertBadge);
+
               return (
                 <StyledTableRow key={batch.batchId}>
                   <TableCell>
@@ -430,16 +452,22 @@ export const InventoryManagementPage: React.FC = () => {
                   </TableCell>
                   <TableCell>${stockValue.toFixed(2)}</TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
+                    <div className={`flex flex-col items-start ${alertClass}`}>
+                      <span>{daysToExpiry <= 0 ? 'Expired' : `${daysToExpiry} days`}</span>
+                      {alertBadge}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-1">
                       <Button
                         onClick={() => handleEditClick(batch)}
-                        className="text-green-600 hover:text-green-800 bg-transparent"
+                        className="text-green-600 hover:text-green-800 bg-transparent p-1"
                       >
                         <EditIcon fontSize="small" />
                       </Button>
                       <Button
                         onClick={() => handleDeleteBatch(batch)}
-                        className="text-red-600 hover:text-red-800 bg-transparent"
+                        className="text-red-600 hover:text-red-800 bg-transparent p-1"
                       >
                         <DeleteIcon fontSize="small" />
                       </Button>
