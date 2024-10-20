@@ -32,12 +32,8 @@ import { SelfPickupItems } from './selfPickUpItems';
 export const Checkout: React.FC = () => {
   const stripe = useStripe();
   const elements = useElements();
-  const {
-    cart,
-    cartPrice,
-    isShippingAddressRequired,
-    cartItemsThatRequireSelfPickUp,
-  } = useCart();
+  const { cart, isShippingAddressRequired, cartItemsThatRequireSelfPickUp } =
+    useCart();
 
   const {
     buyerProfile,
@@ -357,7 +353,9 @@ export const Checkout: React.FC = () => {
                   <Separator />
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Original Total</span>
-                    <span className="font-medium">${originalTotal.toFixed(2)}</span>
+                    <span className="font-medium">
+                      ${originalTotal.toFixed(2)}
+                    </span>
                   </div>
                   {bulkPricingDiscount > 0 && (
                     <div className="flex justify-between text-sm text-green-600">
@@ -374,7 +372,9 @@ export const Checkout: React.FC = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Shipping</span>
                     <span className="font-medium">
-                      {shippingFee === 0 ? 'Free' : `$${shippingFee.toFixed(2)}`}
+                      {shippingFee === 0
+                        ? 'Free'
+                        : `$${shippingFee.toFixed(2)}`}
                     </span>
                   </div>
                   <Separator />

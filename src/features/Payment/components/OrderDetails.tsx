@@ -80,7 +80,7 @@ export const OrderDetails: React.FC<{ orderIds: number[] }> = ({
                     <span className="col-span-3 text-right">Total</span>
                   </div>
                   {order.orderLineItems.map((item, index) => (
-                    <React.Fragment key={item.orderLineItemId}>
+                    <React.Fragment key={`${item.orderLineItemId}-${index}`}>
                       <div className="grid grid-cols-12 gap-2 items-center py-2 text-sm">
                         <span className="col-span-5 font-medium">
                           {item.productName}

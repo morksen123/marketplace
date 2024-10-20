@@ -46,7 +46,7 @@ export const SavedAddressDropdown: React.FC<SavedAddressDropdownProps> = ({
               key={address.shippingAddressId}
               value={address.shippingAddressId?.toString() || ''}
             >
-              {address.addressLine1}, #{address.addressLine2},{' '}
+              {address.addressLine1}, {address.addressLine2},{' '}
               {address.postalCode}, {address.phoneNumber}
             </SelectItem>
           ))}
