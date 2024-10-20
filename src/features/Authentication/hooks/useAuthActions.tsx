@@ -41,12 +41,8 @@ export function useAuthActions() {
       return login(credentials, role);
     },
     onSuccess: (data) => {
-      // console.log('Login success data:', data);
-
-      // Invalidate and refetch authCheck query
       queryClient.invalidateQueries({ queryKey: ['authCheck'] });
       
-      // Set user info
       const userInfo = {
         role: data?.role as RoleTypes,
         id: data?.role === ROLES.BUYER
@@ -57,6 +53,9 @@ export function useAuthActions() {
       };
       console.log('Setting user info:', userInfo);
       setUserInfoFromUser(userInfo);
+      
+      // Persist user info in localStorage
+      localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
       if (data?.role === ROLES.BUYER) {
         navigate('/buyer/home');
@@ -69,6 +68,9 @@ export function useAuthActions() {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => {
+      // Clear persisted user info
+      localStorage.removeItem('userInfo');
+      setUserInfoFromUser({ id: null, role: null });
       window.location.href = '/';
     },
   });

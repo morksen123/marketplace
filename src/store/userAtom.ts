@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 import { RoleTypes } from '@/features/Authentication/types/auth';
 
 interface UserInfo {
@@ -6,7 +7,7 @@ interface UserInfo {
   role: RoleTypes | null;
 }
 
-export const userInfoAtom = atom<UserInfo>({
+export const userInfoAtom = atomWithStorage<UserInfo>('userInfo', {
   id: null,
   role: null,
 });

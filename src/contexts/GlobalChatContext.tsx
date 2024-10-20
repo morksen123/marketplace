@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useCallback, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
 import WebSocketService from '@/services/WebSocketService';
 import { Chat, Message, Announcement, GlobalChatContextType } from '@/types/chat';
@@ -28,6 +28,11 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [notifications, setNotifications] = useAtom(notificationsAtom);
   const { isAuthenticated } = useAuthStatus();
   const { userId, userRole } = useUser();
+  const userInfoRef = useRef({ userId, userRole });
+
+  useEffect(() => {
+    userInfoRef.current = { userId, userRole };
+  }, [userId, userRole]);
 
   const fetchChatMessages = useCallback(async (chatId: number) => {
     if (!messages[chatId]) {
@@ -119,11 +124,16 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [setChats, fetchSelectedChat, selectedChat]);
 
   const fetchNotifications = useCallback(async () => {
+    if (!userId || !userRole) {
+      console.error('User ID or role is not available');
+      return [];
+    }
+
     try {
-      const response = await fetch('/api/notifications');
+      const response = await fetch(`/api/${userRole.toLowerCase()}/notifications/${userId}`);
       if (response.ok) {
         const data = await response.json();
-        return data;  // Return the data instead of setting state here
+        return data;
       } else {
         throw new Error('Failed to fetch notifications');
       }
@@ -132,7 +142,7 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setError('Failed to fetch notifications. Please try again.');
       return [];
     }
-  }, [setError]);
+  }, [setError, userId, userRole]);
 
   const handleNotification = useCallback(async (message: any) => {
     console.log('Notification received:', message.body);
@@ -167,8 +177,11 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       try {
         await WebSocketService.connect();
 
-        // Subscribe to user-specific notifications
+        // Use the ref to get the most up-to-date user info
+        const { userId, userRole } = userInfoRef.current;
+        console.log(`Attempting to subscribe to notifications for ${userRole} ${userId}`);
         if (userId && userRole) {
+          console.log(`Subscribing to notifications for ${userRole} ${userId}`);
           WebSocketService.subscribe(`/topic/notifications/${userRole}/${userId}`, handleNotification);
         }
 
@@ -201,7 +214,7 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (connected) break;
       await new Promise(resolve => setTimeout(resolve, 500));
     }
-  }, [fetchChats, handleChatUpdate, handleChatMessage, isAuthenticated, fetchNotifications, handleNotification, userId, userRole]);
+  }, [fetchChats, handleChatUpdate, handleChatMessage, isAuthenticated, fetchNotifications, handleNotification, setError]);
 
   useEffect(() => {
     if (isAuthenticated) {
