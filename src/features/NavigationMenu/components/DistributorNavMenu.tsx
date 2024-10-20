@@ -12,12 +12,18 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import LoyaltyIcon from '@mui/icons-material/Loyalty';
+import { useAtom } from 'jotai';
+import { notificationsAtom } from '@/atoms/notificationAtoms';
+import { NotificationDropdown } from '@/features/Notifications/components/NotificationDropdown';
 
 export const DistributorNavMenu = () => {
   const navigate = useNavigate();
   const { logout } = useAuthActions();
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [notifications] = useAtom(notificationsAtom);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notificationDropdownRef = useRef<HTMLDivElement>(null);
 
   // Handle account dropdown toggle
   const toggleAccountDropdown = () => {
@@ -35,9 +41,12 @@ export const DistributorNavMenu = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(event.target as Node) &&
+        notificationDropdownRef.current &&
+        !notificationDropdownRef.current.contains(event.target as Node)
       ) {
         setShowAccountDropdown(false);
+        setShowNotificationDropdown(false);
       }
     };
 
@@ -46,6 +55,10 @@ export const DistributorNavMenu = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const toggleNotificationDropdown = () => {
+    setShowNotificationDropdown(!showNotificationDropdown);
+  };
 
   return (
     <nav className="bg-white shadow-md w-full">
@@ -90,12 +103,25 @@ export const DistributorNavMenu = () => {
             >
               <SmsOutlinedIcon className="mr-1" /> Chats
             </Link>
-            <Link
-              to="/account"
-              className="text-black hover:text-gray-600 flex items-center"
-            >
-              <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
-            </Link>
+            <div className="relative" ref={notificationDropdownRef}>
+              <button
+                onClick={toggleNotificationDropdown}
+                className="text-black hover:text-gray-600 flex items-center"
+              >
+                <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
+                {notifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    {notifications.length}
+                  </span>
+                )}
+              </button>
+              {showNotificationDropdown && (
+                <NotificationDropdown
+                  notifications={notifications}
+                  onClose={() => setShowNotificationDropdown(false)}
+                />
+              )}
+            </div>
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={toggleAccountDropdown}

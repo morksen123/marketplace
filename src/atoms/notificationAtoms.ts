@@ -7,7 +7,7 @@ const createLoggedAtom = <T>(initialValue: T, name: string) => {
         (get) => get(baseAtom),
         (get, set, update: T | ((prev: T) => T)) => {
             const nextValue = typeof update === 'function' ? (update as (prev: T) => T)(get(baseAtom)) : update;
-            // console.log(`${name} updated:`, nextValue);
+            console.log(`${name} updated:`, nextValue);
             set(baseAtom, nextValue);
         }
     );

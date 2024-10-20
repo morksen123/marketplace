@@ -68,6 +68,18 @@ export async function rejectDistributorOrder(orderId: number): Promise<void> {
     }
 }
 
+export async function setAwaitingPickupDistributorOrder(orderId: number): Promise<void> {
+    try {
+        await put(`/distributor/order/${orderId}/awaiting-pickup`, {});
+    } catch (error) {
+        if (error instanceof Error) {
+            handleErrorApi(error.message, `Failed to set status to awaiting pickup for order with ID ${orderId}`);
+        } else {
+            handleErrorApi('An unknown error occurred', `Failed to set status to awaiting pickup for order with ID ${orderId}`);
+        }
+    }
+}
+
 export async function shipDistributorOrder(orderId: number, trackingNo: string): Promise<void> {
     try {
         await put(`/distributor/order/${orderId}/shipped?trackingNo=${trackingNo}`, {});
