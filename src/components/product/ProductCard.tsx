@@ -4,6 +4,7 @@ import {
   foodConditionMapping,
 } from '@/features/ProductListing/constants';
 import { productViewEvent } from '@/lib/analytics';
+import { getUserRoleFromCookie } from '@/lib/utils';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import { debounce } from 'lodash';
@@ -46,6 +47,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const isBoosted = product.boostStatus === 'ACTIVE';
   const discountPercentage = calculatePromotionalDiscount(product);
   const promotionalPrice = calculatePromotionalPrice(product);
+  const userRole = getUserRoleFromCookie();
 
   const debouncedProductViewEvent = useCallback(
     debounce((productId: number) => {
@@ -55,10 +57,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
   );
 
   useEffect(() => {
-    if (product) {
+    if (product && userRole === 'BUYER') {
       debouncedProductViewEvent(product.productId);
     }
-  }, [product, debouncedProductViewEvent]);
+  }, [product, debouncedProductViewEvent, userRole]);
 
   return (
     <div
