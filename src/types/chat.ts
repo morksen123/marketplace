@@ -1,3 +1,5 @@
+  import { Notification } from "./notification";
+
   export interface Chat {
     chatId: number;
     buyerId: number;
@@ -44,4 +46,7 @@
     error: string | null;
     fetchChatMessages: (chatId: number) => Promise<void>;
     isAuthenticated: boolean;
+    notifications: Notification[];
+    fetchNotifications: () => Promise<void>;
+    sendNotification: (notification: Omit<Notification, 'notificationId' | 'sentAt'>) => void;
   }

@@ -11,6 +11,8 @@ import {
   isLoadingAtom,
   errorAtom,
 } from '@/atoms/chatAtoms';
+import { notificationsAtom } from '@/atoms/notificationAtoms';
+import { Notification } from '@/types/notification';
 import { useAuthStatus } from '@/features/Authentication/hooks/useAuthStatus';
 
 const GlobalChatContext = createContext<GlobalChatContextType | undefined>(undefined);
@@ -22,7 +24,9 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [selectedChat, setSelectedChat] = useAtom(selectedChatAtom);
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
   const [error, setError] = useAtom(errorAtom);
+  const [notifications, setNotifications] = useAtom(notificationsAtom);
   const { isAuthenticated } = useAuthStatus();
+
   const fetchChatMessages = useCallback(async (chatId: number) => {
     if (!messages[chatId]) {
       try {
@@ -112,7 +116,38 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     updateSelectedChat();
   }, [setChats, fetchSelectedChat, selectedChat]);
 
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const response = await fetch('/api/notifications');
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data);
+        return data;
+      } else {
+        throw new Error('Failed to fetch notifications');
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      setError('Failed to fetch notifications. Please try again.');
+      return [];
+    }
+  }, []);
+
+  const handleNotification = useCallback((message: any) => {
+    const data = JSON.parse(message.body);
+    console.log('Received notification:', data);
+
+    const updatedNotifications = fetchNotifications();
+    const update = async () => {
+      const resolvedNotifications = await updatedNotifications;
+      setNotifications(resolvedNotifications);
+    };
+
+    update();
+  }, [setNotifications, fetchNotifications]);
+
   const connectWebSocket = useCallback(async () => {
+    console.log('Connecting WebSocket...');
     if (!isAuthenticated) {
       console.log('User is not authenticated. Skipping WebSocket connection.');
       return;
@@ -129,6 +164,16 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       try {
         await WebSocketService.connect();
+        console.log('WebSocket connected successfully');
+
+        console.log('Subscribing to notifications...');
+        WebSocketService.subscribe(`/topic/notifications`, handleNotification);
+        console.log('Subscribed to notifications');
+
+        const fetchedNotifications = await fetchNotifications();
+        if (fetchedNotifications) {
+          setNotifications(fetchedNotifications);
+        }
         
         WebSocketService.subscribe('/topic/chats', handleChatUpdate);
         const fetchedChats = await fetchChats();
@@ -155,24 +200,26 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (connected) break;
       await new Promise(resolve => setTimeout(resolve, 500)); // Wait for 0.5 second before retrying
     }
-  }, [fetchChats, handleChatUpdate, handleChatMessage, isAuthenticated]);
+  }, [fetchChats, handleChatUpdate, handleChatMessage, isAuthenticated, fetchNotifications, handleNotification]);
 
   useEffect(() => {
+    console.log('useEffect for WebSocket connection. isAuthenticated:', isAuthenticated);
     if (isAuthenticated) {
+      console.log('Authenticated, attempting to connect WebSocket');
       const connect = async () => {
-      try {
-        await connectWebSocket();
-      } catch (error) {
-        console.error('WebSocket connection error:', error);
-        // Attempt to reconnect after a delay
-        setTimeout(() => connect(), 5000);
-      }
-    };
-    
-    connect();
-    
-    return () => {
-      WebSocketService.disconnect();
+        try {
+          await connectWebSocket();
+        } catch (error) {
+          console.error('WebSocket connection error:', error);
+          setTimeout(() => connect(), 5000);
+        }
+      };
+      
+      connect();
+      
+      return () => {
+        console.log('Cleaning up WebSocket connection');
+        WebSocketService.disconnect();
       };
     }
   }, [connectWebSocket, isAuthenticated]);
@@ -215,6 +262,19 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, []);
 
+  const sendNotification = useCallback(async (notification: Omit<Notification, 'notificationId' | 'sentAt'>) => {
+    try {
+      WebSocketService.sendMessage('/app/sendNotification', notification);
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send notification. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, []);
+
   return (
     <GlobalChatContext.Provider 
       value={{ 
@@ -226,6 +286,9 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         sendMessage,
         sendAnnouncement,
         fetchChatMessages,
+        notifications,
+        sendNotification,
+        fetchNotifications,
         isLoading,
         error,
         reconnect: connectWebSocket,
