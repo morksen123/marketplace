@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { Badge } from "@/components/ui/badge";
 import { TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import Tooltip from '@mui/material/Tooltip';
+import { DistributorOrdersPreview } from '@/features/Orders/components/DistributorOrdersPreview';
 
 export const DistributorHome = () => {
   const [foodCategories, setFoodCategories] = useState<string[]>([]);
@@ -221,32 +222,7 @@ export const DistributorHome = () => {
       {/* Orders Section */}
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4 text-left">Orders</h2>
-        <div className="p-4 bg-white rounded-lg shadow">
-          {orders.length > 0 ? (
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Product</TableCell>
-                  <TableCell>Quantity</TableCell>
-                  <TableCell>Status</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell>{order.product}</TableCell>
-                    <TableCell>{order.quantity}</TableCell>
-                    <TableCell>{order.status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="flex justify-center items-center h-16">
-              <p className="text-gray-500">No Orders</p>
-            </div>
-          )}
-        </div>
+        <DistributorOrdersPreview />
       </div>
       {/* Product Listings Section */}
       <div className="mt-8">

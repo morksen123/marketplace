@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
-import { Loader2, Package, Search } from 'lucide-react';
+import { Loader2, Package, Search, ArrowUpDown, ArrowDown, ArrowUp } from 'lucide-react';
 
 interface DistributorOrderListProps {
   orders: Order[];
@@ -59,6 +59,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
   const [activeDeliveryMethodFilter, setActiveDeliveryMethodFilter] = useState<'ALL' | 'DOORSTEP_DELIVERY' | 'SELF_PICK_UP'>('ALL');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const filteredOrdersMemo = useMemo(() => {
     return distributorOrders?.filter(order => {
@@ -66,8 +67,12 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
       const matchesStatus = activeFilter === 'ALL' || order.status === activeFilter;
       const matchesDeliveryMethod = activeDeliveryMethodFilter === 'ALL' || order.orderLineItems[0].deliveryMethod === activeDeliveryMethodFilter;
       return matchesSearch && matchesStatus && matchesDeliveryMethod;
+    }).sort((a, b) => {
+      const dateA = new Date(a.createdDateTime).getTime();
+      const dateB = new Date(b.createdDateTime).getTime();
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
     }) ?? [];
-  }, [distributorOrders, searchTerm, activeFilter, activeDeliveryMethodFilter]);
+  }, [distributorOrders, searchTerm, activeFilter, activeDeliveryMethodFilter, sortOrder]);
 
   useEffect(() => {
     if (distributorOrders) {
@@ -265,6 +270,22 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
                 <SelectItem value="SELF_PICK_UP">Self Pick-up</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+              className="flex items-center"
+            >
+              {sortOrder === 'asc' ? (
+                <>
+                  Oldest Orders <ArrowUp className="ml-2 h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Recent Orders <ArrowDown className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -307,7 +328,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
                   <span className="text-sm text-gray-500">Total:</span> ${order.orderTotal.toFixed(2)}
                 </p>
                 <p className="text-sm text-gray-500">
-                  <span className="font-medium">Date:</span> {new Date(order.createdDateTime).toLocaleDateString()}
+                  <span className="font-medium">Date:</span> {new Date(order.createdDateTime).toLocaleString()}
                 </p>
               </div>
               <div className="col-span-2 text-center">
