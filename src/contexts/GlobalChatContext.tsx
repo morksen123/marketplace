@@ -134,9 +134,6 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, []);
 
   const handleNotification = useCallback((message: any) => {
-    const data = JSON.parse(message.body);
-    console.log('Received notification:', data);
-
     const updatedNotifications = fetchNotifications();
     const update = async () => {
       const resolvedNotifications = await updatedNotifications;
@@ -147,9 +144,7 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [setNotifications, fetchNotifications]);
 
   const connectWebSocket = useCallback(async () => {
-    console.log('Connecting WebSocket...');
     if (!isAuthenticated) {
-      console.log('User is not authenticated. Skipping WebSocket connection.');
       return;
     }
 
@@ -164,11 +159,8 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       try {
         await WebSocketService.connect();
-        console.log('WebSocket connected successfully');
-
-        console.log('Subscribing to notifications...');
+  
         WebSocketService.subscribe(`/topic/notifications`, handleNotification);
-        console.log('Subscribed to notifications');
 
         const fetchedNotifications = await fetchNotifications();
         if (fetchedNotifications) {
@@ -189,7 +181,6 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       } catch (error) {
         console.error('WebSocket connection failed:', error);
         setError('Connection failed. Retrying...');
-        // Ensure the stompClient is properly cleaned up
         WebSocketService.disconnect();
         return false;
       }
@@ -198,19 +189,16 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     while (true) {
       const connected = await attemptConnection();
       if (connected) break;
-      await new Promise(resolve => setTimeout(resolve, 500)); // Wait for 0.5 second before retrying
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
   }, [fetchChats, handleChatUpdate, handleChatMessage, isAuthenticated, fetchNotifications, handleNotification]);
 
   useEffect(() => {
-    console.log('useEffect for WebSocket connection. isAuthenticated:', isAuthenticated);
     if (isAuthenticated) {
-      console.log('Authenticated, attempting to connect WebSocket');
       const connect = async () => {
         try {
           await connectWebSocket();
         } catch (error) {
-          console.error('WebSocket connection error:', error);
           setTimeout(() => connect(), 5000);
         }
       };
@@ -218,7 +206,6 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       connect();
       
       return () => {
-        console.log('Cleaning up WebSocket connection');
         WebSocketService.disconnect();
       };
     }

@@ -38,7 +38,7 @@ export const BuyerHome = () => {
           });
 
           setProducts(sortedProducts);
-          console.log(sortedProducts);
+          // console.log(sortedProducts);
           sortedProducts.forEach((product: Product) => {
             checkFavourite(product.productId);
           });
