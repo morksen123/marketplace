@@ -14,6 +14,7 @@ import {
 import { notificationsAtom } from '@/atoms/notificationAtoms';
 import { Notification } from '@/types/notification';
 import { useAuthStatus } from '@/features/Authentication/hooks/useAuthStatus';
+import { useUser } from '@/hooks/useUser';
 
 const GlobalChatContext = createContext<GlobalChatContextType | undefined>(undefined);
 
@@ -26,6 +27,7 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [error, setError] = useAtom(errorAtom);
   const [notifications, setNotifications] = useAtom(notificationsAtom);
   const { isAuthenticated } = useAuthStatus();
+  const { userId, userRole } = useUser();
 
   const fetchChatMessages = useCallback(async (chatId: number) => {
     if (!messages[chatId]) {
@@ -164,8 +166,11 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       try {
         await WebSocketService.connect();
-  
-        WebSocketService.subscribe(`/topic/notifications`, handleNotification);
+
+        // Subscribe to user-specific notifications
+        if (userId && userRole) {
+          WebSocketService.subscribe(`/topic/notifications/${userRole}/${userId}`, handleNotification);
+        }
 
         const fetchedNotifications = await fetchNotifications();
         if (fetchedNotifications) {
@@ -196,7 +201,7 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (connected) break;
       await new Promise(resolve => setTimeout(resolve, 500));
     }
-  }, [fetchChats, handleChatUpdate, handleChatMessage, isAuthenticated, fetchNotifications, handleNotification]);
+  }, [fetchChats, handleChatUpdate, handleChatMessage, isAuthenticated, fetchNotifications, handleNotification, userId, userRole]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -284,7 +289,9 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         isLoading,
         error,
         reconnect: connectWebSocket,
-        isAuthenticated: isAuthenticated as boolean
+        isAuthenticated: isAuthenticated as boolean,
+        userId,
+        userRole,
       }}
     >
       {children}

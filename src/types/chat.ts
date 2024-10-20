@@ -1,5 +1,5 @@
   import { Notification } from "./notification";
-
+  import { RoleTypes } from "@/features/Authentication/types/auth";
   export interface Chat {
     chatId: number;
     buyerId: number;
@@ -49,4 +49,6 @@
     notifications: Notification[];
     fetchNotifications: () => Promise<void>;
     sendNotification: (notification: Omit<Notification, 'notificationId' | 'sentAt'>) => void;
+    userId: number | null;
+    userRole: RoleTypes | null;
   }
