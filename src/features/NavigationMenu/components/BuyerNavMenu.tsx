@@ -16,6 +16,12 @@ interface BuyerNavMenuProps {
   showTabs?: boolean;
 }
 
+interface AdminPromotion {
+  id: string;
+  title: string;
+  description: string;
+}
+
 export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
   showTabs = true,
 }) => {
@@ -26,6 +32,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
   const navigate = useNavigate();
   const { logout } = useAuthActions();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [adminPromotions, setAdminPromotions] = useState<AdminPromotion[]>([]);
 
   const tabs = [
     { name: 'Home', route: '/buyer/home' },
@@ -42,7 +49,24 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
     if (currentTab) {
       setSelectedTab(currentTab.name);
     }
+    fetchAdminPromotions();
   }, []);
+
+  const fetchAdminPromotions = async () => {
+    try {
+      const response = await fetch('/api/promotions/admin/active', {
+        method: 'GET',
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setAdminPromotions(data);
+    } catch (error) {
+      console.error('Error fetching admin promotions:', error);
+    }
+  };
 
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,6 +116,27 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
 
   return (
     <nav className="bg-white shadow-md w-full">
+      {adminPromotions.length > 0 && (
+        <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white py-3 px-4">
+          <div className="container mx-auto flex items-center justify-center">
+            <div className="flex flex-col items-center space-y-2">
+              <ul className="flex flex-wrap justify-center items-center">
+                {adminPromotions.map((promo, index) => (
+                  <>
+                    <li key={promo.id} className="text-base font-semibold flex items-center">
+                      <span className="text-xl font-bold">${promo.discountAmount}</span>
+                      <span className="ml-2">off orders ${promo.minimumSpend}+</span>
+                    </li>
+                    {index < adminPromotions.length - 1 && (
+                      <span className="mx-4 text-xl">•</span>
+                    )}
+                  </>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="w-full p-4">
         <div className="flex justify-between items-center">
           {/* Logo Section */}

@@ -14,9 +14,75 @@ import {
 import { AlertTriangle, Minus, Plus, Tag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
+import { useEffect, useState } from 'react';
+
+// Add this new interface
+interface AdminPromotion {
+  id: number;
+  minimumSpend: number;
+  discountAmount: number;
+}
 
 export const Cart: React.FC = () => {
   const { cart, removeFromCart, updateQuantity, cartPrice } = useCart();
+  const [calculatedTotal, setCalculatedTotal] = useState<number | null>(null);
+  const [adminPromotionAmount, setAdminPromotionAmount] = useState<number>(0);
+  const [adminPromotions, setAdminPromotions] = useState<AdminPromotion[]>([]);
+  const [nextBestPromotion, setNextBestPromotion] = useState<AdminPromotion | null>(null);
+
+  useEffect(() => {
+    const fetchCalculatedTotal = async () => {
+      try {
+        const response = await fetch('/api/cart/calculate-total', {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setCalculatedTotal(data.cartTotal);
+
+        setAdminPromotionAmount(data.adminPromotionAmount);
+      } catch (error) {
+        console.error('Error fetching calculated total:', error);
+      }
+    };
+
+    const fetchAdminPromotions = async () => {
+      try {
+        const response = await fetch('/api/promotions/admin/active', {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setAdminPromotions(data);
+      } catch (error) {
+        console.error('Error fetching admin promotions:', error);
+      }
+    };
+
+    fetchCalculatedTotal();
+    fetchAdminPromotions();
+  }, [cart]);
+
+  useEffect(() => {
+    if (adminPromotions.length > 0 && calculatedTotal !== null) {
+      const eligiblePromotions = adminPromotions.filter(promo => promo.minimumSpend > cartPrice);
+      
+      const sortedPromotions = eligiblePromotions.sort((a, b) => {
+        if (a.minimumSpend === b.minimumSpend) {
+          return b.discountAmount - a.discountAmount;
+        }
+        return a.minimumSpend - b.minimumSpend; 
+      });
+
+      setNextBestPromotion(sortedPromotions[0] || null);
+    }
+  }, [adminPromotions, calculatedTotal]);
 
   const getCartItemSavings = (promoSavings: number, bulkSavings: number) => {
     const savingsPerItem = promoSavings + bulkSavings;
@@ -62,9 +128,9 @@ export const Cart: React.FC = () => {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
-                              <Badge variant="warning" className="ml-3">
+                              <Badge variant="warning" className="ml-3 justify-center flex items-center">
                                 <AlertTriangle className="h-3 w-3 mr-1" />
-                                Expiring Soon
+                                <span>Expiring Soon</span>
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -107,7 +173,7 @@ export const Cart: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-col text-left min-w-[220px]">
+                <div className={`flex flex-col text-left min-w-[220px] ${!isCloseToExpiry ? 'ml-[80px]' : ''}`}>
                   {item.bulkPricingDiscount > 0 && (
                     <p className="flex items-center text-secondary">
                       <Tag className="h-3 w-3 mr-1" />
@@ -173,8 +239,33 @@ export const Cart: React.FC = () => {
             );
           })}
           <div className="flex justify-between items-center pt-6">
-            <div className="text-2xl font-bold">
-              Total: ${cartPrice.toFixed(2)}
+            <div className="text-2xl font-bold flex flex-col">
+              <div className="flex items-center">
+                Total: 
+                {calculatedTotal !== null && calculatedTotal < cartPrice ? (
+                  <>
+                    <span className="line-through text-gray-500 mr-2">
+                      ${cartPrice.toFixed(2)}
+                    </span>
+                    <span className="text-secondary mr-2">
+                      ${calculatedTotal.toFixed(2)}
+                    </span>
+                    <span className="flex items-center text-orange-500 text-sm">
+                      <Tag className="h-3 w-3 mr-1" />
+                      Sitewide Promotion (-${(cartPrice - calculatedTotal).toFixed(2)})
+                    </span>
+                  </>
+                ) : (
+                  <span>${cartPrice.toFixed(2)}</span>
+                )}
+              </div>
+              {nextBestPromotion && (
+                <p className="text-sm text-secondary mt-2">
+                  <p className="text-sm text-red-500 mt-2 italic text-left">
+                    Add ${(nextBestPromotion.minimumSpend - cartPrice).toFixed(2)} more to your cart to save ${nextBestPromotion.discountAmount.toFixed(2)}!
+                  </p>
+                </p>
+              )}
             </div>
             <Link to="/buyer/checkout">
               <Button variant="secondary" size="lg">
