@@ -1,14 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDistributorOrders } from '../hooks/useDistributorOrders';
 import { Order, OrderStatus } from '../types/orders';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,10 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
-import { Loader2 } from 'lucide-react';
-
-// Add this constant for delivery method options
-const DELIVERY_METHODS = ['DOORSTEP_DELIVERY', 'SELF_PICK_UP'];
+import { Loader2, Package, Search } from 'lucide-react';
 
 interface DistributorOrderListProps {
   orders: Order[];
@@ -33,7 +22,26 @@ interface DistributorOrderListProps {
 
 const STATUS_FILTERS: OrderStatus[] = ['PENDING', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'PICKUP', 'COMPLETED', 'CANCELLED'];
 
-export const DistributorOrderList: React.FC<DistributorOrderListProps> = ({ orders }) => {
+const getOrderCountsByStatus = (orders: Order[]) => {
+  const counts: Record<OrderStatus | 'ALL', number> = {
+    ALL: orders.length,
+    PENDING: 0,
+    ACCEPTED: 0,
+    SHIPPED: 0,
+    DELIVERED: 0,
+    PICKUP: 0,
+    COMPLETED: 0,
+    CANCELLED: 0,
+  };
+
+  orders.forEach((order) => {
+    counts[order.status]++;
+  });
+
+  return counts;
+};
+
+export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
   const { 
     orders: distributorOrders, 
     isLoadingOrders, 
@@ -70,7 +78,6 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = ({ orde
 
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
@@ -219,24 +226,32 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = ({ orde
     }
   };
 
+  const orderCounts = useMemo(() => getOrderCountsByStatus(distributorOrders || []), [distributorOrders]);
+
   if (isLoadingOrders) {
     return <div className="flex justify-center items-center h-64">Loading orders...</div>;
   }
 
   return (
-    <Card className="w-full shadow-md">
-      <CardHeader className="border-b border-gray-200">
-        <CardTitle className="text-2xl font-bold">Order Management</CardTitle>
+    <Card className="shadow-sm border border-gray-200">
+      <CardHeader className="bg-gray-50 border-b border-gray-200">
+        <CardTitle className="text-xl font-semibold text-gray-800 flex items-center">
+          <Package className="mr-2" size={20} />
+          Order Management
+        </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        <div className="flex flex-col space-y-4 mb-6">
+        <div className="space-y-4 mb-6">
           <div className="flex items-center space-x-4">
-            <Input
-              placeholder="Search by Buyer Email"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
-            />
+            <div className="relative flex-grow">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Input
+                placeholder="Search by Buyer Email"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 w-full"
+              />
+            </div>
             <Select
               value={activeDeliveryMethodFilter}
               onValueChange={(value) => handleDeliveryMethodFilterChange(value as 'ALL' | 'DOORSTEP_DELIVERY' | 'SELF_PICK_UP')}
@@ -257,7 +272,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = ({ orde
               variant={activeFilter === 'ALL' ? 'default' : 'outline'}
               size="sm"
             >
-              All Statuses
+              All Statuses ({orderCounts.ALL})
             </Button>
             {STATUS_FILTERS.map(status => (
               <Button
@@ -266,68 +281,49 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = ({ orde
                 variant={activeFilter === status ? 'default' : 'outline'}
                 size="sm"
               >
-                {status === 'PICKUP' ? 'Awaiting Pickup' : status.charAt(0) + status.slice(1).toLowerCase()}
+                {status === 'PICKUP' ? 'Awaiting Pickup' : status.charAt(0) + status.slice(1).toLowerCase()} ({orderCounts[status]})
               </Button>
             ))}
           </div>
         </div>
         
-        <div className="overflow-x-auto rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-16">Order No.</TableHead>
-                <TableHead className="w-48">Buyer Email</TableHead>
-                <TableHead className="w-24 text-right">Total</TableHead>
-                <TableHead className="w-28">Status</TableHead>
-                <TableHead className="w-40">Created At</TableHead>
-                <TableHead className="w-48">Items</TableHead>
-                <TableHead className="w-32">Delivery Method</TableHead>
-                <TableHead className="w-48">Shipping Address</TableHead>
-                <TableHead className="w-32">Actions</TableHead>
-                <TableHead className="w-24">Details</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder).map((order) => (
-                <TableRow key={order.orderId}>
-                  <TableCell>{filteredOrders.findIndex(o => o.orderId === order.orderId) + 1}</TableCell>
-                  <TableCell>{order.buyerEmail}</TableCell>
-                  <TableCell className="text-right font-medium">${order.orderTotal.toFixed(2)}</TableCell>
-                  <TableCell>{getStatusBadge(order.status)}</TableCell>
-                  <TableCell>{new Date(order.createdDateTime).toLocaleString()}</TableCell>
-                  <TableCell>
-                    <ul className="list-disc list-inside">
-                      {order.orderLineItems.map((item) => (
-                        <li key={`${order.orderId}-${item.orderLineItemId}`} className="text-sm">
-                          {item.productName} (x{item.quantity})
-                        </li>
-                      ))}
-                    </ul>
-                  </TableCell>
-                  <TableCell>
-                    {order.orderLineItems[0].deliveryMethod === 'DOORSTEP_DELIVERY' ? 'Doorstep Delivery' : 'Self Pick-up'}
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {order.orderLineItems[0].deliveryMethod === 'DOORSTEP_DELIVERY' 
-                      ? (order.shippingAddress
-                          ? (typeof order.shippingAddress === 'string'
-                              ? order.shippingAddress
-                              : `${order.shippingAddress.addressLine1}${order.shippingAddress.addressLine2 ? `, ${order.shippingAddress.addressLine2}` : ''}, ${order.shippingAddress.postalCode}`)
-                          : 'No shipping address provided')
-                      : 'Self Pick-up'}
-                  </TableCell>
-                  <TableCell>
-                    {renderActionButtons(order)}
-                  </TableCell>
-                  <TableCell>
-                    <Link to={`/distributor/orders/${order.orderId}`} className="text-blue-500 hover:underline">View</Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <div className="space-y-2">
+          {filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder).map((order) => (
+            <div key={order.orderId} className="grid grid-cols-12 gap-2 items-center p-4 bg-white border border-gray-200 rounded-md shadow-sm">
+              <div className="col-span-1 pr-2 ">
+                <Package className="text-gray-400" size={20} />
+              </div>
+              <div className="col-span-4 pl-0 text-left">
+                <h4 className="font-semibold">Order #{order.orderId}</h4>
+                <p className="text-sm text-gray-500">
+                  <span className="font-medium">Buyer:</span> {order.buyerEmail}
+                </p>
+                <p className="text-sm text-gray-500">
+                  <span className="font-medium">Delivery:</span> {order.orderLineItems[0].deliveryMethod === 'DOORSTEP_DELIVERY' ? 'Doorstep Delivery' : 'Self Pick-up'}
+                </p>
+              </div>
+              <div className="col-span-2 text-right">
+                <p className="font-medium">
+                  <span className="text-sm text-gray-500">Total:</span> ${order.orderTotal.toFixed(2)}
+                </p>
+                <p className="text-sm text-gray-500">
+                  <span className="font-medium">Date:</span> {new Date(order.createdDateTime).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="col-span-2 text-center">
+                <p className="text-sm text-gray-500 mb-1">Status:</p>
+                {getStatusBadge(order.status)}
+              </div>
+              <div className="col-span-3 flex justify-end space-x-2">
+                {renderActionButtons(order)}
+                <Link to={`/distributor/orders/${order.orderId}`}>
+                  <Button variant="outline" size="sm">View</Button>
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
+        
         {filteredOrders.length === 0 && (
           <div className="text-center py-4 text-gray-500">
             No orders found matching your search criteria.
