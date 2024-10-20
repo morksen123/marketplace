@@ -5,6 +5,5 @@ export async function triggerProductClickEvent(productId: string) {
 }
 
 export async function productViewEvent(productId: number) {
-  console.log(`/analytics/${productId}/increment-views`);
   await post(`/analytics/${productId}/increment-views`, {});
 }
