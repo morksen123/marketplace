@@ -1,9 +1,8 @@
 import ProductCard from '@/components/product/ProductCard';
 import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
+import { Product } from '@/features/ProductCatalogue/constants';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import bannerImage from '../../../assets/buyer-homepage-banner.png';
-import { Product } from '@/features/ProductCatalogue/constants';
 import BuyerHomeCarousel from './BuyerHomeCarousel';
 
 export const BuyerHome = () => {
@@ -23,14 +22,16 @@ export const BuyerHome = () => {
         });
         if (response.ok) {
           const data: Product[] = await response.json();
-          
+
           // Sort products
           const sortedProducts = data.sort((a, b) => {
             // First, prioritize boosted products
             // First, prioritize boosted products
-            if (a.boostStatus === 'ACTIVE' && b.boostStatus !== 'ACTIVE') return -1;
-            if (b.boostStatus === 'ACTIVE' && a.boostStatus !== 'ACTIVE') return 1;
-            
+            if (a.boostStatus === 'ACTIVE' && b.boostStatus !== 'ACTIVE')
+              return -1;
+            if (b.boostStatus === 'ACTIVE' && a.boostStatus !== 'ACTIVE')
+              return 1;
+
             // Then, sort by bestBeforeDate of the first batch
             const aDate = new Date(a.batches[0]?.bestBeforeDate || '');
             const bDate = new Date(b.batches[0]?.bestBeforeDate || '');
@@ -63,7 +64,7 @@ export const BuyerHome = () => {
       {/* Hero Section */}
       <section className="relative">
         {/* <img src={bannerImage} alt="GudFood Banner" className="w-full h-auto" /> */}
-        <BuyerHomeCarousel/>
+        <BuyerHomeCarousel />
       </section>
 
       <section className="wrapper mt-10">
