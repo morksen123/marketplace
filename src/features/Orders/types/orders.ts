@@ -1,4 +1,4 @@
-export type OrderStatus = 'PENDING' | 'ACCEPTED' | 'AWAITING_PICKUP' | 'CANCELLED' | 'SHIPPED' | 'DELIVERED' | 'COMPLETED';
+export type OrderStatus = 'PENDING' | 'ACCEPTED' | 'PICKUP' | 'CANCELLED' | 'SHIPPED' | 'DELIVERED' | 'COMPLETED';
 
 export interface Order {
     orderId: number;
@@ -11,8 +11,10 @@ export interface Order {
     buyerId: number;
     buyerEmail: string;
     distributorId: number;
+    orderFees: number;
     orderLineItems: OrderLineItem[];
-    shippingAddress: string;
+    shippingAddress: ShippingAddress;
+    pickUpLocation: string;
 }
 
 export interface OrderLineItem {
@@ -24,4 +26,13 @@ export interface OrderLineItem {
     productName: string;
     deliveryMethod: string;
     pickUpLocation: string;
+}
+
+export interface ShippingAddress {
+    shippingAddressId: number;
+    label: string;
+    phoneNumber: string;
+    addressLine1: string;
+    addressLine2: string;
+    postalCode: string;
 }

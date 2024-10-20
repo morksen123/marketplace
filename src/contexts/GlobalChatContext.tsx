@@ -121,8 +121,7 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const response = await fetch('/api/notifications');
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data);
-        return data;
+        return data;  // Return the data instead of setting state here
       } else {
         throw new Error('Failed to fetch notifications');
       }
@@ -131,17 +130,23 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setError('Failed to fetch notifications. Please try again.');
       return [];
     }
-  }, []);
+  }, [setError]);
 
-  const handleNotification = useCallback((message: any) => {
-    const updatedNotifications = fetchNotifications();
-    const update = async () => {
-      const resolvedNotifications = await updatedNotifications;
-      setNotifications(resolvedNotifications);
-    };
+  const handleNotification = useCallback(async (message: any) => {
+    console.log('Notification received:', message.body);
+    const data = JSON.parse(message.body);
+    console.log('Parsed notification data:', data);
+    
+    // Add a delay before fetching notifications
+    await new Promise(resolve => setTimeout(resolve, 5000)); // 5 second delay
 
-    update();
-  }, [setNotifications, fetchNotifications]);
+    try {
+      const updatedNotifications = await fetchNotifications();
+      setNotifications(updatedNotifications);
+    } catch (error) {
+      console.error('Error updating notifications:', error);
+    }
+  }, [fetchNotifications, setNotifications]);
 
   const connectWebSocket = useCallback(async () => {
     if (!isAuthenticated) {

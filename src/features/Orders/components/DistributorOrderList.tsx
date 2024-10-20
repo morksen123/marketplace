@@ -24,11 +24,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
 import { Loader2 } from 'lucide-react';
 
+// Add this constant for delivery method options
+const DELIVERY_METHODS = ['DOORSTEP_DELIVERY', 'SELF_PICK_UP'];
+
 interface DistributorOrderListProps {
   orders: Order[];
 }
 
-const STATUS_FILTERS: OrderStatus[] = ['PENDING', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'AWAITING_PICKUP', 'COMPLETED', 'CANCELLED'];
+const STATUS_FILTERS: OrderStatus[] = ['PENDING', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'PICKUP', 'COMPLETED', 'CANCELLED'];
 
 export const DistributorOrderList: React.FC<DistributorOrderListProps> = ({ orders }) => {
   const { 
@@ -47,13 +50,16 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = ({ orde
   const [activeFilter, setActiveFilter] = useState<OrderStatus | 'ALL'>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
+  const [activeDeliveryMethodFilter, setActiveDeliveryMethodFilter] = useState<'ALL' | 'DOORSTEP_DELIVERY' | 'SELF_PICK_UP'>('ALL');
+
   const filteredOrdersMemo = useMemo(() => {
     return distributorOrders?.filter(order => {
       const matchesSearch = !searchTerm.trim() || order.buyerEmail.toLowerCase().includes(searchTerm.toLowerCase().trim());
       const matchesStatus = activeFilter === 'ALL' || order.status === activeFilter;
-      return matchesSearch && matchesStatus;
+      const matchesDeliveryMethod = activeDeliveryMethodFilter === 'ALL' || order.orderLineItems[0].deliveryMethod === activeDeliveryMethodFilter;
+      return matchesSearch && matchesStatus && matchesDeliveryMethod;
     }) ?? [];
-  }, [distributorOrders, searchTerm, activeFilter]);
+  }, [distributorOrders, searchTerm, activeFilter, activeDeliveryMethodFilter]);
 
   useEffect(() => {
     if (distributorOrders) {
@@ -133,17 +139,84 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = ({ orde
       ACCEPTED: 'bg-blue-100 text-blue-800',
       CANCELLED: 'bg-red-100 text-red-800',
       SHIPPED: 'bg-purple-100 text-purple-800',
-      AWAITING_PICKUP: 'bg-orange-100 text-orange-800',
+      PICKUP: 'bg-orange-100 text-orange-800',
       DELIVERED: 'bg-green-100 text-green-800',
       COMPLETED: 'bg-gray-100 text-gray-800',
     };
 
-    return <Badge className={`${statusColors[status]} font-medium`}>{status}</Badge>;
+    const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : status;
+
+    return <Badge className={`${statusColors[status]} font-medium`}>{displayStatus}</Badge>;
   };
 
   const handleFilterChange = (status: OrderStatus | 'ALL') => {
     setActiveFilter(status);
     setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const handleDeliveryMethodFilterChange = (method: 'ALL' | 'DOORSTEP_DELIVERY' | 'SELF_PICK_UP') => {
+    setActiveDeliveryMethodFilter(method);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const renderActionButtons = (order: Order) => {
+    switch (order.status) {
+      case 'PENDING':
+        return (
+          <div className="flex space-x-2">
+            <Button 
+              onClick={() => handleAcceptOrder(order.orderId)} 
+              variant="secondary"
+              size="sm"
+              disabled={loadingStates[order.orderId]}
+            >
+              {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Accept'}
+            </Button>
+            <Button 
+              onClick={() => handleRejectOrder(order.orderId)} 
+              variant="destructive"
+              size="sm"
+              disabled={loadingStates[order.orderId]}
+            >
+              {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reject'}
+            </Button>
+          </div>
+        );
+      case 'ACCEPTED':
+        return order.orderLineItems[0].deliveryMethod === 'SELF_PICK_UP' ? (
+          <Button 
+            onClick={() => handleAwaitingPickup(order.orderId)} 
+            variant="secondary"
+            size="sm"
+            disabled={loadingStates[order.orderId]}
+          >
+            {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Awaiting Pickup'}
+          </Button>
+        ) : (
+          <Button 
+            onClick={() => handleShipOrder(order.orderId)} 
+            variant="secondary"
+            size="sm"
+            disabled={loadingStates[order.orderId]}
+          >
+            {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Ship'}
+          </Button>
+        );
+      case 'SHIPPED':
+      case 'PICKUP':
+        return (
+          <Button 
+            onClick={() => handleDeliverOrder(order.orderId)} 
+            variant="secondary"
+            size="sm"
+            disabled={loadingStates[order.orderId]}
+          >
+            {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Delivered'}
+          </Button>
+        );
+      default:
+        return null;
+    }
   };
 
   if (isLoadingOrders) {
@@ -152,24 +225,39 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = ({ orde
 
   return (
     <Card className="w-full shadow-md">
-      <CardHeader>
+      <CardHeader className="border-b border-gray-200">
         <CardTitle className="text-2xl font-bold">Order Management</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <div className="flex flex-col space-y-4 mb-6">
-          <Input
-            placeholder="Search by Buyer Email"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
+          <div className="flex items-center space-x-4">
+            <Input
+              placeholder="Search by Buyer Email"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            <Select
+              value={activeDeliveryMethodFilter}
+              onValueChange={(value) => handleDeliveryMethodFilterChange(value as 'ALL' | 'DOORSTEP_DELIVERY' | 'SELF_PICK_UP')}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Delivery Method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Delivery Methods</SelectItem>
+                <SelectItem value="DOORSTEP_DELIVERY">Doorstep Delivery</SelectItem>
+                <SelectItem value="SELF_PICK_UP">Self Pick-up</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={() => handleFilterChange('ALL')}
               variant={activeFilter === 'ALL' ? 'default' : 'outline'}
               size="sm"
             >
-              All
+              All Statuses
             </Button>
             {STATUS_FILTERS.map(status => (
               <Button
@@ -178,13 +266,13 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = ({ orde
                 variant={activeFilter === status ? 'default' : 'outline'}
                 size="sm"
               >
-                {status.charAt(0) + status.slice(1).toLowerCase()}
+                {status === 'PICKUP' ? 'Awaiting Pickup' : status.charAt(0) + status.slice(1).toLowerCase()}
               </Button>
             ))}
           </div>
         </div>
         
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -205,78 +293,32 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = ({ orde
                 <TableRow key={order.orderId}>
                   <TableCell>{filteredOrders.findIndex(o => o.orderId === order.orderId) + 1}</TableCell>
                   <TableCell>{order.buyerEmail}</TableCell>
-                  <TableCell className="text-right">${order.orderTotal.toFixed(2)}</TableCell>
+                  <TableCell className="text-right font-medium">${order.orderTotal.toFixed(2)}</TableCell>
                   <TableCell>{getStatusBadge(order.status)}</TableCell>
                   <TableCell>{new Date(order.createdDateTime).toLocaleString()}</TableCell>
                   <TableCell>
                     <ul className="list-disc list-inside">
                       {order.orderLineItems.map((item) => (
-                        <li key={item.orderLineItemId}>
+                        <li key={`${order.orderId}-${item.orderLineItemId}`} className="text-sm">
                           {item.productName} (x{item.quantity})
                         </li>
                       ))}
                     </ul>
                   </TableCell>
                   <TableCell>
-                    {order.orderLineItems[0].deliveryMethod}
+                    {order.orderLineItems[0].deliveryMethod === 'DOORSTEP_DELIVERY' ? 'Doorstep Delivery' : 'Self Pick-up'}
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {order.orderLineItems[0].deliveryMethod === 'DOORSTEP_DELIVERY' 
+                      ? (order.shippingAddress
+                          ? (typeof order.shippingAddress === 'string'
+                              ? order.shippingAddress
+                              : `${order.shippingAddress.addressLine1}${order.shippingAddress.addressLine2 ? `, ${order.shippingAddress.addressLine2}` : ''}, ${order.shippingAddress.postalCode}`)
+                          : 'No shipping address provided')
+                      : 'Self Pick-up'}
                   </TableCell>
                   <TableCell>
-                    {order.orderLineItems[0].deliveryMethod === 'DOORSTEP_DELIVERY' ? order.shippingAddress : 'Self Pick-up'}
-                  </TableCell>
-                  <TableCell>
-                    {order.status === 'PENDING' && (
-                      <div className="flex space-x-2">
-                        <Button 
-                          onClick={() => handleAcceptOrder(order.orderId)} 
-                          variant="secondary"
-                          size="sm"
-                          disabled={loadingStates[order.orderId]}
-                        >
-                          {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Accept'}
-                        </Button>
-                        <Button 
-                          onClick={() => handleRejectOrder(order.orderId)} 
-                          variant="destructive"
-                          size="sm"
-                          disabled={loadingStates[order.orderId]}
-                        >
-                          {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reject'}
-                        </Button>
-                      </div>
-                    )}
-                    {order.status === 'ACCEPTED' && (
-                      <>
-                        {order.orderLineItems[0].deliveryMethod === 'SELF_PICK_UP' ? (
-                          <Button 
-                            onClick={() => handleAwaitingPickup(order.orderId)} 
-                            variant="secondary"
-                            size="sm"
-                            disabled={loadingStates[order.orderId]}
-                          >
-                            {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Ready to Pickup'}
-                          </Button>
-                        ) : (
-                          <Button 
-                            onClick={() => handleShipOrder(order.orderId)} 
-                            variant="secondary"
-                            size="sm"
-                            disabled={loadingStates[order.orderId]}
-                          >
-                            {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Ship'}
-                          </Button>
-                        )}
-                      </>
-                    )}
-                    {(order.status === 'SHIPPED' || order.status === 'AWAITING_PICKUP') && (
-                      <Button 
-                        onClick={() => handleDeliverOrder(order.orderId)} 
-                        variant="secondary"
-                        size="sm"
-                        disabled={loadingStates[order.orderId]}
-                      >
-                        {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Deliver'}
-                      </Button>
-                    )}
+                    {renderActionButtons(order)}
                   </TableCell>
                   <TableCell>
                     <Link to={`/distributor/orders/${order.orderId}`} className="text-blue-500 hover:underline">View</Link>
