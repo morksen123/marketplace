@@ -217,6 +217,13 @@ const routes: RouteObject[] = [
                   return { Component: BuyerOrdersRoute };
                 },
               },
+              {
+                path: '/buyer/orders/:orderId',
+                lazy: async () => {
+                  const { BuyerOrderDetailsRoute } = await import('./routes/buyerProfile/buyer-order-details');
+                  return { Component: BuyerOrderDetailsRoute };
+                },
+              },
             ],
           },
           {
