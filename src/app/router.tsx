@@ -208,6 +208,22 @@ const routes: RouteObject[] = [
                   return { Component: BuyerFaqRoute };
                 },
               },
+              {
+                path: '/buyer/orders',
+                lazy: async () => {
+                  const { BuyerOrdersRoute } = await import(
+                    './routes/buyerProfile/buyer-orders'
+                  );
+                  return { Component: BuyerOrdersRoute };
+                },
+              },
+              {
+                path: '/buyer/orders/:orderId',
+                lazy: async () => {
+                  const { BuyerOrderDetailsRoute } = await import('./routes/buyerProfile/buyer-order-details');
+                  return { Component: BuyerOrderDetailsRoute };
+                },
+              },
             ],
           },
           {
@@ -345,6 +361,22 @@ const routes: RouteObject[] = [
                 lazy: async () => {
                   const { SalesRoute } = await import('./routes/payment/sales');
                   return { Component: SalesRoute };
+                },
+              },
+              {
+                path: '/distributor/orders',
+                lazy: async () => {
+                  const { DistributorOrdersRoute } = await import(
+                    './routes/orders/distributor-orders'
+                  );
+                  return { Component: DistributorOrdersRoute };
+                },
+              },
+              {
+                path: '/distributor/orders/:orderId',
+                lazy: async () => {
+                  const { DistributorOrderDetailsRoute } = await import('./routes/orders/distributor-order-details');
+                  return { Component: DistributorOrderDetailsRoute };
                 },
               },
             ],

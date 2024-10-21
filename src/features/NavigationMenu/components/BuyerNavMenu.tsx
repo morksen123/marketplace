@@ -9,8 +9,11 @@ import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAtom } from 'jotai';
+import { notificationsAtom } from '@/atoms/notificationAtoms';
+import { NotificationDropdown } from '@/features/Notifications/components/NotificationDropdown';
 
 interface BuyerNavMenuProps {
   showTabs?: boolean;
@@ -33,6 +36,9 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
   const { logout } = useAuthActions();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [adminPromotions, setAdminPromotions] = useState<AdminPromotion[]>([]);
+  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [notifications, setNotifications] = useAtom(notificationsAtom);
+  const notificationDropdownRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
     { name: 'Home', route: '/buyer/home' },
@@ -97,9 +103,12 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(event.target as Node) &&
+        notificationDropdownRef.current &&
+        !notificationDropdownRef.current.contains(event.target as Node)
       ) {
         setShowAccountDropdown(false);
+        setShowNotificationDropdown(false);
       }
     };
 
@@ -113,6 +122,35 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
     setSelectedTab(tabName);
     navigate(route);
   };
+
+  const toggleNotificationDropdown = () => {
+    setShowNotificationDropdown(!showNotificationDropdown);
+    console.log('Notification dropdown toggled. Current state:', !showNotificationDropdown);
+  };
+
+  useEffect(() => {
+    console.log('Notifications in BuyerNavMenu:', notifications);
+  }, [notifications]);
+
+  const handleNotificationRead = useCallback((notificationId: string) => {
+    console.log('Marking notification as read:', notificationId);
+    setNotifications(prevNotifications => {
+      const updatedNotifications = prevNotifications.map(notification =>
+        notification.notificationId.toString() === notificationId
+          ? { ...notification, read: true }
+          : notification
+      );
+      console.log('Updated notifications:', updatedNotifications);
+      return updatedNotifications;
+    });
+  }, [setNotifications]);
+
+  // Calculate unread notifications count
+  const unreadNotificationsCount = useMemo(() => {
+    const count = notifications.filter(notification => !notification.read).length;
+    console.log('Unread notifications count:', count);
+    return count;
+  }, [notifications]);
 
   return (
     <nav className="bg-white shadow-md w-full">
@@ -176,12 +214,27 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
             >
               <SmsOutlinedIcon className="mr-1" /> Chats
             </Link>
-            <Link
-              to="/account"
-              className="text-black hover:text-gray-600 flex items-center"
-            >
-              <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
-            </Link>
+            <div className="relative" ref={notificationDropdownRef}>
+              <button
+                onClick={toggleNotificationDropdown}
+                className="text-black hover:text-gray-600 flex items-center"
+              >
+                <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
+                {unreadNotificationsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    {unreadNotificationsCount}
+                  </span>
+                )}
+              </button>
+              {showNotificationDropdown && (
+                <NotificationDropdown
+                  notifications={notifications}
+                  onClose={() => setShowNotificationDropdown(false)}
+                  onNotificationRead={handleNotificationRead}
+                  userRole="buyer"
+                />
+              )}
+            </div>
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={toggleAccountDropdown}

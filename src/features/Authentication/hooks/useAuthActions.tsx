@@ -21,12 +21,14 @@ import {
   ROLES,
   RoleTypes,
 } from '../types/auth';
+import { useUser } from '@/hooks/useUser';
 
 export function useAuthActions() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [, setIsOpen] = useAtom(emailModalOpenAtom);
   const [, setUserEmail] = useAtom(userEmailAtom);
+  const { setUserInfo: setUserInfoFromUser } = useUser();
 
   const loginMutation = useMutation({
     mutationFn: ({
@@ -39,8 +41,21 @@ export function useAuthActions() {
       return login(credentials, role);
     },
     onSuccess: (data) => {
-      // Invalidate and refetch authCheck query
       queryClient.invalidateQueries({ queryKey: ['authCheck'] });
+      
+      const userInfo = {
+        role: data?.role as RoleTypes,
+        id: data?.role === ROLES.BUYER
+          ? Number((data as { buyerId?: string })?.buyerId)
+          : data?.role === ROLES.DISTRIBUTOR
+          ? Number((data as { distributorId?: string })?.distributorId)
+          : null
+      };
+      console.log('Setting user info:', userInfo);
+      setUserInfoFromUser(userInfo);
+      
+      // Persist user info in localStorage
+      localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
       if (data?.role === ROLES.BUYER) {
         navigate('/buyer/home');
@@ -53,6 +68,9 @@ export function useAuthActions() {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => {
+      // Clear persisted user info
+      localStorage.removeItem('userInfo');
+      setUserInfoFromUser({ id: null, role: null });
       window.location.href = '/';
     },
   });

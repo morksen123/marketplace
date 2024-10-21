@@ -7,6 +7,7 @@ import { Suspense, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import './App.css';
 import { AppRouter } from './router';
+import { GlobalChatProvider } from '@/contexts/GlobalChatContext';
 
 function App() {
   const [queryClient] = useState(
@@ -17,16 +18,18 @@ function App() {
   );
 
   return (
-    <Suspense fallback={<div className="wrapper">Loading...</div>}>
-      <ErrorBoundary fallbackRender={ErrorFallback}>
-        <QueryClientProvider client={queryClient}>
-          <JotaiProvider>
-            <Toaster />
-            <AppRouter />
-          </JotaiProvider>
-        </QueryClientProvider>
-      </ErrorBoundary>
-    </Suspense>
+    <QueryClientProvider client={queryClient}>
+      <JotaiProvider>
+        <GlobalChatProvider>
+          <Suspense fallback={<div className="wrapper">Loading...</div>}>
+            <ErrorBoundary fallbackRender={ErrorFallback}>
+              <Toaster />
+              <AppRouter />
+            </ErrorBoundary>
+          </Suspense>
+        </GlobalChatProvider>
+      </JotaiProvider>
+    </QueryClientProvider>
   );
 }
 
