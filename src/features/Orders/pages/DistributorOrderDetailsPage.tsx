@@ -23,6 +23,7 @@ export const DistributorOrderDetailsPage: React.FC = () => {
   } = useDistributorOrders(Number(orderId));
 
   const [isUpdating, setIsUpdating] = useState(false);
+  const [lastAction, setLastAction] = useState<string | null>(null);
 
   if (isLoadingOrders) {
     return <Skeleton className="w-full h-56" />;
@@ -32,11 +33,16 @@ export const DistributorOrderDetailsPage: React.FC = () => {
     return <div className="text-center">Order not found</div>;
   }
 
-  const handleStatusUpdate = async (action: () => Promise<void>) => {
+  const handleStatusUpdate = async (action: () => Promise<void>, actionName: string) => {
     setIsUpdating(true);
+    setLastAction(actionName);
     try {
       await action();
       await refetchOrders();
+      // Add a slight delay before reloading to ensure the refetch is complete
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } finally {
       setIsUpdating(false);
     }
@@ -48,53 +54,53 @@ export const DistributorOrderDetailsPage: React.FC = () => {
         return (
           <>
             <Button
-              onClick={() => handleStatusUpdate(() => acceptOrder.mutateAsync(order.orderId))}
+              onClick={() => handleStatusUpdate(() => acceptOrder.mutateAsync(order.orderId), 'accept')}
               variant="secondary"
               disabled={isUpdating}
             >
-              {isUpdating ? <Loader2 size={24} /> : 'Accept Order'}
+              {isUpdating && lastAction === 'accept' ? <Loader2 size={24} className="h-4 w-4 animate-spin" /> : 'Accept Order'}
             </Button>
             <Button
-              onClick={() => handleStatusUpdate(() => rejectOrder.mutateAsync(order.orderId))}
+              onClick={() => handleStatusUpdate(() => rejectOrder.mutateAsync(order.orderId), 'reject')}
               variant="destructive"
               disabled={isUpdating}
             >
-              {isUpdating ? <Loader2 size={24} /> : 'Reject Order'}
+              {isUpdating && lastAction === 'reject' ? <Loader2 size={24} className="h-4 w-4 animate-spin"/> : 'Reject Order'}
             </Button>
           </>
         );
       case 'ACCEPTED':
         return order.orderLineItems[0]?.deliveryMethod === 'SELF_PICK_UP' ? (
           <Button
-            onClick={() => handleStatusUpdate(() => awaitPickupOrder.mutateAsync(order.orderId))}
+            onClick={() => handleStatusUpdate(() => awaitPickupOrder.mutateAsync(order.orderId), 'awaitPickup')}
             variant="secondary"
             disabled={isUpdating}
           >
-            {isUpdating ? <Loader2 size={24} /> : 'Set Awaiting Pickup'}
+            {isUpdating && lastAction === 'awaitPickup' ? <Loader2 size={24} className="h-4 w-4 animate-spin"/> : 'Set Awaiting Pickup'}
           </Button>
         ) : (
           <Button
             onClick={() => {
               const trackingNo = prompt('Enter tracking number:');
               if (trackingNo) {
-                handleStatusUpdate(() => shipOrder.mutateAsync({ orderId: order.orderId, trackingNo }));
+                handleStatusUpdate(() => shipOrder.mutateAsync({ orderId: order.orderId, trackingNo }), 'ship');
               }
             }}
             variant="secondary"
             disabled={isUpdating}
           >
-            {isUpdating ? <Loader2 size={24} /> : 'Ship Order'}
+            {isUpdating && lastAction === 'ship' ? <Loader2 size={24} className="h-4 w-4 animate-spin"/> : 'Ship Order'}
           </Button>
         );
       case 'SHIPPED':
       case 'PICKUP':
         return (
           <Button
-            onClick={() => handleStatusUpdate(() => deliverOrder.mutateAsync(order.orderId))}
+            onClick={() => handleStatusUpdate(() => deliverOrder.mutateAsync(order.orderId), 'deliver')}
             variant="secondary"
             disabled={isUpdating}
           >
-            {isUpdating ? <Loader2 size={24} /> : 'Mark as Delivered'}
+            {isUpdating && lastAction === 'deliver' ? <Loader2 size={24} className="h-4 w-4 animate-spin"/> : 'Mark as Delivered'}
           </Button>
         );
       default:

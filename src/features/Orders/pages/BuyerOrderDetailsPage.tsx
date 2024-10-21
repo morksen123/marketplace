@@ -24,6 +24,9 @@ export const BuyerOrderDetailsPage: React.FC = () => {
       }
       // Refetch the orders after the action
       await ordersQuery.refetch();
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error(`Error ${action}ing order:`, error);
     } finally {
