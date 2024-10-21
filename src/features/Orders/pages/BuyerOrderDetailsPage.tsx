@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { OrderDetails } from '@/features/Payment/components/OrderDetails';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { RefundRequestModal } from '../components/RefundRequest';
 import { useBuyerOrders } from '../hooks/useBuyerOrders';
 import { Order } from '../types/orders';
 
 export const BuyerOrderDetailsPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const { cancelOrderMutation, completeOrderMutation, ordersQuery } = useBuyerOrders();
+  const { cancelOrderMutation, completeOrderMutation, ordersQuery } =
+    useBuyerOrders();
   const [isLoading, setIsLoading] = useState(false);
 
   // Use the orderId to find the specific order
-  const order = ordersQuery.data?.find(o => o.orderId === parseInt(orderId!, 10));
+  const order = ordersQuery.data?.find(
+    (o) => o.orderId === parseInt(orderId!, 10),
+  );
 
   const handleAction = async (action: 'cancel' | 'complete') => {
     setIsLoading(true);
@@ -40,19 +44,30 @@ export const BuyerOrderDetailsPage: React.FC = () => {
             onClick={() => handleAction('cancel')}
             disabled={isLoading}
           >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Cancel Order'}
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              'Cancel Order'
+            )}
           </Button>
         );
       case 'DELIVERED':
       case 'PICKUP':
         return (
-          <Button
-            variant="secondary"
-            onClick={() => handleAction('complete')}
-            disabled={isLoading}
-          >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Complete Order'}
-          </Button>
+          <div className="flex space-x-4">
+            <RefundRequestModal order={order} />
+            <Button
+              variant="secondary"
+              onClick={() => handleAction('complete')}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                'Complete Order'
+              )}
+            </Button>
+          </div>
         );
       default:
         return null;
