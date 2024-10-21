@@ -10,7 +10,7 @@ export interface Notification {
     distributorNameString: string;
     buyerId: number;
     buyerNameString: string;
-    messageDto: Message;
-    orderDto: OrderDto;
+    messageDto?: Message;
+    orderDto?: OrderDto;
     senderRole: string;
 }
