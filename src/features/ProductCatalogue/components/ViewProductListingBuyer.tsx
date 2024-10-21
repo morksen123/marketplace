@@ -17,12 +17,14 @@ import {
   Product,
   unitMapping,
 } from '@/features/ProductListing/constants';
+import { triggerProductClickEvent } from '@/lib/analytics';
 import { calculatePromotionalDiscount, formatDisplayDate } from '@/lib/utils';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import ChatIcon from '@mui/icons-material/Chat';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import StarIcon from '@mui/icons-material/Star';
-import React, { useEffect, useState } from 'react';
+import { debounce } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 interface ViewProductListingBuyerProps {
@@ -50,6 +52,30 @@ export const ViewProductListingBuyer: React.FC<
   const [discountedBulkPricing, setDiscountedBulkPricing] = useState<
     BulkPricing[]
   >([]);
+  const [debouncedProductId, setDebouncedProductId] = useState<string | null>(
+    null,
+  );
+
+  const debouncedSetProductId = useCallback(
+    debounce((id: string) => {
+      setDebouncedProductId(id);
+    }, 500),
+    [],
+  );
+
+  // Effect to update the debounced product ID
+  useEffect(() => {
+    if (productId) {
+      debouncedSetProductId(productId);
+    }
+  }, [productId, debouncedSetProductId]);
+
+  // Effect to trigger the click event when the debounced product ID changes
+  useEffect(() => {
+    if (debouncedProductId) {
+      triggerProductClickEvent(debouncedProductId);
+    }
+  }, [debouncedProductId]);
 
   useEffect(() => {
     const fetchDistributor = async () => {
@@ -90,54 +116,7 @@ export const ViewProductListingBuyer: React.FC<
       }
     };
 
-    // const fetchBuyerId = async () => {
-    //   try {
-    //     const response = await fetch(
-    //       `http://localhost:8080/api/buyer/profile`,
-    //       {
-    //         method: 'GET',
-    //         headers: {
-    //           'Content-Type': 'application/json',
-    //         },
-    //         credentials: 'include',
-    //       },
-    //     );
-    //     if (response.ok) {
-    //       const data = await response.json();
-    //       setBuyerId(data.buyerId);
-    //     } else {
-    //       console.error('Failed to fetch buyer ID');
-    //     }
-    //   } catch (error) {
-    //     console.error('Error fetching buyer ID:', error);
-    //   }
-    // };
-
-    // const checkFavourited = async () => {
-    //   if (isBuyer) {
-    //     try {
-    //       const response = await fetch(
-    //         `/api/buyer/favourites/check?productId=${productId}`,
-    //         {
-    //           method: 'GET',
-    //           headers: {
-    //             'Content-Type': 'application/json',
-    //           },
-    //           credentials: 'include',
-    //         },
-    //       );
-
-    //       const result = await response.json();
-    //       setIsFavourite(result);
-    //     } catch (error) {
-    //       console.error('Error checking if product is favourited:', error);
-    //     }
-    //   }
-    // };
-
-    // fetchBuyerId();
     fetchProduct();
-    // checkFavourited();
   }, [productId, isBuyer]);
 
   useEffect(() => {
@@ -157,47 +136,6 @@ export const ViewProductListingBuyer: React.FC<
       }
     }
   }, [product]);
-
-  // const handleToggleFavourite = async () => {
-  //   if (!isBuyer) return;
-
-  //   try {
-  //     let response;
-  //     if (isFavourite) {
-  //       response = await fetch(
-  //         `/api/buyer/${buyerId}/favourites/${productId}/remove`,
-  //         {
-  //           method: 'PUT',
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //           },
-  //           credentials: 'include',
-  //         },
-  //       );
-  //     } else {
-  //       response = await fetch(
-  //         `/api/buyer/${buyerId}/favourites/${productId}/add`,
-  //         {
-  //           method: 'PUT',
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //           },
-  //           credentials: 'include',
-  //         },
-  //       );
-  //     }
-
-  //     if (response.ok) {
-  //       setIsFavourite(!isFavourite);
-  //     } else {
-  //       const errorMessage = await response.text();
-  //       console.error('Error:', errorMessage);
-  //       alert(`Failed to update favourites: ${errorMessage}`);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error occurred while updating favourites:', error);
-  //   }
-  // };
 
   const handleAddToCart = (product: Product, quantity: number) => {
     addToCart(product, quantity);

@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { RoleTypes } from '@/features/Authentication/types/auth';
 import { Transaction } from '@/features/Payment/types/payment';
 import { capitalizeFirstLetter, formatDisplayDate } from '@/lib/utils';
 import {
@@ -23,9 +24,10 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-export const TransactionSummary: React.FC<{ transaction: Transaction }> = ({
-  transaction,
-}) => {
+export const TransactionSummary: React.FC<{
+  transaction: Transaction;
+  userRole: RoleTypes;
+}> = ({ userRole, transaction }) => {
   const grossAmount = (transaction.amount / 100).toFixed(2);
   const netAmount = (
     (transaction.amount - (transaction.applicationFee ?? 0)) /
@@ -60,24 +62,25 @@ export const TransactionSummary: React.FC<{ transaction: Transaction }> = ({
             </h3>
             <p className="text-lg text-gray-900">${grossAmount}</p>
           </div>
-
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-gray-500 flex items-center">
-              <ArrowDownRight className="mr-2" size={16} />
-              Net Amount
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <HelpCircle className="ml-1" size={14} />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Amount earned after deducting the application fee</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </h3>
-            <p className="text-lg text-gray-900">${netAmount}</p>
-          </div>
+          {userRole === 'DISTRIBUTOR' && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-gray-500 flex items-center">
+                <ArrowDownRight className="mr-2" size={16} />
+                Net Amount
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <HelpCircle className="ml-1" size={14} />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Amount earned after deducting the application fee</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </h3>
+              <p className="text-lg text-gray-900">${netAmount}</p>
+            </div>
+          )}
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-gray-500 flex items-center">
               <CreditCard className="mr-2" size={16} />

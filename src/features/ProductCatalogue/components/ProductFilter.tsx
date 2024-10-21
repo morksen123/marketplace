@@ -1,31 +1,41 @@
-import React, { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from "@/components/ui/checkbox";
+import React, { useEffect } from 'react';
 
 const ProductFilter = ({ onFilter, initialFilters }) => {
   const [filters, setFilters] = React.useState(initialFilters);
-  const categoryOptions = ["CANNED_GOODS", "DAIRY_AND_EGGS", "DRY_GOODS_AND_STAPLES", "FRUITS_AND_VEGETABLES", "FROZEN"];
-  const conditionOptions = ["BRUISED", "DAMAGED_PACKAGING", "NEAR_EXPIRY", "UGLY"];
-  const deliveryMethodOptions = ["SELF_PICK_UP", "DOORSTEP_DELIVERY"];
+  const categoryOptions = [
+    'CANNED_GOODS',
+    'DAIRY_AND_EGGS',
+    'DRY_GOODS_AND_STAPLES',
+    'FRUITS_AND_VEGETABLES',
+    'FROZEN',
+  ];
+  const conditionOptions = [
+    'BRUISED',
+    'DAMAGED_PACKAGING',
+    'NEAR_EXPIRY',
+    'UGLY',
+  ];
+  const deliveryMethodOptions = ['SELF_PICK_UP', 'DOORSTEP_DELIVERY'];
 
   useEffect(() => {
     onFilter(filters);
   }, [filters, onFilter]);
 
   const handleFilterChange = (key, value) => {
-    setFilters(prevFilters => ({
+    setFilters((prevFilters) => ({
       ...prevFilters,
-      [key]: value
+      [key]: value,
     }));
   };
 
   const handleCheckboxChange = (key, value) => {
-    setFilters(prevFilters => ({
+    setFilters((prevFilters) => ({
       ...prevFilters,
       [key]: prevFilters[key].includes(value)
-        ? prevFilters[key].filter(item => item !== value)
-        : [...prevFilters[key], value]
+        ? prevFilters[key].filter((item) => item !== value)
+        : [...prevFilters[key], value],
     }));
   };
 
@@ -40,7 +50,14 @@ const ProductFilter = ({ onFilter, initialFilters }) => {
             className="h-5 w-5 border-2 border-gray-300 rounded-sm"
           />
           <label htmlFor={option} className="ml-2 text-sm">
-            {option.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
+            {option
+              .replace(/_/g, ' ')
+              .split(' ')
+              .map(
+                (word) =>
+                  word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+              )
+              .join(' ')}
           </label>
         </div>
       ))}
@@ -48,7 +65,7 @@ const ProductFilter = ({ onFilter, initialFilters }) => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-left">
       <h2 className="text-xl font-semibold mb-4">Filters</h2>
 
       <div className="space-y-4">
@@ -60,26 +77,34 @@ const ProductFilter = ({ onFilter, initialFilters }) => {
         <Label className="text-base font-medium">Price Range</Label>
         <div className="flex space-x-4">
           <div className="flex-1">
-            <Label htmlFor="minPrice" className="text-sm">Min</Label>
+            <Label htmlFor="minPrice" className="text-sm">
+              Min
+            </Label>
             <input
               id="minPrice"
               type="number"
               min={0}
               max={10000}
               value={filters.minPrice}
-              onChange={(e) => handleFilterChange('minPrice', Number(e.target.value))}
+              onChange={(e) =>
+                handleFilterChange('minPrice', Number(e.target.value))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
             />
           </div>
           <div className="flex-1">
-            <Label htmlFor="maxPrice" className="text-sm">Max</Label>
+            <Label htmlFor="maxPrice" className="text-sm">
+              Max
+            </Label>
             <input
               id="maxPrice"
               type="number"
               min={0}
               max={10000}
               value={filters.maxPrice}
-              onChange={(e) => handleFilterChange('maxPrice', Number(e.target.value))}
+              onChange={(e) =>
+                handleFilterChange('maxPrice', Number(e.target.value))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
             />
           </div>

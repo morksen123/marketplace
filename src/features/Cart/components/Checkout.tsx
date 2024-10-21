@@ -32,12 +32,8 @@ import { SelfPickupItems } from './selfPickUpItems';
 export const Checkout: React.FC = () => {
   const stripe = useStripe();
   const elements = useElements();
-  const {
-    cart,
-    cartPrice,
-    isShippingAddressRequired,
-    cartItemsThatRequireSelfPickUp,
-  } = useCart();
+  const { cart, isShippingAddressRequired, cartItemsThatRequireSelfPickUp } =
+    useCart();
 
   const {
     buyerProfile,
@@ -52,6 +48,10 @@ export const Checkout: React.FC = () => {
     useState<Address>();
   const [selectedBillingAddress, setSelectedBillingAddress] =
     useState<Address>();
+  const [calculatedTotal, setCalculatedTotal] = useState(0);
+  const [adminPromotionAmount, setAdminPromotionAmount] = useState(0);
+  const [originalTotal, setOriginalTotal] = useState(0);
+  const [bulkPricingDiscount, setBulkPricingDiscount] = useState(0);
 
   useEffect(() => {
     if (defaultBillingAddress) {
@@ -122,6 +122,47 @@ export const Checkout: React.FC = () => {
     });
 
     setIsLoading(false);
+  };
+
+  const fetchCalculatedTotal = async () => {
+    try {
+      const response = await fetch('/api/cart/calculate-total', {
+        method: 'GET',
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setCalculatedTotal(data.cartTotal);
+      setAdminPromotionAmount(data.adminPromotionAmount);
+    } catch (error) {
+      console.error('Error fetching calculated total:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCalculatedTotal();
+  }, []);
+
+  useEffect(() => {
+    calculateTotals();
+  }, [cart]);
+
+  const calculateTotals = () => {
+    let originalSum = 0;
+    let discountedSum = 0;
+
+    cart?.cartLineItems.forEach((item) => {
+      const originalItemTotal = item.product.price * item.quantity;
+      const discountedItemTotal = item.price * item.quantity;
+
+      originalSum += originalItemTotal;
+      discountedSum += discountedItemTotal;
+    });
+
+    setOriginalTotal(originalSum);
+    setBulkPricingDiscount(originalSum - discountedSum);
   };
 
   if (buyerProfileLoading) {
@@ -311,9 +352,23 @@ export const Checkout: React.FC = () => {
                   ))}
                   <Separator />
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">${cartPrice.toFixed(2)}</span>
+                    <span className="text-gray-600">Original Total</span>
+                    <span className="font-medium">
+                      ${originalTotal.toFixed(2)}
+                    </span>
                   </div>
+                  {bulkPricingDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Item Discounts</span>
+                      <span>-${bulkPricingDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {adminPromotionAmount > 0 && (
+                    <div className="flex justify-between text-sm text-orange-600">
+                      <span>Sitewide Promotion</span>
+                      <span>-${adminPromotionAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Shipping</span>
                     <span className="font-medium">
@@ -325,7 +380,7 @@ export const Checkout: React.FC = () => {
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span>${(cartPrice + shippingFee).toFixed(2)}</span>
+                    <span>${calculatedTotal.toFixed(2)}</span>
                   </div>
                 </CardContent>
                 <CardFooter>

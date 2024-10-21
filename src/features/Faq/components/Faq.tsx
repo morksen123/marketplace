@@ -97,10 +97,14 @@ export const Faq: React.FC = () => {
 
   return (
     <div className="wrapper max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Frequently Asked Questions</h1>
-      {faqData.map((category, index) => (
-        <FaqCategory key={index} category={category} />
-      ))}
+      <h1 className="text-3xl font-bold mb-8 text-left text-gray-800">Frequently Asked Questions</h1>
+      {faqData.length > 0 ? (
+        faqData.map((category, index) => (
+          <FaqCategory key={index} category={category} />
+        ))
+      ) : (
+        <p className="text-left text-gray-500">No FAQs available at the moment.</p>
+      )}
     </div>
   );
 };

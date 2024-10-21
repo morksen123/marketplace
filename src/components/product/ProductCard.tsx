@@ -1,11 +1,13 @@
+import { Product } from '@/features/ProductCatalogue/constants';
 import {
   foodCategoryMapping,
   foodConditionMapping,
 } from '@/features/ProductListing/constants';
+import { productViewEvent } from '@/lib/analytics';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
-import React from 'react';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
-import { Product } from '@/features/ProductCatalogue/constants';
+import { debounce } from 'lodash';
+import React, { useCallback, useEffect } from 'react';
 
 interface ProductCardProps {
   product: Product;
@@ -44,6 +46,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const isBoosted = product.boostStatus === 'ACTIVE';
   const discountPercentage = calculatePromotionalDiscount(product);
   const promotionalPrice = calculatePromotionalPrice(product);
+
+  const debouncedProductViewEvent = useCallback(
+    debounce((productId: number) => {
+      productViewEvent(productId);
+    }, 500),
+    [],
+  );
+
+  useEffect(() => {
+    if (product) {
+      debouncedProductViewEvent(product.productId);
+    }
+  }, [product, debouncedProductViewEvent]);
 
   return (
     <div
