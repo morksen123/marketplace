@@ -15,6 +15,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
 import { Loader2, Package, Search, ArrowDown, ArrowUp } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 interface DistributorOrderListProps {
   orders: Order[];
@@ -60,6 +62,9 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
   const ordersPerPage = 10;
   const [activeDeliveryMethodFilter, setActiveDeliveryMethodFilter] = useState<'ALL' | 'DOORSTEP_DELIVERY' | 'SELF_PICK_UP'>('ALL');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState('');
+  const [currentOrderId, setCurrentOrderId] = useState<number | null>(null);
 
   const filteredOrdersMemo = useMemo(() => {
     return distributorOrders?.filter(order => {
@@ -123,14 +128,21 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
   };
 
   const handleShipOrder = async (orderId: number) => {
-    const trackingNo = prompt('Enter tracking number:');
-    if (trackingNo) {
-      setLoading(orderId, true);
+    setCurrentOrderId(orderId);
+    setIsTrackingModalOpen(true);
+  };
+
+  const handleTrackingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentOrderId && trackingNumber) {
+      setLoading(currentOrderId, true);
       try {
-        await shipOrder.mutateAsync({ orderId, trackingNo });
+        await shipOrder.mutateAsync({ orderId: currentOrderId, trackingNo: trackingNumber });
         await refetchOrders();
+        setIsTrackingModalOpen(false);
+        setTrackingNumber('');
       } finally {
-        setLoading(orderId, false);
+        setLoading(currentOrderId, false);
       }
     }
   };
@@ -377,6 +389,36 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
           </Pagination>
         </div>
       </CardContent>
+
+      <Dialog open={isTrackingModalOpen} onOpenChange={setIsTrackingModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Enter Tracking Number</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleTrackingSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="trackingNumber" className="text-sm text-gray-600">
+                  Tracking Number
+                </Label>
+                <Input
+                  id="trackingNumber"
+                  value={trackingNumber}
+                  onChange={(e) => setTrackingNumber(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="submit" 
+                className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transform transition duration-200 ease-in-out hover:scale-105"
+              >
+                Ship Order
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
