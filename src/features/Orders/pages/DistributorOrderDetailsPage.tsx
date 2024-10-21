@@ -228,7 +228,7 @@ export const DistributorOrderDetailsPage: React.FC = () => {
                     <MapPin className="mr-2" size={16} />
                     Pick-up Location
                   </h3>
-                  <p className="text-sm text-gray-600 text-left">{order.pickUpLocation}</p>
+                  <p className="text-sm text-gray-600">{order.pickUpLocation}</p>
                 </div>
               )}
             </div>
