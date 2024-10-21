@@ -69,7 +69,11 @@ export async function apiClient<T>(
     const response = await fetch(`${API_URL}${endpoint}`, options);
 
     if (response.status === 401) {
-      // Handle unauthorized error
+      if (endpoint === '/auth/check') {
+        // Silently handle 401 for auth check
+        return { data: null, error: null };
+      }
+      // Handle unauthorized error for other endpoints
       const error = new Error('Unauthorized: Please log in again') as ApiError;
       error.status = 401;
       throw error;
