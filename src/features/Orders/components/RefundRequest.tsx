@@ -41,11 +41,10 @@ async function createRefundRequest(
   orderId: number,
   amount: number,
   refundReason: string,
-  additionalDetails: string,
 ) {
   const body = {
     amount: amount,
-    refundReason: `${refundReason}: ${additionalDetails}}`,
+    refundReason: `${refundReason}`,
   };
   await post(`/buyer/order/${orderId}/refund`, body);
 }
@@ -75,7 +74,7 @@ export const RefundRequestModal: React.FC<RefundRequestModalProps> = ({
       orderId: number;
       amount: number;
       refundReason: string;
-    }) => createRefundRequest(orderId, amount, refundReason, details),
+    }) => createRefundRequest(orderId, amount, refundReason),
     onSuccess: () => {
       handleSuccessApi(
         'Refund request submitted',
