@@ -56,6 +56,7 @@ export const RefundRequestModal: React.FC<RefundRequestModalProps> = ({
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [hasRefunded, setHasRefunded] = useState(false);
 
   const refundAmount = useMemo(() => {
     return order.orderLineItems
@@ -94,6 +95,7 @@ export const RefundRequestModal: React.FC<RefundRequestModalProps> = ({
   });
 
   const handleSubmit = (e: React.FormEvent) => {
+    setHasRefunded(true);
     e.preventDefault();
     if (!reason) {
       handleErrorApi('Error', 'Please select a reason for the refund.');
@@ -129,7 +131,9 @@ export const RefundRequestModal: React.FC<RefundRequestModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="orange">Request Refund</Button>
+        <Button disabled={hasRefunded} variant="orange">
+          Request Refund
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
