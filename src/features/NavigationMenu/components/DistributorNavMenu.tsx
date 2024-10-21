@@ -8,7 +8,7 @@ import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirectoryOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import LoyaltyIcon from '@mui/icons-material/Loyalty';
@@ -21,7 +21,7 @@ export const DistributorNavMenu = () => {
   const { logout } = useAuthActions();
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
-  const [notifications] = useAtom(notificationsAtom);
+  const [notifications, setNotifications] = useAtom(notificationsAtom);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -56,9 +56,34 @@ export const DistributorNavMenu = () => {
     };
   }, []);
 
+  useEffect(() => {
+    console.log('Notifications in DistributorNavMenu:', notifications);
+  }, [notifications]);
+
   const toggleNotificationDropdown = () => {
     setShowNotificationDropdown(!showNotificationDropdown);
+    console.log('Notification dropdown toggled. Current state:', !showNotificationDropdown);
   };
+
+  const handleNotificationRead = useCallback((notificationId: string) => {
+    console.log('Marking notification as read:', notificationId);
+    setNotifications(prevNotifications => {
+      const updatedNotifications = prevNotifications.map(notification =>
+        notification.notificationId.toString() === notificationId
+          ? { ...notification, read: true }
+          : notification
+      );
+      console.log('Updated notifications:', updatedNotifications);
+      return updatedNotifications;
+    });
+  }, [setNotifications]);
+
+  // Calculate unread notifications count
+  const unreadNotificationsCount = useMemo(() => {
+    const count = notifications.filter(notification => !notification.read).length;
+    console.log('Unread notifications count:', count);
+    return count;
+  }, [notifications]);
 
   return (
     <nav className="bg-white shadow-md w-full">
@@ -109,9 +134,9 @@ export const DistributorNavMenu = () => {
                 className="text-black hover:text-gray-600 flex items-center"
               >
                 <NotificationsNoneOutlinedIcon className="mr-1" /> Notifications
-                {notifications.length > 0 && (
+                {unreadNotificationsCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                    {notifications.length}
+                    {unreadNotificationsCount}
                   </span>
                 )}
               </button>
@@ -119,6 +144,8 @@ export const DistributorNavMenu = () => {
                 <NotificationDropdown
                   notifications={notifications}
                   onClose={() => setShowNotificationDropdown(false)}
+                  onNotificationRead={handleNotificationRead}
+                  userRole="distributor"
                 />
               )}
             </div>

@@ -4,7 +4,7 @@ import { OrderDto } from "../features/Payment/types/payment";
 export interface Notification {
     notificationId: number;
     content: string;
-    isRead: boolean;
+    read: boolean;
     createdAt: string;
     distributorId: number;
     distributorNameString: string;

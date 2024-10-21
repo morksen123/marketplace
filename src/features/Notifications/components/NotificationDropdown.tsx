@@ -8,18 +8,42 @@ import { MessageCircle, Package, Bell } from 'lucide-react';
 interface NotificationDropdownProps {
   notifications: Notification[];
   onClose: () => void;
+  onNotificationRead: (notificationId: string) => void;
+  userRole: 'buyer' | 'distributor';
 }
 
-export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notifications, onClose }) => {
+export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notifications, onClose, onNotificationRead, userRole }) => {
   const navigate = useNavigate();
 
-  const handleNotificationClick = (notification: Notification) => {
+  const markNotificationAsRead = async (notificationId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/notifications/${notificationId}/read`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      if (response.ok) {
+        onNotificationRead(notificationId); // Call this immediately after successful API call
+      } else {
+        console.error('Failed to mark notification as read');
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    await markNotificationAsRead(notification.notificationId.toString()); // Wait for this to complete
+    const baseRoute = userRole === 'buyer' ? '/buyer' : '/distributor';
+    
     if (notification.content === 'New Message' && notification.messageDto) {
-      navigate(`/distributor/profile/chats/${notification.messageDto.chatId}`);
+      navigate(`${baseRoute}/profile/chats`);
     } else if (notification.content === 'New Order Created' && notification.orderDto) {
-      navigate(`/distributor/orders/${notification.orderDto.orderId}`);
+      navigate(`${baseRoute}/orders/${notification.orderDto.orderId}`);
     } else if (notification.content === 'Order Status Updated' && notification.orderDto) {
-      navigate(`/distributor/orders/${notification.orderDto.orderId}`);
+      navigate(`${baseRoute}/orders/${notification.orderDto.orderId}`);
     }
     onClose();
   };
@@ -96,7 +120,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ noti
                     </div>
                   )}
                 </div>
-                {!notification.isRead && (
+                {!notification.read && (
                   <div className="w-2 h-2 bg-red-500 rounded-full ml-2"></div>
                 )}
               </div>
