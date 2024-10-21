@@ -116,7 +116,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ noti
                   )}
                   {notification.content === 'Order Status Updated' && notification.orderDto && (
                     <div className="text-xs text-gray-600 flex items-center">
-                      Order #{notification.orderDto.orderId}: {getStatusBadge(notification.orderDto.status)}
+                      Order #{notification.orderDto.orderId}: {getStatusBadge(notification.orderStatus)}
                     </div>
                   )}
                 </div>

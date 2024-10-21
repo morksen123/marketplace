@@ -13,4 +13,5 @@ export interface Notification {
     messageDto?: Message;
     orderDto?: OrderDto;
     senderRole: string;
+    orderStatus: string;
 }
