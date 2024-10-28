@@ -4,36 +4,50 @@ import { useNavigate } from 'react-router-dom';
 export const BuyerSideMenu: React.FC = () => {
   const navigate = useNavigate();
 
-  const links = [
-    { text: 'My Profile', path: '/buyer/profile' },
-    { text: 'My Addresses', path: '/buyer/profile/my-addresses' },
-    { text: 'Chats', path: '/buyer/profile/chats' },
-    { text: 'Notifications', path: '/buyer/profile/notifications' },
-    { text: 'Change Password', path: '/buyer/profile/change-password' },
+  const categories = [
     {
-      text: 'Purchasing Preferences',
-      path: '/buyer/profile/purchasing-preferences',
+      title: 'Profile Management',
+      links: [
+        { text: 'User Information', path: '/buyer/profile' },
+        { text: 'Addresses', path: '/buyer/profile/my-addresses' },
+        { text: 'Change Password', path: '/buyer/profile/change-password' },
+        { text: 'Account Deactivation', path: '/buyer/profile/account-deactivation' },
+      ]
     },
-    { text: 'Favourites', path: '/buyer/profile/favourites' },
     {
-      text: 'Account Deactivation',
-      path: '/buyer/profile/account-deactivation',
+      title: 'Communication',
+      links: [
+        { text: 'Chats', path: '/buyer/profile/chats' },
+      ]
     },
-    { text: 'Transactions', path: '/buyer/transactions' },
-    { text: 'Orders', path: '/buyer/orders' },
+    {
+      title: 'Shopping',
+      links: [
+        { text: 'Favourites', path: '/buyer/profile/favourites' },
+        { text: 'Orders', path: '/buyer/orders' },
+        { text: 'Transactions', path: '/buyer/transactions' },
+      ]
+    }
   ];
 
   return (
     <div className="w-64 min-h-screen p-4 shadow-md">
-      <ul className="space-y-2">
-        {links.map((link, index) => (
-          <li key={index} className="cursor-pointer">
-            <button
-              onClick={() => navigate(link.path)}
-              className="block w-full text-left py-2 px-4 rounded hover:bg-gray-200"
-            >
-              {link.text}
-            </button>
+      <ul className="space-y-6">
+        {categories.map((category, categoryIndex) => (
+          <li key={categoryIndex}>
+            <h3 className="font-bold text-gray-700 mb-2 text-left">{category.title}</h3>
+            <ul className="space-y-2">
+              {category.links.map((link, linkIndex) => (
+                <li key={linkIndex} className="cursor-pointer">
+                  <button
+                    onClick={() => navigate(link.path)}
+                    className="block w-full text-left py-2 px-4 rounded hover:bg-gray-200"
+                  >
+                    {link.text}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </li>
         ))}
       </ul>

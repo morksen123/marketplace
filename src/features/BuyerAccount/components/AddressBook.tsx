@@ -27,17 +27,16 @@ export default function AddressBook() {
   const validateForm = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
+    // Validate all fields at once
     if (!formData.label) newErrors.label = 'Label is required';
-    if (!formData.addressLine1)
-      newErrors.addressLine1 = 'Address Line 1 is required';
-    if (!formData.addressLine2)
-      newErrors.addressLine2 = 'Unit Number is required';
+    if (!formData.addressLine1) newErrors.addressLine1 = 'Address Line 1 is required';
+    if (!formData.addressLine2) newErrors.addressLine2 = 'Unit Number is required';
     if (!formData.postalCode) newErrors.postalCode = 'Postal Code is required';
+    if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone number is required';
 
+    // Move regex validations here to check only when submitting
     const phoneRegex = /^\d{8,}$/;
-    if (!formData.phoneNumber) {
-      newErrors.phoneNumber = 'Phone number is required';
-    } else if (!phoneRegex.test(formData.phoneNumber)) {
+    if (formData.phoneNumber && !phoneRegex.test(formData.phoneNumber)) {
       newErrors.phoneNumber = 'Phone number must be at least 8 digits';
     }
 
@@ -114,7 +113,7 @@ export default function AddressBook() {
                   value={formData.label}
                   onChange={handleInputChange}
                   placeholder="E.g., Home, Office, Parents' House"
-                  required
+                  className={errors.label ? 'border-red-500' : ''}
                 />
                 {errors.label && (
                   <p className="text-red-500 text-sm">{errors.label}</p>
@@ -128,7 +127,7 @@ export default function AddressBook() {
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
                   placeholder="E.g., 8123 4567"
-                  required
+                  className={errors.phoneNumber ? 'border-red-500' : ''}
                 />
                 {errors.phoneNumber && (
                   <p className="text-red-500 text-sm">{errors.phoneNumber}</p>
@@ -142,7 +141,7 @@ export default function AddressBook() {
                   value={formData.addressLine1}
                   onChange={handleInputChange}
                   placeholder="E.g., Blk 123 Clementi Avenue 1"
-                  required
+                  className={errors.addressLine1 ? 'border-red-500' : ''}
                 />
                 {errors.addressLine1 && (
                   <p className="text-red-500 text-sm">{errors.addressLine1}</p>
@@ -156,7 +155,7 @@ export default function AddressBook() {
                   value={formData.addressLine2}
                   onChange={handleInputChange}
                   placeholder="E.g., #12-34"
-                  required
+                  className={errors.addressLine2 ? 'border-red-500' : ''}
                 />
                 {errors.addressLine2 && (
                   <p className="text-red-500 text-sm">{errors.addressLine2}</p>
@@ -170,7 +169,7 @@ export default function AddressBook() {
                   value={formData.postalCode}
                   onChange={handleInputChange}
                   placeholder="E.g., 123456"
-                  required
+                  className={errors.postalCode ? 'border-red-500' : ''}
                 />
                 {errors.postalCode && (
                   <p className="text-red-500 text-sm">{errors.postalCode}</p>
