@@ -17,7 +17,6 @@ export const DistributorSideMenu: React.FC = () => {
       title: 'Communication',
       links: [
         { text: 'Chats', path: '/distributor/profile/chats' },
-        { text: 'Notifications', path: '/distributor/profile/notifications' },
       ]
     },
     {
