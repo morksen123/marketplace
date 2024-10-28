@@ -43,10 +43,6 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
   const tabs = [
     { name: 'Home', route: '/buyer/home' },
     { name: 'Sale', route: '/buyer/sale' },
-    { name: 'Fruits & Vegetables', route: '/buyer/fruits-vegetables' },
-    { name: 'Canned Goods', route: '/buyer/canned-goods' },
-    { name: 'Frozen', route: '/buyer/frozen' },
-    { name: 'Our Mission', route: '/buyer/mission' },
   ];
 
   useEffect(() => {

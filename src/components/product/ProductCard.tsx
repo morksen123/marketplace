@@ -105,27 +105,25 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {foodCategoryMapping[product.foodCategory]}
       </p>
       <p className="text-gray-500">
-        Condition: {foodConditionMapping[product.foodCondition]}
+        {foodConditionMapping[product.foodCondition]}
       </p>
 
-      {isPromotionalPage && (
-        /* Highlight: Updated div to center content */
-        <div className="mt-2 flex flex-col items-center">
-          <div className="flex items-center justify-center">
-            <p className="text-gray-500 line-through mr-2">
-              ${product.price.toFixed(2)}
-            </p>
-            <p className="text-green-600 font-bold">
-              ${promotionalPrice.toFixed(2)}
-            </p>
-          </div>
-          {discountPercentage > 0 && (
-            <p className="text-red-500 font-semibold mt-1">
-              {discountPercentage}% OFF
-            </p>
-          )}
+      <div className="mt-2 flex flex-col items-center">
+        <div className="flex items-center justify-center">
+          <p className="text-gray-500 line-through mr-2">
+            ${product.price.toFixed(2)}
+          </p>
+          <p className="text-green-600 font-bold">
+            ${promotionalPrice.toFixed(2)}
+          </p>
         </div>
-      )}
+        {discountPercentage > 0 && (
+          <p className="text-red-500 font-semibold mt-1">
+            {discountPercentage}% OFF
+          </p>
+        )}
+      </div>
+
     </div>
   );
 };
