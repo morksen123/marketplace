@@ -4,10 +4,13 @@ import foodWasteIcon from '@/assets/food-waste.png';
 import greenhouseGasIcon from '@/assets/greenhouse-gas.png';
 import bannerImage from '@/assets/landing-v4.png';
 import { BannerContent } from './BannerContent';
+import { AllBlogs } from '@/features/Sustainability/Blogs/AllBlogs';
+import { LandingNavBar } from '@/features/Sustainability/LandingNavBar/LandingNavBar';
 
 export const LandingContent = () => {
   return (
     <>
+      <LandingNavBar />
       {/* Banner Section */}
       <section className="relative flex justify-center items-center h-[1150px]">
         <div className="w-full h-full">

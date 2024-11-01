@@ -17,6 +17,20 @@ const routes: RouteObject[] = [
     },
   },
   {
+    path: '/blogs',
+    lazy: async () => {
+      const { BlogsRoute } = await import('./routes/sustainability/blogs');
+      return { Component: BlogsRoute };
+    },
+  },
+  {
+    path: '/blogs/:blogId',
+    lazy: async () => {
+      const { ViewBlogRoute } = await import('./routes/sustainability/view-blog');
+      return { Component: ViewBlogRoute };
+    },
+  },
+  {
     path: '/auth/register',
     lazy: async () => {
       const { RegisterRoute } = await import('./routes/auth/register');
