@@ -28,7 +28,7 @@ export const LandingNavBar: React.FC<LandingNavBarProps> = ({
 
   return (
     <nav className="bg-white w-full border-b border-gray-200 shadow-lg">
-      <div className="w-full px-4 pt-4 py-1">
+      <div className="w-full px-4 pt-4">
         <div className="flex justify-between items-center">
           {/* Logo Section */}
           <div className="pl-6">
