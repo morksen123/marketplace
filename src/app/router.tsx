@@ -17,6 +17,20 @@ const routes: RouteObject[] = [
     },
   },
   {
+    path: '/blogs',
+    lazy: async () => {
+      const { BlogsRoute } = await import('./routes/sustainability/blogs');
+      return { Component: BlogsRoute };
+    },
+  },
+  {
+    path: '/blogs/:blogId',
+    lazy: async () => {
+      const { ViewBlogRoute } = await import('./routes/sustainability/view-blog');
+      return { Component: ViewBlogRoute };
+    },
+  },
+  {
     path: '/auth/register',
     lazy: async () => {
       const { RegisterRoute } = await import('./routes/auth/register');
@@ -224,6 +238,15 @@ const routes: RouteObject[] = [
                   return { Component: BuyerOrderDetailsRoute };
                 },
               },
+              {
+                path: '/buyer/leaderboard',
+                lazy: async () => {
+                  const { LeaderboardRoute } = await import(
+                    './routes/sustainability/leaderboard'
+                  );
+                  return { Component: LeaderboardRoute };
+                },
+              },
             ],
           },
           {
@@ -377,6 +400,15 @@ const routes: RouteObject[] = [
                 lazy: async () => {
                   const { DistributorOrderDetailsRoute } = await import('./routes/orders/distributor-order-details');
                   return { Component: DistributorOrderDetailsRoute };
+                },
+              },
+              {
+                path: '/distributor/leaderboard',
+                lazy: async () => {
+                  const { LeaderboardRoute } = await import(
+                    './routes/sustainability/leaderboard'
+                  );
+                  return { Component: LeaderboardRoute };
                 },
               },
             ],
