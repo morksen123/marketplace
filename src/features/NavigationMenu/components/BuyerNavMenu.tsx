@@ -14,6 +14,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { notificationsAtom } from '@/atoms/notificationAtoms';
 import { NotificationDropdown } from '@/features/Notifications/components/NotificationDropdown';
+import LeaderboardOutlinedIcon from '@mui/icons-material/LeaderboardOutlined';
 
 interface BuyerNavMenuProps {
   showTabs?: boolean;
@@ -199,6 +200,12 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
           {/* Navigation Links with Icons */}
           <div className="flex items-center space-x-12 pr-6">
             <Link
+              to="/buyer/leaderboard"
+              className="text-black hover:text-gray-600 flex items-center"
+            >
+              <LeaderboardOutlinedIcon className="mr-1" /> Leaderboard
+            </Link>
+            <Link
               to="/buyer/faq"
               className="text-black hover:text-gray-600 flex items-center"
             >
@@ -238,9 +245,8 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
               >
                 <PersonOutlineOutlinedIcon className="mr-1" /> Account
                 <ArrowDropDownIcon
-                  className={`transition-transform duration-300 ${
-                    showAccountDropdown ? 'rotate-180' : ''
-                  }`}
+                  className={`transition-transform duration-300 ${showAccountDropdown ? 'rotate-180' : ''
+                    }`}
                 />
               </button>
               {showAccountDropdown && (
@@ -288,11 +294,10 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
             {tabs.map((tab) => (
               <button
                 key={tab.name}
-                className={`py-4 px-4 text-black focus:outline-none flex-grow ${
-                  selectedTab === tab.name
+                className={`py-4 px-4 text-black focus:outline-none flex-grow ${selectedTab === tab.name
                     ? 'border-b-2 border-green-500 text-green-500'
                     : 'hover:text-green-500'
-                }`}
+                  }`}
                 onClick={() => handleTabClick(tab.name, tab.route)}
               >
                 {tab.name}

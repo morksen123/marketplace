@@ -2,21 +2,24 @@ import usersIcon from '@/assets/customers.png';
 import foodDumpImage from '@/assets/food-dump.png';
 import foodWasteIcon from '@/assets/food-waste.png';
 import greenhouseGasIcon from '@/assets/greenhouse-gas.png';
-import bannerImage from '@/assets/landing-v3.png';
+import bannerImage from '@/assets/landing-v4.png';
 import { BannerContent } from './BannerContent';
 
 export const LandingContent = () => {
   return (
     <>
       {/* Banner Section */}
-      <section className="relative">
-        <img
-          src={bannerImage}
-          alt="GudFood Banner"
-          className="w-full object-cover"
-        />
-
-        <BannerContent />
+      <section className="relative flex justify-center items-center h-[1150px]">
+        <div className="w-full h-full">
+          <img
+            src={bannerImage}
+            alt="GudFood Banner"
+            className="w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 flex justify-center items-center">
+            <BannerContent />
+          </div>
+        </div>
       </section>
 
       {/* Content Section */}
