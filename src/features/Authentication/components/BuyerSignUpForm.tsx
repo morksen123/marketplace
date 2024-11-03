@@ -17,6 +17,8 @@ import { buyerSignUpFormDefaultValues } from '../constants';
 import { useAuthActions } from '../hooks/useAuthActions';
 import { BuyerSignUpSchema } from '../schema';
 import { BuyerRegisterForm } from '../types/auth';
+import { useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export const BuyerSignUpForm = () => {
   const { registerBuyer } = useAuthActions();
@@ -24,6 +26,15 @@ export const BuyerSignUpForm = () => {
     resolver: zodResolver(BuyerSignUpSchema),
     defaultValues: buyerSignUpFormDefaultValues,
   });
+
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get('ref');
+
+  useEffect(() => {
+    if (refCode) {
+      form.setValue('referredByCode', refCode);
+    }
+  }, [refCode, form]);
 
   const handleBuyerSignUp = async (data: BuyerRegisterForm) => {
     await registerBuyer(data);
@@ -145,6 +156,27 @@ export const BuyerSignUpForm = () => {
                           <Input
                             type="password"
                             placeholder="Confirm password"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="referredByCode"
+                    render={({ field }) => (
+                      <FormItem className="text-left block">
+                        <FormLabel className="flex items-center gap-1">
+                          Referral Code
+                          <span className="text-sm text-muted-foreground">(Optional)</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Referral Code (if any)"
                             {...field}
                           />
                         </FormControl>
