@@ -1,6 +1,6 @@
 import React from 'react';
 import ProfileManagement from '@/components/profile/ProfileManagement';
-
+import AddressBook from './AddressBook';
 const BuyerProfileManagement: React.FC = () => {
   const API_BASE_URL = 'http://localhost:8080/api';
 
@@ -67,6 +67,7 @@ const BuyerProfileManagement: React.FC = () => {
         greeting={greeting}
         hasProfilePicture={true}
       />
+      <AddressBook />
     </div>
   );
 };

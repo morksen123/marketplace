@@ -20,6 +20,7 @@ export const BuyerSignUpSchema = z
     homeAddress: z.string().min(6, {
       message: 'Home address must be at least 6 characters long',
     }),
+    referredByCode: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",

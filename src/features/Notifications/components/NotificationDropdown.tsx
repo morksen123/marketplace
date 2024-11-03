@@ -84,7 +84,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ noti
   );
 
   return (
-    <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-20">
+    <div className="absolute right-0 mt-2 w-96 bg-white rounded-md shadow-lg overflow-hidden z-20">
       <div className="py-2 max-h-80 overflow-y-auto">
         {sortedNotifications.length === 0 ? (
           <div className="px-4 py-2 text-sm text-gray-700">No new notifications</div>
@@ -95,33 +95,33 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ noti
               className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 last:border-b-0"
               onClick={() => handleNotificationClick(notification)}
             >
-              <div className="flex items-center">
-                <div className="flex-shrink-0 mr-3">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 mr-3 mt-1">
                   {getNotificationIcon(notification.content)}
                 </div>
-                <div className="flex-grow">
-                  <div className="text-sm font-medium text-gray-900 text-left">{notification.content}</div>
+                <div className="flex-grow max-w-[280px]">
+                  <div className="text-sm font-medium text-gray-900 text-left break-words">{notification.content}</div>
                   <div className="text-xs text-gray-500 text-left">
                     {format(new Date(notification.createdAt), 'MMM d, yyyy HH:mm')}
                   </div>
                   {notification.content === 'New Message' && notification.messageDto && (
-                    <div className="text-xs text-gray-600 text-left">
+                    <div className="text-xs text-gray-600 text-left break-words">
                       From: {notification.buyerNameString}
                     </div>
                   )}
                   {notification.content === 'New Order Created' && notification.orderDto && (
-                    <div className="text-xs text-gray-600 text-left">
+                    <div className="text-xs text-gray-600 text-left break-words">
                       Order #{notification.orderDto.orderId} from {notification.buyerNameString}
                     </div>
                   )}
                   {notification.content === 'Order Status Updated' && notification.orderDto && (
-                    <div className="text-xs text-gray-600 flex items-center">
-                      Order #{notification.orderDto.orderId}: {getStatusBadge(notification.orderStatus)}
+                    <div className="text-xs text-gray-600 flex items-center flex-wrap gap-1">
+                      <span>Order #{notification.orderDto.orderId}:</span> {getStatusBadge(notification.orderStatus)}
                     </div>
                   )}
                 </div>
                 {!notification.read && (
-                  <div className="w-2 h-2 bg-red-500 rounded-full ml-2"></div>
+                  <div className="w-2 h-2 bg-red-500 rounded-full ml-2 flex-shrink-0 mt-1"></div>
                 )}
               </div>
             </div>

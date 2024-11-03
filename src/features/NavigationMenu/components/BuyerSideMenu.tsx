@@ -6,10 +6,14 @@ export const BuyerSideMenu: React.FC = () => {
 
   const categories = [
     {
+      links: [
+        { text: 'Profile', path: '/buyer/profile' }
+      ]
+    },
+    {
       title: 'Profile Management',
       links: [
-        { text: 'User Information', path: '/buyer/profile' },
-        { text: 'Addresses', path: '/buyer/profile/my-addresses' },
+        { text: 'Profile Details', path: '/buyer/profile-management' },
         { text: 'Change Password', path: '/buyer/profile/change-password' },
         { text: 'Account Deactivation', path: '/buyer/profile/account-deactivation' },
       ]
