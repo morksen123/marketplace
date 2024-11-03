@@ -24,12 +24,15 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { handleSuccessApi } from '@/lib/api-client';
 
 interface Profile {
   points: number;
   firstName: string;
   lastName: string;
   referralCode?: string;
+  referredByCode?: string;
+  hasQualifyingPurchase: boolean;
 }
 
 const fetchProfile = async () => {
@@ -77,8 +80,15 @@ const fetchReferralLink = async () => {
 };
 
 export const Profile: React.FC = () => {
-  const [profile, setProfile] = useState<Profile>({ points: 0, firstName: '', lastName: '', referralCode: ''});
+  const [profile, setProfile] = useState<Profile>({ 
+    points: 0, 
+    firstName: '', 
+    lastName: '', 
+    referralCode: '',
+    hasQualifyingPurchase: false 
+  });
   const [referralLink, setReferralLink] = useState<string>('');
+  const [referralCodeInput, setReferralCodeInput] = useState<string>('');
 
   useEffect(() => {
     const getProfile = async () => {
@@ -93,6 +103,38 @@ export const Profile: React.FC = () => {
     getProfile();
     getReferralLink();
   }, []);
+
+  const handleSubmitReferralCode = async () => {
+    try {
+      const response = await fetch('/api/buyer/referral-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ referralCode: referralCodeInput }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to apply referral code');
+      }
+
+      handleSuccessApi("Success!", "Referral code applied successfully.")
+
+      // Refresh profile data
+      const updatedProfile = await fetchProfile();
+      setProfile(updatedProfile);
+      setReferralCodeInput(''); // Clear input after successful submission
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to apply referral code",
+        duration: 2000,
+        variant: "destructive",
+      });
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -153,6 +195,23 @@ export const Profile: React.FC = () => {
                 <div className="text-sm text-gray-600">Total Points</div>
               </div>
               <div className="flex flex-col items-end gap-1">
+                {!profile.referredByCode && !profile.hasQualifyingPurchase && (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Enter referral code"
+                      value={referralCodeInput}
+                      onChange={(e) => setReferralCodeInput(e.target.value)}
+                      className="w-40"
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleSubmitReferralCode}
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                )}
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
@@ -179,11 +238,7 @@ export const Profile: React.FC = () => {
                           size="icon"
                           onClick={() => {
                             navigator.clipboard.writeText(profile.referralCode || '');
-                            toast({
-                              title: "Copied!",
-                              description: "Referral code copied to clipboard",
-                              duration: 2000,
-                            });
+                            handleSuccessApi("Success!", "Referral code copied to clipboard");
                           }}
                         >
                           <Copy className="h-4 w-4" />
@@ -202,11 +257,7 @@ export const Profile: React.FC = () => {
                             size="icon"
                             onClick={() => {
                               navigator.clipboard.writeText(referralLink);
-                              toast({
-                                title: "Copied!",
-                                description: "Referral link copied to clipboard",
-                                duration: 2000,
-                              });
+                              handleSuccessApi("Success!", "Referral link copied to clipboard");
                             }}
                           >
                             <Copy className="h-4 w-4" />
@@ -217,7 +268,9 @@ export const Profile: React.FC = () => {
                   </DialogContent>
                 </Dialog>
                 <span className="text-sm font-medium text-green-600 animate-pulse">
-                  Earn 250 points when you refer a friend!
+                  {profile.referredByCode && !profile.hasQualifyingPurchase 
+                    ? "Complete a purchase over $100 to earn your referral bonus!"
+                    : "Earn 250 points when you refer a friend!"}
                 </span>
               </div>
             </div>
