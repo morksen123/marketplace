@@ -278,12 +278,21 @@ const routes: RouteObject[] = [
               },
               // Add other distributor-specific routes here
               {
-                path: '/distributor/profile',
+                path: '/distributor/profile-management',
                 lazy: async () => {
                   const { ProfileManagementRoute } = await import(
                     './routes/distributorProfile/profile-management'
                   );
                   return { Component: ProfileManagementRoute };
+                },
+              },
+              {
+                path: '/distributor/profile',
+                lazy: async () => {
+                  const { ProfileRoute } = await import(
+                    './routes/distributorProfile/profile'
+                  );
+                  return { Component: ProfileRoute };
                 },
               },
               {
@@ -422,10 +431,10 @@ const routes: RouteObject[] = [
               {
                 path: '/distributor/leaderboard',
                 lazy: async () => {
-                  const { LeaderboardRoute } = await import(
-                    './routes/sustainability/leaderboard'
+                  const { DistributorLeaderboardRoute } = await import(
+                    './routes/sustainability/distributor-leaderboard'
                   );
-                  return { Component: LeaderboardRoute };
+                  return { Component: DistributorLeaderboardRoute };
                 },
               },
               {

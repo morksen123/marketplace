@@ -4,14 +4,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Medal, Trophy, Star, TreeDeciduous, Droplets, Battery, Recycle, Info, TrendingUp } from 'lucide-react';
 import { motion  } from 'framer-motion';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { LinearProgress, Box, Typography } from '@mui/material';
 
 interface User {
   id: number;
-  name: string;
+  distributorName: string;
   points: number;
   wasteReduced: number;
   rank: number;
@@ -24,9 +23,10 @@ interface User {
   referralCount: number;
   weightOfFoodSaved: number;
   profilePic: string;
+  email: string;
 }
 
-export const Leaderboard = () => {
+export const DistributorLeaderboard = () => {
   const [hoveredUser, setHoveredUser] = useState<number | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,7 @@ export const Leaderboard = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/buyer/leaderboard', {
+        const response = await fetch('/api/distributor/leaderboard', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
@@ -337,6 +337,7 @@ export const Leaderboard = () => {
       animate="visible"
       variants={containerVariants}
     >
+
       {/* Top 3 Section */}
       <motion.div 
         className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
@@ -356,32 +357,25 @@ export const Leaderboard = () => {
                   whileHover={{ scale: 1.05 }}
                 >
                   <img 
-                    src={user.profilePic} 
-                    alt={user.name}
+                    src={user.profilePic}
+                    alt={user.distributorName}
                     className="w-full h-full object-cover"
                   />
                 </motion.div>
                 
                 <motion.h3 className="text-xl font-bold mb-2">
-                  {user.name}
+                  {user.distributorName}
                 </motion.h3>
-                <div className="flex flex-col gap-4">
-                  <motion.div whileHover={{ scale: 1.1 }}>
-                    <Badge className="text-lg px-4 py-2 bg-green-500 text-white block">
-                      {user.points?.toLocaleString() || 0} Points
-                    </Badge>
-                  </motion.div>
-                  {(user.weightOfFoodSaved || user.weightOfFoodSaved !== 0) && (
-                    <motion.div whileHover={{ scale: 1.05 }} className="text-sm text-gray-600">
-                      Food Saved: {user.weightOfFoodSaved.toLocaleString()} kg
-                    </motion.div>
+                <motion.div whileHover={{ scale: 1.1 }} className="space-y-2">
+                  <Badge className="text-lg px-4 py-2 bg-green-500 text-white">
+                    {user.points.toLocaleString()} Points
+                  </Badge>
+                  {user.weightOfFoodSaved && (
+                    <div className="text-sm text-gray-600">
+                      Food Saved: {user.weightOfFoodSaved.toLocaleString()}kg
+                    </div>
                   )}
-                  {(user.referralCount || user.referralCount !== 0) && (
-                    <motion.div whileHover={{ scale: 1.05 }} className="text-sm text-gray-600">
-                      Referred: {user.referralCount}
-                    </motion.div>
-                  )}
-                </div>
+                </motion.div>
               </CardContent>
             </Card>
           </motion.div>
@@ -395,10 +389,9 @@ export const Leaderboard = () => {
             <TableHeader>
               <TableRow>
                 <TableHead className="text-left">Rank</TableHead>
-                <TableHead className="text-left">Member</TableHead>
+                <TableHead className="text-left">Distributor</TableHead>
                 <TableHead className="text-left">Points</TableHead>
                 <TableHead className="text-left">Food Saved (kg)</TableHead>
-                <TableHead className="text-left">Referred</TableHead>
                 <TableHead className="text-left">Email</TableHead>
               </TableRow>
             </TableHeader>
@@ -412,20 +405,19 @@ export const Leaderboard = () => {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full overflow-hidden">
                         <img 
-                          src={user.profilePic} 
-                          alt={user.name}
+                          src={user.profilePic || '/default-avatar.png'}
+                          alt={user.distributorName}
                           className="w-full h-full object-cover"
                         />
                       </div>
                       <div>
-                        <p className="font-medium">{user.name}</p>
+                        <p className="font-medium">{user.distributorName}</p>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-left">{user.points.toLocaleString()}</TableCell>
-                  <TableCell className="text-left">{user.weightOfFoodSaved.toLocaleString()}</TableCell>
-                  <TableCell className="text-left">{user.referralCount}</TableCell>
-                  <TableCell className="text-left">{user.email}</TableCell>
+                  <TableCell className="text-left">{user.points?.toLocaleString() || 0}</TableCell>
+                  <TableCell className="text-left">{user.weightOfFoodSaved?.toLocaleString() || 0}</TableCell>
+                  <TableCell className="text-left">{user.email || 'N/A'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
