@@ -6,9 +6,14 @@ export const DistributorSideMenu: React.FC = () => {
 
   const categories = [
     {
+      links: [
+        { text: 'Profile', path: '/distributor/profile' },
+      ]
+    },
+    {
       title: 'Profile Management',
       links: [
-        { text: 'User Information', path: '/distributor/profile' },
+        { text: 'User Information', path: '/distributor/profile-management' },
         { text: 'Change Password', path: '/distributor/profile/change-password' },
         { text: 'Account Deactivation', path: '/distributor/profile/account-deactivation' },
       ]

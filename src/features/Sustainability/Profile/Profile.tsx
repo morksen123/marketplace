@@ -25,6 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { handleSuccessApi } from '@/lib/api-client';
+import { PointsHistory } from './components/PointsHistoryTable';
 
 interface Profile {
   points: number;
@@ -80,12 +81,12 @@ const fetchReferralLink = async () => {
 };
 
 export const Profile: React.FC = () => {
-  const [profile, setProfile] = useState<Profile>({ 
-    points: 0, 
-    firstName: '', 
-    lastName: '', 
+  const [profile, setProfile] = useState<Profile>({
+    points: 0,
+    firstName: '',
+    lastName: '',
     referralCode: '',
-    hasQualifyingPurchase: false 
+    hasQualifyingPurchase: false
   });
   const [referralLink, setReferralLink] = useState<string>('');
   const [referralCodeInput, setReferralCodeInput] = useState<string>('');
@@ -203,8 +204,8 @@ export const Profile: React.FC = () => {
                       onChange={(e) => setReferralCodeInput(e.target.value)}
                       className="w-40"
                     />
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={handleSubmitReferralCode}
                     >
@@ -228,9 +229,9 @@ export const Profile: React.FC = () => {
                     </DialogHeader>
                     <div className="flex flex-col space-y-4">
                       <div className="flex items-center space-x-2">
-                        <Input 
-                          readOnly 
-                          value={profile.referralCode || ''} 
+                        <Input
+                          readOnly
+                          value={profile.referralCode || ''}
                           className="font-mono"
                         />
                         <Button
@@ -247,8 +248,8 @@ export const Profile: React.FC = () => {
                       <div className="flex flex-col space-y-2">
                         <p className="text-sm text-muted-foreground">Referral Link:</p>
                         <div className="flex items-center space-x-2">
-                          <Input 
-                            readOnly 
+                          <Input
+                            readOnly
                             value={referralLink}
                             className="font-mono text-xs"
                           />
@@ -268,30 +269,26 @@ export const Profile: React.FC = () => {
                   </DialogContent>
                 </Dialog>
                 <span className="text-sm font-medium text-green-600 animate-pulse">
-                  {profile.referredByCode && !profile.hasQualifyingPurchase 
+                  {profile.referredByCode && !profile.hasQualifyingPurchase
                     ? "Complete a purchase over $100 to earn your referral bonus!"
                     : "Earn 250 points when you refer a friend!"}
                 </span>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="mt-4">
-              <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">Level 5</span>
-                <span className="text-sm text-gray-600">250 points to next level</span>
-              </div>
-              <Progress value={(profile.points % 1000) / 10} className="h-2" />
-            </div>
-          </CardContent>
         </Card>
+      </motion.div>
+
+      {/* Add Points History section */}
+      <motion.div variants={cardVariants} className="mt-8">
+        <PointsHistory />
       </motion.div>
 
       {/* Impact Stats */}
       <motion.div variants={cardVariants} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="pt-6">
-            <motion.div 
+            <motion.div
               className="flex items-center justify-center flex-col"
               whileHover={{ scale: 1.05 }}
             >
@@ -304,7 +301,7 @@ export const Profile: React.FC = () => {
 
         <Card>
           <CardContent className="pt-6">
-            <motion.div 
+            <motion.div
               className="flex items-center justify-center flex-col"
               whileHover={{ scale: 1.05 }}
             >
@@ -317,7 +314,7 @@ export const Profile: React.FC = () => {
 
         <Card>
           <CardContent className="pt-6">
-            <motion.div 
+            <motion.div
               className="flex items-center justify-center flex-col"
               whileHover={{ scale: 1.05 }}
             >
@@ -330,7 +327,7 @@ export const Profile: React.FC = () => {
 
         <Card>
           <CardContent className="pt-6">
-            <motion.div 
+            <motion.div
               className="flex items-center justify-center flex-col"
               whileHover={{ scale: 1.05 }}
             >
