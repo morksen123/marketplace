@@ -4,10 +4,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Medal, Trophy, Star, TreeDeciduous, Droplets, Battery, Recycle, Info, TrendingUp } from 'lucide-react';
 import { motion  } from 'framer-motion';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { LinearProgress, Box, Typography } from '@mui/material';
+import { BuyerInformation } from './components/BuyerInformation';
 
 interface User {
   id: number;
@@ -31,6 +31,7 @@ export const Leaderboard = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -307,6 +308,10 @@ export const Leaderboard = () => {
     </motion.div>
   );
 
+  const handleUserClick = (user: User) => {
+    setSelectedUser(user);
+  };
+
   // Add loading and error states to the return
   if (loading) {
     return (
@@ -348,7 +353,7 @@ export const Leaderboard = () => {
             variants={cardVariants}
             className={`${index === 1 ? 'md:mt-0' : 'md:mt-12'}`}
           >
-            <Card className={`relative overflow-hidden ${getGradientByRank(user.rank)} hover:shadow-xl transition-all duration-300`}>
+            <Card className={`relative overflow-hidden ${getGradientByRank(user.rank)} hover:shadow-xl transition-all duration-300`} onClick={() => handleUserClick(user)} cursor-pointer>
               <CardContent className="text-center pt-6">
                 {/* Profile Picture */}
                 <motion.div 
@@ -404,7 +409,7 @@ export const Leaderboard = () => {
             </TableHeader>
             <TableBody>
               {nextTen.map((user, index) => (
-                <TableRow key={user.id}>
+                <TableRow key={user.id} onClick={() => handleUserClick(user)} hover:bg-gray-100 cursor-pointer>
                   <TableCell className="text-left font-medium">
                     {index + 4}
                   </TableCell>
@@ -438,6 +443,12 @@ export const Leaderboard = () => {
 
       {/* Add Sustainability Tips Section */}
       <SustainabilityTipsSection />
+
+      <BuyerInformation 
+        user={selectedUser}
+        isOpen={!!selectedUser}
+        onClose={() => setSelectedUser(null)}
+      />
     </motion.div>
   );
 };

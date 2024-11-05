@@ -7,7 +7,7 @@ import { motion  } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { LinearProgress, Box, Typography } from '@mui/material';
-
+import { DistributorInformation } from './components/DistributorInformation';
 interface User {
   id: number;
   distributorName: string;
@@ -31,6 +31,7 @@ export const DistributorLeaderboard = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -307,6 +308,10 @@ export const DistributorLeaderboard = () => {
     </motion.div>
   );
 
+  const handleUserClick = (user: User) => {
+    setSelectedUser(user);
+  };
+
   // Add loading and error states to the return
   if (loading) {
     return (
@@ -349,7 +354,7 @@ export const DistributorLeaderboard = () => {
             variants={cardVariants}
             className={`${index === 1 ? 'md:mt-0' : 'md:mt-12'}`}
           >
-            <Card className={`relative overflow-hidden ${getGradientByRank(user.rank)} hover:shadow-xl transition-all duration-300`}>
+            <Card className={`relative overflow-hidden ${getGradientByRank(user.rank)} hover:shadow-xl transition-all duration-300`} onClick={() => handleUserClick(user)} cursor-pointer>
               <CardContent className="text-center pt-6">
                 {/* Profile Picture */}
                 <motion.div 
@@ -430,6 +435,13 @@ export const DistributorLeaderboard = () => {
 
       {/* Add Sustainability Tips Section */}
       <SustainabilityTipsSection />
+
+      <DistributorInformation 
+        user={selectedUser}
+        isOpen={!!selectedUser}
+        onClose={() => setSelectedUser(null)}
+      />
+
     </motion.div>
   );
 };

@@ -11,6 +11,7 @@ import {
   Star,
   WorkspacePremium as Medal,
   CalendarMonth as Calendar,
+  Grade as LeaderboardIcon,
 } from '@mui/icons-material';
 import { Copy, Share } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -34,6 +35,15 @@ interface Profile {
   referralCode?: string;
   referredByCode?: string;
   hasQualifyingPurchase: boolean;
+}
+
+interface Badge {
+  badgeId: number;
+  title: string;
+  subtitle: string;
+  criteria: string;
+  earnedOn: string;
+  category: 'SUSTAINABILITY' | 'LEADERBOARD' | 'QUALITY_SERVICE' | 'QUALITY_ENGAGEMENT';
 }
 
 const fetchProfile = async () => {
@@ -80,6 +90,28 @@ const fetchReferralLink = async () => {
   }
 };
 
+const fetchBadges = async () => {
+  try {
+    const response = await fetch('/api/buyer/badges', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch badges');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching badges:', error);
+    throw error;
+  }
+};
+
 export const Profile: React.FC = () => {
   const [profile, setProfile] = useState<Profile>({
     points: 0,
@@ -90,6 +122,7 @@ export const Profile: React.FC = () => {
   });
   const [referralLink, setReferralLink] = useState<string>('');
   const [referralCodeInput, setReferralCodeInput] = useState<string>('');
+  const [badges, setBadges] = useState<Badge[]>([]);
 
   useEffect(() => {
     const getProfile = async () => {
@@ -101,8 +134,13 @@ export const Profile: React.FC = () => {
       const link = await fetchReferralLink();
       setReferralLink(link);
     };
+    const getBadges = async () => {
+      const badgeData = await fetchBadges();
+      setBadges(badgeData);
+    };
     getProfile();
     getReferralLink();
+    getBadges();
   }, []);
 
   const handleSubmitReferralCode = async () => {
@@ -350,23 +388,42 @@ export const Profile: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <motion.div
-                key={1}
-                className="relative p-4 rounded-lg border bg-gradient-to-br from-white to-gray-50"
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="flex flex-col items-center text-center">
-                  <div className="mb-2">
-                    <TreeDeciduous className="h-8 w-8 text-green-500" />
-                  </div>
-                  <h3 className="font-semibold text-sm mb-1">Tree Hugger</h3>
-                  <p className="text-xs text-gray-600">Planted first tree</p>
-                  <div className="mt-2 flex items-center text-xs text-gray-500">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {new Date("2024-03-20").toLocaleDateString()}
-                  </div>
+              {badges && badges.length > 0 ? (
+                badges.map((badge) => (
+                  <motion.div
+                    key={badge.badgeId}
+                    className="relative p-4 rounded-lg border bg-gradient-to-br from-white to-gray-50"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      <div className="mb-2">
+                        {badge.category === 'SUSTAINABILITY' && (
+                          <TreeDeciduous className="h-8 w-8 text-green-500" />
+                        )}
+                        {badge.category === 'LEADERBOARD' && (
+                          <LeaderboardIcon className="h-8 w-8 text-yellow-500" />
+                        )}
+                        {badge.category === 'QUALITY_ENGAGEMENT' && (
+                          <Star className="h-8 w-8 text-blue-500" />
+                        )}
+                        {badge.category === 'QUALITY_SERVICE' && (
+                          <Star className="h-8 w-8 text-purple-500" />
+                        )}
+                      </div>
+                      <h3 className="font-semibold text-sm mb-1">{badge.title}</h3>
+                      <p className="text-xs text-gray-600">{badge.subtitle}</p>
+                      <div className="mt-2 flex items-center text-xs text-gray-500">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(badge.earnedOn).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="col-span-full text-center text-gray-500">
+                  No badges earned yet
                 </div>
-              </motion.div>
+              )}
             </div>
           </CardContent>
         </Card>
