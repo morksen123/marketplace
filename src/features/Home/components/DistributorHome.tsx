@@ -376,17 +376,17 @@ export const DistributorHome = () => {
                       </TableCell>
                       <TableCell>
                         <Tooltip title={product.listingTitle} arrow>
-                          <span>{truncateText(product.listingTitle, 100)}</span>
+                          <div>{truncateText(product.listingTitle, 100)}</div>
                         </Tooltip>
                       </TableCell>
                       <TableCell>
                         <Tooltip title={foodCategoryMapping[product.foodCategory] || product.foodCategory} arrow>
-                          <span>{truncateText(foodCategoryMapping[product.foodCategory] || product.foodCategory, 30)}</span>
+                          <div>{truncateText(foodCategoryMapping[product.foodCategory] || product.foodCategory, 30)}</div>
                         </Tooltip>
                       </TableCell>
                       <TableCell>
                         <Tooltip title={foodConditionMapping[product.foodCondition] || product.foodCondition} arrow>
-                          {truncateText(foodConditionMapping[product.foodCondition] || product.foodCondition, 30)}
+                          <div>{truncateText(foodConditionMapping[product.foodCondition] || product.foodCondition, 30)}</div>
                         </Tooltip>
                       </TableCell>
                       <TableCell>${product.price.toFixed(2)}</TableCell>
