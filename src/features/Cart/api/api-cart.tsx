@@ -16,6 +16,13 @@ export interface CartLineItem {
   promotionDiscount: number;
 }
 
+interface ImpactMetricsDto {
+  weightSaved: number;
+  co2Prevented: number;
+  treesEquivalent: number;
+  electricityDaysSaved: number;
+}
+
 export async function viewCart(): Promise<CartDto | null> {
   const { data } = await get<CartDto>('/cart/viewCart');
   return data || null;
@@ -50,3 +57,9 @@ export async function removeItemFromCart(productId: string) {
 export async function createTransaction(paymentIntentId: string) {
   await post(`/cart/create-transaction?paymentIntentId=${paymentIntentId}`, {});
 }
+
+export async function calculateCartImpact(): Promise<ImpactMetricsDto | null> {
+  const { data } = await get<ImpactMetricsDto>('/cart/calculate-impact');
+  return data || null;
+}
+
