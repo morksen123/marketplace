@@ -1,20 +1,22 @@
 import logo from '@/assets/gudfood-logo.png';
+import { notificationsAtom } from '@/atoms/notificationAtoms';
 import { Button } from '@/components/ui/button';
 import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
 import { useCart } from '@/features/Cart/hooks/useCart';
+import { HomepageReviewPrompt } from '@/features/Feedback/HomepageReviewPrompt';
+import { NotificationDropdown } from '@/features/Notifications/components/NotificationDropdown';
+import { orderLineItems } from '@/mock-data';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import LeaderboardOutlinedIcon from '@mui/icons-material/LeaderboardOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import { notificationsAtom } from '@/atoms/notificationAtoms';
-import { NotificationDropdown } from '@/features/Notifications/components/NotificationDropdown';
-import LeaderboardOutlinedIcon from '@mui/icons-material/LeaderboardOutlined';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface BuyerNavMenuProps {
   showTabs?: boolean;
@@ -37,7 +39,8 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
   const { logout } = useAuthActions();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [adminPromotions, setAdminPromotions] = useState<AdminPromotion[]>([]);
-  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [showNotificationDropdown, setShowNotificationDropdown] =
+    useState(false);
   const [notifications, setNotifications] = useAtom(notificationsAtom);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +51,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
 
   useEffect(() => {
     const currentPath = window.location.pathname;
-    const currentTab = tabs.find(tab => tab.route === currentPath);
+    const currentTab = tabs.find((tab) => tab.route === currentPath);
     if (currentTab) {
       setSelectedTab(currentTab.name);
     }
@@ -122,29 +125,37 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
 
   const toggleNotificationDropdown = () => {
     setShowNotificationDropdown(!showNotificationDropdown);
-    console.log('Notification dropdown toggled. Current state:', !showNotificationDropdown);
+    console.log(
+      'Notification dropdown toggled. Current state:',
+      !showNotificationDropdown,
+    );
   };
 
   useEffect(() => {
     console.log('Notifications in BuyerNavMenu:', notifications);
   }, [notifications]);
 
-  const handleNotificationRead = useCallback((notificationId: string) => {
-    console.log('Marking notification as read:', notificationId);
-    setNotifications(prevNotifications => {
-      const updatedNotifications = prevNotifications.map(notification =>
-        notification.notificationId.toString() === notificationId
-          ? { ...notification, read: true }
-          : notification
-      );
-      console.log('Updated notifications:', updatedNotifications);
-      return updatedNotifications;
-    });
-  }, [setNotifications]);
+  const handleNotificationRead = useCallback(
+    (notificationId: string) => {
+      console.log('Marking notification as read:', notificationId);
+      setNotifications((prevNotifications) => {
+        const updatedNotifications = prevNotifications.map((notification) =>
+          notification.notificationId.toString() === notificationId
+            ? { ...notification, read: true }
+            : notification,
+        );
+        console.log('Updated notifications:', updatedNotifications);
+        return updatedNotifications;
+      });
+    },
+    [setNotifications],
+  );
 
   // Calculate unread notifications count
   const unreadNotificationsCount = useMemo(() => {
-    const count = notifications.filter(notification => !notification.read).length;
+    const count = notifications.filter(
+      (notification) => !notification.read,
+    ).length;
     console.log('Unread notifications count:', count);
     return count;
   }, [notifications]);
@@ -158,9 +169,16 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
               <ul className="flex flex-wrap justify-center items-center">
                 {adminPromotions.map((promo, index) => (
                   <>
-                    <li key={promo.id} className="text-base font-semibold flex items-center">
-                      <span className="text-xl font-bold">${promo.discountAmount}</span>
-                      <span className="ml-2">off orders ${promo.minimumSpend}+</span>
+                    <li
+                      key={promo.id}
+                      className="text-base font-semibold flex items-center"
+                    >
+                      <span className="text-xl font-bold">
+                        ${promo.discountAmount}
+                      </span>
+                      <span className="ml-2">
+                        off orders ${promo.minimumSpend}+
+                      </span>
                     </li>
                     {index < adminPromotions.length - 1 && (
                       <span className="mx-4 text-xl">•</span>
@@ -172,6 +190,9 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
           </div>
         </div>
       )}
+
+      <HomepageReviewPrompt pendingReviews={orderLineItems} />
+
       <div className="w-full p-4">
         <div className="flex justify-between items-center">
           {/* Logo Section */}
@@ -191,7 +212,11 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
                 onChange={handleInputChange}
                 className="w-full py-2 px-4 rounded-lg focus:outline-none border border-gray-300 bg-gray-100 text-black"
               />
-              <button type="submit" className="absolute right-0 top-0 mt-1.5 mr-2" aria-label="Search">
+              <button
+                type="submit"
+                className="absolute right-0 top-0 mt-1.5 mr-2"
+                aria-label="Search"
+              >
                 <SearchIcon className="w-6 h-6 text-gray-600" />
               </button>
             </form>
@@ -245,8 +270,9 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
               >
                 <PersonOutlineOutlinedIcon className="mr-1" /> Account
                 <ArrowDropDownIcon
-                  className={`transition-transform duration-300 ${showAccountDropdown ? 'rotate-180' : ''
-                    }`}
+                  className={`transition-transform duration-300 ${
+                    showAccountDropdown ? 'rotate-180' : ''
+                  }`}
                 />
               </button>
               {showAccountDropdown && (
@@ -289,15 +315,16 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
 
       {/* Tabs Menu */}
       {showTabs && (
-        <div className="bg-white w-full">
+        <div className="bg-white w-full border-t border-gray-100">
           <div className="flex justify-between">
             {tabs.map((tab) => (
               <button
                 key={tab.name}
-                className={`py-4 px-4 text-black focus:outline-none flex-grow ${selectedTab === tab.name
+                className={`py-4 px-4 text-black focus:outline-none flex-grow ${
+                  selectedTab === tab.name
                     ? 'border-b-2 border-green-500 text-green-500'
                     : 'hover:text-green-500'
-                  }`}
+                }`}
                 onClick={() => handleTabClick(tab.name, tab.route)}
               >
                 {tab.name}
