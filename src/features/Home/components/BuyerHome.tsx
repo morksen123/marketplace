@@ -5,9 +5,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Apple, TreePine, Factory, Lightbulb } from 'lucide-react';
-
+import { ImpactGoalsProgress } from './ImpactGoalsProgress';
 // Update the interface
-interface ImpactMetricsDto {
+interface ImpactMetrics {
   weightSaved: number;
   co2Prevented: number;
   treesEquivalent: number;
@@ -18,7 +18,12 @@ export const BuyerHome = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const navigate = useNavigate();
   const { favourites, toggleFavourite, checkFavourite } = useFavourites();
-  const [impactMetrics, setImpactMetrics] = useState<ImpactMetricsDto | null>(null);
+  const [impactMetrics, setImpactMetrics] = useState<ImpactMetrics>({
+    weightSaved: 0,
+    co2Prevented: 0,
+    treesEquivalent: 0,
+    electricityDaysSaved: 0
+  });
 
   // Fetch products from the API when the component mounts
   useEffect(() => {
@@ -72,6 +77,7 @@ export const BuyerHome = () => {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include'
         });
         if (response.ok) {
           const data = await response.json();
@@ -94,14 +100,14 @@ export const BuyerHome = () => {
 
   return (
     <div className="pb-12">
-      <motion.section 
+      <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="bg-green-50 py-12"
       >
         <div className="wrapper">
-          <motion.h2 
+          <motion.h2
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
@@ -116,7 +122,7 @@ export const BuyerHome = () => {
             </motion.span>
           </motion.h2>
 
-          <motion.div 
+          <motion.div
             initial="hidden"
             animate="show"
             variants={{
@@ -141,7 +147,7 @@ export const BuyerHome = () => {
                   <Apple className="h-8 w-8 text-green-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-green-600">
-                  {impactMetrics?.weightSaved.toFixed(1) || 0} kg
+                  {impactMetrics.weightSaved.toFixed(1)} kg
                 </h3>
                 <p className="text-gray-600">Food Waste Prevented</p>
               </div>
@@ -160,7 +166,7 @@ export const BuyerHome = () => {
                   <Factory className="h-8 w-8 text-blue-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-blue-600">
-                  {impactMetrics?.co2Prevented?.toFixed(1) || 0} kg
+                  {impactMetrics.co2Prevented.toFixed(1)} kg
                 </h3>
                 <p className="text-gray-600">CO₂ Emissions Prevented</p>
               </div>
@@ -179,7 +185,7 @@ export const BuyerHome = () => {
                   <TreePine className="h-8 w-8 text-yellow-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-yellow-600">
-                  {impactMetrics?.treesEquivalent?.toFixed(1) || 0}
+                  {impactMetrics.treesEquivalent.toFixed(1)}
                 </h3>
                 <p className="text-gray-600">Trees Equivalent Saved</p>
               </div>
@@ -198,7 +204,7 @@ export const BuyerHome = () => {
                   <Lightbulb className="h-8 w-8 text-purple-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-purple-600">
-                  {impactMetrics?.electricityDaysSaved?.toFixed(1) || 0}
+                  {impactMetrics.electricityDaysSaved.toFixed(1)}
                 </h3>
                 <p className="text-gray-600">Days of Electricity Saved</p>
               </div>
@@ -214,6 +220,11 @@ export const BuyerHome = () => {
             Together, we're making a difference! 🌱
           </motion.p>
         </div>
+
+        <section className="wrapper mt-10">
+          <ImpactGoalsProgress weightSaved={impactMetrics.weightSaved} />
+        </section>
+
       </motion.section>
 
       <section className="wrapper mt-10">
