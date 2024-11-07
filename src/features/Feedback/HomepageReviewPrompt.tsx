@@ -1,5 +1,4 @@
-import { Package, X } from 'lucide-react';
-import { useState } from 'react';
+import { Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { OrderLineItem } from '../Orders/types/orders';
 
@@ -10,12 +9,6 @@ interface HomepageReviewPromptProps {
 export const HomepageReviewPrompt = ({
   pendingReviews,
 }: HomepageReviewPromptProps) => {
-  const [isVisible, setIsVisible] = useState(true);
-
-  if (!isVisible || pendingReviews.length === 0) {
-    return null;
-  }
-
   return (
     <div className="w-full bg-blue-50">
       <div className="w-full px-10">
@@ -59,15 +52,6 @@ export const HomepageReviewPrompt = ({
             >
               Write Reviews
             </Link>
-
-            {/* Dismiss Button */}
-            <button
-              onClick={() => setIsVisible(false)}
-              className=" rounded-full hover:bg-blue-100 transition-colors duration-200"
-              aria-label="Dismiss notification"
-            >
-              <X className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-            </button>
           </div>
         </div>
       </div>

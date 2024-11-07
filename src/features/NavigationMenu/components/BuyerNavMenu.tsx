@@ -190,7 +190,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
           </div>
         </div>
       )}
-
+      {/* TODO: add visible condition */}
       <HomepageReviewPrompt pendingReviews={orderLineItems} />
 
       <div className="w-full p-4">
