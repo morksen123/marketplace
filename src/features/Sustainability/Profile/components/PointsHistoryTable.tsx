@@ -18,6 +18,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, ArrowDown, ArrowUp, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface PointsHistoryEntry {
   id: number;
@@ -36,6 +43,8 @@ export const PointsHistory: React.FC = () => {
   // Use React fetch to get points history
   const [pointsHistory, setPointsHistory] = useState<PointsHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [selectedSource, setSelectedSource] = useState<string>('all');
 
   useEffect(() => {
     const fetchPointsHistory = async () => {
@@ -79,7 +88,8 @@ export const PointsHistory: React.FC = () => {
 
   const filteredHistory = pointsHistory
     ?.filter((entry) =>
-      entry.description.toLowerCase().includes(searchTerm.toLowerCase())
+      entry.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (selectedSource === 'all' || entry.source === selectedSource)
     )
     .sort((a, b) => {
       const dateA = new Date(a.earnedDateTime).getTime();
@@ -92,6 +102,11 @@ export const PointsHistory: React.FC = () => {
   const currentItems = filteredHistory.slice(indexOfFirstItem, indexOfLastItem);
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  const getUniqueSources = () => {
+    const sources = new Set(pointsHistory?.map(entry => entry.source) || []);
+    return Array.from(sources);
+  };
 
   if (isLoading) {
     return <div className="text-center py-4">Loading points history...</div>;
@@ -106,15 +121,32 @@ export const PointsHistory: React.FC = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="relative flex-grow max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <Input
-              placeholder="Search by description"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+        <div className="flex items-center justify-between mb-6 gap-4">
+          <div className="flex items-center gap-4 flex-grow max-w-lg">
+            <div className="relative flex-grow">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Input
+                placeholder="Search by description"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={selectedSource} onValueChange={setSelectedSource}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sources</SelectItem>
+                {getUniqueSources().map((source) => (
+                  <SelectItem key={source} value={source}>
+                    {source.replace('_', ' ').split(' ').map(word => 
+                      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                    ).join(' ')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <Button
             variant="outline"
