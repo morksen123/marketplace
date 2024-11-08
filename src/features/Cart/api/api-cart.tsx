@@ -21,6 +21,11 @@ interface ImpactMetricsDto {
   co2Prevented: number;
   treesEquivalent: number;
   electricityDaysSaved: number;
+  acNightsSaved: number;
+  mealsSaved: number;
+  waterLitresSaved: number;
+  carKmEquivalent: number;
+  showersEquivalent: number;
 }
 
 export async function viewCart(): Promise<CartDto | null> {

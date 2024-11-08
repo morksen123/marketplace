@@ -24,7 +24,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-
+import food from '@/assets/food.png';
+import co2 from '@/assets/co2.png';
+import electricity from '@/assets/electricity.png';
+import water from '@/assets/water.png';
+import { ImpactExplanation } from './components/ImpactExplanation';
+import { ShareContent } from './components/Share';
+import { SustainabilityImpact } from './components/SustainabilityImpact';
 interface Profile {
   points: number;
   firstName: string;
@@ -48,6 +54,12 @@ interface ImpactMetricsDto {
   co2Prevented: number;
   treesEquivalent: number;
   electricityDaysSaved: number;
+  acNightsSaved: number;
+  mealsSaved: number;
+  waterLitresSaved: number;
+  showersEquivalent: number;
+  swimmingPoolsEquivalent: number;
+  carKmEquivalent: number;
 }
 
 const fetchProfile = async () => {
@@ -128,6 +140,10 @@ export const Profile: React.FC = () => {
   const [referralCodeInput, setReferralCodeInput] = useState<string>('');
   const [badges, setBadges] = useState<Badge[]>([]);
   const [impactMetrics, setImpactMetrics] = useState<ImpactMetricsDto | null>(null);
+  const [selectedImpact, setSelectedImpact] = useState<{
+    category: 'food' | 'water' | 'electricity' | 'carbon';
+    type: 'personal' | 'community';
+  } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -227,67 +243,12 @@ export const Profile: React.FC = () => {
     }
   };
 
-  const renderRankIcon = (rank: number) => {
-    switch (true) {
-      case rank === 1:
-        return <Trophy className="text-yellow-500" sx={{ fontSize: 28 }} />;
-      case rank <= 3:
-        return <Medal className="text-gray-400" sx={{ fontSize: 24 }} />;
-      case rank <= 10:
-        return <Star className="text-amber-500" sx={{ fontSize: 24 }} />;
-      default:
-        return <Star className="text-gray-600" sx={{ fontSize: 20 }} />;
-    }
-  };
 
-  const shareToSocialMedia = (platform: 'linkedin' | 'facebook' | 'instagram') => {
-    // Create a more concise message for LinkedIn
-    const linkedInMessage = `I'm making a sustainable impact with GudFood! 🌱\n\n` +
-      `• Prevented ${impactMetrics?.weightSaved.toFixed(2)}kg of food waste\n` +
-      `• Saved ${impactMetrics?.co2Prevented.toFixed(2)}kg of CO₂ emissions\n` +
-      `• Equivalent to ${impactMetrics?.treesEquivalent.toFixed(1)} trees\n\n` +
-      `Join me in reducing food waste!`;
-
-    // Get the base URL of your application
-    const baseUrl = window.location.origin;
-    const shareUrl = `${baseUrl}/join?ref=${profile.referralCode}`;
-
-    switch (platform) {
-      case 'linkedin':
-        // LinkedIn sharing with specific URL parameters
-        const linkedInUrl = new URL('https://www.linkedin.com/sharing/share-offsite/');
-        linkedInUrl.searchParams.append('url', shareUrl);
-        linkedInUrl.searchParams.append('summary', linkedInMessage);
-        linkedInUrl.searchParams.append('source', 'GudFood');
-        
-        window.open(
-          linkedInUrl.toString(),
-          'LinkedInShare',
-          'width=800,height=600,menubar=no,toolbar=no,status=no'
-        );
-        break;
-
-      case 'facebook':
-        // Facebook sharing with quote
-        const facebookText = encodeURIComponent(impactMessage);
-        window.open(
-          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${facebookText}`,
-          '_blank',
-          'width=600,height=600'
-        );
-        break;
-
-      case 'instagram':
-        // Since Instagram doesn't support direct URL sharing, we'll create a copyable message
-        navigator.clipboard.writeText(impactMessage).then(() => {
-          toast({
-            title: "Instagram Sharing",
-            description: "Impact metrics copied! Share a screenshot of your stats along with the copied message on Instagram.",
-            duration: 5000,
-          });
-        });
-        break;
-    }
+  const handleImpactCardClick = (
+    category: 'food' | 'water' | 'electricity' | 'carbon',
+    type: 'personal' | 'community'
+  ) => {
+    setSelectedImpact({ category, type });
   };
 
   return (
@@ -310,10 +271,6 @@ export const Profile: React.FC = () => {
                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 opacity-10" />
                 <div className="absolute inset-2 rounded-full bg-white flex flex-col items-center justify-center">
                   <h2 className="text-2xl font-bold">{profile.firstName} {profile.lastName}</h2>
-                  <div className="flex items-center gap-2 mt-2">
-                    {renderRankIcon(3)}
-                    <span className="text-gray-600">Rank #3</span>
-                  </div>
                 </div>
               </motion.div>
 
@@ -438,108 +395,11 @@ export const Profile: React.FC = () => {
         {/* Statistics Tab */}
         <TabsContent value="stats">
           <motion.div variants={cardVariants}>
-            {/* Impact Summary Card */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TreeDeciduous className="h-5 w-5" />
-                  Your Sustainability Impact
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center text-lg text-gray-700 mb-6">
-                  <p className="leading-relaxed">
-                    Your sustainable choices have prevented{' '}
-                    <span className="font-bold text-green-600">
-                      {(impactMetrics?.weightSaved ?? 0).toFixed(2)} kg
-                    </span> of food waste
-                    and saved{' '}
-                    <span className="font-bold text-green-600">
-                      {(impactMetrics?.co2Prevented ?? 0).toFixed(2)} kg
-                    </span> of CO₂ emissions!
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    {
-                      icon: <Recycle className="h-8 w-8" />,
-                      value: (impactMetrics?.weightSaved ?? 0).toFixed(1),
-                      suffix: "kg",
-                      label: "Food Saved",
-                      color: "green",
-                      bgColor: "bg-green-50"
-                    },
-                    {
-                      icon: <Battery className="h-8 w-8" />,
-                      value: (impactMetrics?.co2Prevented ?? 0).toFixed(1),
-                      suffix: "kg",
-                      label: "CO₂ Prevented",
-                      color: "yellow",
-                      bgColor: "bg-yellow-50"
-                    },
-                    {
-                      icon: <Droplets className="h-8 w-8" />,
-                      value: (impactMetrics?.electricityDaysSaved ?? 0).toFixed(1),
-                      suffix: "days",
-                      label: "Electricity Days Saved",
-                      color: "blue",
-                      bgColor: "bg-blue-50"
-                    },
-                    {
-                      icon: <TreeDeciduous className="h-8 w-8" />,
-                      value: (impactMetrics?.treesEquivalent ?? 0).toFixed(1),
-                      suffix: "",
-                      label: "Trees Equivalent",
-                      color: "emerald",
-                      bgColor: "bg-emerald-50"
-                    }
-                  ].map((metric, index) => (
-                    <motion.div
-                      key={index}
-                      whileHover={{ scale: 1.05 }}
-                      className="relative overflow-hidden"
-                    >
-                      <Card className={`border-none ${metric.bgColor}`}>
-                        <CardContent className="pt-6">
-                          <motion.div
-                            className="flex items-center justify-center flex-col relative z-10"
-                            whileHover={{ y: -5 }}
-                          >
-                            <div className={`text-${metric.color}-500 mb-2`}>
-                              {metric.icon}
-                            </div>
-                            <p className={`text-2xl font-bold text-${metric.color}-600`}>
-                              {metric.value}{metric.suffix}
-                            </p>
-                            <p className="text-sm text-gray-600">{metric.label}</p>
-                          </motion.div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div className="mt-6 flex flex-wrap justify-center gap-4">
-                  {[
-                    { platform: 'linkedin' as const, icon: <LinkedInIcon className="h-4 w-4" />, label: 'Share on LinkedIn' },
-                    { platform: 'facebook' as const, icon: <FacebookIcon className="h-4 w-4" />, label: 'Share on Facebook' },
-                    { platform: 'instagram' as const, icon: <InstagramIcon className="h-4 w-4" />, label: 'Share on Instagram' }
-                  ].map(({ platform, icon, label }) => (
-                    <Button
-                      key={platform}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => shareToSocialMedia(platform)}
-                      className="flex items-center gap-2 min-w-[160px]"
-                    >
-                      {icon}
-                      {label}
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <SustainabilityImpact 
+              impactMetrics={impactMetrics}
+              onImpactCardClick={handleImpactCardClick}
+              cardVariants={cardVariants}
+            />
           </motion.div>
         </TabsContent>
 
@@ -636,6 +496,20 @@ export const Profile: React.FC = () => {
           </motion.div>
         </TabsContent>
       </Tabs>
+
+      <Dialog 
+        open={selectedImpact !== null} 
+        onOpenChange={() => setSelectedImpact(null)}
+      >
+        <DialogContent className="max-w-4xl">
+          {selectedImpact && (
+            <ImpactExplanation 
+              category={selectedImpact.category} 
+              type={selectedImpact.type}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
