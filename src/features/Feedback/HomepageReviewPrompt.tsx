@@ -32,7 +32,7 @@ export const HomepageReviewPrompt = ({
             <div className="hidden sm:flex -space-x-2">
               {pendingReviews.slice(0, 3).map((review) => (
                 <img
-                  key={review.orderId}
+                  key={review.orderLineItemId}
                   src="/api/placeholder/32/32"
                   alt={review.productName}
                   className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm"

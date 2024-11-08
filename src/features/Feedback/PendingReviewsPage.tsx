@@ -1,46 +1,78 @@
-import { ChevronRight, Clock, Package, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { sampleOrders } from '@/mock-data';
+import { ChevronRight, Clock, Package } from 'lucide-react';
+import { useState } from 'react';
+import { BulkReviewModal } from './BulkReviewModal';
+import { SingleItemReview } from './SingleItemReview';
+
+const pendingOrders = [
+  {
+    id: 'ORD-123',
+    deliveryDate: 'Today, 2:30 PM',
+    items: [
+      {
+        id: 1,
+        name: 'Imperfect Apples',
+        quantity: '1kg',
+        price: '$2.99',
+        image: '/api/placeholder/80/80',
+      },
+      {
+        id: 2,
+        name: 'Odd Shaped Carrots',
+        quantity: '500g',
+        price: '$1.99',
+        image: '/api/placeholder/80/80',
+      },
+    ],
+  },
+  {
+    id: 'ORD-124',
+    deliveryDate: 'Today, 3:15 PM',
+    items: [
+      {
+        id: 3,
+        name: 'Bruised Bananas',
+        quantity: '1kg',
+        price: '$2.49',
+        image: '/api/placeholder/80/80',
+      },
+    ],
+  },
+];
 
 export const PendingReviewsPage = () => {
-  const pendingOrders = [
-    {
-      id: 'ORD-123',
-      deliveryDate: 'Today, 2:30 PM',
-      items: [
-        {
-          id: 1,
-          name: 'Imperfect Apples',
-          quantity: '1kg',
-          price: '$2.99',
-          image: '/api/placeholder/80/80',
-        },
-        {
-          id: 2,
-          name: 'Odd Shaped Carrots',
-          quantity: '500g',
-          price: '$1.99',
-          image: '/api/placeholder/80/80',
-        },
-      ],
-    },
-    {
-      id: 'ORD-124',
-      deliveryDate: 'Today, 3:15 PM',
-      items: [
-        {
-          id: 3,
-          name: 'Bruised Bananas',
-          quantity: '1kg',
-          price: '$2.49',
-          image: '/api/placeholder/80/80',
-        },
-      ],
-    },
-  ];
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [isBulkReviewModalOpen, setIsBulkReviewModalOpen] = useState(false);
+  const [isSingleItemReviewOpen, setIsSingleItemReviewOpen] = useState(false);
+
+  const handleReviewClick = (item, orderId) => {
+    setSelectedItem(item);
+    setIsSingleItemReviewOpen(true);
+    setSelectedOrderId(orderId);
+  };
+
+  const handleCloseReview = () => {
+    setSelectedItem(null);
+    setSelectedOrderId(null);
+  };
+
+  const handleSubmitReview = async (reviewData) => {
+    try {
+      // Call your API to submit the review
+      // await reviewService.createReview(reviewData);
+      // Refresh the pending reviews list
+      // You might want to remove the reviewed item from the list
+    } catch (error) {
+      console.error('Failed to submit review:', error);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="py-1 text-left">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <h1 className="text-xl font-semibold">Pending Reviews</h1>
           <p className="text-sm text-gray-600 mt-1">
@@ -68,9 +100,12 @@ export const PendingReviewsPage = () => {
                       </div>
                     </div>
                   </div>
-                  <button className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                  <Button
+                    onClick={() => setIsBulkReviewModalOpen(true)}
+                    variant={'secondary'}
+                  >
                     Review All Items
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -92,25 +127,13 @@ export const PendingReviewsPage = () => {
                               Quantity: {item.quantity}
                             </p>
                           </div>
-                          <button className="flex items-center space-x-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                          <button
+                            onClick={() => handleReviewClick(item, order.id)}
+                            className="flex items-center space-x-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
                             <span>Write Review</span>
                             <ChevronRight className="h-4 w-4" />
                           </button>
-                        </div>
-
-                        {/* Quick Rating Option */}
-                        <div className="mt-4">
-                          <div className="flex items-center space-x-1">
-                            {[1, 2, 3, 4, 5].map((rating) => (
-                              <Star
-                                key={rating}
-                                className="w-5 h-5 text-gray-300 cursor-pointer hover:text-yellow-400"
-                              />
-                            ))}
-                            <span className="text-sm text-gray-500 ml-2">
-                              Quick rate
-                            </span>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -121,7 +144,7 @@ export const PendingReviewsPage = () => {
               {/* Order Footer */}
               <div className="p-4 bg-blue-50 rounded-b-lg">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-blue-600">
+                  <span className="text-secondary">
                     Your reviews help save {order.items.length} items from waste
                   </span>
                   <span className="text-gray-600">
@@ -133,6 +156,21 @@ export const PendingReviewsPage = () => {
           ))}
         </div>
       </div>
+      {selectedItem && (
+        <SingleItemReview
+          item={selectedItem}
+          orderId={selectedOrderId}
+          isOpen={isSingleItemReviewOpen}
+          onClose={() => setIsSingleItemReviewOpen(false)}
+          onSubmit={() => {}}
+        />
+      )}
+
+      <BulkReviewModal
+        orders={sampleOrders}
+        isOpen={isBulkReviewModalOpen}
+        onClose={() => setIsBulkReviewModalOpen(false)}
+      />
     </div>
   );
 };

@@ -102,3 +102,20 @@ export const orderLineItems: OrderLineItem[] = [
     pickUpLocation: 'Store #9',
   },
 ];
+
+export const sampleOrders = [
+  {
+    id: 'ORD-123',
+    items: [
+      { id: 1, name: 'Imperfect Apples', orderId: 'ORD-123' },
+      { id: 2, name: 'Bruised Bananas', orderId: 'ORD-123' },
+    ],
+  },
+  {
+    id: 'ORD-124',
+    items: [
+      { id: 3, name: 'Odd-Shaped Carrots', orderId: 'ORD-124' },
+      { id: 4, name: 'Overripe Tomatoes', orderId: 'ORD-124' },
+    ],
+  },
+];
