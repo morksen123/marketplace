@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Medal, Trophy, Star, ShoppingCart, Users } from 'lucide-react';
+import { Medal, Trophy, Star, ShoppingCart, Users, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { BuyerInformation } from './components/BuyerInformation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -46,6 +46,19 @@ export const Leaderboard = () => {
   const [currentUser, setCurrentUser] = useState<BuyerDTO | null>(null);
   const [referralLink, setReferralLink] = useState<string | null>(null);
   const { cart } = useCart();
+  const [daysUntilReset, setDaysUntilReset] = useState<number>(0);
+
+  const calculateDaysUntilReset = () => {
+    const today = new Date();
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const diffTime = Math.abs(lastDay.getTime() - today.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  useEffect(() => {
+    setDaysUntilReset(calculateDaysUntilReset());
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -261,6 +274,29 @@ export const Leaderboard = () => {
       animate="visible"
       variants={containerVariants}
     >
+      <motion.div 
+        className="w-full py-3"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div 
+            className="flex items-center justify-center gap-3"
+            whileHover={{ scale: 1.01 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <Calendar className="h-5 w-5 text-green-400" />
+            <p className="text-center text-sm">
+              <span className="text-gray-800 mr-2">Monthly leaderboard resets in</span>
+              <span className="font-bold bg-green-500 bg-clip-text text-transparent">
+                {daysUntilReset} {daysUntilReset === 1 ? 'day' : 'days'}
+              </span>
+            </p>
+          </motion.div>
+        </div>
+      </motion.div>
+
       {/* Full-width Status Message */}
       {getLeaderboardMessage() && (
         <motion.div className="w-full">
@@ -324,9 +360,7 @@ export const Leaderboard = () => {
                     <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto">
                       {/* 2nd Place */}
                       <div className="flex flex-col items-center">
-                        <p className="text-black font-medium mb-1">{topThree[1]?.name}</p>
-                        <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[1]?.weightOfFoodSaved || 0} kg</p>
-                        <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[1]?.referralCount || 0}</p>
+                        <p className="text-black font-bold text-xl mb-1">{topThree[1]?.name}</p>
                         <motion.div
                           className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-white mb-8"
                           whileHover={{ scale: 1.05 }}
@@ -339,7 +373,9 @@ export const Leaderboard = () => {
                           />
                         </motion.div>
                         <div className="relative w-full">
-                          <p className="text-black text-xl font-bold mb-2">{topThree[1]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black text-l font-bold mb-2">{topThree[1]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[1]?.weightOfFoodSaved || 0} kg</p>
+                          <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[1]?.referralCount || 0}</p>
                           <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
                           <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-16 rounded-t-lg flex items-center justify-center">
                             <span className="text-3xl font-bold text-white">2</span>
@@ -349,9 +385,7 @@ export const Leaderboard = () => {
 
                       {/* 1st Place */}
                       <div className="flex flex-col items-center -mt-8">
-                        <p className="text-black font-medium mb-1">{topThree[0]?.name}</p>
-                        <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[0]?.weightOfFoodSaved || 0} kg</p>
-                        <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[0]?.referralCount || 0}</p>
+                        <p className="text-black font-bold text-xl mb-1">{topThree[0]?.name}</p>
                         <motion.div
                           className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-white mb-8"
                           whileHover={{ scale: 1.05 }}
@@ -364,7 +398,9 @@ export const Leaderboard = () => {
                           />
                         </motion.div>
                         <div className="relative w-full">
-                          <p className="text-black text-xl font-bold mb-2">{topThree[0]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black text-l font-bold mb-2">{topThree[0]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[0]?.weightOfFoodSaved || 0} kg</p>
+                          <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[0]?.referralCount || 0}</p>
                           <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
                           <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-20 rounded-t-lg flex items-center justify-center">
                             <span className="text-4xl font-bold text-white">1</span>
@@ -374,9 +410,7 @@ export const Leaderboard = () => {
 
                       {/* 3rd Place */}
                       <div className="flex flex-col items-center">
-                        <p className="text-black font-medium mb-1">{topThree[2]?.name}</p>
-                        <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[2]?.weightOfFoodSaved || 0} kg</p>
-                        <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[2]?.referralCount || 0}</p>
+                        <p className="text-black font-bold text-xl mb-1">{topThree[2]?.name}</p>
 
                         <motion.div
                           className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-white mb-8"
@@ -390,7 +424,9 @@ export const Leaderboard = () => {
                           />
                         </motion.div>
                         <div className="relative w-full">
-                          <p className="text-black text-xl font-bold mb-2 mt-1">{topThree[2]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black text-l font-bold mb-2 mt-1">{topThree[2]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[2]?.weightOfFoodSaved || 0} kg</p>
+                          <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[2]?.referralCount || 0}</p>
                           <div className="absolute inset-x-0 bottom-0 h-15 bg-[#3651C0]/20 rounded-t-lg" />
                           <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-14 rounded-t-lg flex items-center justify-center">
                             <span className="text-3xl font-bold text-white">3</span>
@@ -505,7 +541,7 @@ export const Leaderboard = () => {
               {cart?.cartLineItems.length > 0 && (
                 <Alert
                   variant="default"
-                  className="border-none shadow-lg bg-gradient-to-r from-purple-400 to-pink-500 text-white py-6"
+                  className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100 text-black py-6"
                 >
                   <motion.div
                     className="flex flex-col items-center justify-center gap-3 w-full h-full"
@@ -524,7 +560,7 @@ export const Leaderboard = () => {
                       </div>
                       <Link
                         to="/buyer/cart"
-                        className="mt-2 bg-white text-purple-500 hover:bg-purple-50 font-bold px-8 py-3 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        className="mt-2 bg-white text-indigo-500 hover:bg-purple-50 font-bold px-8 py-3 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                       >
                         Checkout Now →
                       </Link>
@@ -536,7 +572,7 @@ export const Leaderboard = () => {
               {/* Referral Alert */}
               <Alert
                 variant="default"
-                className="border-none shadow-lg bg-gradient-to-r from-green-400 to-emerald-500 text-white py-6"
+                className="border-none shadow-lg bg-gradient-to-br from-emerald-50 to-teal-100 text-black py-6"
               >
                 <motion.div
                   className="flex flex-col items-center justify-center gap-3 w-full h-full"
@@ -555,7 +591,7 @@ export const Leaderboard = () => {
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <button className="mt-2 bg-white text-emerald-600 hover:bg-emerald-50 font-bold px-8 py-3 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                        <button className="mt-2 bg-white text-teal-600 hover:bg-emerald-50 font-bold px-8 py-3 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                           Get Referral Code →
                         </button>
                       </DialogTrigger>

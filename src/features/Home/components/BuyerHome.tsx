@@ -3,15 +3,30 @@ import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 import { Product } from '@/features/ProductCatalogue/constants';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Apple, TreePine, Factory, Lightbulb } from 'lucide-react';
-import { ImpactGoalsProgress } from './ImpactGoalsProgress';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ImpactGoalsProgress } from './ImpactGoalsProgress'
+import food from '@/assets/food.png'
+import co2 from '@/assets/co2.png'
+import electricity from '@/assets/electricity.png'
+import { Card, CardContent } from '@/components/ui/card';
+import bannerImage from '@/assets/buyer-homepage-banner.png';
+import { TreeDeciduous, Recycle } from 'lucide-react';
+import water from '@/assets/water.png'
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ImpactExplanation } from '@/features/Sustainability/Profile/components/ImpactExplanation';
+
 // Update the interface
 interface ImpactMetrics {
   weightSaved: number;
   co2Prevented: number;
   treesEquivalent: number;
   electricityDaysSaved: number;
+  acNightsSaved: number;
+  mealsSaved: number;
+  waterLitresSaved: number;
+  showersEquivalent: number;
+  swimmingPoolsEquivalent: number;
+  carKmEquivalent: number;
 }
 
 export const BuyerHome = () => {
@@ -22,8 +37,49 @@ export const BuyerHome = () => {
     weightSaved: 0,
     co2Prevented: 0,
     treesEquivalent: 0,
-    electricityDaysSaved: 0
+    electricityDaysSaved: 0,
+    acNightsSaved: 0,
+    mealsSaved: 0,
+    waterLitresSaved: 0,
+    showersEquivalent: 0,
+    swimmingPoolsEquivalent: 0,
+    carKmEquivalent: 0
   });
+  const [personalImpactMetrics, setPersonalImpactMetrics] = useState<ImpactMetrics>({
+    weightSaved: 0,
+    co2Prevented: 0,
+    treesEquivalent: 0,
+    electricityDaysSaved: 0,
+    acNightsSaved: 0,
+    mealsSaved: 0,
+    waterLitresSaved: 0,
+    showersEquivalent: 0,
+    swimmingPoolsEquivalent: 0,
+    carKmEquivalent: 0
+  });
+  const [selectedImpact, setSelectedImpact] = useState<{
+    category: 'food' | 'water' | 'electricity' | 'carbon';
+    type: 'personal' | 'community';
+  } | null>(null);
+
+  const cardVariants = {
+    hidden: {
+      opacity: 0,
+      y: 20,
+      rotate: 0
+    },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      rotate: [-2, 1, -1, 2][i % 4],
+      transition: {
+        delay: i * 0.1,
+        duration: 0.5,
+        type: "spring",
+        stiffness: 100
+      }
+    })
+  };
 
   // Fetch products from the API when the component mounts
   useEffect(() => {
@@ -79,6 +135,7 @@ export const BuyerHome = () => {
           },
           credentials: 'include'
         });
+
         if (response.ok) {
           const data = await response.json();
           setImpactMetrics(data);
@@ -90,7 +147,29 @@ export const BuyerHome = () => {
       }
     };
 
+    const fetchPersonalImpactMetrics = async () => {
+      try {
+        const response = await fetch('/api/impact/personal', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setPersonalImpactMetrics(data);
+        } else {
+          console.error('Failed to fetch impact metrics');
+        }
+      } catch (error) {
+        console.error('Error fetching impact metrics:', error);
+      }
+    };
+
     fetchImpactMetrics();
+    fetchPersonalImpactMetrics();
   }, []);
 
   // Function to handle navigation to the product detail page
@@ -98,141 +177,285 @@ export const BuyerHome = () => {
     navigate(`/buyer/view-product/${productId}`);
   };
 
+  const handleImpactCardClick = (
+    category: 'food' | 'water' | 'electricity' | 'carbon',
+    type: 'personal' | 'community'
+  ) => {
+    setSelectedImpact({ category, type });
+  };
+
+  const ImpactDialog = ({ impact, onClose }) => {
+    if (!impact) return null;
+
+    return (
+      <AnimatePresence>
+        <motion.div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          variants={overlayVariants}
+          initial="initial"
+          animate="visible"
+          exit="exit"
+          onClick={onClose}
+        >
+          <motion.div
+            className="bg-white rounded-2xl max-w-md w-full mx-4 overflow-hidden"
+            variants={cardVariants}
+            initial="initial"
+            animate="expanded"
+            exit="exit"
+            onClick={e => e.stopPropagation()}
+          >
+            <ImpactExplanation 
+              category={impact.category}
+              type={impact.type}
+            />
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+    );
+  };
+
   return (
     <div className="pb-12">
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-green-50 py-12"
-      >
-        <div className="wrapper">
-          <motion.h2
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl font-bold text-center mb-8 flex items-center justify-center space-x-2"
-          >
-            <span>Our Community Impact</span>
-            <motion.span
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
-            >
-              🌍
-            </motion.span>
-          </motion.h2>
-
-          <motion.div
-            initial="hidden"
-            animate="show"
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: { staggerChildren: 0.2 }
-              }
-            }}
-            className="grid grid-cols-1 md:grid-cols-4 gap-6"
-          >
-            {/* Food Saved Metric */}
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                show: { opacity: 1, y: 0 }
-              }}
-              className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex flex-col items-center space-y-2">
-                <div className="p-3 bg-green-100 rounded-full">
-                  <Apple className="h-8 w-8 text-green-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-green-600">
-                  {impactMetrics.weightSaved.toFixed(1)} kg
-                </h3>
-                <p className="text-gray-600">Food Waste Prevented</p>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-[80%] lg:mx-auto p-8 md:px-10 xl:px-0">
+        {/* Quote Card - Dark Theme */}
+        <motion.div
+          className="md:col-span-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="bg-[#14171F] text-white h-full relative overflow-hidden">
+            <div className="absolute inset-0">
+              <img
+                src={bannerImage}
+                alt="Banner"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/50" />
+            </div>
+            <CardContent className="p-8 relative z-10">
+              <div>
+                <h2 className="text-3xl font-bold mb-6 leading-tight">
+                  "Cutting food waste is a delicious way of saving money, helping to feed the world and protect the planet."
+                </h2>
+                <p className="text-lg text-gray-300 italic">
+                  – Tristram Stuart
+                </p>
               </div>
-            </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-            {/* CO2 Prevented Metric */}
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                show: { opacity: 1, y: 0 }
-              }}
-              className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex flex-col items-center space-y-2">
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <Factory className="h-8 w-8 text-blue-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-blue-600">
-                  {impactMetrics.co2Prevented.toFixed(1)} kg
-                </h3>
-                <p className="text-gray-600">CO₂ Emissions Prevented</p>
-              </div>
-            </motion.div>
-
-            {/* Trees Equivalent Metric */}
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                show: { opacity: 1, y: 0 }
-              }}
-              className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex flex-col items-center space-y-2">
-                <div className="p-3 bg-yellow-100 rounded-full">
-                  <TreePine className="h-8 w-8 text-yellow-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-yellow-600">
-                  {impactMetrics.treesEquivalent.toFixed(1)}
-                </h3>
-                <p className="text-gray-600">Trees Equivalent Saved</p>
-              </div>
-            </motion.div>
-
-            {/* Electricity Days Saved Metric */}
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                show: { opacity: 1, y: 0 }
-              }}
-              className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex flex-col items-center space-y-2">
-                <div className="p-3 bg-purple-100 rounded-full">
-                  <Lightbulb className="h-8 w-8 text-purple-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-purple-600">
-                  {impactMetrics.electricityDaysSaved.toFixed(1)}
-                </h3>
-                <p className="text-gray-600">Days of Electricity Saved</p>
-              </div>
-            </motion.div>
-          </motion.div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-            className="text-center mt-6 text-gray-600 italic"
-          >
-            Together, we're making a difference! 🌱
-          </motion.p>
-        </div>
-
-        <section className="wrapper mt-10">
+        {/* Monthly Community Goals - Moved up */}
+        <motion.div
+          className="md:col-span-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
           <ImpactGoalsProgress weightSaved={impactMetrics.weightSaved} />
-        </section>
+        </motion.div>
 
-      </motion.section>
+        {/* Impact Statistics Cards - Split into Personal and Community */}
+        <motion.div
+          className="md:col-span-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            {/* Personal Impact */}
+            <Card className="bg-gradient-to-br from-emerald-50 to-teal-100 md:col-span-6">
+              <CardContent className="p-8">
+                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  <TreeDeciduous className="h-6 w-6 text-emerald-600" />
+                  Your Environmental Hero Journey
+                </h2>
+                <div className="grid grid-cols-1 gap-4">
+                  {/* Food Rescued Card */}
+                  <div 
+                    className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    onClick={() => handleImpactCardClick('food', 'personal')}
+                  >
+                    <div className="flex items-start text-left justify-between">
+                      <div className="flex items-start">
+                        <img src={food} alt="Food" className="w-12 h-12 mr-4" />
+                        <div>
+                          <h3 className="text-gray-600 mb-2 font-medium">Food Rescued</h3>
+                          <p className="text-3xl font-bold text-emerald-600"><b>{personalImpactMetrics.weightSaved.toFixed(1)}</b> kg</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base text-gray-600 space-y-2">
+                          <p className="font-medium">🍽️ <b>{personalImpactMetrics.mealsSaved.toFixed(0)}</b> meals saved</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
+                  {/* Carbon Impact Card */}
+                  <div 
+                    className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    onClick={() => handleImpactCardClick('carbon', 'personal')}
+                  >
+                    <div className="flex items-start text-left justify-between">
+                      <div className="flex items-start">
+                        <img src={co2} alt="CO2" className="w-12 h-12 mr-4" />
+                        <div>
+                          <h3 className="text-gray-600 mb-2 font-medium">Carbon Impact</h3>
+                          <p className="text-3xl font-bold text-emerald-600"><b>{personalImpactMetrics.co2Prevented.toFixed(1)}</b> kg</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base text-gray-600 space-y-2">
+                          <p className="font-medium">🚗 <b>{personalImpactMetrics.carKmEquivalent.toFixed(1)}</b> km not driven</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Energy Impact Card */}
+                  <div 
+                    className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    onClick={() => handleImpactCardClick('electricity', 'personal')}
+                  >
+                    <div className="flex items-start text-left justify-between">
+                      <div className="flex items-start">
+                        <img src={electricity} alt="Electricity" className="w-12 h-12 mr-4" />
+                        <div>
+                          <h3 className="text-gray-600 mb-2 font-medium">Energy Impact</h3>
+                          <p className="text-3xl font-bold text-emerald-600"><b>{personalImpactMetrics.acNightsSaved.toFixed(1)}</b> nights</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base text-gray-600 space-y-2">
+                          <p className="font-medium">❄️ <b>{personalImpactMetrics.acNightsSaved.toFixed(1)}</b> number of nights of air conditioning saved</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Water Saved Card */}
+                  <div 
+                    className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    onClick={() => handleImpactCardClick('water', 'personal')}
+                  >
+                    <div className="flex items-start text-left justify-between">
+                      <div className="flex items-start">
+                        <img src={water} alt="Water" className="w-12 h-12 mr-4" />
+                        <div>
+                          <h3 className="text-gray-600 mb-2 font-medium">Water Saved</h3>
+                          <p className="text-3xl font-bold text-emerald-600"><b>{personalImpactMetrics.waterLitresSaved.toFixed(0)}</b> litres</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base text-gray-600 space-y-2">
+                          <p className="font-medium">🚿 <b>{personalImpactMetrics.showersEquivalent.toFixed(0)}</b> showers</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Community Impact */}
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 md:col-span-6">
+              <CardContent className="p-8">
+                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  <Recycle className="h-6 w-6 text-blue-600" />
+                  Our Collective Impact
+                </h2>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all"
+                                      onClick={() => handleImpactCardClick('food', 'community')}>
+                    <div className="flex items-start text-left justify-between">
+                      <div className="flex items-start">
+                        <img src={food} alt="Food" className="w-12 h-12 mr-4" />
+                        <div>
+                          <h3 className="text-gray-600 mb-2 font-medium">Community Food Rescue</h3>
+                          <p className="text-3xl font-bold text-blue-600"><b>{impactMetrics.weightSaved.toFixed(1)}</b> kg</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base text-gray-600 space-y-2">
+                          <p className="font-medium">🍽️ Feeds <b>{impactMetrics.weightSaved.toFixed(0)}</b> people</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all"
+                    onClick={() => handleImpactCardClick('carbon', 'community')}
+                    >
+                    <div className="flex items-start text-left justify-between">
+                      <div className="flex items-start">
+                        <img src={co2} alt="CO2" className="w-12 h-12 mr-4" />
+                        <div>
+                          <h3 className="text-gray-600 mb-2 font-medium">Carbon Prevention</h3>
+                          <p className="text-3xl font-bold text-blue-600"><b>{impactMetrics.co2Prevented.toFixed(1)}</b> kg</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base text-gray-600 space-y-2">
+                          <p className="font-medium">🌳 <b>{impactMetrics.treesEquivalent.toFixed(0)}</b> trees planted</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all"
+                    onClick={() => handleImpactCardClick('electricity', 'community')}
+                  >
+                    <div className="flex items-start text-left justify-between">
+                      <div className="flex items-start">
+                        <img src={electricity} alt="Electricity" className="w-12 h-12 mr-4" />
+                        <div>
+                          <h3 className="text-gray-600 mb-2 font-medium">Energy Savings</h3>
+                          <p className="text-3xl font-bold text-blue-600"><b>{impactMetrics.electricityDaysSaved.toFixed(1)}</b> days</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base text-gray-600 space-y-2">
+                          <p className="font-medium">🏠 Powers <b>{(impactMetrics.electricityDaysSaved * 0.1).toFixed(0)}</b> homes</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Water Saved Card */}
+                  <div className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all"
+                    onClick={() => handleImpactCardClick('water', 'community')}
+                  > 
+                    <div className="flex items-start text-left justify-between">
+                      <div className="flex items-start">
+                        <img src={water} alt="Water" className="w-12 h-12 mr-4" />
+                        <div>
+                          <h3 className="text-gray-600 mb-2 font-medium">Water Saved</h3>
+                          <p className="text-3xl font-bold text-blue-600"><b>{personalImpactMetrics.waterLitresSaved.toFixed(0)}</b> litres</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base text-gray-600 space-y-2">
+                          <p className="font-medium">🏊‍♂️ As much as <b>{personalImpactMetrics.swimmingPoolsEquivalent.toFixed(0)}</b> Olympic swimming pools</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Products section with wrapper class */}
       <section className="wrapper mt-10">
-        {/* To refactor ProductCard */}
         <h3 className="text-3xl text-left font-bold text-gray-800">
           Our Products
         </h3>
-        {/* Products Listings */}
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.length > 0 ? (
             products.map((product) => (
@@ -253,6 +476,20 @@ export const BuyerHome = () => {
           )}
         </div>
       </section>
+
+      <Dialog 
+        open={selectedImpact !== null} 
+        onOpenChange={() => setSelectedImpact(null)}
+      >
+        <DialogContent className="max-w-4xl">
+          {selectedImpact && (
+            <ImpactExplanation 
+              category={selectedImpact.category} 
+              type={selectedImpact.type}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
