@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Medal, Trophy, Star, TreeDeciduous, Droplets, Battery, Recycle, Info, TrendingUp } from 'lucide-react';
-import { motion  } from 'framer-motion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { LinearProgress, Box, Typography } from '@mui/material';
+import { Medal, Trophy, Star, ShoppingCart, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { BuyerInformation } from './components/BuyerInformation';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Link } from 'react-router-dom';
+import { useCart } from '@/features/Cart/hooks/useCart';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Copy } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface User {
   id: number;
@@ -26,44 +30,128 @@ interface User {
   profilePic: string;
 }
 
+interface BuyerDTO {
+  id: number;
+  email: string;
+  points: number;
+  firstName: string;
+  lastName: string;
+}
+
 export const Leaderboard = () => {
-  const [hoveredUser, setHoveredUser] = useState<number | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<BuyerDTO | null>(null);
+  const [referralLink, setReferralLink] = useState<string | null>(null);
+  const { cart } = useCart();
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/buyer/leaderboard', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const [leaderboardResponse, profileResponse] = await Promise.all([
+          fetch('/api/buyer/leaderboard', {
+            credentials: 'include'
+          }),
+          fetch('/api/buyer/profile', {
+            credentials: 'include'
+          })
+        ]);
+
+        if (!leaderboardResponse.ok || !profileResponse.ok) {
+          throw new Error('Failed to fetch data');
         }
-        
-        const data = await response.json();
-        setUsers(data);
+
+        const leaderboardData = await leaderboardResponse.json();
+        const profileData = await profileResponse.json();
+
+        setUsers(leaderboardData);
+        setCurrentUser(profileData);
       } catch (err) {
-        setError('Failed to fetch leaderboard data');
-        console.error('Error fetching leaderboard data:', err);
+        setError('Failed to fetch data');
+        console.error('Error:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchUsers();
+
+    const fetchReferralLink = async () => {
+      try {
+        const response = await fetch('/api/buyer/referral-link', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+    
+        if (!response.ok) {
+          throw new Error('Failed to fetch referral link');
+        }
+    
+        const data = await response.json();
+        setReferralLink(data.referralLink);
+      } catch (error) {
+        console.error('Error fetching referral link:', error);
+        throw error;
+      }
+    };
+    fetchData();
+    fetchReferralLink();
   }, []);
+
+  const getOrdinalSuffix = (i: number) => {
+    const j = i % 10;
+    const k = i % 100;
+    if (j === 1 && k !== 11) return "st";
+    if (j === 2 && k !== 12) return "nd";
+    if (j === 3 && k !== 13) return "rd";
+    return "th";
+  };
+
+  const getLeaderboardMessage = () => {
+    if (!currentUser || !users.length) return null;
+
+    // Find current user's position in the leaderboard
+    const userPosition = users.findIndex(user => user.email === currentUser.email);
+
+    // If user is not in top 10
+    if (userPosition === -1) {
+      const pointsNeeded = users[users.length - 1].points - currentUser.points;
+      if (pointsNeeded <= 0) {
+        return {
+          message: "Keep earning points to climb up the leaderboard!",
+          type: 'info'
+        };
+      }
+      return {
+        message: `You need ${pointsNeeded.toLocaleString()} more points to appear on the leaderboard!`,
+        type: 'info'
+      };
+    }
+
+    // If user is in top 10 but not first
+    if (userPosition > 0) {
+      const pointsNeeded = users[userPosition - 1].points - currentUser.points;
+      const nextUser = users[userPosition - 1];
+      return {
+        message: `You're in ${userPosition + 1}${getOrdinalSuffix(userPosition + 1)} place! ${pointsNeeded.toLocaleString()} more points to overtake ${nextUser.name}!`,
+        type: 'success'
+      };
+    }
+
+    // If user is first
+    return {
+      message: "You're leading the leaderboard! Continue purchasing to maintain your position!",
+      type: 'success'
+    };
+  };
 
   // Split users into top 3 and next 10 users (total of 13)
   const topThree = users.slice(0, 3);
-  const nextTen = users.slice(3, 13);
+  const nextTen = users.slice(3, 10);
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -129,8 +217,8 @@ export const Leaderboard = () => {
   // Add this with the other animation variants
   const tableRowVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
       transition: {
         type: "spring",
@@ -156,8 +244,8 @@ export const Leaderboard = () => {
     return (
       <div className="text-center text-red-500 p-4">
         <p>{error}</p>
-        <button 
-          onClick={() => window.location.reload()} 
+        <button
+          onClick={() => window.location.reload()}
           className="mt-2 text-sm text-gray-600 hover:text-gray-800"
         >
           Try again
@@ -167,109 +255,376 @@ export const Leaderboard = () => {
   }
 
   return (
-    <motion.div 
-      className="container mx-auto px-4 py-8"
+    <motion.div
+      className="w-full min-h-screen text-white"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-      {/* Top 3 Section */}
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
-        variants={containerVariants}
-      >
-        {[topThree[1], topThree[0], topThree[2]].map((user, index) => (
-          <motion.div
-            key={user.id}
-            variants={cardVariants}
-            className={`${index === 1 ? 'md:mt-0' : 'md:mt-12'}`}
+      {/* Full-width Status Message */}
+      {getLeaderboardMessage() && (
+        <motion.div className="w-full">
+          <Alert
+            variant={getLeaderboardMessage()?.type === 'success' ? 'success' : 'info'}
+            className="border-none shadow-lg bg-gradient-to-r from-green-400/90 to-blue-500/90 backdrop-blur-sm text-white py-6"
           >
-            <Card className={`relative overflow-hidden ${getGradientByRank(user.rank)} hover:shadow-xl transition-all duration-300`} onClick={() => handleUserClick(user)} cursor-pointer>
-              <CardContent className="text-center pt-6">
-                {/* Profile Picture */}
-                <motion.div 
-                  className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-white shadow-lg"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <img 
-                    src={user.profilePic} 
-                    alt={user.name}
-                    className="w-full h-full object-cover"
-                  />
-                </motion.div>
-                
-                <motion.h3 className="text-xl font-bold mb-2">
-                  {user.name}
-                </motion.h3>
-                <div className="flex flex-col gap-4">
-                  <motion.div whileHover={{ scale: 1.1 }}>
-                    <Badge className="text-lg px-4 py-2 bg-green-500 text-white block">
-                      {user.points?.toLocaleString() || 0} Points
-                    </Badge>
+            <motion.div
+              className="flex flex-col items-center justify-center gap-3 w-full"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <AlertDescription className="flex flex-col items-center gap-3 text-center">
+                <span className="text-xl font-medium">
+                  {getLeaderboardMessage()?.message}
+                </span>
+                {getLeaderboardMessage()?.message.includes('overtake') && (
+                  <motion.div
+                    className="bg-white/20 px-6 py-2 rounded-full"
+                    initial={{ scale: 1 }}
+                    animate={{
+                      scale: [1, 1.05, 1],
+                      boxShadow: [
+                        "0 0 0 0 rgba(255,255,255,0.4)",
+                        "0 0 0 10px rgba(255,255,255,0)",
+                        "0 0 0 0 rgba(255,255,255,0)"
+                      ]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <span className="text-lg font-bold">
+                      {getLeaderboardMessage()?.message.split('!')[1]}
+                    </span>
                   </motion.div>
-                  {(user.weightOfFoodSaved || user.weightOfFoodSaved !== 0) && (
-                    <motion.div whileHover={{ scale: 1.05 }} className="text-sm text-gray-600">
-                      Food Saved: {user.weightOfFoodSaved.toLocaleString()} kg
-                    </motion.div>
-                  )}
-                  {(user.referralCount || user.referralCount !== 0) && (
-                    <motion.div whileHover={{ scale: 1.05 }} className="text-sm text-gray-600">
-                      Referred: {user.referralCount}
-                    </motion.div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </motion.div>
+                )}
+              </AlertDescription>
+            </motion.div>
+          </Alert>
+        </motion.div>
+      )}
 
-      {/* Other Users Table */}
-      <Card className="overflow-hidden shadow-lg">
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-left">Rank</TableHead>
-                <TableHead className="text-left">Member</TableHead>
-                <TableHead className="text-left">Points</TableHead>
-                <TableHead className="text-left">Food Saved (kg)</TableHead>
-                <TableHead className="text-left">Referred</TableHead>
-                <TableHead className="text-left">Email</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {nextTen.map((user, index) => (
-                <TableRow key={user.id} onClick={() => handleUserClick(user)} hover:bg-gray-100 cursor-pointer>
-                  <TableCell className="text-left font-medium">
-                    {index + 4}
-                  </TableCell>
-                  <TableCell className="text-left">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden">
-                        <img 
-                          src={user.profilePic} 
-                          alt={user.name}
-                          className="w-full h-full object-cover"
-                        />
+      {/* Main Content Area */}
+      <div className="w-full bg-white rounded-t-[2.5rem] min-h-screen">
+        <div className="max-w-7xl mx-auto px-2 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Leaderboard Section - Left Side */}
+            <div className="lg:col-span-2">
+              <Card className="overflow-hidden shadow-lg border-none">
+                <CardHeader className="border-b border-gray-100 bg-gray-50">
+                  <CardTitle className="text-xl font-bold text-gray-800">
+                    Top Players
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {/* Top 3 Podium */}
+                  <div className="pt-16 pb-0 px-8">
+                    <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto">
+                      {/* 2nd Place */}
+                      <div className="flex flex-col items-center">
+                        <p className="text-black font-medium mb-1">{topThree[1]?.name}</p>
+                        <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[1]?.weightOfFoodSaved || 0} kg</p>
+                        <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[1]?.referralCount || 0}</p>
+                        <motion.div
+                          className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-white mb-8"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <img
+                            src={topThree[1]?.profilePic}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onClick={() => handleUserClick(topThree[1])}
+                          />
+                        </motion.div>
+                        <div className="relative w-full">
+                          <p className="text-black text-xl font-bold mb-2">{topThree[1]?.points?.toLocaleString() || 0} points</p>
+                          <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
+                          <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-16 rounded-t-lg flex items-center justify-center">
+                            <span className="text-3xl font-bold text-white">2</span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{user.name}</p>
+
+                      {/* 1st Place */}
+                      <div className="flex flex-col items-center -mt-8">
+                        <p className="text-black font-medium mb-1">{topThree[0]?.name}</p>
+                        <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[0]?.weightOfFoodSaved || 0} kg</p>
+                        <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[0]?.referralCount || 0}</p>
+                        <motion.div
+                          className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-white mb-8"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <img
+                            src={topThree[0]?.profilePic}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onClick={() => handleUserClick(topThree[0])}
+                          />
+                        </motion.div>
+                        <div className="relative w-full">
+                          <p className="text-black text-xl font-bold mb-2">{topThree[0]?.points?.toLocaleString() || 0} points</p>
+                          <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
+                          <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-20 rounded-t-lg flex items-center justify-center">
+                            <span className="text-4xl font-bold text-white">1</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 3rd Place */}
+                      <div className="flex flex-col items-center">
+                        <p className="text-black font-medium mb-1">{topThree[2]?.name}</p>
+                        <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[2]?.weightOfFoodSaved || 0} kg</p>
+                        <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[2]?.referralCount || 0}</p>
+
+                        <motion.div
+                          className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-white mb-8"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <img
+                            src={topThree[2]?.profilePic}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onClick={() => handleUserClick(topThree[2])}
+                          />
+                        </motion.div>
+                        <div className="relative w-full">
+                          <p className="text-black text-xl font-bold mb-2 mt-1">{topThree[2]?.points?.toLocaleString() || 0} points</p>
+                          <div className="absolute inset-x-0 bottom-0 h-15 bg-[#3651C0]/20 rounded-t-lg" />
+                          <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-14 rounded-t-lg flex items-center justify-center">
+                            <span className="text-3xl font-bold text-white">3</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-left">{user.points.toLocaleString()}</TableCell>
-                  <TableCell className="text-left">{user.weightOfFoodSaved.toLocaleString()}</TableCell>
-                  <TableCell className="text-left">{user.referralCount}</TableCell>
-                  <TableCell className="text-left">{user.email}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </div>
 
-      <BuyerInformation 
+                  {/* Leaderboard Table */}
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-16">Rank</TableHead>
+                        <TableHead>Member</TableHead>
+                        <TableHead className="text-right">Points</TableHead>
+                        <TableHead className="text-right hidden md:table-cell">Food Saved</TableHead>
+                        <TableHead className="text-right hidden md:table-cell">Referrals</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {nextTen.map((user, index) => (
+                        <TableRow
+                          key={user.id}
+                          onClick={() => handleUserClick(user)}
+                          className="cursor-pointer hover:bg-gray-50"
+                        >
+                          <TableCell className="font-medium">{index + 4}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full overflow-hidden">
+                                <img src={user.profilePic} alt="" className="w-full h-full object-cover" />
+                              </div>
+                              <div className="font-medium">{user.name}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-semibold">
+                            {user.points.toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-right hidden md:table-cell">
+                            {user.weightOfFoodSaved.toLocaleString()}kg
+                          </TableCell>
+                          <TableCell className="text-right hidden md:table-cell">
+                            {user.referralCount}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Stats Section - Right Side */}
+            <div className="lg:col-span-1 space-y-8">
+              {/* Personal Stats Card */}
+              <Card className="shadow-lg border-none">
+                <CardHeader className="border-b border-gray-100 bg-gray-50">
+                  <CardTitle className="text-xl font-bold text-gray-800">
+                    Your Statistics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  {currentUser ? (
+                    <div className="space-y-6">
+                      {/* Profile Summary */}
+                      <div className="text-center">
+                        <div className="relative">
+                          <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+                            <img
+                              src={users.find(u => u.id === currentUser.id)?.profilePic || 'default-avatar.png'}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="absolute -top-2 -right-2 bg-[#4263EB] text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                            {users.findIndex(u => u.id === currentUser.id) === -1
+                              ? 'N/A'
+                              : `${users.findIndex(u => u.id === currentUser.id) + 1}${getOrdinalSuffix(users.findIndex(u => u.id === currentUser.id) + 1)}`}
+                          </div>
+                        </div>
+                        <h3 className="font-bold text-lg">{currentUser.firstName} {currentUser.lastName}</h3>
+                        <p className="text-gray-600">{currentUser.points.toLocaleString()} points</p>
+                      </div>
+
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-gray-50 rounded-lg p-4 text-center">
+                          <h4 className="text-gray-600 text-sm">Food Saved</h4>
+                          <p className="text-xl font-bold text-green-600">
+                            {users.find(u => u.id === currentUser.id)?.weightOfFoodSaved.toLocaleString()}kg
+                          </p>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-4 text-center">
+                          <h4 className="text-gray-600 text-sm">Referrals</h4>
+                          <p className="text-xl font-bold text-blue-600">
+                            {users.find(u => u.id === currentUser.id)?.referralCount || 0}
+                          </p>
+                        </div>
+                      </div>
+
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-500">
+                      Please log in to view your statistics
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Cart Alert */}
+              {cart?.cartLineItems.length > 0 && (
+                <Alert
+                  variant="default"
+                  className="border-none shadow-lg bg-gradient-to-r from-purple-400 to-pink-500 text-white py-6"
+                >
+                  <motion.div
+                    className="flex flex-col items-center justify-center gap-3 w-full h-full"
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  >
+                    <AlertDescription className="flex flex-col items-center gap-3">
+                      <span className="text-xl font-medium">
+                        Complete your cart checkout to earn points!
+                      </span>
+                      <div className="flex items-center gap-2 bg-white/20 px-6 py-2 rounded-full">
+                        <ShoppingCart className="h-5 w-5" />
+                        <span className="font-bold">
+                          {cart?.cartLineItems.reduce((total, item) => total + item.quantity, 0)} {cart?.cartLineItems.reduce((total, item) => total + item.quantity, 0) === 1 ? 'item' : 'items'} in cart
+                        </span>
+                      </div>
+                      <Link
+                        to="/buyer/cart"
+                        className="mt-2 bg-white text-purple-500 hover:bg-purple-50 font-bold px-8 py-3 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                      >
+                        Checkout Now →
+                      </Link>
+                    </AlertDescription>
+                  </motion.div>
+                </Alert>
+              )}
+
+              {/* Referral Alert */}
+              <Alert
+                variant="default"
+                className="border-none shadow-lg bg-gradient-to-r from-green-400 to-emerald-500 text-white py-6"
+              >
+                <motion.div
+                  className="flex flex-col items-center justify-center gap-3 w-full h-full"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <AlertDescription className="flex flex-col items-center gap-3">
+                    <span className="text-xl font-medium">
+                      Refer friends & earn 250 points!
+                    </span>
+                    <div className="flex items-center gap-2 bg-white/20 px-6 py-2 rounded-full">
+                      <Users className="h-5 w-5" />
+                      <span className="font-bold">
+                        Share your referral code today
+                      </span>
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="mt-2 bg-white text-emerald-600 hover:bg-emerald-50 font-bold px-8 py-3 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                          Get Referral Code →
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Your Referral Code</DialogTitle>
+                          <DialogDescription>
+                            Share this code with friends and earn rewards when they sign up!
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex flex-col space-y-4">
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              readOnly
+                              value={currentUser?.referralCode || ''}
+                              className="font-mono"
+                            />
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              onClick={() => {
+                                navigator.clipboard.writeText(currentUser?.referralCode || '');
+                                toast({
+                                  title: "Success!",
+                                  description: "Referral code copied to clipboard",
+                                  duration: 2000,
+                                });
+                              }}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="flex flex-col space-y-2">
+                            <p className="text-sm text-muted-foreground">Referral Link:</p>
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                readOnly
+                                value={referralLink}
+                                className="font-mono text-xs"
+                              />
+                              <Button
+                                variant="secondary"
+                                size="icon"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(referralLink);
+                                  toast({
+                                    title: "Success!",
+                                    description: "Referral link copied to clipboard",
+                                    duration: 2000,
+                                  });
+                                }}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </AlertDescription>
+                </motion.div>
+              </Alert>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Keep existing modal */}
+      <BuyerInformation
         user={selectedUser}
         isOpen={!!selectedUser}
         onClose={() => setSelectedUser(null)}
