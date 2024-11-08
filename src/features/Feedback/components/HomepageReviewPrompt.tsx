@@ -1,6 +1,6 @@
+import { OrderLineItem } from '@/features/Orders/types/orders';
 import { Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { OrderLineItem } from '../Orders/types/orders';
 
 interface HomepageReviewPromptProps {
   pendingReviews: OrderLineItem[];

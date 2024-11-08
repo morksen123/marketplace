@@ -1,4 +1,4 @@
-import { PendingReviewsPage } from '@/features/Feedback/PendingReviewsPage';
+import { PendingReviewsPage } from '@/features/Feedback/components/PendingReviewsPage';
 import { BuyerNavMenu } from '@/features/NavigationMenu/components/BuyerNavMenu';
 
 export const ReviewsPendingRoute = () => {

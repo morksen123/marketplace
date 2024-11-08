@@ -119,3 +119,39 @@ export const sampleOrders = [
     ],
   },
 ];
+
+export const pendingReviewOrders = [
+  {
+    id: 'ORD-123',
+    deliveryDate: 'Today, 2:30 PM',
+    items: [
+      {
+        id: 1,
+        name: 'Imperfect Apples',
+        quantity: '1kg',
+        price: '$2.99',
+        image: '/api/placeholder/80/80',
+      },
+      {
+        id: 2,
+        name: 'Odd Shaped Carrots',
+        quantity: '500g',
+        price: '$1.99',
+        image: '/api/placeholder/80/80',
+      },
+    ],
+  },
+  {
+    id: 'ORD-124',
+    deliveryDate: 'Today, 3:15 PM',
+    items: [
+      {
+        id: 3,
+        name: 'Bruised Bananas',
+        quantity: '1kg',
+        price: '$2.49',
+        image: '/api/placeholder/80/80',
+      },
+    ],
+  },
+];

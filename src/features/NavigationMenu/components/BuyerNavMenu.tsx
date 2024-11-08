@@ -3,7 +3,7 @@ import { notificationsAtom } from '@/atoms/notificationAtoms';
 import { Button } from '@/components/ui/button';
 import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
 import { useCart } from '@/features/Cart/hooks/useCart';
-import { HomepageReviewPrompt } from '@/features/Feedback/HomepageReviewPrompt';
+import { HomepageReviewPrompt } from '@/features/Feedback/components/HomepageReviewPrompt';
 import { NotificationDropdown } from '@/features/Notifications/components/NotificationDropdown';
 import { orderLineItems } from '@/mock-data';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
