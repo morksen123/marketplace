@@ -98,8 +98,7 @@ export function SingleReviewContent({
                 })
               }
               className="w-full p-2 pr-10 border rounded-lg appearance-none bg-white
-        hover:border-[#00813A] focus:outline-none focus:ring-2 focus:ring-[#00813A] 
-        focus:ring-opacity-50 focus:border-[#00813A] text-sm"
+        hover:border-black focus:outline-black text-sm"
             >
               <option value="" disabled>
                 Select condition
@@ -177,8 +176,7 @@ export function SingleReviewContent({
                 handleReviewChange({ usablePortion: e.target.value })
               }
               className="w-full p-2 pr-10 border rounded-lg appearance-none bg-white
-        hover:border-[#00813A] focus:outline-none focus:ring-2 focus:ring-[#00813A] 
-        focus:ring-opacity-50 focus:border-[#00813A] text-sm"
+        hover:border-black focus:outline-black text-sm"
             >
               <option value="" disabled>
                 Select usable portion
