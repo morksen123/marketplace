@@ -1,4 +1,4 @@
-import { AlertCircle, Camera, X } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import { ReviewItem, ReviewSubmission } from '../types/review-types';
 import { StarRating } from './StarRating';
@@ -9,6 +9,17 @@ interface SingleReviewContentProps {
   onReviewChange: (review: ReviewSubmission) => void;
   currentReview: ReviewSubmission | null;
 }
+
+// Constants
+const CONDITION_TYPES = [
+  { value: 'bruised', label: 'Bruised' },
+  { value: 'nearExpiry', label: 'Near Expiry' },
+  { value: 'oddShape', label: 'Odd Shape' },
+  { value: 'overripe', label: 'Overripe' },
+  { value: 'underripe', label: 'Underripe' },
+  { value: 'blemished', label: 'Blemished' },
+  { value: 'sizeVariation', label: 'Size Variation' },
+] as const;
 
 export const SingleReviewContent = ({
   item,
@@ -21,10 +32,15 @@ export const SingleReviewContent = ({
       itemId: Number(item.id),
       orderId,
       rating: 0,
+      qualityRating: 0,
       review: '',
-      qualityAsDescribed: false,
-      wouldRecommend: false,
-      usablePercentage: '',
+      conditionAsDescribed: 'asDescribed',
+      conditionTypes: [],
+      usablePortion: '',
+      usageIdeas: '',
+      storageTips: '',
+      valueForMoney: false,
+      wouldBuyAgain: false,
       photos: [],
     },
   );
@@ -43,14 +59,14 @@ export const SingleReviewContent = ({
           <img
             src={item.imageUrl || '/api/placeholder/120/120'}
             alt={item.name}
-            className="w-30 h-30 rounded-lg object-cover"
+            className="w-28 h-28 rounded-lg object-cover"
           />
           <div>
             <h3 className="font-medium text-lg">{item.name}</h3>
             <p className="text-gray-600">Order #{orderId}</p>
             <div className="mt-2 flex items-center text-sm text-gray-500">
               <AlertCircle className="h-4 w-4 mr-1" />
-              Your review helps others make informed decisions
+              Your review helps reduce food waste
             </div>
           </div>
         </div>
@@ -58,108 +74,169 @@ export const SingleReviewContent = ({
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6">
-        <div className="space-y-6">
+        <div className="space-y-8">
+          {/* Overall Rating */}
           <div>
-            <label className="block font-medium mb-2">Overall Rating</label>
+            <label className="block font-medium mb-2">
+              Overall Value Rating
+            </label>
+            <p className="text-sm text-gray-500 mb-2">
+              Rate the overall value considering the discounted price
+            </p>
             <StarRating
               rating={review.rating}
               onRatingChange={(rating) => handleReviewChange({ rating })}
             />
           </div>
 
+          {/* Condition Assessment */}
           <div>
             <label className="block font-medium mb-2">
-              How much of the product was usable?
+              How was the condition?
             </label>
             <select
-              value={review.usablePercentage}
+              value={review.conditionAsDescribed}
               onChange={(e) =>
-                handleReviewChange({ usablePercentage: e.target.value })
+                handleReviewChange({
+                  conditionAsDescribed: e.target
+                    .value as ReviewSubmission['conditionAsDescribed'],
+                })
               }
               className="w-full p-2 border rounded-lg"
-              required
             >
-              <option value="">Select percentage</option>
-              <option value="100">100% - Fully usable</option>
-              <option value="75">75% - Mostly usable</option>
-              <option value="50">50% - Partially usable</option>
-              <option value="25">25% - Limited use</option>
+              <option value="asDescribed">
+                As Described - Exactly what I expected
+              </option>
+              <option value="betterThanDescribed">Better Than Expected</option>
+              <option value="slightlyWorse">
+                Fair - Slightly worse but still good value
+              </option>
+              <option value="significantlyWorse">
+                Poor - Significantly worse than described
+              </option>
+              <option value="unusable">
+                Unusable - Not suitable for intended use
+              </option>
             </select>
           </div>
 
-          <div>
-            <label className="block font-medium mb-2">Your Review</label>
-            <textarea
-              value={review.review}
-              onChange={(e) => handleReviewChange({ review: e.target.value })}
-              className="w-full p-3 border rounded-lg h-32"
-              placeholder="How was the quality? Any tips for using this item?"
-              required
-            />
-          </div>
-
+          {/* Imperfections Grid */}
           <div>
             <label className="block font-medium mb-2">
-              Add Photos (Optional)
+              What type of imperfections did you notice?
             </label>
-            <div className="space-y-3">
-              <button
-                type="button"
-                className="flex items-center space-x-2 px-4 py-2 border rounded-lg hover:bg-gray-50"
-              >
-                <Camera className="h-5 w-5" />
-                <span>Upload Photos</span>
-              </button>
-              {review.photos.length > 0 && (
-                <div className="flex gap-2 flex-wrap">
-                  {review.photos.map((photo, index) => (
-                    <div key={index} className="relative w-20 h-20">
-                      <img
-                        src={photo}
-                        alt={`Review photo ${index + 1}`}
-                        className="w-full h-full object-cover rounded"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleReviewChange({
-                            photos: review.photos.filter((_, i) => i !== index),
-                          })
-                        }
-                        className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <p className="text-sm text-gray-500 mb-2">Select all that apply</p>
+            <div className="grid grid-cols-2 gap-2">
+              {CONDITION_TYPES.map(({ value, label }) => (
+                <label
+                  key={value}
+                  className="flex items-center p-3 border rounded-lg hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={review.conditionTypes.includes(value)}
+                    onChange={(e) => {
+                      const newTypes = e.target.checked
+                        ? [...review.conditionTypes, value]
+                        : review.conditionTypes.filter((t) => t !== value);
+                      handleReviewChange({ conditionTypes: newTypes });
+                    }}
+                    className="rounded mr-2"
+                  />
+                  <span className="text-sm">{label}</span>
+                </label>
+              ))}
             </div>
           </div>
 
+          {/* Usable Portion */}
+          <div>
+            <label className="block font-medium mb-2">
+              How much was usable?
+            </label>
+            <select
+              value={review.usablePortion}
+              onChange={(e) =>
+                handleReviewChange({ usablePortion: e.target.value })
+              }
+              className="w-full p-2 border rounded-lg"
+            >
+              <option value="">Select usable portion</option>
+              <option value="90-100">90-100% usable</option>
+              <option value="70-90">70-90% usable</option>
+              <option value="50-70">50-70% usable</option>
+              <option value="under50">Less than 50% usable</option>
+            </select>
+          </div>
+
+          {/* Quality Rating */}
+          <div>
+            <label className="block font-medium mb-2">
+              Quality of the Usable Portion
+            </label>
+            <p className="text-sm text-gray-500 mb-2">
+              Rate the taste/quality of the usable part
+            </p>
+            <StarRating
+              rating={review.qualityRating}
+              onRatingChange={(qualityRating) =>
+                handleReviewChange({ qualityRating })
+              }
+            />
+          </div>
+
+          {/* Usage Ideas */}
+          <div>
+            <label className="block font-medium mb-2">
+              How did you use it?
+            </label>
+            <textarea
+              value={review.usageIdeas}
+              onChange={(e) =>
+                handleReviewChange({ usageIdeas: e.target.value })
+              }
+              placeholder="Share how you used this item (e.g., recipes, preparation methods)"
+              className="w-full p-3 border rounded-lg h-24"
+            />
+          </div>
+
+          {/* Storage Tips */}
+          <div>
+            <label className="block font-medium mb-2">Storage Tips</label>
+            <textarea
+              value={review.storageTips}
+              onChange={(e) =>
+                handleReviewChange({ storageTips: e.target.value })
+              }
+              placeholder="Share any tips for storing or extending shelf life"
+              className="w-full p-3 border rounded-lg h-24"
+            />
+          </div>
+
+          {/* Final Questions */}
           <div className="space-y-3">
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={review.qualityAsDescribed}
+                checked={review.valueForMoney}
                 onChange={(e) =>
-                  handleReviewChange({ qualityAsDescribed: e.target.checked })
+                  handleReviewChange({ valueForMoney: e.target.checked })
                 }
                 className="rounded"
               />
-              <span className="text-sm">Quality was as described</span>
+              <span className="text-sm">Good value for money</span>
             </label>
 
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={review.wouldRecommend}
+                checked={review.wouldBuyAgain}
                 onChange={(e) =>
-                  handleReviewChange({ wouldRecommend: e.target.checked })
+                  handleReviewChange({ wouldBuyAgain: e.target.checked })
                 }
                 className="rounded"
               />
-              <span className="text-sm">I would recommend this product</span>
+              <span className="text-sm">I would buy this again</span>
             </label>
           </div>
         </div>

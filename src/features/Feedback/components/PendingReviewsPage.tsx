@@ -208,19 +208,14 @@ export const PendingReviewsPage = () => {
   const isCurrentReviewValid = isBulkReview
     ? Boolean(
         bulkReviews[Number(currentItem?.id)]?.rating &&
-          bulkReviews[Number(currentItem?.id)]?.review &&
-          bulkReviews[Number(currentItem?.id)]?.usablePercentage,
+          bulkReviews[Number(currentItem?.id)]?.review,
       )
-    : Boolean(
-        currentReview?.rating &&
-          currentReview?.review &&
-          currentReview?.usablePercentage,
-      );
+    : Boolean(currentReview?.rating && currentReview?.review);
 
-  const areAllReviewsComplete = selectedOrder?.items.every((item) => {
-    const review = bulkReviews[Number(item.id)];
-    return review?.rating && review?.review && review?.usablePercentage;
-  });
+  // const areAllReviewsComplete = selectedOrder?.items.every((item) => {
+  //   const review = bulkReviews[Number(item.id)];
+  //   return review?.rating && review?.review && review?.usablePercentage;
+  // });
 
   const handleSubmit = () => {
     if (isBulkReview) {
@@ -268,7 +263,7 @@ export const PendingReviewsPage = () => {
         <div className="h-full flex flex-col">
           <div className="flex-1 overflow-y-auto">
             <ReviewHeader
-              isBulkReview
+              isBulkReview={!!isBulkReview}
               currentStep={activeIndex + 1}
               totalSteps={selectedOrder?.items.length || 1}
             />

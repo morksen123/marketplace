@@ -1,20 +1,30 @@
-export interface ReviewSubmission {
-  itemId: number;
-  orderId: string;
-  rating: number;
-  review: string;
-  qualityAsDescribed: boolean;
-  wouldRecommend: boolean;
-  usablePercentage: string;
-  photos: string[];
-}
-
 export interface ReviewItem {
   id: number;
   name: string;
-  imageUrl: string;
+  imageUrl?: string;
   orderId: string;
   quantity: string;
+}
+
+export interface ReviewSubmission {
+  itemId: number;
+  orderId: string;
+  rating: number; // Overall value rating
+  qualityRating: number; // Quality of usable portion
+  review: string; // General comments
+  conditionAsDescribed:
+    | 'asDescribed'
+    | 'betterThanDescribed'
+    | 'slightlyWorse'
+    | 'significantlyWorse'
+    | 'unusable';
+  conditionTypes: string[]; // Types of imperfections
+  usablePortion: string; // How much was usable
+  usageIdeas: string; // How it was used
+  storageTips: string; // Storage advice
+  valueForMoney: boolean;
+  wouldBuyAgain: boolean;
+  photos: string[];
 }
 
 export interface SingleReviewContentProps {
