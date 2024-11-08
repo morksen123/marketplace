@@ -82,7 +82,7 @@ export const ImpactGoalsProgress = ({ weightSaved }: { weightSaved: number }) =>
                                     <div className="flex flex-col items-center gap-4">
                                         <div className="relative w-24 h-24">
                                             <CircularProgress 
-                                                percentage={goal.progressPercentage}
+                                                percentage={Math.min(goal.progressPercentage.toFixed(0), 100)}
                                                 strokeWidth={8}
                                                 size={96}
                                                 color="#22c55e"
