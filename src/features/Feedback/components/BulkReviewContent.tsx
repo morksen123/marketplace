@@ -21,9 +21,9 @@ export const BulkReviewContent = ({
   return (
     <div className="h-full flex flex-col">
       {/* Progress Bar */}
-      <div className="h-1 bg-gray-100">
+      <div className="min-h-1 bg-gray-100">
         <div
-          className="h-full bg-blue-600 transition-all duration-300"
+          className="h-full bg-secondary transition-all duration-300"
           style={{
             width: `${(currentStep / totalSteps) * 100}%`,
           }}

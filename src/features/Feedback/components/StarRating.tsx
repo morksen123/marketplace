@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export const StarRating = ({
   rating,
@@ -6,25 +6,21 @@ export const StarRating = ({
 }: {
   rating: number;
   onRatingChange: (rating: number) => void;
-}) => {
-  return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          onClick={() => onRatingChange(star)}
-          className="focus:outline-none"
-        >
-          <Star
-            size={24}
-            className={`${
-              star <= rating
-                ? 'fill-yellow-400 text-yellow-400'
-                : 'text-gray-300'
-            } cursor-pointer transition-colors`}
-          />
-        </button>
-      ))}
-    </div>
-  );
-};
+}) => (
+  <div className="flex space-x-1">
+    {[1, 2, 3, 4, 5].map((star) => (
+      <Button
+        key={star}
+        variant="ghost"
+        size="sm"
+        onClick={() => onRatingChange(star)}
+        className={`
+          ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}
+          hover:text-yellow-500 transition-colors
+        `}
+      >
+        ★
+      </Button>
+    ))}
+  </div>
+);

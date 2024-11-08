@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ReviewFooterProps {
@@ -34,13 +35,9 @@ export const ReviewFooter = ({
           >
             Cancel
           </button>
-          <button
-            onClick={onSubmit}
-            disabled={!isValid}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
+          <Button onClick={onSubmit} disabled={!isValid} variant="secondary">
             Submit Review
-          </button>
+          </Button>
         </div>
       </div>
     );
