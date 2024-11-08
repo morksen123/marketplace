@@ -272,87 +272,71 @@ export const BuyerHome = () => {
                   <TreeDeciduous className="h-6 w-6 text-emerald-600" />
                   Your Environmental Hero Journey
                 </h2>
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   {/* Food Rescued Card */}
                   <div 
-                    className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
                     onClick={() => handleImpactCardClick('food', 'personal')}
                   >
-                    <div className="flex items-start text-left justify-between">
-                      <div className="flex items-start">
-                        <img src={food} alt="Food" className="w-12 h-12 mr-4" />
-                        <div>
-                          <h3 className="text-gray-600 mb-2 font-medium">Food Rescued</h3>
-                          <p className="text-3xl font-bold text-emerald-600"><b>{personalImpactMetrics.weightSaved.toFixed(1)}</b> kg</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-base text-gray-600 space-y-2">
-                          <p className="font-medium">🍽️ <b>{personalImpactMetrics.mealsSaved.toFixed(0)}</b> meals saved</p>
-                        </div>
+                    <div className="flex flex-col items-center text-center">
+                      <img src={food} alt="Food" className="w-12 h-12 mb-2" />
+                      <div>
+                        <h3 className="text-gray-600 mb-2 font-medium">Food Rescued</h3>
+                        <p className="text-3xl font-bold text-emerald-600">{personalImpactMetrics.weightSaved.toFixed(1)} kg</p>
+                        <p className="text-base text-black-600">
+                          🍽️ {personalImpactMetrics.mealsSaved.toFixed(0)} meals saved
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   {/* Carbon Impact Card */}
                   <div 
-                    className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
                     onClick={() => handleImpactCardClick('carbon', 'personal')}
                   >
-                    <div className="flex items-start text-left justify-between">
-                      <div className="flex items-start">
-                        <img src={co2} alt="CO2" className="w-12 h-12 mr-4" />
-                        <div>
-                          <h3 className="text-gray-600 mb-2 font-medium">Carbon Impact</h3>
-                          <p className="text-3xl font-bold text-emerald-600"><b>{personalImpactMetrics.co2Prevented.toFixed(1)}</b> kg</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-base text-gray-600 space-y-2">
-                          <p className="font-medium">🚗 <b>{personalImpactMetrics.carKmEquivalent.toFixed(1)}</b> km not driven</p>
-                        </div>
+                    <div className="flex flex-col items-center text-center">
+                      <img src={co2} alt="CO2" className="w-12 h-12 mb-2" />
+                      <div>
+                        <h3 className="text-gray-600 mb-2 font-medium">Carbon Impact</h3>
+                        <p className="text-3xl font-bold text-emerald-600">{personalImpactMetrics.co2Prevented.toFixed(1)} kg</p>
+                        <p className="text-base text-black-600">
+                          🚗 {personalImpactMetrics.carKmEquivalent.toFixed(1)} km not driven
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   {/* Energy Impact Card */}
                   <div 
-                    className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
                     onClick={() => handleImpactCardClick('electricity', 'personal')}
                   >
-                    <div className="flex items-start text-left justify-between">
-                      <div className="flex items-start">
-                        <img src={electricity} alt="Electricity" className="w-12 h-12 mr-4" />
-                        <div>
-                          <h3 className="text-gray-600 mb-2 font-medium">Energy Impact</h3>
-                          <p className="text-3xl font-bold text-emerald-600"><b>{personalImpactMetrics.acNightsSaved.toFixed(1)}</b> nights</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-base text-gray-600 space-y-2">
-                          <p className="font-medium">❄️ <b>{personalImpactMetrics.acNightsSaved.toFixed(1)}</b> number of nights of air conditioning saved</p>
-                        </div>
+                    <div className="flex flex-col items-center text-center">
+                      <img src={electricity} alt="Electricity" className="w-12 h-12 mb-2" />
+                      <div>
+                        <h3 className="text-gray-600 mb-2 font-medium">Energy Impact</h3>
+                        <p className="text-3xl font-bold text-emerald-600">{personalImpactMetrics.acNightsSaved.toFixed(1)} days</p>
+                        <p className="text-base text-black-600">
+                          ❄️ {personalImpactMetrics.acNightsSaved.toFixed(1)} nights of AC
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Water Saved Card */}
+                  {/* Water Impact Card */}
                   <div 
-                    className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
                     onClick={() => handleImpactCardClick('water', 'personal')}
                   >
-                    <div className="flex items-start text-left justify-between">
-                      <div className="flex items-start">
-                        <img src={water} alt="Water" className="w-12 h-12 mr-4" />
-                        <div>
-                          <h3 className="text-gray-600 mb-2 font-medium">Water Saved</h3>
-                          <p className="text-3xl font-bold text-emerald-600"><b>{personalImpactMetrics.waterLitresSaved.toFixed(0)}</b> litres</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-base text-gray-600 space-y-2">
-                          <p className="font-medium">🚿 <b>{personalImpactMetrics.showersEquivalent.toFixed(0)}</b> showers</p>
-                        </div>
+                    <div className="flex flex-col items-center text-center">
+                      <img src={water} alt="Water" className="w-12 h-12 mb-2" />
+                      <div>
+                        <h3 className="text-gray-600 mb-2 font-medium">Water Saved</h3>
+                        <p className="text-3xl font-bold text-emerald-600">{personalImpactMetrics.waterLitresSaved.toFixed(0)} litres</p>
+                        <p className="text-base text-black-600">
+                          🚿 {personalImpactMetrics.showersEquivalent.toFixed(0)} showers
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -367,79 +351,62 @@ export const BuyerHome = () => {
                   <Recycle className="h-6 w-6 text-blue-600" />
                   Our Collective Impact
                 </h2>
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all"
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
                                       onClick={() => handleImpactCardClick('food', 'community')}>
-                    <div className="flex items-start text-left justify-between">
-                      <div className="flex items-start">
-                        <img src={food} alt="Food" className="w-12 h-12 mr-4" />
-                        <div>
-                          <h3 className="text-gray-600 mb-2 font-medium">Community Food Rescue</h3>
-                          <p className="text-3xl font-bold text-blue-600"><b>{impactMetrics.weightSaved.toFixed(1)}</b> kg</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-base text-gray-600 space-y-2">
-                          <p className="font-medium">🍽️ Feeds <b>{impactMetrics.weightSaved.toFixed(0)}</b> people</p>
-                        </div>
+                    <div className="flex flex-col items-center text-center">
+                      <img src={food} alt="Food" className="w-12 h-12 mb-2" />
+                      <div>
+                        <h3 className="text-gray-600 mb-2 font-medium">Community Food Rescue</h3>
+                        <p className="text-3xl font-bold text-blue-600"><b>{impactMetrics.weightSaved.toFixed(1)}</b> kg</p>
+                        <p className="text-base text-black-600">
+                          🍽️ Feeds <b>{impactMetrics.weightSaved.toFixed(0)}</b> people
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all"
+                  <div className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
                     onClick={() => handleImpactCardClick('carbon', 'community')}
                     >
-                    <div className="flex items-start text-left justify-between">
-                      <div className="flex items-start">
-                        <img src={co2} alt="CO2" className="w-12 h-12 mr-4" />
-                        <div>
-                          <h3 className="text-gray-600 mb-2 font-medium">Carbon Prevention</h3>
-                          <p className="text-3xl font-bold text-blue-600"><b>{impactMetrics.co2Prevented.toFixed(1)}</b> kg</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-base text-gray-600 space-y-2">
-                          <p className="font-medium">🌳 <b>{impactMetrics.treesEquivalent.toFixed(0)}</b> trees planted</p>
-                        </div>
+                    <div className="flex flex-col items-center text-center">
+                      <img src={co2} alt="CO2" className="w-12 h-12 mb-2" />
+                      <div>
+                        <h3 className="text-gray-600 mb-2 font-medium">Carbon Prevention</h3>
+                        <p className="text-3xl font-bold text-blue-600"><b>{impactMetrics.co2Prevented.toFixed(1)}</b> kg</p>
+                        <p className="text-base text-black-600">
+                          🌳 <b>{impactMetrics.treesEquivalent.toFixed(0)}</b> trees planted
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all"
+                  <div className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
                     onClick={() => handleImpactCardClick('electricity', 'community')}
                   >
-                    <div className="flex items-start text-left justify-between">
-                      <div className="flex items-start">
-                        <img src={electricity} alt="Electricity" className="w-12 h-12 mr-4" />
-                        <div>
-                          <h3 className="text-gray-600 mb-2 font-medium">Energy Savings</h3>
-                          <p className="text-3xl font-bold text-blue-600"><b>{impactMetrics.electricityDaysSaved.toFixed(1)}</b> days</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-base text-gray-600 space-y-2">
-                          <p className="font-medium">🏠 Powers <b>{(impactMetrics.electricityDaysSaved * 0.1).toFixed(0)}</b> homes</p>
-                        </div>
+                    <div className="flex flex-col items-center text-center">
+                      <img src={electricity} alt="Electricity" className="w-12 h-12 mb-2" />
+                      <div>
+                        <h3 className="text-gray-600 mb-2 font-medium">Energy Savings</h3>
+                        <p className="text-3xl font-bold text-blue-600"><b>{impactMetrics.electricityDaysSaved.toFixed(1)}</b> days</p>
+                        <p className="text-base text-black-600">
+                          🏠 Powers <b>{(impactMetrics.electricityDaysSaved * 0.1).toFixed(0)}</b> homes
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Water Saved Card */}
-                  <div className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all"
+                  <div className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
                     onClick={() => handleImpactCardClick('water', 'community')}
                   > 
-                    <div className="flex items-start text-left justify-between">
-                      <div className="flex items-start">
-                        <img src={water} alt="Water" className="w-12 h-12 mr-4" />
-                        <div>
-                          <h3 className="text-gray-600 mb-2 font-medium">Water Saved</h3>
-                          <p className="text-3xl font-bold text-blue-600"><b>{personalImpactMetrics.waterLitresSaved.toFixed(0)}</b> litres</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-base text-gray-600 space-y-2">
-                          <p className="font-medium">🏊‍♂️ As much as <b>{personalImpactMetrics.swimmingPoolsEquivalent.toFixed(0)}</b> Olympic swimming pools</p>
-                        </div>
+                    <div className="flex flex-col items-center text-center">
+                      <img src={water} alt="Water" className="w-12 h-12 mb-2" />
+                      <div>
+                        <h3 className="text-gray-600 mb-2 font-medium">Water Saved</h3>
+                        <p className="text-3xl font-bold text-blue-600"><b>{personalImpactMetrics.waterLitresSaved.toFixed(0)}</b> litres</p>
+                        <p className="text-base text-black-600">
+                          🏊‍♂️ <b>{personalImpactMetrics.swimmingPoolsEquivalent.toFixed(0)}</b> Olympic swimming pools
+                        </p>
                       </div>
                     </div>
                   </div>

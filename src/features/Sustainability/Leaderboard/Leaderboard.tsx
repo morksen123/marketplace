@@ -99,11 +99,11 @@ export const Leaderboard = () => {
           },
           credentials: 'include',
         });
-    
+
         if (!response.ok) {
           throw new Error('Failed to fetch referral link');
         }
-    
+
         const data = await response.json();
         setReferralLink(data.referralLink);
       } catch (error) {
@@ -274,14 +274,14 @@ export const Leaderboard = () => {
       animate="visible"
       variants={containerVariants}
     >
-      <motion.div 
+      <motion.div
         className="w-full py-3"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         <div className="max-w-7xl mx-auto px-4">
-          <motion.div 
+          <motion.div
             className="flex items-center justify-center gap-3"
             whileHover={{ scale: 1.01 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -311,7 +311,7 @@ export const Leaderboard = () => {
             >
               <AlertDescription className="flex flex-col items-center gap-3 text-center">
                 <span className="text-xl font-medium">
-                  {getLeaderboardMessage()?.message}
+                  {getLeaderboardMessage()?.message.split('!')[0]}!
                 </span>
                 {getLeaderboardMessage()?.message.includes('overtake') && (
                   <motion.div
@@ -490,6 +490,11 @@ export const Leaderboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
+                  <div className="max-w-7xl mx-auto mb-6 px-4">
+                      <p className="text-center text-sm">
+                        <span className="text-gray-800 mr-2">Keep climbing the leaderboard! Earn badges to unlock bonus points and rewards.</span>
+                      </p>
+                  </div>
                   {currentUser ? (
                     <div className="space-y-6">
                       {/* Profile Summary */}
@@ -497,15 +502,15 @@ export const Leaderboard = () => {
                         <div className="relative">
                           <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
                             <img
-                              src={users.find(u => u.id === currentUser.id)?.profilePic || 'default-avatar.png'}
+                              src={users.find(u => u.buyerId === currentUser.buyerId)?.profilePic || 'default-avatar.png'}
                               alt=""
                               className="w-full h-full object-cover"
                             />
                           </div>
                           <div className="absolute -top-2 -right-2 bg-[#4263EB] text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                            {users.findIndex(u => u.id === currentUser.id) === -1
+                            {users.findIndex(u => u.buyerId === currentUser.buyerId) === -1
                               ? 'N/A'
-                              : `${users.findIndex(u => u.id === currentUser.id) + 1}${getOrdinalSuffix(users.findIndex(u => u.id === currentUser.id) + 1)}`}
+                              : `${users.findIndex(u => u.buyerId === currentUser.buyerId) + 1}${getOrdinalSuffix(users.findIndex(u => u.buyerId === currentUser.buyerId) + 1)}`}
                           </div>
                         </div>
                         <h3 className="font-bold text-lg">{currentUser.firstName} {currentUser.lastName}</h3>
@@ -517,7 +522,7 @@ export const Leaderboard = () => {
                         <div className="bg-gray-50 rounded-lg p-4 text-center">
                           <h4 className="text-gray-600 text-sm">Food Saved</h4>
                           <p className="text-xl font-bold text-green-600">
-                            {users.find(u => u.id === currentUser.id)?.weightOfFoodSaved.toLocaleString()}kg
+                            {users.find(u => u.id === currentUser.id)?.weightOfFoodSaved.toLocaleString()} kg
                           </p>
                         </div>
                         <div className="bg-gray-50 rounded-lg p-4 text-center">
@@ -662,6 +667,7 @@ export const Leaderboard = () => {
       {/* Keep existing modal */}
       <BuyerInformation
         user={selectedUser}
+        currentUser={currentUser}   
         isOpen={!!selectedUser}
         onClose={() => setSelectedUser(null)}
       />
