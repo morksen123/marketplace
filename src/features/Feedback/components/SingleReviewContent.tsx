@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, Camera } from 'lucide-react';
@@ -73,7 +72,7 @@ export function SingleReviewContent({
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="overall-rating">
+          <Label htmlFor="overall-rating" className="text-md">
             Overall Value Rating <span className="text-destructive">*</span>
           </Label>
           <p className="text-sm text-muted-foreground">
@@ -86,7 +85,7 @@ export function SingleReviewContent({
         </div>
 
         <div>
-          <Label className="block mb-2">
+          <Label className="block mb-2 text-md">
             How was the condition? <span className="text-red-500">*</span>
           </Label>
           <div className="relative">
@@ -137,33 +136,37 @@ export function SingleReviewContent({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>
+        <div>
+          <label className="block font-medium mb-2">
             What type of imperfections did you notice?{' '}
-            <span className="text-destructive">*</span>
-          </Label>
-          <p className="text-sm text-muted-foreground">Select all that apply</p>
+            <span className="text-red-500">*</span>
+          </label>
+          <p className="text-sm text-gray-500 mb-2">Select all that apply</p>
           <div className="grid grid-cols-2 gap-2">
             {CONDITION_TYPES.map(({ value, label }) => (
-              <div key={value} className="flex items-center space-x-2">
-                <Checkbox
-                  id={value}
+              <label
+                key={value}
+                className="flex items-center p-3 border rounded-lg hover:bg-gray-50"
+              >
+                <input
+                  type="checkbox"
                   checked={review.conditionTypes.includes(value)}
-                  onCheckedChange={(checked) => {
-                    const newTypes = checked
+                  onChange={(e) => {
+                    const newTypes = e.target.checked
                       ? [...review.conditionTypes, value]
                       : review.conditionTypes.filter((t) => t !== value);
                     handleReviewChange({ conditionTypes: newTypes });
                   }}
+                  className="rounded mr-2 accent-green-700"
                 />
-                <Label htmlFor={value}>{label}</Label>
-              </div>
+                <span className="text-sm">{label}</span>
+              </label>
             ))}
           </div>
         </div>
 
         <div>
-          <Label className="block  mb-2">
+          <Label className="block  mb-2 text-md">
             How much of the product was usable?{' '}
             <span className="text-red-500">*</span>
           </Label>
@@ -204,7 +207,7 @@ export function SingleReviewContent({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="quality-rating">
+          <Label htmlFor="quality-rating" className="text-md">
             Quality of the Usable Portion{' '}
             <span className="text-destructive">*</span>
           </Label>
@@ -221,7 +224,7 @@ export function SingleReviewContent({
 
         {/* buy again */}
         <div className="space-y-2">
-          <Label htmlFor="buy-again">
+          <Label htmlFor="buy-again" className="text-md">
             Would you buy this again? <span className="text-red-500">*</span>
           </Label>
           <div className="flex space-x-4">
@@ -244,7 +247,7 @@ export function SingleReviewContent({
         </div>
 
         <div className="space-y-2">
-          <Label>Add Photos (Recommended)</Label>
+          <Label className="text-md">Add Photos (Recommended)</Label>
           <Button variant="secondary" className="w-full">
             <Camera className="h-5 w-5 mr-2" />
             Upload Photos
@@ -252,7 +255,9 @@ export function SingleReviewContent({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="review">Share your experience</Label>
+          <Label className="text-md" htmlFor="review">
+            Share your experience
+          </Label>
           <Textarea
             id="review"
             value={review.review}
@@ -262,7 +267,9 @@ export function SingleReviewContent({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="storage-tips">Storage Tips</Label>
+          <Label className="text-md" htmlFor="storage-tips">
+            Storage Tips
+          </Label>
           <Textarea
             id="storage-tips"
             value={review.storageTips}
