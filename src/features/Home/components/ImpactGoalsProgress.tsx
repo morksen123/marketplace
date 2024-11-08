@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Target, Trophy, TrendingUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CircularProgress } from '@/components/ui/circular-progress';
 
 interface ImpactGoal {
     id?: number;
@@ -38,6 +38,7 @@ export const ImpactGoalsProgress = ({ weightSaved }: { weightSaved: number }) =>
                 setGoals(data);
             } catch (error) {
                 console.error('Error fetching goals:', error);
+                setGoals([]);
             } finally {
                 setLoading(false);
             }
@@ -54,74 +55,51 @@ export const ImpactGoalsProgress = ({ weightSaved }: { weightSaved: number }) =>
         );
     }
 
+    const savedWeight = weightSaved || 0;
+
     return (
         <Card className="shadow-lg border-0 bg-gradient-to-br from-green-50 to-white">
             <CardHeader className="border-b border-gray-100">
                 <div className="flex justify-between items-center">
                     <CardTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
                         <Target size={24} className="text-green-600" />
-                        Community Impact Goals
+                        Monthly Community Goals
                     </CardTitle>
                 </div>
             </CardHeader>
-            <CardContent className="p-6">
-                <motion.div
-                    initial="hidden"
-                    animate="visible"
-                    variants={{
-                        hidden: { opacity: 0 },
-                        visible: {
-                            opacity: 1,
-                            transition: {
-                                staggerChildren: 0.2
-                            }
-                        }
-                    }}
-                    className="space-y-6"
-                >
-                    {goals.length > 0 ? (
-                        goals.map((goal) => (
-                            <motion.div
-                                key={goal.id}
-                                variants={{
-                                    hidden: { opacity: 0, y: 20 },
-                                    visible: { opacity: 1, y: 0 }
-                                }}
-                                className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100"
-                            >
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                                            <TrendingUp size={18} className="text-green-500" />
-                                            {goal.description}
-                                        </h3>
-                                        <span className="text-sm font-medium px-3 py-1 bg-green-100 text-green-700 rounded-full">
-                                            {parseFloat(goal.progressPercentage).toFixed(1)}%
-                                        </span>
+            <CardContent className="p-6 space-y-6">
+                {goals.length === 0 ? (
+                    <div className="text-center py-8">
+                        <Trophy size={48} className="text-green-600 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg text-gray-600 font-medium">No active goals yet, but we're still making an impact!</p>
+                        <p className="text-sm text-gray-500">Every small action counts towards a bigger change.</p>
+                    </div>
+                ) : (
+                    <div className={`grid ${goals.length > 1 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1'} gap-6`}>
+                        {goals.map((goal) => (
+                            <Card key={goal.id} className="bg-white">
+                                <CardContent className="p-6">
+                                    <div className="flex flex-col items-center gap-4">
+                                        <div className="relative w-24 h-24">
+                                            <CircularProgress 
+                                                percentage={goal.progressPercentage}
+                                                strokeWidth={8}
+                                                size={96}
+                                                color="#22c55e"
+                                            />
+                                        </div>
+                                        <div className="text-center">
+                                            <h3 className="font-semibold text-gray-800">{goal.description}</h3>
+                                            <p className="text-sm text-gray-500">
+                                                {savedWeight.toFixed(0)} kg of {goal.targetWeightInKg} kg goal
+                                            </p>
+                                        </div>
                                     </div>
-
-                                    <Progress
-                                        value={parseFloat(goal.progressPercentage)}
-                                        className="h-2.5 bg-gray-100"
-                                        indicatorClassName="bg-gradient-to-r from-green-500 to-green-600"
-                                    />
-
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-600">Target: {goal.targetWeightInKg}kg</span>
-                                        <span className="text-gray-500 text-xs">
-                                            Ends {new Date(goal.endDate).toLocaleDateString()}
-                                        </span>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))
-                    ) : (
-                        <div className="text-center py-8 text-gray-500">
-                            <Target className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                            <p>No active impact goals at the moment</p>
-                        </div>
-                    )}
-                </motion.div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
             </CardContent>
         </Card>
     );

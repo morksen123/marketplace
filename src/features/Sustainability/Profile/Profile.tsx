@@ -241,21 +241,50 @@ export const Profile: React.FC = () => {
   };
 
   const shareToSocialMedia = (platform: 'linkedin' | 'facebook' | 'instagram') => {
-    const impactMessage = `I've prevented ${impactMetrics?.weightSaved.toFixed(2)}kg of food waste and saved ${impactMetrics?.co2Prevented.toFixed(2)}kg of CO₂ emissions through sustainable shopping!`;
-    
+    // Create a more concise message for LinkedIn
+    const linkedInMessage = `I'm making a sustainable impact with GudFood! 🌱\n\n` +
+      `• Prevented ${impactMetrics?.weightSaved.toFixed(2)}kg of food waste\n` +
+      `• Saved ${impactMetrics?.co2Prevented.toFixed(2)}kg of CO₂ emissions\n` +
+      `• Equivalent to ${impactMetrics?.treesEquivalent.toFixed(1)} trees\n\n` +
+      `Join me in reducing food waste!`;
+
+    // Get the base URL of your application
+    const baseUrl = window.location.origin;
+    const shareUrl = `${baseUrl}/join?ref=${profile.referralCode}`;
+
     switch (platform) {
       case 'linkedin':
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}&summary=${encodeURIComponent(impactMessage)}`, '_blank');
+        // LinkedIn sharing with specific URL parameters
+        const linkedInUrl = new URL('https://www.linkedin.com/sharing/share-offsite/');
+        linkedInUrl.searchParams.append('url', shareUrl);
+        linkedInUrl.searchParams.append('summary', linkedInMessage);
+        linkedInUrl.searchParams.append('source', 'GudFood');
+        
+        window.open(
+          linkedInUrl.toString(),
+          'LinkedInShare',
+          'width=800,height=600,menubar=no,toolbar=no,status=no'
+        );
         break;
+
       case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(impactMessage)}`, '_blank');
+        // Facebook sharing with quote
+        const facebookText = encodeURIComponent(impactMessage);
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${facebookText}`,
+          '_blank',
+          'width=600,height=600'
+        );
         break;
+
       case 'instagram':
-        // Instagram doesn't support direct sharing via URL
-        toast({
-          title: "Instagram Sharing",
-          description: "Screenshot your impact metrics to share on Instagram!",
-          duration: 3000,
+        // Since Instagram doesn't support direct URL sharing, we'll create a copyable message
+        navigator.clipboard.writeText(impactMessage).then(() => {
+          toast({
+            title: "Instagram Sharing",
+            description: "Impact metrics copied! Share a screenshot of your stats along with the copied message on Instagram.",
+            duration: 5000,
+          });
         });
         break;
     }
@@ -491,34 +520,23 @@ export const Profile: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="mt-6 flex justify-center gap-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => shareToSocialMedia('linkedin')}
-                    className="flex items-center gap-2"
-                  >
-                    <LinkedInIcon className="h-4 w-4" />
-                    Share on LinkedIn
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => shareToSocialMedia('facebook')}
-                    className="flex items-center gap-2"
-                  >
-                    <FacebookIcon className="h-4 w-4" />
-                    Share on Facebook
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => shareToSocialMedia('instagram')}
-                    className="flex items-center gap-2"
-                  >
-                    <InstagramIcon className="h-4 w-4" />
-                    Share on Instagram
-                  </Button>
+                <div className="mt-6 flex flex-wrap justify-center gap-4">
+                  {[
+                    { platform: 'linkedin' as const, icon: <LinkedInIcon className="h-4 w-4" />, label: 'Share on LinkedIn' },
+                    { platform: 'facebook' as const, icon: <FacebookIcon className="h-4 w-4" />, label: 'Share on Facebook' },
+                    { platform: 'instagram' as const, icon: <InstagramIcon className="h-4 w-4" />, label: 'Share on Instagram' }
+                  ].map(({ platform, icon, label }) => (
+                    <Button
+                      key={platform}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => shareToSocialMedia(platform)}
+                      className="flex items-center gap-2 min-w-[160px]"
+                    >
+                      {icon}
+                      {label}
+                    </Button>
+                  ))}
                 </div>
               </CardContent>
             </Card>
