@@ -5,7 +5,6 @@ interface ReviewFooterProps {
   onClose: () => void;
   onSubmit: () => void;
   isValid: boolean;
-  // Bulk review specific props
   isBulkReview?: boolean;
   currentStep?: number;
   totalSteps?: number;
@@ -13,7 +12,7 @@ interface ReviewFooterProps {
   onNext?: () => void;
 }
 
-export const ReviewFooter = ({
+export function ReviewFooter({
   onClose,
   onSubmit,
   isValid,
@@ -22,66 +21,53 @@ export const ReviewFooter = ({
   totalSteps = 1,
   onPrevious,
   onNext,
-}: ReviewFooterProps) => {
+}: ReviewFooterProps) {
   const isLastStep = currentStep === totalSteps;
 
   if (!isBulkReview) {
     return (
-      <div className="p-6 bg-gray-50 border-t">
+      <footer className="p-4 bg-background border-t">
         <div className="flex justify-between items-center">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-          >
+          <Button variant="outline" onClick={onClose}>
             Cancel
-          </button>
-          <Button onClick={onSubmit} disabled={!isValid} variant="secondary">
+          </Button>
+          <Button variant="secondary" onClick={onSubmit} disabled={!isValid}>
             Submit Review
           </Button>
         </div>
-      </div>
+      </footer>
     );
   }
 
   return (
-    <div className="p-6 bg-gray-50 border-t">
+    <footer className="p-4 bg-background border-t">
       <div className="flex justify-between items-center">
-        <button
+        <Button
+          variant="ghost"
           onClick={onPrevious}
           disabled={currentStep === 1}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-            currentStep === 1
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'text-blue-600 hover:bg-blue-50'
-          }`}
+          className="flex items-center space-x-2"
         >
-          <ChevronLeft className="h-5 w-5" />
+          <ChevronLeft className="h-4 w-4" />
           <span>Previous</span>
-        </button>
-
-        <div className="text-sm text-gray-600">
-          Review {currentStep} of {totalSteps}
-        </div>
+        </Button>
 
         {isLastStep ? (
-          <button
-            onClick={onSubmit}
-            disabled={!isValid}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
+          <Button variant="secondary" onClick={onSubmit} disabled={!isValid}>
             Submit All Reviews
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
+            variant="ghost"
             onClick={onNext}
             disabled={!isValid}
-            className="flex items-center space-x-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+            className="flex items-center space-x-2"
           >
             <span>Next</span>
-            <ChevronRight className="h-5 w-5" />
-          </button>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         )}
       </div>
-    </div>
+    </footer>
   );
-};
+}

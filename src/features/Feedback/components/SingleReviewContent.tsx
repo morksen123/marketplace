@@ -1,17 +1,7 @@
-'use client';
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, Camera } from 'lucide-react';
 import { useState } from 'react';
@@ -65,8 +55,8 @@ export function SingleReviewContent({
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto">
-      <CardHeader className="flex flex-row items-center space-x-4 p-6">
+    <Card className="w-full max-w-3xl rounded-none">
+      <CardHeader className="flex flex-row items-center space-x-4 p-6 bg-secondary/5 mb-6">
         <img
           src={item.imageUrl || '/placeholder.svg?height=120&width=120'}
           alt={item.name}
@@ -95,40 +85,56 @@ export function SingleReviewContent({
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="condition">
-            How was the condition? <span className="text-destructive">*</span>
+        <div>
+          <Label className="block mb-2">
+            How was the condition? <span className="text-red-500">*</span>
           </Label>
-          <Select
-            value={review.conditionAsDescribed}
-            onValueChange={(value) =>
-              handleReviewChange({
-                conditionAsDescribed:
-                  value as ReviewSubmission['conditionAsDescribed'],
-              })
-            }
-          >
-            <SelectTrigger id="condition">
-              <SelectValue placeholder="Select condition" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="asDescribed">
+          <div className="relative">
+            <select
+              value={review.conditionAsDescribed}
+              onChange={(e) =>
+                handleReviewChange({
+                  conditionAsDescribed: e.target
+                    .value as ReviewSubmission['conditionAsDescribed'],
+                })
+              }
+              className="w-full p-2 pr-10 border rounded-lg appearance-none bg-white
+        hover:border-[#00813A] focus:outline-none focus:ring-2 focus:ring-[#00813A] 
+        focus:ring-opacity-50 focus:border-[#00813A] text-sm"
+            >
+              <option value="" disabled>
+                Select condition
+              </option>
+              <option value="asDescribed">
                 As Described - Exactly what I expected
-              </SelectItem>
-              <SelectItem value="betterThanDescribed">
-                Better Than Expected
-              </SelectItem>
-              <SelectItem value="slightlyWorse">
+              </option>
+              <option value="betterThanDescribed">Better Than Expected</option>
+              <option value="slightlyWorse">
                 Fair - Slightly worse but still good value
-              </SelectItem>
-              <SelectItem value="significantlyWorse">
+              </option>
+              <option value="significantlyWorse">
                 Poor - Significantly worse than described
-              </SelectItem>
-              <SelectItem value="unusable">
+              </option>
+              <option value="unusable">
                 Unusable - Not suitable for intended use
-              </SelectItem>
-            </SelectContent>
-          </Select>
+              </option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+              <svg
+                className="w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -156,27 +162,45 @@ export function SingleReviewContent({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="usable-portion">
+        <div>
+          <Label className="block  mb-2">
             How much of the product was usable?{' '}
-            <span className="text-destructive">*</span>
+            <span className="text-red-500">*</span>
           </Label>
-          <Select
-            value={review.usablePortion}
-            onValueChange={(value) =>
-              handleReviewChange({ usablePortion: value })
-            }
-          >
-            <SelectTrigger id="usable-portion">
-              <SelectValue placeholder="Select usable portion" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="90-100">90-100% usable</SelectItem>
-              <SelectItem value="70-90">70-90% usable</SelectItem>
-              <SelectItem value="50-70">50-70% usable</SelectItem>
-              <SelectItem value="under50">Less than 50% usable</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="relative">
+            <select
+              value={review.usablePortion}
+              onChange={(e) =>
+                handleReviewChange({ usablePortion: e.target.value })
+              }
+              className="w-full p-2 pr-10 border rounded-lg appearance-none bg-white
+        hover:border-[#00813A] focus:outline-none focus:ring-2 focus:ring-[#00813A] 
+        focus:ring-opacity-50 focus:border-[#00813A] text-sm"
+            >
+              <option value="" disabled>
+                Select usable portion
+              </option>
+              <option value="90-100">90-100% usable</option>
+              <option value="70-90">70-90% usable</option>
+              <option value="50-70">50-70% usable</option>
+              <option value="under50">Less than 50% usable</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <svg
+                className="w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -195,33 +219,33 @@ export function SingleReviewContent({
           />
         </div>
 
+        {/* buy again */}
         <div className="space-y-2">
-          <Label>
-            Would you buy this again?{' '}
-            <span className="text-destructive">*</span>
+          <Label htmlFor="buy-again">
+            Would you buy this again? <span className="text-red-500">*</span>
           </Label>
-          <RadioGroup
-            value={review.wouldBuyAgain ? 'yes' : 'no'}
-            onValueChange={(value) =>
-              handleReviewChange({ wouldBuyAgain: value === 'yes' })
-            }
-          >
-            <div className="flex space-x-4">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="yes" id="yes" />
-                <Label htmlFor="yes">Yes</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no" id="no" />
-                <Label htmlFor="no">No</Label>
-              </div>
-            </div>
-          </RadioGroup>
+          <div className="flex space-x-4">
+            {['Yes', 'No'].map((option) => (
+              <button
+                key={option}
+                onClick={() =>
+                  handleReviewChange({ wouldBuyAgain: option === 'Yes' })
+                }
+                className={`text-sm px-4 py-2 rounded-lg border ${
+                  review.wouldBuyAgain === (option === 'Yes')
+                    ? 'bg-green-50 border-green-500 text-secondary'
+                    : 'hover:bg-gray-50'
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-2">
           <Label>Add Photos (Recommended)</Label>
-          <Button variant="outline" className="w-full">
+          <Button variant="secondary" className="w-full">
             <Camera className="h-5 w-5 mr-2" />
             Upload Photos
           </Button>
