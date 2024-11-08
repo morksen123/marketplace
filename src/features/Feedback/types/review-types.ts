@@ -22,7 +22,6 @@ export interface ReviewSubmission {
   usablePortion: string; // How much was usable
   usageIdeas: string; // How it was used
   storageTips: string; // Storage advice
-  valueForMoney: boolean;
   wouldBuyAgain: boolean;
   photos: string[];
 }

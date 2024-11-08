@@ -1,4 +1,4 @@
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Camera } from 'lucide-react';
 import { useState } from 'react';
 import { ReviewItem, ReviewSubmission } from '../types/review-types';
 import { StarRating } from './StarRating';
@@ -39,8 +39,7 @@ export const SingleReviewContent = ({
       usablePortion: '',
       usageIdeas: '',
       storageTips: '',
-      valueForMoney: false,
-      wouldBuyAgain: false,
+      wouldBuyAgain: true,
       photos: [],
     },
   );
@@ -52,7 +51,7 @@ export const SingleReviewContent = ({
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col">
       {/* Header */}
       <div className="p-6 border-b">
         <div className="flex items-start space-x-4">
@@ -78,7 +77,7 @@ export const SingleReviewContent = ({
           {/* Overall Rating */}
           <div>
             <label className="block font-medium mb-2">
-              Overall Value Rating
+              Overall Value Rating <span className="text-red-500">*</span>
             </label>
             <p className="text-sm text-gray-500 mb-2">
               Rate the overall value considering the discounted price
@@ -92,7 +91,7 @@ export const SingleReviewContent = ({
           {/* Condition Assessment */}
           <div>
             <label className="block font-medium mb-2">
-              How was the condition?
+              How was the condition? <span className="text-red-500">*</span>
             </label>
             <select
               value={review.conditionAsDescribed}
@@ -123,7 +122,8 @@ export const SingleReviewContent = ({
           {/* Imperfections Grid */}
           <div>
             <label className="block font-medium mb-2">
-              What type of imperfections did you notice?
+              What type of imperfections did you notice?{' '}
+              <span className="text-red-500">*</span>
             </label>
             <p className="text-sm text-gray-500 mb-2">Select all that apply</p>
             <div className="grid grid-cols-2 gap-2">
@@ -152,7 +152,8 @@ export const SingleReviewContent = ({
           {/* Usable Portion */}
           <div>
             <label className="block font-medium mb-2">
-              How much was usable?
+              How much of the product was usable?{' '}
+              <span className="text-red-500">*</span>
             </label>
             <select
               value={review.usablePortion}
@@ -172,7 +173,8 @@ export const SingleReviewContent = ({
           {/* Quality Rating */}
           <div>
             <label className="block font-medium mb-2">
-              Quality of the Usable Portion
+              Quality of the Usable Portion{' '}
+              <span className="text-red-500">*</span>
             </label>
             <p className="text-sm text-gray-500 mb-2">
               Rate the taste/quality of the usable part
@@ -183,6 +185,40 @@ export const SingleReviewContent = ({
                 handleReviewChange({ qualityRating })
               }
             />
+          </div>
+
+          <div>
+            <label className="block font-medium mb-2">
+              Add Photos <span className="text-red-500">*</span>
+            </label>
+            <button className="flex items-center space-x-2 px-4 py-2 border rounded-lg hover:bg-gray-50">
+              <Camera className="h-5 w-5" />
+              <span>Upload Photos </span>
+            </button>
+          </div>
+
+          {/* buy again */}
+          <div>
+            <label className="block font-medium mb-2">
+              Would you buy this again? <span className="text-red-500">*</span>
+            </label>
+            <div className="flex space-x-4">
+              {['Yes', 'No'].map((option) => (
+                <button
+                  key={option}
+                  onClick={() =>
+                    handleReviewChange({ wouldBuyAgain: option === 'Yes' })
+                  }
+                  className={`px-4 py-2 rounded-lg border ${
+                    review.wouldBuyAgain === (option === 'Yes')
+                      ? 'bg-green-50 border-green-500 text-green-700'
+                      : 'hover:bg-gray-50'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Usage Ideas */}
@@ -211,33 +247,6 @@ export const SingleReviewContent = ({
               placeholder="Share any tips for storing or extending shelf life"
               className="w-full p-3 border rounded-lg h-24"
             />
-          </div>
-
-          {/* Final Questions */}
-          <div className="space-y-3">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={review.valueForMoney}
-                onChange={(e) =>
-                  handleReviewChange({ valueForMoney: e.target.checked })
-                }
-                className="rounded"
-              />
-              <span className="text-sm">Good value for money</span>
-            </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={review.wouldBuyAgain}
-                onChange={(e) =>
-                  handleReviewChange({ wouldBuyAgain: e.target.checked })
-                }
-                className="rounded"
-              />
-              <span className="text-sm">I would buy this again</span>
-            </label>
           </div>
         </div>
       </div>
