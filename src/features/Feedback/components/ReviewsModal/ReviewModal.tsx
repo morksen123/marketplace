@@ -42,9 +42,9 @@ export const ReviewModal = ({
 
   const isCurrentReviewValid = isBulkReview
     ? Boolean(
-        bulkReviews[currentItem?.orderLineItemId || 0]?.overallRating &&
-          bulkReviews[currentItem?.orderLineItemId || 0]?.review &&
-          bulkReviews[currentItem?.orderLineItemId || 0]?.usablePercentage,
+        bulkReviews[currentItem?.orderLineItem || 0]?.overallRating &&
+          bulkReviews[currentItem?.orderLineItem || 0]?.review &&
+          bulkReviews[currentItem?.orderLineItem || 0]?.usablePercentage,
       )
     : Boolean(
         currentReview?.overallRating &&
@@ -71,14 +71,14 @@ export const ReviewModal = ({
               totalSteps={selectedOrder.orderLineItems.length}
               onReviewChange={onReviewChange}
               currentReview={
-                currentItem ? bulkReviews[currentItem.orderLineItemId] : null
+                currentItem ? bulkReviews[currentItem.orderLineItem] : null
               }
             />
           ) : (
             selectedItem && (
               <SingleReviewContent
                 item={selectedItem}
-                orderId={selectedOrder.orderId.toString()}
+                orderId={selectedOrder.orderId}
                 onReviewChange={onReviewChange}
                 currentReview={currentReview}
               />

@@ -53,8 +53,7 @@ export const useReviewModal = () => {
     } else {
       setBulkReviews((prev) => ({
         ...prev,
-        [selectedOrder?.orderLineItems[activeIndex].orderLineItemId || 0]:
-          review,
+        [selectedOrder?.orderLineItems[activeIndex].orderLineItem || 0]: review,
       }));
     }
   };
@@ -64,6 +63,8 @@ export const useReviewModal = () => {
       if (!isBulkReview) {
         await createReviewMutation.mutateAsync(currentReview!);
       } else {
+        console.log(bulkReviews);
+        return;
         await Promise.all(
           Object.values(bulkReviews).map((review) =>
             createReviewMutation.mutateAsync(review),

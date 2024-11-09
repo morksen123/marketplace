@@ -127,8 +127,6 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
     {},
   );
 
-  console.log(orders);
-
   const setLoading = (orderId: number, isLoading: boolean) => {
     setLoadingStates((prev) => ({ ...prev, [orderId]: isLoading }));
   };

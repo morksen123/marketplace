@@ -34,7 +34,7 @@ export const BulkReviewContent = ({
       <div className="flex-1">
         <SingleReviewContent
           item={currentItem}
-          orderId={currentItem.orderId.toString()}
+          orderId={currentItem.orderId}
           onReviewChange={onReviewChange}
           currentReview={currentReview}
         />

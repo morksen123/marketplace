@@ -2,7 +2,7 @@ import { OrderLineItem } from './features/Orders/types/orders';
 
 export const orderLineItems: OrderLineItem[] = [
   {
-    orderLineItemId: 1,
+    orderLineItem: 1,
     quantity: 2,
     price: 29.99,
     productId: 101,
@@ -12,7 +12,7 @@ export const orderLineItems: OrderLineItem[] = [
     pickUpLocation: '',
   },
   {
-    orderLineItemId: 2,
+    orderLineItem: 2,
     quantity: 1,
     price: 49.99,
     productId: 102,
@@ -22,7 +22,7 @@ export const orderLineItems: OrderLineItem[] = [
     pickUpLocation: 'Store #12',
   },
   {
-    orderLineItemId: 3,
+    orderLineItem: 3,
     quantity: 3,
     price: 15.99,
     productId: 103,
@@ -32,7 +32,7 @@ export const orderLineItems: OrderLineItem[] = [
     pickUpLocation: '',
   },
   {
-    orderLineItemId: 4,
+    orderLineItem: 4,
     quantity: 1,
     price: 999.99,
     productId: 104,
@@ -42,7 +42,7 @@ export const orderLineItems: OrderLineItem[] = [
     pickUpLocation: '',
   },
   {
-    orderLineItemId: 5,
+    orderLineItem: 5,
     quantity: 2,
     price: 24.99,
     productId: 105,
@@ -52,7 +52,7 @@ export const orderLineItems: OrderLineItem[] = [
     pickUpLocation: 'Store #7',
   },
   {
-    orderLineItemId: 6,
+    orderLineItem: 6,
     quantity: 1,
     price: 49.99,
     productId: 106,
@@ -62,7 +62,7 @@ export const orderLineItems: OrderLineItem[] = [
     pickUpLocation: '',
   },
   {
-    orderLineItemId: 7,
+    orderLineItem: 7,
     quantity: 5,
     price: 9.99,
     productId: 107,
@@ -72,7 +72,7 @@ export const orderLineItems: OrderLineItem[] = [
     pickUpLocation: '',
   },
   {
-    orderLineItemId: 8,
+    orderLineItem: 8,
     quantity: 2,
     price: 5.99,
     productId: 108,
@@ -82,7 +82,7 @@ export const orderLineItems: OrderLineItem[] = [
     pickUpLocation: 'Store #5',
   },
   {
-    orderLineItemId: 9,
+    orderLineItem: 9,
     quantity: 1,
     price: 199.99,
     productId: 109,
@@ -92,7 +92,7 @@ export const orderLineItems: OrderLineItem[] = [
     pickUpLocation: '',
   },
   {
-    orderLineItemId: 10,
+    orderLineItem: 10,
     quantity: 4,
     price: 19.99,
     productId: 110,

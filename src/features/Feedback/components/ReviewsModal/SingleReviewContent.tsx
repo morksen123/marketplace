@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, Camera } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CreateReviewDTO, ReviewItem } from '../../types/review-types';
 import { StarRating } from '../StarRating';
 
 interface SingleReviewContentProps {
   item: ReviewItem;
-  orderId: string;
+  orderId: number;
   onReviewChange: (review: CreateReviewDTO) => void;
   currentReview: CreateReviewDTO | null;
 }
@@ -32,7 +32,7 @@ export function SingleReviewContent({
 }: SingleReviewContentProps) {
   const [review, setReview] = useState<CreateReviewDTO>(
     currentReview || {
-      orderLineItemId: Number(item.orderLineItemId),
+      orderLineItemId: item.orderLineItem,
       overallRating: 0,
       qualityRating: 0,
       review: '',
@@ -44,6 +44,23 @@ export function SingleReviewContent({
       photoUrls: [],
     },
   );
+
+  useEffect(() => {
+    if (!currentReview) {
+      setReview({
+        orderLineItemId: item.orderLineItem,
+        overallRating: 0,
+        qualityRating: 0,
+        review: '',
+        conditionAsDescribed: 'AS_DESCRIBED',
+        conditionTypes: [],
+        usablePercentage: '',
+        storageTips: '',
+        wouldBuyAgain: true,
+        photoUrls: [],
+      });
+    }
+  }, [currentReview, item.orderLineItem]);
 
   const handleReviewChange = (updatedReview: Partial<CreateReviewDTO>) => {
     const newReview = { ...review, ...updatedReview };
