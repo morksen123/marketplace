@@ -63,8 +63,6 @@ export const useReviewModal = () => {
       if (!isBulkReview) {
         await createReviewMutation.mutateAsync(currentReview!);
       } else {
-        console.log(bulkReviews);
-        return;
         await Promise.all(
           Object.values(bulkReviews).map((review) =>
             createReviewMutation.mutateAsync(review),

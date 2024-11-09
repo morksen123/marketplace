@@ -23,6 +23,7 @@ export interface Order {
   orderLineItems: OrderLineItem[];
   shippingAddress: ShippingAddress;
   pickUpLocation: string;
+  reviewNeeded: boolean;
 }
 
 export interface OrderLineItem {

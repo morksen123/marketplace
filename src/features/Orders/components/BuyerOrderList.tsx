@@ -376,13 +376,14 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
                       ))}
                     </div>
                   </div>
-
-                  <Button
-                    onClick={() => openReviewModal(order)}
-                    variant="outline"
-                  >
-                    Review
-                  </Button>
+                  {order.reviewNeeded && (
+                    <Button
+                      onClick={() => openReviewModal(order)}
+                      variant="outline"
+                    >
+                      Review
+                    </Button>
+                  )}
 
                   <div className="flex space-x-2 ml-4">
                     {renderActionButtons(order)}

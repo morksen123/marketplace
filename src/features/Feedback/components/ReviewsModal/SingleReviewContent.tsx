@@ -1,10 +1,10 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, Camera } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CreateReviewDTO, ReviewItem } from '../../types/review-types';
+import { ReviewPhotoUpload } from '../ReviewPhotoUpload';
 import { StarRating } from '../StarRating';
 
 interface SingleReviewContentProps {
@@ -280,10 +280,11 @@ export function SingleReviewContent({
 
         <div className="space-y-2">
           <Label className="text-md">Add Photos (Recommended)</Label>
-          <Button variant="secondary" className="w-full">
-            <Camera className="h-5 w-5 mr-2" />
-            Upload Photos
-          </Button>
+          <ReviewPhotoUpload
+            photoUrls={review.photoUrls || []}
+            onPhotosChange={(urls) => handleReviewChange({ photoUrls: urls })}
+            maxPhotos={4}
+          />
         </div>
 
         <div className="space-y-2">
