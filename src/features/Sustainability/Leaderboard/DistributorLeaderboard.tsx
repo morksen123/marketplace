@@ -714,6 +714,7 @@ export const DistributorLeaderboard = () => {
         user={selectedUser}
         isOpen={!!selectedUser}
         onClose={() => setSelectedUser(null)}
+        currentUser={currentDistributor}
       />
     </motion.div>
   );
