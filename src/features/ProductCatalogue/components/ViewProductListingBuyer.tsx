@@ -225,7 +225,7 @@ export const ViewProductListingBuyer: React.FC<
               {/* Pricing - implement promotion price here */}
               {promotionalPrice !== null ? (
                 <>
-                  <p className="text-2xl text-[#017A37] font-semibold mr-2">
+                  <p className="text-2xl text-[#22C55E] font-semibold text-left mr-2">
                     ${promotionalPrice.toFixed(2)} per{' '}
                     {unitMapping[product.foodCategory] || 'unit'}
                   </p>
@@ -235,7 +235,7 @@ export const ViewProductListingBuyer: React.FC<
                   </p>
                 </>
               ) : (
-                <p className="text-2xl text-[#017A37] font-semibold">
+                <p className="text-2xl text-[#22C55E] font-semibold text-left">
                   ${product.price.toFixed(2)}
                 </p>
               )}
@@ -270,7 +270,7 @@ export const ViewProductListingBuyer: React.FC<
                 <span className="ml-1 text-sm font-medium">4.5</span>
               </div>
               <button
-                className="ml-4 flex items-center bg-[#017A37] hover:bg-[#015A27] text-white rounded-full px-3 py-1 transition duration-300 ease-in-out"
+                className="ml-4 flex items-center bg-[#22C55E] hover:bg-[#015A27] text-white rounded-full px-3 py-1 transition duration-300 ease-in-out"
                 onClick={handleChatClick}
               >
                 <ChatIcon style={{ fontSize: '18px' }} className="mr-1" />
@@ -365,7 +365,7 @@ export const ViewProductListingBuyer: React.FC<
                     )}
                   </td>
                   {promotionalDiscount > 0 && (
-                    <td className="border border-gray-300 px-4 py-2 text-[#017A37] font-semibold">
+                    <td className="border border-gray-300 px-4 py-2 text-[#22C55E] font-semibold">
                       ${pricing.discountedPrice.toFixed(2)}
                     </td>
                   )}

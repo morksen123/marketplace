@@ -43,7 +43,7 @@ export const StripeWrapper = () => {
   const appearance = {
     theme: 'stripe' as const,
     variables: {
-      colorPrimary: '#017A37', // Set the primary color as --secondary green
+      colorPrimary: '#22C55E', // Set the primary color as --secondary green
       fontFamily: '"Roboto", sans-serif',
     },
   };

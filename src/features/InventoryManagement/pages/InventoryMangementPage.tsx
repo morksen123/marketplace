@@ -39,14 +39,14 @@ type SortColumn = keyof BatchWithProduct | `product.${keyof Product}` | 'daysToE
 
 const StyledTabs = styled(Tabs)({
   '& .MuiTabs-indicator': {
-    backgroundColor: '#017A37',
+    backgroundColor: '#22C55E',
   },
 });
 
 const StyledTab = styled(Tab)({
   color: '#4B5563',
   '&.Mui-selected': {
-    color: '#017A37',
+    color: '#22C55E',
   },
   '&:hover': {
     color: '#015A27',

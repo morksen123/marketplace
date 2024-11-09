@@ -192,7 +192,7 @@ export const DistributorNavMenu = () => {
               )}
             </div>
             <Link to="/distributor/home">
-              <Button variant="secondary">
+              <Button variant="secondary" className="button-green">
                 <StoreMallDirectoryOutlinedIcon className="mr-2" /> Store
               </Button>
             </Link>
