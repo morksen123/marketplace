@@ -1,43 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
-import {
-  EmojiEvents as Trophy,
-  Park as TreeDeciduous,
-  WaterDrop as Droplets,
-  Battery90 as Battery,
-  Recycling as Recycle,
-  Star,
-  WorkspacePremium as Medal,
-  CalendarMonth as Calendar,
-  Grade as LeaderboardIcon,
-  CardGiftcard as Gift,
-  Share,
-  ContentCopy as Copy,
-  Facebook as FacebookIcon,
-  LinkedIn as LinkedInIcon,
-  Instagram as InstagramIcon,
-} from '@mui/icons-material';
-import { PointsHistory } from './components/PointsHistoryTable';
+import { Share, ContentCopy as Copy } from '@mui/icons-material';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import food from '@/assets/food.png';
-import co2 from '@/assets/co2.png';
-import electricity from '@/assets/electricity.png';
-import water from '@/assets/water.png';
 import { ImpactExplanation } from './components/ImpactExplanation';
-import { ShareContent } from './components/Share';
 import { SustainabilityImpact } from './components/SustainabilityImpact';
+import { Badges } from './components/Badges';
+import { PointsGuide } from './components/PointsGuide';
+import { PointsHistory } from './components/PointsHistoryTable';
+import { Rewards } from './components/Rewards';
+
 interface Profile {
   points: number;
   firstName: string;
   lastName: string;
+  email: string;
+  createdDateTime: string
   referralCode?: string;
   referredByCode?: string;
   hasQualifyingPurchase: boolean;
+  savedPoints: number;
+  profilePic: string;
 }
 
 interface Badge {
@@ -133,8 +119,12 @@ export const Profile: React.FC = () => {
     points: 0,
     firstName: '',
     lastName: '',
+    email: '',
+    createdDateTime: '',
     referralCode: '',
-    hasQualifyingPurchase: false
+    hasQualifyingPurchase: false,
+    savedPoints: 0,
+    profilePic: ''
   });
   const [referralLink, setReferralLink] = useState<string>('');
   const [referralCodeInput, setReferralCodeInput] = useState<string>('');
@@ -144,6 +134,9 @@ export const Profile: React.FC = () => {
     category: 'food' | 'water' | 'electricity' | 'carbon';
     type: 'personal' | 'community';
   } | null>(null);
+  const [showPointsGuide, setShowPointsGuide] = useState(false);
+  const [showPointsHistory, setShowPointsHistory] = useState(false);
+  const [showRewards, setShowRewards] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -252,115 +245,71 @@ export const Profile: React.FC = () => {
   };
 
   return (
-    <motion.div
-      className="container mx-auto px-4 py-8"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
-      {/* Profile Header Card */}
-      <motion.div variants={cardVariants} className="mb-8">
+    <motion.div className="mx-36 px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-[auto,1fr,1fr,1fr] gap-5 mb-8">
+        <div className="w-64 h-64 rounded-full overflow-hidden border-4 border-white shadow-lg">
+          <img
+            src={profile.profilePic || '/default-avatar.png'}
+            alt={`${profile.firstName} ${profile.lastName}`}
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Profile Info Card */}
         <Card className="bg-gradient-to-br from-blue-50 via-green-50 to-emerald-50">
-          <CardContent className="pt-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-              {/* Profile Info Circle */}
-              <motion.div 
-                className="relative w-48 h-48"
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 opacity-10" />
-                <div className="absolute inset-2 rounded-full bg-white flex flex-col items-center justify-center">
-                  <h2 className="text-2xl font-bold">{profile.firstName} {profile.lastName}</h2>
+          <CardContent className="p-8">
+            <div className="flex flex-col gap-8">
+              <div className="flex justify-between items-start">
+                <div className="text-left">
+                  <div className="text-4xl font-bold text-black">{profile.firstName} {profile.lastName}</div>
+                  <div className="text-xs text-gray-500 mt-2">Member since {new Date(profile.createdDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
                 </div>
-              </motion.div>
 
-              {/* Points Circle */}
-              <motion.div 
-                className="relative w-40 h-40"
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 opacity-10" />
-                <div className="absolute inset-2 rounded-full bg-white flex flex-col items-center justify-center">
-                  <div className="text-4xl font-bold text-green-600">{profile.points}</div>
-                  <div className="text-sm text-gray-600">Total Points</div>
-                </div>
-              </motion.div>
+                {/* Referral Sections */}
+                <div className="flex flex-col items-end gap-4">
+                  {!profile.referredByCode && !profile.hasQualifyingPurchase && (
+                    <motion.div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Enter referral code"
+                        value={referralCodeInput}
+                        onChange={(e) => setReferralCodeInput(e.target.value)}
+                        className="w-48"
+                      />
+                      <Button variant="outline" size="sm" onClick={handleSubmitReferralCode}>
+                        Apply
+                      </Button>
+                    </motion.div>
+                  )}
 
-              {/* Referral Section */}
-              <div className="flex flex-col gap-4">
-                {!profile.referredByCode && !profile.hasQualifyingPurchase && (
-                  <motion.div 
-                    className="flex items-center gap-2"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <Input
-                      placeholder="Enter referral code"
-                      value={referralCodeInput}
-                      onChange={(e) => setReferralCodeInput(e.target.value)}
-                      className="w-40 rounded-full"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleSubmitReferralCode}
-                      className="rounded-full"
-                    >
-                      Apply
-                    </Button>
-                  </motion.div>
-                )}
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Share className="h-4 w-4 mr-2" />
-                      Share Referral Code
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Your Referral Code</DialogTitle>
-                      <DialogDescription>
-                        Share this code with friends and earn rewards when they sign up!
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex flex-col space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          readOnly
-                          value={profile.referralCode || ''}
-                          className="font-mono"
-                        />
-                        <Button
-                          variant="secondary"
-                          size="icon"
-                          onClick={() => {
-                            navigator.clipboard.writeText(profile.referralCode || '');
-                            toast({
-                              title: "Success!",
-                              description: "Referral code copied to clipboard",
-                              duration: 2000,
-                            });
-                          }}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div className="flex flex-col space-y-2">
-                        <p className="text-sm text-muted-foreground">Referral Link:</p>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="w-64">
+                        <Share className="h-4 w-4 mr-2" />
+                        Share Referral Code
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Your Referral Code</DialogTitle>
+                        <DialogDescription>
+                          Share this code with friends and earn rewards when they sign up!
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="flex flex-col space-y-4">
                         <div className="flex items-center space-x-2">
                           <Input
                             readOnly
-                            value={referralLink}
-                            className="font-mono text-xs"
+                            value={profile.referralCode || ''}
+                            className="font-mono"
                           />
                           <Button
                             variant="secondary"
                             size="icon"
                             onClick={() => {
-                              navigator.clipboard.writeText(referralLink);
+                              navigator.clipboard.writeText(profile.referralCode || '');
                               toast({
                                 title: "Success!",
-                                description: "Referral link copied to clipboard",
+                                description: "Referral code copied to clipboard",
                                 duration: 2000,
                               });
                             }}
@@ -368,148 +317,159 @@ export const Profile: React.FC = () => {
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
+                        <div className="flex flex-col space-y-2">
+                          <p className="text-sm text-muted-foreground">Referral Link:</p>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              readOnly
+                              value={referralLink}
+                              className="font-mono text-xs"
+                            />
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              onClick={() => {
+                                navigator.clipboard.writeText(referralLink);
+                                toast({
+                                  title: "Success!",
+                                  description: "Referral link copied to clipboard",
+                                  duration: 2000,
+                                });
+                              }}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <span className="text-sm font-medium text-green-600 animate-pulse">
-                  {profile.referredByCode && !profile.hasQualifyingPurchase
-                    ? "Complete a purchase over $100 to earn your referral bonus!"
-                    : "Earn 250 points when you refer a friend!"}
-                </span>
+                    </DialogContent>
+                  </Dialog>
+
+                  <div className="text-sm font-medium text-green-600 text-right">
+                    {profile.referredByCode && !profile.hasQualifyingPurchase
+                      ? "Complete a purchase over $100 to earn your referral bonus!"
+                      : "Earn 250 points when you refer a friend!"}
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
-      </motion.div>
 
-      {/* Tabbed Interface */}
-      <Tabs defaultValue="stats" className="space-y-6">
-        <TabsList className="grid grid-cols-4 gap-4 w-full">
-          <TabsTrigger value="stats" className="text-lg">Statistics</TabsTrigger>
-          <TabsTrigger value="points" className="text-lg">Points History</TabsTrigger>
-          <TabsTrigger value="badges" className="text-lg">Badges</TabsTrigger>
-          <TabsTrigger value="rewards" className="text-lg">Rewards</TabsTrigger>
-        </TabsList>
+        {/* Total Points Card */}
+        <Card className="bg-gradient-to-br from-blue-50 via-green-50 to-emerald-50 relative">
+          <div className="absolute top-2 left-2">
+            <div className="group relative">
+              <div className="rounded-full w-5 h-5 bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-600 text-sm">?</span>
+              </div>
+              <div
+                className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-6 py-2 bg-gray-800 text-white text-sm font-medium rounded-md shadow-lg w-72"
+              >
+                These points reset every month. They contribute to your leaderboard position.
+              </div>
+            </div>
+          </div>
+          <CardContent className="p-8 flex flex-col items-center justify-center h-full">
+            <div className="flex flex-col items-center">
+              <div className="text-5xl font-bold text-green-600">{profile.points}</div>
+              <div className="text-xl text-gray-600 mt-2">Leaderboard Points</div>
+              <button
+                className="text-sm text-blue-600 hover:text-blue-800 underline absolute top-2 right-2"
+                onClick={() => setShowPointsGuide(true)}
+              >
+                How to Earn?
+              </button>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowPointsHistory(true)}
+              className="w-48 mt-2"
+            >
+              View Points History
+            </Button>
+          </CardContent>
+        </Card>
 
-        {/* Statistics Tab */}
-        <TabsContent value="stats">
-          <motion.div variants={cardVariants}>
-            <SustainabilityImpact 
-              impactMetrics={impactMetrics}
-              onImpactCardClick={handleImpactCardClick}
-              cardVariants={cardVariants}
-            />
-          </motion.div>
-        </TabsContent>
+        {/* Saved Points Card */}
+        <Card className="bg-gradient-to-br from-blue-50 via-green-50 to-emerald-50 relative">
+          <div className="absolute top-2 left-2">
+            <div className="group relative">
+              <div className="rounded-full w-5 h-5 bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-600 text-sm">?</span>
+              </div>
+              <div
+                className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-6 py-2 bg-gray-800 text-white text-sm font-medium rounded-md shadow-lg w-72"
+              >
+                After the Leaderboard resets, these points are added to your Redeemable Points and can be redeemed for rewards.
+              </div>
+            </div>
+          </div>
+          <CardContent className="p-8 flex flex-col items-center justify-center h-full">
+            <div className="text-5xl font-bold text-green-600">{profile.savedPoints}</div>
+            <div className="text-xl text-gray-600 mt-2">Redeemable Points</div>
+            <Button
+              variant="outline"
+              onClick={() => setShowRewards(true)}
+              className="w-48 mt-2"
+            >
+              View Rewards
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* Points History Tab */}
-        <TabsContent value="points">
-          <motion.div variants={cardVariants}>
-            <PointsHistory />
-          </motion.div>
-        </TabsContent>
+      {/* Bottom Section - Sustainability Impact and Badges */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Sustainability Impact */}
+        <SustainabilityImpact
+          impactMetrics={impactMetrics}
+          onImpactCardClick={handleImpactCardClick}
+          cardVariants={cardVariants}
+        />
 
-        {/* Badges Tab */}
-        <TabsContent value="badges">
-          <motion.div variants={cardVariants}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Medal className="h-5 w-5" />
-                  Badges & Achievements
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {badges && badges.length > 0 ? (
-                    badges.map((badge) => (
-                      <motion.div
-                        key={badge.badgeId}
-                        className="relative p-4 rounded-lg border bg-gradient-to-br from-white to-gray-50"
-                        whileHover={{ scale: 1.05 }}
-                      >
-                        <div className="flex flex-col items-center text-center">
-                          <div className="mb-2">
-                            {badge.category === 'SUSTAINABILITY' && (
-                              <TreeDeciduous className="h-8 w-8 text-green-500" />
-                            )}
-                            {badge.category === 'LEADERBOARD' && (
-                              <LeaderboardIcon className="h-8 w-8 text-yellow-500" />
-                            )}
-                            {badge.category === 'QUALITY_ENGAGEMENT' && (
-                              <Star className="h-8 w-8 text-blue-500" />
-                            )}
-                            {badge.category === 'QUALITY_SERVICE' && (
-                              <Star className="h-8 w-8 text-purple-500" />
-                            )}
-                          </div>
-                          <h3 className="font-semibold text-sm mb-1">{badge.title}</h3>
-                          <p className="text-xs text-gray-600">{badge.subtitle}</p>
-                          <div className="mt-2 flex items-center text-xs text-gray-500">
-                            <Calendar className="h-3 w-3 mr-1" />
-                            {new Date(badge.earnedOn).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))
-                  ) : (
-                    <div className="col-span-full text-center text-gray-500">
-                      No badges earned yet
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </TabsContent>
 
-        {/* Rewards Tab */}
-        <TabsContent value="rewards">
-          <motion.div variants={cardVariants}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Gift className="h-5 w-5" />
-                  Redeem Rewards
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Add reward cards here */}
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col items-center text-center">
-                        <Gift className="h-12 w-12 text-green-500 mb-4" />
-                        <h3 className="font-bold mb-2">$5 Store Credit</h3>
-                        <p className="text-sm text-gray-600 mb-4">Redeem 500 points for store credit</p>
-                        <button className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600">
-                          Redeem 500 points
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  {/* Add more reward cards as needed */}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </TabsContent>
-      </Tabs>
+        {/* Badges */}
+        <Badges badges={badges} />
 
-      <Dialog 
-        open={selectedImpact !== null} 
+      </div>
+
+      {/* Keep existing Dialog for impact explanation */}
+      <Dialog
+        open={selectedImpact !== null}
         onOpenChange={() => setSelectedImpact(null)}
       >
         <DialogContent className="max-w-4xl">
           {selectedImpact && (
-            <ImpactExplanation 
-              category={selectedImpact.category} 
+            <ImpactExplanation
+              category={selectedImpact.category}
               type={selectedImpact.type}
             />
           )}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={showPointsHistory} onOpenChange={setShowPointsHistory}>
+        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+          </DialogHeader>
+          <PointsHistory />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showRewards} onOpenChange={setShowRewards}>
+        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+          </DialogHeader>
+          <Rewards />
+        </DialogContent>
+      </Dialog>
+
+      <PointsGuide
+        isOpen={showPointsGuide}
+        onClose={() => setShowPointsGuide(false)}
+        userType="buyer"
+      />
     </motion.div>
   );
 };

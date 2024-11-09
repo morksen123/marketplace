@@ -333,7 +333,18 @@ export const BuyerHome = () => {
                       <img src={water} alt="Water" className="w-12 h-12 mb-2" />
                       <div>
                         <h3 className="text-gray-600 mb-2 font-medium">Water Saved</h3>
-                        <p className="text-3xl font-bold text-emerald-600">{personalImpactMetrics.waterLitresSaved.toFixed(0)} litres</p>
+                        <p className="text-3xl font-bold text-emerald-600">
+                          <b>
+                            {personalImpactMetrics.waterLitresSaved >= 1000000000000
+                              ? `${(personalImpactMetrics.waterLitresSaved / 1000000000000).toFixed(1)} tril`
+                              : personalImpactMetrics.waterLitresSaved >= 1000000000
+                              ? `${(personalImpactMetrics.waterLitresSaved / 1000000000).toFixed(1)} bil`
+                              : personalImpactMetrics.waterLitresSaved >= 1000000
+                              ? `${(personalImpactMetrics.waterLitresSaved / 1000000).toFixed(1)}mil`
+                              : personalImpactMetrics.waterLitresSaved.toFixed(0)
+                            }
+                          </b> ℓ
+                        </p>
                         <p className="text-base text-black-600">
                           🚿 {personalImpactMetrics.showersEquivalent.toFixed(0)} showers
                         </p>
@@ -357,7 +368,7 @@ export const BuyerHome = () => {
                     <div className="flex flex-col items-center text-center">
                       <img src={food} alt="Food" className="w-12 h-12 mb-2" />
                       <div>
-                        <h3 className="text-gray-600 mb-2 font-medium">Community Food Rescue</h3>
+                        <h3 className="text-gray-600 mb-2 font-medium">Food Rescue</h3>
                         <p className="text-3xl font-bold text-blue-600"><b>{impactMetrics.weightSaved.toFixed(1)}</b> kg</p>
                         <p className="text-base text-black-600">
                           🍽️ Feeds <b>{impactMetrics.weightSaved.toFixed(0)}</b> people
@@ -403,7 +414,18 @@ export const BuyerHome = () => {
                       <img src={water} alt="Water" className="w-12 h-12 mb-2" />
                       <div>
                         <h3 className="text-gray-600 mb-2 font-medium">Water Saved</h3>
-                        <p className="text-3xl font-bold text-blue-600"><b>{personalImpactMetrics.waterLitresSaved.toFixed(0)}</b> litres</p>
+                        <p className="text-3xl font-bold text-blue-600">
+                          <b>
+                            {personalImpactMetrics.waterLitresSaved >= 1000000000000
+                              ? `${(personalImpactMetrics.waterLitresSaved / 1000000000000).toFixed(1)} tril`
+                              : personalImpactMetrics.waterLitresSaved >= 1000000000
+                              ? `${(personalImpactMetrics.waterLitresSaved / 1000000000).toFixed(1)} bil`
+                              : personalImpactMetrics.waterLitresSaved >= 1000000
+                              ? `${(personalImpactMetrics.waterLitresSaved / 1000000).toFixed(1)}mil`
+                              : personalImpactMetrics.waterLitresSaved.toFixed(0)
+                            }
+                          </b> ℓ
+                        </p>
                         <p className="text-base text-black-600">
                           🏊‍♂️ <b>{personalImpactMetrics.swimmingPoolsEquivalent.toFixed(0)}</b> Olympic swimming pools
                         </p>
