@@ -44,6 +44,7 @@ export function SingleReviewContent({
       photoUrls: [],
     },
   );
+  const [productImage, setProductImage] = useState('');
 
   useEffect(() => {
     if (!currentReview) {
@@ -62,6 +63,20 @@ export function SingleReviewContent({
     }
   }, [currentReview, item.orderLineItem]);
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch(`/api/products/product/${item.productId}`);
+        const data = await response.json();
+        setProductImage(data.productPictures[0]);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      }
+    };
+
+    fetchProduct();
+  }, [item.productId]);
+
   const handleReviewChange = (updatedReview: Partial<CreateReviewDTO>) => {
     const newReview = { ...review, ...updatedReview };
     setReview(newReview);
@@ -72,7 +87,7 @@ export function SingleReviewContent({
     <Card className="w-full max-w-3xl rounded-none">
       <CardHeader className="flex flex-row items-center space-x-4 p-6 bg-secondary/5 mb-6">
         <img
-          // src={item. || '/placeholder.svg?height=120&width=120'}
+          src={productImage || '/placeholder.svg?height=120&width=120'}
           alt={item.productName}
           className="w-28 h-28 rounded-lg object-cover"
         />
