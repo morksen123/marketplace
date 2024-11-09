@@ -138,44 +138,36 @@ export const Profile: React.FC = () => {
   const [showPointsHistory, setShowPointsHistory] = useState(false);
   const [showRewards, setShowRewards] = useState(false);
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const getProfile = async () => {
-      const data = await fetchProfile();
-      console.log(data);
-      setProfile(data);
-    };
-    const getReferralLink = async () => {
-      const link = await fetchReferralLink();
-      setReferralLink(link);
-    };
-    const getBadges = async () => {
-      const badgeData = await fetchBadges();
-      setBadges(badgeData);
-    };
-    const fetchImpactMetrics = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/impact/personal', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setImpactMetrics(data);
-        } else {
-          console.error('Failed to fetch impact metrics');
-        }
+        const [profileData, referralLinkData, badgeData, impactData] = await Promise.all([
+          fetchProfile(),
+          fetchReferralLink(),
+          fetchBadges(),
+          fetch('/api/impact/personal', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          }).then(res => res.json())
+        ]);
+
+        setProfile(profileData);
+        setReferralLink(referralLinkData);
+        setBadges(badgeData);
+        setImpactMetrics(impactData);
       } catch (error) {
-        console.error('Error fetching impact metrics:', error);
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    getProfile();
-    getReferralLink();
-    getBadges();
-    fetchImpactMetrics();
+
+    fetchData();
   }, []);
 
   const handleSubmitReferralCode = async () => {
@@ -244,9 +236,17 @@ export const Profile: React.FC = () => {
     setSelectedImpact({ category, type });
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500" />
+      </div>
+    );
+  }
+
   return (
-    <motion.div className="mx-36 px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-[auto,1fr,1fr,1fr] gap-5 mb-8">
+    <motion.div className="mx-12 px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-[auto,1.5fr,0.8fr,0.8fr] gap-5 mb-8">
         <div className="w-64 h-64 rounded-full overflow-hidden border-4 border-white shadow-lg">
           <img
             src={profile.profilePic || '/default-avatar.png'}
@@ -283,7 +283,7 @@ export const Profile: React.FC = () => {
 
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-64">
+                      <Button variant="outline" size="sm" className="w-48">
                         <Share className="h-4 w-4 mr-2" />
                         Share Referral Code
                       </Button>
