@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Medal, Trophy, Star, TreeDeciduous, Droplets, Battery, Recycle, Info, TrendingUp } from 'lucide-react';
-import { motion  } from 'framer-motion';
+import { Medal, Trophy, Star, TreeDeciduous, Droplets, Battery, Recycle, Info, TrendingUp, Heart, Package, Tag } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { LinearProgress, Box, Typography } from '@mui/material';
 import { DistributorInformation } from './components/DistributorInformation';
+import { Calendar } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Link } from 'react-router-dom';
+
 interface User {
   id: number;
   distributorName: string;
@@ -26,39 +30,65 @@ interface User {
   email: string;
 }
 
+interface DistributorDTO {
+  id: number;
+  email: string;
+  points: number;
+  distributorName: string;
+}
+
 export const DistributorLeaderboard = () => {
   const [hoveredUser, setHoveredUser] = useState<number | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [daysUntilReset, setDaysUntilReset] = useState<number>(0);
+  const [currentDistributor, setCurrentDistributor] = useState<DistributorDTO | null>(null);
+
+  const calculateDaysUntilReset = () => {
+    const today = new Date();
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const diffTime = Math.abs(lastDay.getTime() - today.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    setDaysUntilReset(calculateDaysUntilReset());
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/distributor/leaderboard', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const [leaderboardResponse, profileResponse] = await Promise.all([
+          fetch('/api/distributor/leaderboard', {
+            credentials: 'include'
+          }),
+          fetch('/api/distributor/profile', {
+            credentials: 'include'
+          })
+        ]);
+
+        if (!leaderboardResponse.ok || !profileResponse.ok) {
+          throw new Error('Failed to fetch data');
         }
-        
-        const data = await response.json();
-        setUsers(data);
+
+        const leaderboardData = await leaderboardResponse.json();
+        const profileData = await profileResponse.json();
+
+        setUsers(leaderboardData);
+        setCurrentDistributor(profileData);
       } catch (err) {
-        setError('Failed to fetch leaderboard data');
-        console.error('Error fetching leaderboard data:', err);
+        setError('Failed to fetch data');
+        console.error('Error:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchUsers();
+
+    fetchData();
   }, []);
 
   // Split users into top 3 and next 10 users (total of 13)
@@ -129,8 +159,8 @@ export const DistributorLeaderboard = () => {
   // Add this with the other animation variants
   const tableRowVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
       transition: {
         type: "spring",
@@ -147,169 +177,55 @@ export const DistributorLeaderboard = () => {
     totalTreesPlanted: users.reduce((acc, user) => acc + user.treesPlanted, 0),
   };
 
-  // Add this section before the leaderboard
-  const CommunityImpactSection = () => (
-    <motion.div 
-      className="mb-12"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-    >
-      <h2 className="text-2xl font-bold mb-6 text-center">Our Community Impact</h2>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <motion.div 
-              className="flex items-center justify-center flex-col"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Recycle className="h-8 w-8 text-green-500 mb-2" />
-              <p className="text-2xl font-bold text-green-600">{communityStats.totalWasteReduced}kg</p>
-              <p className="text-sm text-gray-600">Waste Reduced</p>
-            </motion.div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <motion.div 
-              className="flex items-center justify-center flex-col"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Battery className="h-8 w-8 text-yellow-500 mb-2" />
-              <p className="text-2xl font-bold text-yellow-600">{communityStats.totalCarbonSaved}kg</p>
-              <p className="text-sm text-gray-600">Carbon Saved</p>
-            </motion.div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <motion.div 
-              className="flex items-center justify-center flex-col"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Droplets className="h-8 w-8 text-blue-500 mb-2" />
-              <p className="text-2xl font-bold text-blue-600">{communityStats.totalWaterSaved}L</p>
-              <p className="text-sm text-gray-600">Water Saved</p>
-            </motion.div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <motion.div 
-              className="flex items-center justify-center flex-col"
-              whileHover={{ scale: 1.05 }}
-            >
-              <TreeDeciduous className="h-8 w-8 text-emerald-500 mb-2" />
-              <p className="text-2xl font-bold text-emerald-600">{communityStats.totalTreesPlanted}</p>
-              <p className="text-sm text-gray-600">Trees Planted</p>
-            </motion.div>
-          </CardContent>
-        </Card>
-      </div>
-    </motion.div>
-  );
-
-  // Add this section after the leaderboard
-  const SustainabilityTipsSection = () => (
-    <motion.div 
-      className="mt-12"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
-    >
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Info className="h-5 w-5" />
-            Sustainability Tips & Challenges
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="weekly">
-            <TabsList className="mb-4">
-              <TabsTrigger value="weekly">Weekly Challenge</TabsTrigger>
-              <TabsTrigger value="tips">Daily Tips</TabsTrigger>
-              <TabsTrigger value="achievements">Achievements</TabsTrigger>
-            </TabsList>
-            <TabsContent value="weekly">
-              <div className="space-y-4">
-                <h3 className="font-semibold">Current Challenge: Reduce Plastic Usage</h3>
-                
-                {/* MUI Progress Bar */}
-                <Box sx={{ width: '100%', mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Box sx={{ width: '100%', mr: 1 }}>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={65} 
-                        sx={{
-                          height: 8,
-                          borderRadius: 5,
-                          backgroundColor: 'rgba(0,0,0,0.1)',
-                          '& .MuiLinearProgress-bar': {
-                            backgroundColor: '#22c55e', // green-500
-                            borderRadius: 5,
-                          }
-                        }}
-                      />
-                    </Box>
-                    <Box sx={{ minWidth: 35 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        65%
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
-
-                <p className="text-sm text-gray-600">Community Progress</p>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm">
-                    Join Challenge
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    Learn More
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="tips">
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                  Use reusable bags for grocery shopping
-                </li>
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                  Turn off lights when leaving a room
-                </li>
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                  Use a reusable water bottle
-                </li>
-              </ul>
-            </TabsContent>
-            <TabsContent value="achievements">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Add achievement badges here */}
-                <motion.div 
-                  className="text-center p-4 rounded-lg border"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <TreeDeciduous className="h-8 w-8 mx-auto text-green-500 mb-2" />
-                  <p className="font-semibold">Tree Hugger</p>
-                  <p className="text-xs text-gray-600">Plant 5 trees</p>
-                </motion.div>
-                {/* Add more achievements */}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-
   const handleUserClick = (user: User) => {
     setSelectedUser(user);
+  };
+
+  const getOrdinalSuffix = (i: number) => {
+    const j = i % 10;
+    const k = i % 100;
+    if (j === 1 && k !== 11) return "st";
+    if (j === 2 && k !== 12) return "nd";
+    if (j === 3 && k !== 13) return "rd";
+    return "th";
+  };
+
+  const getLeaderboardMessage = () => {
+    if (!currentDistributor || !users.length) return null;
+
+    // Find current distributor's position in the leaderboard
+    const distributorPosition = users.findIndex(user => user.email === currentDistributor.email);
+
+    // If distributor is not in top 10
+    if (distributorPosition === -1) {
+      const pointsNeeded = users[users.length - 1].points - currentDistributor.points;
+      if (pointsNeeded <= 0) {
+        return {
+          message: "Keep earning points to climb up the leaderboard!",
+          type: 'info'
+        };
+      }
+      return {
+        message: `You need ${pointsNeeded.toLocaleString()} more points to appear on the leaderboard!`,
+        type: 'info'
+      };
+    }
+
+    // If distributor is in top 10 but not first
+    if (distributorPosition > 0) {
+      const pointsNeeded = users[distributorPosition - 1].points - currentDistributor.points;
+      const nextUser = users[distributorPosition - 1];
+      return {
+        message: `You're in ${distributorPosition + 1}${getOrdinalSuffix(distributorPosition + 1)} place! ${pointsNeeded.toLocaleString()} more points to overtake ${nextUser.distributorName}!`,
+        type: 'success'
+      };
+    }
+
+    // If distributor is first
+    return {
+      message: "You're leading the leaderboard! Keep up the great work!",
+      type: 'success'
+    };
   };
 
   // Add loading and error states to the return
@@ -325,8 +241,8 @@ export const DistributorLeaderboard = () => {
     return (
       <div className="text-center text-red-500 p-4">
         <p>{error}</p>
-        <button 
-          onClick={() => window.location.reload()} 
+        <button
+          onClick={() => window.location.reload()}
           className="mt-2 text-sm text-gray-600 hover:text-gray-800"
         >
           Try again
@@ -336,112 +252,469 @@ export const DistributorLeaderboard = () => {
   }
 
   return (
-    <motion.div 
-      className="container mx-auto px-4 py-8"
+    <motion.div
+      className="w-full min-h-screen text-white"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-
-      {/* Top 3 Section */}
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
-        variants={containerVariants}
+      <motion.div
+        className="w-full py-3"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
       >
-        {[topThree[1], topThree[0], topThree[2]].map((user, index) => (
+        <div className="max-w-7xl mx-auto px-4">
           <motion.div
-            key={user.id}
-            variants={cardVariants}
-            className={`${index === 1 ? 'md:mt-0' : 'md:mt-12'}`}
+            className="flex items-center justify-center gap-3"
+            whileHover={{ scale: 1.01 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
-            <Card className={`relative overflow-hidden ${getGradientByRank(user.rank)} hover:shadow-xl transition-all duration-300`} onClick={() => handleUserClick(user)} cursor-pointer>
-              <CardContent className="text-center pt-6">
-                {/* Profile Picture */}
-                <motion.div 
-                  className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-white shadow-lg"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <img 
-                    src={user.profilePic}
-                    alt={user.distributorName}
-                    className="w-full h-full object-cover"
-                  />
-                </motion.div>
-                
-                <motion.h3 className="text-xl font-bold mb-2">
-                  {user.distributorName}
-                </motion.h3>
-                <motion.div whileHover={{ scale: 1.1 }} className="space-y-2">
-                  <Badge className="text-lg px-4 py-2 bg-green-500 text-white">
-                    {user.points.toLocaleString()} Points
-                  </Badge>
-                  {user.weightOfFoodSaved && (
-                    <div className="text-sm text-gray-600">
-                      Food Saved: {user.weightOfFoodSaved.toLocaleString()}kg
-                    </div>
-                  )}
-                </motion.div>
-              </CardContent>
-            </Card>
+            <Calendar className="h-5 w-5 text-green-400" />
+            <p className="text-center text-sm">
+              <span className="text-gray-800 mr-2">Monthly leaderboard resets in</span>
+              <span className="font-bold bg-green-500 bg-clip-text text-transparent">
+                {daysUntilReset} {daysUntilReset === 1 ? 'day' : 'days'}
+              </span>
+            </p>
           </motion.div>
-        ))}
+        </div>
       </motion.div>
 
-      {/* Other Users Table */}
-      <Card className="overflow-hidden shadow-lg">
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-left">Rank</TableHead>
-                <TableHead className="text-left">Distributor</TableHead>
-                <TableHead className="text-left">Points</TableHead>
-                <TableHead className="text-left">Food Saved (kg)</TableHead>
-                <TableHead className="text-left">Email</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {nextTen.map((user, index) => (
-                <TableRow key={user.id}>
-                  <TableCell className="text-left font-medium">
-                    {index + 4}
-                  </TableCell>
-                  <TableCell className="text-left">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden">
-                        <img 
-                          src={user.profilePic || '/default-avatar.png'}
-                          alt={user.distributorName}
-                          className="w-full h-full object-cover"
-                        />
+      {/* Full-width Status Message */}
+      {getLeaderboardMessage() && (
+        <motion.div className="w-full">
+          <Alert
+            variant={getLeaderboardMessage()?.type === 'success' ? 'success' : 'info'}
+            className="border-none shadow-lg bg-gradient-to-r from-green-400/90 to-blue-500/90 backdrop-blur-sm text-white py-6"
+          >
+            <motion.div
+              className="flex flex-col items-center justify-center gap-3 w-full"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <AlertDescription className="flex flex-col items-center gap-3 text-center">
+                <span className="text-xl font-medium">
+                  {getLeaderboardMessage()?.message.split('!')[0]}!
+                </span>
+                {getLeaderboardMessage()?.message.includes('overtake') && (
+                  <motion.div
+                    className="bg-white/20 px-6 py-2 rounded-full"
+                    initial={{ scale: 1 }}
+                    animate={{
+                      scale: [1, 1.05, 1],
+                      boxShadow: [
+                        "0 0 0 0 rgba(255,255,255,0.4)",
+                        "0 0 0 10px rgba(255,255,255,0)",
+                        "0 0 0 0 rgba(255,255,255,0)"
+                      ]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <span className="text-lg font-bold">
+                      {getLeaderboardMessage()?.message.split('!')[1]}
+                    </span>
+                  </motion.div>
+                )}
+              </AlertDescription>
+            </motion.div>
+          </Alert>
+        </motion.div>
+      )}
+
+      {/* Main Content Area */}
+      <div className="w-full bg-white rounded-t-[2.5rem] min-h-screen">
+        <div className="max-w-7xl mx-auto px-2 py-12">
+          {/* Transaction Fee Tiers Bar */}
+          {currentDistributor && (
+            <div className="mb-6">
+              <div className="flex flex-col mb-4">
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Your Transaction Fee Tier</h3>
+                <p className="text-sm text-gray-600">
+                  The standard transaction fee is 10%. Maintain your position on the leaderboard at month-end to qualify for reduced fees.
+                </p>
+              </div>
+             
+              <div className="grid grid-cols-3 gap-3">
+                {/* Top 3 Tier */}
+                <div
+                  className={`
+                    rounded-lg p-3 transition-all duration-200 relative
+                    ${users.findIndex(u => u.distributorId === currentDistributor.distributorId) < 3
+                      ? 'bg-gradient-to-r from-green-100 to-blue-100 border-2 border-blue-500'
+                      : 'bg-gray-50'
+                    }
+                  `}
+                >
+                  {users.findIndex(u => u.distributorId === currentDistributor.distributorId) < 3 && (
+                    <div className="absolute -top-2 -right-2 bg-blue-500 text-white px-2 py-0.5 rounded-full text-xs">
+                      Current
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <p className="font-semibold text-gray-800">Top 3</p>
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-green-600">5%</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top 5 Tier */}
+                <div
+                  className={`
+                    rounded-lg p-3 transition-all duration-200 relative
+                    ${users.findIndex(u => u.distributorId === currentDistributor.distributorId) >= 3 && users.findIndex(u => u.distributorId === currentDistributor.distributorId) < 5
+                      ? 'bg-gradient-to-r from-green-100 to-blue-100 border-2 border-blue-500'
+                      : 'bg-gray-50'
+                    }
+                  `}
+                >
+                  {users.findIndex(u => u.distributorId === currentDistributor.distributorId) >= 3 && users.findIndex(u => u.distributorId === currentDistributor.distributorId) < 5 && (
+                    <div className="absolute -top-2 -right-2 bg-blue-500 text-white px-2 py-0.5 rounded-full text-xs">
+                      Current
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <p className="font-semibold text-gray-800">Top 5</p>
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-blue-600">6%</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top 10 Tier */}
+                <div
+                  className={`
+                    rounded-lg p-3 transition-all duration-200 relative
+                    ${users.findIndex(u => u.distributorId === currentDistributor.distributorId) >= 5 && users.findIndex(u => u.distributorId === currentDistributor.distributorId) < 10
+                      ? 'bg-gradient-to-r from-green-100 to-blue-100 border-2 border-blue-500'
+                      : 'bg-gray-50'
+                    }
+                  `}
+                >
+                  {users.findIndex(u => u.distributorId === currentDistributor.distributorId) >= 5 && users.findIndex(u => u.distributorId === currentDistributor.distributorId) < 10 && (
+                    <div className="absolute -top-2 -right-2 bg-blue-500 text-white px-2 py-0.5 rounded-full text-xs">
+                      Current
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <p className="font-semibold text-gray-800">Top 10</p>
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-indigo-600">7%</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Leaderboard Section - Left Side */}
+            <div className="lg:col-span-2">
+              <Card className="overflow-hidden shadow-lg border-none">
+                <CardHeader className="border-b border-gray-100 bg-gray-50">
+                  <CardTitle className="text-xl font-bold text-gray-800">
+                    Top Distributors
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {/* Top 3 Podium */}
+                  <div className="pt-16 pb-0 px-8">
+                    <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto">
+                      {/* Second Place */}
+                      <div className="flex flex-col items-center">
+                        <p className="text-black font-bold text-xl mb-1">{topThree[1]?.distributorName}</p>
+                        <motion.div
+                          className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-white mb-8"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <img
+                            src={topThree[1]?.profilePic}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onClick={() => handleUserClick(topThree[1])}
+                          />
+                        </motion.div>
+                        <div className="relative w-full">
+                          <p className="text-black text-l font-bold mb-2">{topThree[1]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[1]?.weightOfFoodSaved || 0} kg</p>
+                          <p className="text-black/80 text-sm mb-4">Weight Donated: {topThree[1]?.referralCount || 0}</p>
+                          <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
+                          <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-16 rounded-t-lg flex items-center justify-center">
+                            <span className="text-3xl font-bold text-white">2</span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{user.distributorName}</p>
+
+                      {/* First Place */}
+                      <div className="flex flex-col items-center -mt-8">
+                        <p className="text-black font-bold text-xl mb-1">{topThree[0]?.distributorName}</p>
+                        <motion.div
+                          className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-white mb-8"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <img
+                            src={topThree[0]?.profilePic}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onClick={() => handleUserClick(topThree[0])}
+                          />
+                        </motion.div>
+                        <div className="relative w-full">
+                          <p className="text-black text-l font-bold mb-2">{topThree[0]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[0]?.weightOfFoodSaved || 0} kg</p>
+                          <p className="text-black/80 text-sm mb-4">Weight Donated: {topThree[0]?.referralCount || 0}</p>
+                          <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
+                          <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-20 rounded-t-lg flex items-center justify-center">
+                            <span className="text-4xl font-bold text-white">1</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Third Place */}
+                      <div className="flex flex-col items-center">
+                        <p className="text-black font-bold text-xl mb-1">{topThree[2]?.distributorName}</p>
+                        <motion.div
+                          className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-white mb-8"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <img
+                            src={topThree[2]?.profilePic}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onClick={() => handleUserClick(topThree[2])}
+                          />
+                        </motion.div>
+                        <div className="relative w-full">
+                          <p className="text-black text-l font-bold mb-2">{topThree[2]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[2]?.weightOfFoodSaved || 0} kg</p>
+                          <p className="text-black/80 text-sm mb-4">Weight Donated: {topThree[2]?.referralCount || 0}</p>
+                          <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
+                          <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-14 rounded-t-lg flex items-center justify-center">
+                            <span className="text-3xl font-bold text-white">3</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-left">{user.points?.toLocaleString() || 0}</TableCell>
-                  <TableCell className="text-left">{user.weightOfFoodSaved?.toLocaleString() || 0}</TableCell>
-                  <TableCell className="text-left">{user.email || 'N/A'}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </div>
 
-      {/* Add Community Impact Section */}
-      <CommunityImpactSection />
+                  {/* Leaderboard Table */}
+                  <div className="px-6 py-8">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-16">Rank</TableHead>
+                          <TableHead>Distributor</TableHead>
+                          <TableHead className="text-right">Points</TableHead>
+                          <TableHead className="text-right">Food Saved</TableHead>
+                          <TableHead className="text-right">Weight Donated</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {nextTen.map((user, index) => (
+                          <motion.tr
+                            key={user.distributorId}
+                            variants={tableRowVariants}
+                            className="cursor-pointer hover:bg-gray-50"
+                            onClick={() => handleUserClick(user)}
+                            onMouseEnter={() => setHoveredUser(user.distributorId)}
+                            onMouseLeave={() => setHoveredUser(null)}
+                          >
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-2">
+                                {index + 4}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full overflow-hidden">
+                                  <img
+                                    src={user.profilePic}
+                                    alt={user.distributorName}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div>
+                                  <div className="font-medium">{user.distributorName}</div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {user.points.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {(user.weightOfFoodSaved || 0).toLocaleString()}kg
+                            </TableCell>
+                            <TableCell className="text-right text-red-500">
+                              CHANGE
+                            </TableCell>
+                          </motion.tr>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-      {/* Add Sustainability Tips Section */}
-      <SustainabilityTipsSection />
+            {/* Stats Section - Right Side */}
+            <div className="lg:col-span-1 space-y-8">
+              {/* Personal Stats Card */}
+              <Card className="shadow-lg border-none">
+                <CardHeader className="border-b border-gray-100 bg-gray-50">
+                  <CardTitle className="text-xl font-bold text-gray-800">
+                    Your Statistics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="max-w-7xl mx-auto mb-6 px-4">
+                    <p className="text-center text-sm">
+                      <span className="text-gray-800 mr-2">
+                        Keep climbing the leaderboard! Earn badges to unlock bonus points and rewards.
+                      </span>
+                    </p>
+                  </div>
+                  {currentDistributor ? (
+                    <div className="space-y-6">
+                      {/* Profile Summary */}
+                      <div className="text-center">
+                        <div className="relative">
+                          <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+                            <img
+                              src={users.find(u => u.distributorId === currentDistributor.distributorId)?.profilePic || 'default-avatar.png'}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="absolute -top-2 -right-2 bg-[#4263EB] text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                            {users.findIndex(u => u.distributorId === currentDistributor.distributorId) === -1
+                              ? 'N/A'
+                              : `${users.findIndex(u => u.distributorId === currentDistributor.distributorId) + 1}${getOrdinalSuffix(users.findIndex(u => u.distributorId === currentDistributor.distributorId) + 1)}`}
+                          </div>
+                        </div>
+                        <h3 className="font-bold text-lg">{currentDistributor.distributorName}</h3>
+                        <p className="text-gray-600">{currentDistributor.points?.toLocaleString() || 0} points</p>
+                      </div>
 
-      <DistributorInformation 
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-gray-50 rounded-lg p-4 text-center">
+                          <h4 className="text-gray-600 text-sm">Food Saved</h4>
+                          <p className="text-xl font-bold text-green-600">
+                            {users.find(u => u.distributorId === currentDistributor.distributorId)?.weightOfFoodSaved?.toLocaleString() ?? 0} kg
+                          </p>
+                        </div>
+                        {/* <div className="bg-gray-50 rounded-lg p-4 text-center">
+                          <h4 className="text-gray-600 text-sm">Referrals</h4>
+                          <p className="text-xl font-bold text-blue-600">
+                            {users.find(u => u.distributorId === currentUser.distributorId)?.weightDonated || 0}
+                          </p>
+                        </div> */}
+                      </div>
+
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-500">
+                      Please log in to view your statistics
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions Section */}
+              {/* Product Listing Alert */}
+              <Alert
+                variant="default"
+                className="border-none shadow-lg bg-gradient-to-br from-emerald-50 to-teal-100 text-black py-5"
+              >
+                <motion.div
+                  className="flex flex-col items-center gap-3 w-full"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <AlertDescription className="flex flex-col items-center gap-3">
+                    <span className="text-xl font-medium">List Your Products</span>
+                    <div className="flex items-center gap-2 bg-white/20 px-5 py-2 rounded-full">
+                      <Package className="h-5 w-5" />
+                      <span className="font-bold">Create new product listings</span>
+                    </div>
+                    <Link
+                      to="/create-product-listing"
+                      className="mt-1 bg-white text-teal-600 hover:bg-emerald-50 font-bold px-7 py-2.5 rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    >
+                      Create Listing →
+                    </Link>
+                  </AlertDescription>
+                </motion.div>
+              </Alert>
+
+              {/* Promotions Alert */}
+              <Alert
+                variant="default"
+                className="border-none shadow-lg bg-gradient-to-br from-purple-50 to-pink-100 text-black py-5"
+              >
+                <motion.div
+                  className="flex flex-col items-center gap-3 w-full"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <AlertDescription className="flex flex-col items-center gap-3">
+                    <span className="text-xl font-medium">Create Special Promotions</span>
+                    <div className="flex items-center gap-2 bg-white/20 px-5 py-2 rounded-full">
+                      <Tag className="h-5 w-5" />
+                      <span className="font-bold">Boost your sales with promotions</span>
+                    </div>
+                    <Link
+                      to="/distributor/promotions"
+                      className="mt-1 bg-white text-purple-600 hover:bg-purple-50 font-bold px-7 py-2.5 rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    >
+                      Create Promotion →
+                    </Link>
+                  </AlertDescription>
+                </motion.div>
+              </Alert>
+
+              {/* Donations Alert */}
+              <Alert
+                variant="default"
+                className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100 text-black py-5"
+              >
+                <motion.div
+                  className="flex flex-col items-center gap-3 w-full"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <AlertDescription className="flex flex-col items-center gap-3">
+                    <span className="text-xl font-medium">
+                      Make a Difference Through Donations
+                    </span>
+                    <div className="flex items-center gap-2 bg-white/20 px-5 py-2 rounded-full">
+                      <Heart className="h-5 w-5" />
+                      <span className="font-bold">Help reduce food waste today</span>
+                    </div>
+                    <Link
+                      to="/distributor/donations"
+                      className="mt-1 bg-white text-indigo-600 hover:bg-blue-50 font-bold px-7 py-2.5 rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    >
+                      Start Donating →
+                    </Link>
+                  </AlertDescription>
+                </motion.div>
+              </Alert>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <DistributorInformation
         user={selectedUser}
         isOpen={!!selectedUser}
         onClose={() => setSelectedUser(null)}
       />
-
     </motion.div>
   );
 };

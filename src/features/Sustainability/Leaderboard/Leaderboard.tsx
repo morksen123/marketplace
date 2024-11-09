@@ -441,7 +441,7 @@ export const Leaderboard = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-16">Rank</TableHead>
-                        <TableHead>Member</TableHead>
+                        <TableHead>Buyer</TableHead>
                         <TableHead className="text-right">Points</TableHead>
                         <TableHead className="text-right hidden md:table-cell">Food Saved</TableHead>
                         <TableHead className="text-right hidden md:table-cell">Referrals</TableHead>

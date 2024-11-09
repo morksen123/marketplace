@@ -184,37 +184,6 @@ export const BuyerHome = () => {
     setSelectedImpact({ category, type });
   };
 
-  const ImpactDialog = ({ impact, onClose }) => {
-    if (!impact) return null;
-
-    return (
-      <AnimatePresence>
-        <motion.div
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-          variants={overlayVariants}
-          initial="initial"
-          animate="visible"
-          exit="exit"
-          onClick={onClose}
-        >
-          <motion.div
-            className="bg-white rounded-2xl max-w-md w-full mx-4 overflow-hidden"
-            variants={cardVariants}
-            initial="initial"
-            animate="expanded"
-            exit="exit"
-            onClick={e => e.stopPropagation()}
-          >
-            <ImpactExplanation 
-              category={impact.category}
-              type={impact.type}
-            />
-          </motion.div>
-        </motion.div>
-      </AnimatePresence>
-    );
-  };
-
   return (
     <div className="pb-12">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-[80%] lg:mx-auto p-8 md:px-10 xl:px-0">

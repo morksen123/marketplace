@@ -354,7 +354,7 @@ export const DistributorIndividualChat: React.FC = () => {
           <Button
             onClick={handleCloseDialog}
             style={{
-              backgroundColor: '#017A37',
+              backgroundColor: '#22C55E',
               color: 'white',
               padding: '8px 16px',
               borderRadius: '4px',
@@ -368,7 +368,7 @@ export const DistributorIndividualChat: React.FC = () => {
               onClick={handleSaveFile}              
               startIcon={<SaveIcon />}
               style={{
-                backgroundColor: '#017A37',
+                backgroundColor: '#22C55E',
                 color: 'white',
                 padding: '8px 16px',
                 borderRadius: '4px',
