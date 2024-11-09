@@ -66,7 +66,7 @@ export const BadgeDesign: React.FC<BadgeDesignProps> = ({
       transition={{ duration: 0.3 }}
     >
       <div className={`
-        w-72 h-36 
+        w-64 h-36 
         rounded-lg 
         bg-gradient-to-br ${getBadgeGradient()}
         shadow-md 
