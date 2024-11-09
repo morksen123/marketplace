@@ -58,7 +58,7 @@ export const BadgeGuide: React.FC<BadgeGuideProps> = ({ isOpen, onClose, userTyp
       },
       {
         name: 'Leading Supplier', 
-        description: 'Recognition for distributors who consistently rank at the top of the GudFood leaderboard',
+        description: 'Recognises distributors who ranked in the top of the GudFood leaderboard for the past month',
         criteria: 'Awarded for placing in the top 3 on the leaderboard in the previous month'
       },
       {
