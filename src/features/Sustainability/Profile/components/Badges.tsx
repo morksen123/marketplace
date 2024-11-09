@@ -1,11 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import {
-  TreeDeciduous,
-  Star,
-  Calendar,
-} from 'lucide-react';
-import { Medal, Grade as LeaderboardIcon } from '@mui/icons-material';
+import { useState } from 'react';
+import { BadgeGuide } from '../components/BadgeGuide';
+import { BadgeDesign } from './BadgeDesign';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 interface Badge {
   badgeId: number;
@@ -18,59 +18,177 @@ interface Badge {
 
 interface BadgesProps {
   badges: Badge[];
+  userType?: 'buyer' | 'distributor';
 }
 
-export const Badges: React.FC<BadgesProps> = ({ badges }) => {
+export const Badges: React.FC<BadgesProps> = ({ badges, userType = 'buyer' }) => {
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isAllBadgesOpen, setIsAllBadgesOpen] = useState(false);
+
+  const handleGuideClose = () => {
+    setIsGuideOpen(false);
+  };
+
+  const displayedBadges = badges.slice(0, 9);
+  const hasMoreBadges = badges.length > 9;
+
   return (
-    <motion.div>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Medal className="h-5 w-5" />
-            Badges & Achievements
-          </CardTitle>
+    <motion.div className="h-full">
+      <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 h-full">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              Badges & Achievements
+            </CardTitle>
+            <button 
+              className="text-sm text-blue-600 hover:text-blue-800 underline"
+              onClick={() => setIsGuideOpen(true)}
+            >
+              How to Earn?
+            </button>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <CardContent className="h-[calc(100%-5rem)]">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 h-full">
             {badges && badges.length > 0 ? (
-              badges.map((badge) => (
-                <motion.div
-                  key={badge.badgeId}
-                  className="relative p-4 rounded-lg border bg-gradient-to-br from-white to-gray-50"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-2">
-                      {badge.category === 'SUSTAINABILITY' && (
-                        <TreeDeciduous className="h-8 w-8 text-green-500" />
-                      )}
-                      {badge.category === 'LEADERBOARD' && (
-                        <LeaderboardIcon className="h-8 w-8 text-yellow-500" />
-                      )}
-                      {badge.category === 'QUALITY_ENGAGEMENT' && (
-                        <Star className="h-8 w-8 text-blue-500" />
-                      )}
-                      {badge.category === 'QUALITY_SERVICE' && (
-                        <Star className="h-8 w-8 text-purple-500" />
-                      )}
-                    </div>
-                    <h3 className="font-semibold text-sm mb-1">{badge.title}</h3>
-                    <p className="text-xs text-gray-600">{badge.subtitle}</p>
-                    <div className="mt-2 flex items-center text-xs text-gray-500">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(badge.earnedOn).toLocaleDateString()}
-                    </div>
-                  </div>
-                </motion.div>
-              ))
+              <>
+                {displayedBadges.map((badge) => (
+                  <BadgeDesign
+                    key={badge.badgeId}
+                    badgeId={badge.badgeId}
+                    title={badge.title}
+                    subtitle={badge.subtitle}
+                    criteria={badge.criteria}
+                    earnedOn={badge.earnedOn}
+                    category={badge.category}
+                  />
+                ))}
+                {hasMoreBadges && (
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center justify-center"
+                  >
+                    <Button
+                      onClick={() => setIsAllBadgesOpen(true)}
+                      variant="outline"
+                      className="h-full w-full bg-white/50 hover:bg-white/80"
+                    >
+                      View All Badges ({badges.length})
+                    </Button>
+                  </motion.div>
+                )}
+              </>
             ) : (
-              <div className="col-span-full text-center text-gray-500">
+              <div className="col-span-full flex items-center justify-center h-full text-gray-500">
                 No badges earned yet
               </div>
             )}
           </div>
         </CardContent>
       </Card>
+
+      <BadgeGuide 
+        isOpen={isGuideOpen}
+        onClose={handleGuideClose}
+        userType={userType}
+      />
+
+      <Dialog open={isAllBadgesOpen} onOpenChange={setIsAllBadgesOpen}>
+        <DialogContent className="max-w-6xl h-[60vh] overflow-hidden flex flex-col">
+          <DialogHeader className="mb-6">
+            <DialogTitle className="text-2xl font-bold text-center">
+              All Badges & Achievements
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2 text-center">
+              View all your earned badges and their details
+            </DialogDescription>
+          </DialogHeader>
+
+          <Tabs defaultValue="all" className="mt-4 flex-1 flex flex-col min-h-0">
+            <TabsList className="grid grid-cols-4 w-full">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="sustainability">Sustainability</TabsTrigger>
+              <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+              <TabsTrigger value="quality">Quality</TabsTrigger>
+            </TabsList>
+
+            <div className="flex-1 overflow-y-auto min-h-0">
+              <TabsContent value="all" className="mt-6 h-full">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 place-items-center">
+                  {badges.map((badge) => (
+                    <BadgeDesign
+                      key={badge.badgeId}
+                      badgeId={badge.badgeId}
+                      title={badge.title}
+                      subtitle={badge.subtitle}
+                      criteria={badge.criteria}
+                      earnedOn={badge.earnedOn}
+                      category={badge.category}
+                    />
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="sustainability" className="mt-6 h-full">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 place-items-center">
+                  {badges
+                    .filter((badge) => badge.category === 'SUSTAINABILITY')
+                    .map((badge) => (
+                      <BadgeDesign
+                        key={badge.badgeId}
+                        badgeId={badge.badgeId}
+                        title={badge.title}
+                        subtitle={badge.subtitle}
+                        criteria={badge.criteria}
+                        earnedOn={badge.earnedOn}
+                        category={badge.category}
+                      />
+                    ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="leaderboard" className="mt-6 h-full">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 place-items-center">
+                  {badges
+                    .filter((badge) => badge.category === 'LEADERBOARD')
+                    .map((badge) => (
+                      <BadgeDesign
+                        key={badge.badgeId}
+                        badgeId={badge.badgeId}
+                        title={badge.title}
+                        subtitle={badge.subtitle}
+                        criteria={badge.criteria}
+                        earnedOn={badge.earnedOn}
+                        category={badge.category}
+                      />
+                    ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="quality" className="mt-6 h-full">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 place-items-center">
+                  {badges
+                    .filter((badge) => 
+                      badge.category === 'QUALITY_SERVICE' || 
+                      badge.category === 'QUALITY_ENGAGEMENT'
+                    )
+                    .map((badge) => (
+                      <BadgeDesign
+                        key={badge.badgeId}
+                        badgeId={badge.badgeId}
+                        title={badge.title}
+                        subtitle={badge.subtitle}
+                        criteria={badge.criteria}
+                        earnedOn={badge.earnedOn}
+                        category={badge.category}
+                      />
+                    ))}
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
-}; 
+};

@@ -522,13 +522,13 @@ export const Leaderboard = () => {
                         <div className="bg-gray-50 rounded-lg p-4 text-center">
                           <h4 className="text-gray-600 text-sm">Food Saved</h4>
                           <p className="text-xl font-bold text-green-600">
-                            {users.find(u => u.id === currentUser.id)?.weightOfFoodSaved.toLocaleString()} kg
+                            {users.find(u => u.buyerId === currentUser.buyerId)?.weightOfFoodSaved.toLocaleString()} kg
                           </p>
                         </div>
                         <div className="bg-gray-50 rounded-lg p-4 text-center">
                           <h4 className="text-gray-600 text-sm">Referrals</h4>
                           <p className="text-xl font-bold text-blue-600">
-                            {users.find(u => u.id === currentUser.id)?.referralCount || 0}
+                            {users.find(u => u.buyerId === currentUser.buyerId)?.referralCount || 0}
                           </p>
                         </div>
                       </div>

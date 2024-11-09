@@ -184,7 +184,7 @@ export const CheckoutComplete: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12">
-      <div className="max-w-4xl w-full">
+      <div className="max-w-6xl w-full">
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className={`text-center ${statusContent.color}`}>
@@ -222,11 +222,11 @@ export const CheckoutComplete: React.FC = () => {
                     </div>
                     <motion.div 
                       variants={container} 
-                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4"
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-8"
                     >
                       {/* Food Impact Card */}
                       <div 
-                        className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                        className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
                         onClick={() => handleImpactCardClick('food', 'personal')}
                       >
                         <div className="flex flex-col items-center text-center">
@@ -243,7 +243,7 @@ export const CheckoutComplete: React.FC = () => {
 
                       {/* Carbon Impact Card */}
                       <div 
-                        className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                        className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
                         onClick={() => handleImpactCardClick('carbon', 'personal')}
                       >
                         <div className="flex flex-col items-center text-center">
@@ -260,7 +260,7 @@ export const CheckoutComplete: React.FC = () => {
 
                       {/* Energy Impact Card */}
                       <div 
-                        className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                        className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
                         onClick={() => handleImpactCardClick('electricity', 'personal')}
                       >
                         <div className="flex flex-col items-center text-center">
@@ -277,14 +277,21 @@ export const CheckoutComplete: React.FC = () => {
 
                       {/* Water Impact Card */}
                       <div 
-                        className="bg-white/80 backdrop-blur rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                        className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
                         onClick={() => handleImpactCardClick('water', 'personal')}
                       >
                         <div className="flex flex-col items-center text-center">
                           <img src={water} alt="Water" className="w-8 h-8 mb-2" />
                           <h3 className="text-gray-600 text-sm font-bold">Water Saved</h3>
                           <p className="text-2xl font-bold text-emerald-600 mt-1">
-                            {impactMetrics.waterLitresSaved.toFixed(0)} litres
+                            {impactMetrics.waterLitresSaved >= 1000000000000
+                              ? `${(impactMetrics.waterLitresSaved / 1000000000000).toFixed(1)} tril`
+                              : impactMetrics.waterLitresSaved >= 1000000000
+                              ? `${(impactMetrics.waterLitresSaved / 1000000000).toFixed(1)} bil`
+                              : impactMetrics.waterLitresSaved >= 1000000
+                              ? `${(impactMetrics.waterLitresSaved / 1000000).toFixed(1)} mil`
+                              : impactMetrics.waterLitresSaved.toFixed(0)
+                            } ℓ
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
                             🚿 {impactMetrics.showersEquivalent.toFixed(0)} showers

@@ -29,11 +29,10 @@ export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVar
   if (!impactMetrics) return null;
 
   return (
-    <motion.div variants={cardVariants}>
-      <Card className="mb-6 bg-gradient-to-br from-emerald-50 to-teal-100">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TreeDeciduous className="h-5 w-5" />
+    <motion.div variants={cardVariants} className="h-full">
+      <Card className="bg-gradient-to-br from-emerald-50 to-teal-100 h-full">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center">
             Your Sustainability Impact
           </CardTitle>
         </CardHeader>
@@ -106,7 +105,14 @@ export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVar
                 <div>
                   <h3 className="text-gray-600 mb-2 font-medium">Water Saved</h3>
                   <p className="text-4xl font-bold text-emerald-600 mb-2">
-                    {impactMetrics.waterLitresSaved.toFixed(0)} litres
+                    {impactMetrics.waterLitresSaved >= 1000000000000
+                      ? `${(impactMetrics.waterLitresSaved / 1000000000000).toFixed(1)} tril`
+                      : impactMetrics.waterLitresSaved >= 1000000000
+                      ? `${(impactMetrics.waterLitresSaved / 1000000000).toFixed(1)} bil`
+                      : impactMetrics.waterLitresSaved >= 1000000
+                      ? `${(impactMetrics.waterLitresSaved / 1000000).toFixed(1)} mil`
+                      : impactMetrics.waterLitresSaved.toFixed(0)
+                    } ℓ
                   </p>
                   <p className="text-sm text-gray-600">
                     🚿 {impactMetrics.showersEquivalent.toFixed(0)} showers saved

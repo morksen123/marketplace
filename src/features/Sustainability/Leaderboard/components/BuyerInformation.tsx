@@ -181,7 +181,14 @@ export const BuyerInformation: React.FC<BuyerInformationProps> = ({
                                 <div>
                                     <h3 className="text-gray-600 mb-2 font-medium">Water Saved</h3>
                                     <p className="text-3xl font-bold text-emerald-600">
-                                        {impactMetrics?.waterLitresSaved.toFixed(0)} L
+                                        {impactMetrics?.waterLitresSaved >= 1000000000000
+                                          ? `${(impactMetrics.waterLitresSaved / 1000000000000).toFixed(1)} tril`
+                                          : impactMetrics?.waterLitresSaved >= 1000000000
+                                          ? `${(impactMetrics.waterLitresSaved / 1000000000).toFixed(1)} bil`
+                                          : impactMetrics?.waterLitresSaved >= 1000000
+                                          ? `${(impactMetrics.waterLitresSaved / 1000000).toFixed(1)} mil`
+                                          : impactMetrics?.waterLitresSaved.toFixed(0)
+                                        } ℓ
                                     </p>
                                 </div>
                             </div>
