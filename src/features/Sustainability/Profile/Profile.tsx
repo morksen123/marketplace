@@ -372,7 +372,7 @@ export const Profile: React.FC = () => {
           </div>
           <CardContent className="p-8 flex flex-col items-center justify-center h-full">
             <div className="flex flex-col items-center">
-              <div className="text-5xl font-bold text-green-600">{profile.points}</div>
+              <div className="text-5xl font-bold text-green-500">{profile.points}</div>
               <div className="text-xl text-gray-600 mt-2">Leaderboard Points</div>
               <button
                 className="text-sm text-blue-600 hover:text-blue-800 underline absolute top-2 right-2"
@@ -406,7 +406,7 @@ export const Profile: React.FC = () => {
             </div>
           </div>
           <CardContent className="p-8 flex flex-col items-center justify-center h-full">
-            <div className="text-5xl font-bold text-green-600">{profile.savedPoints}</div>
+            <div className="text-5xl font-bold text-green-500">{profile.savedPoints}</div>
             <div className="text-xl text-gray-600 mt-2">Redeemable Points</div>
             <Button
               variant="outline"
@@ -430,7 +430,9 @@ export const Profile: React.FC = () => {
 
 
         {/* Badges */}
-        <Badges badges={badges} />
+        <Badges badges={badges} 
+          userType="buyer"
+        />
 
       </div>
 

@@ -21,7 +21,7 @@ interface BadgesProps {
   userType?: 'buyer' | 'distributor';
 }
 
-export const Badges: React.FC<BadgesProps> = ({ badges, userType = 'buyer' }) => {
+export const Badges: React.FC<BadgesProps> = ({ badges, userType }) => {
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isAllBadgesOpen, setIsAllBadgesOpen] = useState(false);
 
@@ -66,12 +66,12 @@ export const Badges: React.FC<BadgesProps> = ({ badges, userType = 'buyer' }) =>
                 {hasMoreBadges && (
                   <motion.div
                     whileHover={{ scale: 1.05 }}
-                    className="flex items-center justify-center"
+                    className="flex items-center justify-center col-span-2 md:col-span-3"
                   >
                     <Button
                       onClick={() => setIsAllBadgesOpen(true)}
                       variant="outline"
-                      className="h-full w-full bg-white/50 hover:bg-white/80"
+                      className="h-full w-1/2 bg-white/50 hover:bg-white/80"
                     >
                       View All Badges ({badges.length})
                     </Button>

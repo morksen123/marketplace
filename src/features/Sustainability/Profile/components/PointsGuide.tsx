@@ -79,6 +79,12 @@ export const PointsGuide: React.FC<PointsGuideProps> = ({ isOpen, onClose, userT
       description: 'Points for positive ratings',
       criteria: '5 points per 5-star rating',
       icon: <Star className="h-6 w-6 text-yellow-500" />
+    },
+    {
+      title: 'Badges Earned',
+      description: 'Points for badges earned', 
+      criteria: '50 points for each badge earned',
+      icon: <Medal className="h-6 w-6 text-red-500" />
     }
   ];
 
