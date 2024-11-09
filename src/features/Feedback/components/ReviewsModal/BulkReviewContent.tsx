@@ -1,12 +1,12 @@
-import { ReviewItem, ReviewSubmission } from '../types/review-types';
+import { CreateReviewDTO, ReviewItem } from '../../types/review-types';
 import { SingleReviewContent } from './SingleReviewContent';
 
 interface BulkReviewContentProps {
   orders: ReviewItem[];
   currentStep: number;
   totalSteps: number;
-  onReviewChange: (review: ReviewSubmission) => void;
-  currentReview: ReviewSubmission | null;
+  onReviewChange: (review: CreateReviewDTO) => void;
+  currentReview: CreateReviewDTO | null;
 }
 
 export const BulkReviewContent = ({
@@ -34,7 +34,7 @@ export const BulkReviewContent = ({
       <div className="flex-1">
         <SingleReviewContent
           item={currentItem}
-          orderId={currentItem.orderId}
+          orderId={currentItem.orderId.toString()}
           onReviewChange={onReviewChange}
           currentReview={currentReview}
         />

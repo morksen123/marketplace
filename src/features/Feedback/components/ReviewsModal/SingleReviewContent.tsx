@@ -4,24 +4,24 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, Camera } from 'lucide-react';
 import { useState } from 'react';
-import { ReviewItem, ReviewSubmission } from '../types/review-types';
-import { StarRating } from './StarRating';
+import { CreateReviewDTO, ReviewItem } from '../../types/review-types';
+import { StarRating } from '../StarRating';
 
 interface SingleReviewContentProps {
   item: ReviewItem;
   orderId: string;
-  onReviewChange: (review: ReviewSubmission) => void;
-  currentReview: ReviewSubmission | null;
+  onReviewChange: (review: CreateReviewDTO) => void;
+  currentReview: CreateReviewDTO | null;
 }
 
 const CONDITION_TYPES = [
-  { value: 'bruised', label: 'Bruised' },
-  { value: 'nearExpiry', label: 'Near Expiry' },
-  { value: 'oddShape', label: 'Odd Shape' },
-  { value: 'overripe', label: 'Overripe' },
-  { value: 'underripe', label: 'Underripe' },
-  { value: 'blemished', label: 'Blemished' },
-  { value: 'sizeVariation', label: 'Size Variation' },
+  { value: 'BRUISED', label: 'Bruised' },
+  { value: 'NEAR_EXPIRY', label: 'Near Expiry' },
+  { value: 'ODD_SHAPE', label: 'Odd Shape' },
+  { value: 'OVERRIPE', label: 'Overripe' },
+  { value: 'UNDERRIPE', label: 'Underripe' },
+  { value: 'BLEMISHED', label: 'Blemished' },
+  { value: 'SIZE_VARIATION', label: 'Size Variation' },
 ] as const;
 
 export function SingleReviewContent({
@@ -30,24 +30,22 @@ export function SingleReviewContent({
   onReviewChange,
   currentReview,
 }: SingleReviewContentProps) {
-  const [review, setReview] = useState<ReviewSubmission>(
+  const [review, setReview] = useState<CreateReviewDTO>(
     currentReview || {
-      itemId: Number(item.id),
-      orderId,
-      rating: 0,
+      orderLineItemId: Number(item.orderLineItemId),
+      overallRating: 0,
       qualityRating: 0,
       review: '',
-      conditionAsDescribed: 'asDescribed',
+      conditionAsDescribed: 'AS_DESCRIBED',
       conditionTypes: [],
-      usablePortion: '',
-      usageIdeas: '',
+      usablePercentage: '',
       storageTips: '',
       wouldBuyAgain: true,
-      photos: [],
+      photoUrls: [],
     },
   );
 
-  const handleReviewChange = (updatedReview: Partial<ReviewSubmission>) => {
+  const handleReviewChange = (updatedReview: Partial<CreateReviewDTO>) => {
     const newReview = { ...review, ...updatedReview };
     setReview(newReview);
     onReviewChange(newReview);
@@ -57,12 +55,12 @@ export function SingleReviewContent({
     <Card className="w-full max-w-3xl rounded-none">
       <CardHeader className="flex flex-row items-center space-x-4 p-6 bg-secondary/5 mb-6">
         <img
-          src={item.imageUrl || '/placeholder.svg?height=120&width=120'}
-          alt={item.name}
+          // src={item. || '/placeholder.svg?height=120&width=120'}
+          alt={item.productName}
           className="w-28 h-28 rounded-lg object-cover"
         />
         <div>
-          <h3 className="text-lg font-medium">{item.name}</h3>
+          <h3 className="text-lg font-medium">{item.productName}</h3>
           <p className="text-sm text-muted-foreground">Order #{orderId}</p>
           <div className="mt-2 flex items-center text-sm text-muted-foreground">
             <AlertCircle className="h-4 w-4 mr-1" />
@@ -79,8 +77,10 @@ export function SingleReviewContent({
             Rate the overall value considering the discounted price
           </p>
           <StarRating
-            rating={review.rating}
-            onRatingChange={(rating) => handleReviewChange({ rating })}
+            rating={review.overallRating}
+            onRatingChange={(rating) =>
+              handleReviewChange({ overallRating: rating })
+            }
           />
         </div>
 
@@ -94,7 +94,7 @@ export function SingleReviewContent({
               onChange={(e) =>
                 handleReviewChange({
                   conditionAsDescribed: e.target
-                    .value as ReviewSubmission['conditionAsDescribed'],
+                    .value as CreateReviewDTO['conditionAsDescribed'],
                 })
               }
               className="w-full p-2 pr-10 border rounded-lg appearance-none bg-white
@@ -103,17 +103,19 @@ export function SingleReviewContent({
               <option value="" disabled>
                 Select condition
               </option>
-              <option value="asDescribed">
+              <option value="AS_DESCRIBED">
                 As Described - Exactly what I expected
               </option>
-              <option value="betterThanDescribed">Better Than Expected</option>
-              <option value="slightlyWorse">
+              <option value="BETTER_THAN_DESCRIBED">
+                Better Than Expected
+              </option>
+              <option value="SLIGHTLY_WORSE">
                 Fair - Slightly worse but still good value
               </option>
-              <option value="significantlyWorse">
+              <option value="SIGNIFICANTLY_WORSE">
                 Poor - Significantly worse than described
               </option>
-              <option value="unusable">
+              <option value="UNUSABLE">
                 Unusable - Not suitable for intended use
               </option>
             </select>
@@ -171,9 +173,9 @@ export function SingleReviewContent({
           </Label>
           <div className="relative">
             <select
-              value={review.usablePortion}
+              value={review.usablePercentage}
               onChange={(e) =>
-                handleReviewChange({ usablePortion: e.target.value })
+                handleReviewChange({ usablePercentage: e.target.value })
               }
               className="w-full p-2 pr-10 border rounded-lg appearance-none bg-white
         hover:border-black focus:outline-black text-sm"
