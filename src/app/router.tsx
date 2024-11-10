@@ -1,4 +1,5 @@
 import { ROLES } from '@/features/Authentication/types/auth';
+import { ReviewPrompt } from '@/features/Feedback/components/ReviewPrompt';
 import { AuthGuard, RoleGuard } from '@/lib/auth';
 import { StripeWrapper } from '@/lib/stripe';
 import {
@@ -26,7 +27,9 @@ const routes: RouteObject[] = [
   {
     path: '/blogs/:blogId',
     lazy: async () => {
-      const { ViewBlogRoute } = await import('./routes/sustainability/view-blog');
+      const { ViewBlogRoute } = await import(
+        './routes/sustainability/view-blog'
+      );
       return { Component: ViewBlogRoute };
     },
   },
@@ -234,7 +237,9 @@ const routes: RouteObject[] = [
               {
                 path: '/buyer/orders/:orderId',
                 lazy: async () => {
-                  const { BuyerOrderDetailsRoute } = await import('./routes/buyerProfile/buyer-order-details');
+                  const { BuyerOrderDetailsRoute } = await import(
+                    './routes/buyerProfile/buyer-order-details'
+                  );
                   return { Component: BuyerOrderDetailsRoute };
                 },
               },
@@ -245,6 +250,15 @@ const routes: RouteObject[] = [
                     './routes/sustainability/leaderboard'
                   );
                   return { Component: LeaderboardRoute };
+                },
+              },
+              {
+                path: '/buyer/reviews/pending',
+                lazy: async () => {
+                  const { ReviewsPendingRoute } = await import(
+                    './routes/reviews/ reviews-pending'
+                  );
+                  return { Component: ReviewsPendingRoute };
                 },
               },
             ],
@@ -398,7 +412,9 @@ const routes: RouteObject[] = [
               {
                 path: '/distributor/orders/:orderId',
                 lazy: async () => {
-                  const { DistributorOrderDetailsRoute } = await import('./routes/orders/distributor-order-details');
+                  const { DistributorOrderDetailsRoute } = await import(
+                    './routes/orders/distributor-order-details'
+                  );
                   return { Component: DistributorOrderDetailsRoute };
                 },
               },
@@ -448,5 +464,10 @@ const routes: RouteObject[] = [
 const router = createBrowserRouter(routes);
 
 export const AppRouter = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <ReviewPrompt />
+    </>
+  );
 };
