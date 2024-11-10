@@ -61,3 +61,17 @@ export interface ReviewCommentDTO {
   createdAt: string;
   // Add other comment fields as needed
 }
+
+export interface CreatePlatformRatingRequest {
+  overallRating: number;
+  impactAwareness: number;
+  valueSatisfaction: number;
+  suggestions?: string;
+  wouldRecommend: boolean;
+}
+
+export interface RatingEligibility {
+  canRate: boolean;
+  nextEligibleDate?: string;
+  message: string;
+}

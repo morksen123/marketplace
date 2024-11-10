@@ -11,6 +11,7 @@ export const StarRating = ({
     {[1, 2, 3, 4, 5].map((star) => (
       <Button
         key={star}
+        type="button"
         variant="ghost"
         size="sm"
         onClick={() => onRatingChange(star)}

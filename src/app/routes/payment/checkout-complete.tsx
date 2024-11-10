@@ -1,10 +1,23 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
 import { createTransaction } from '@/features/Cart/api/api-cart';
+import { PlatformRatingForm } from '@/features/Feedback/components/PlatformReview/PlatformRatingForm';
+import {
+  useCreatePlatformRating,
+  usePlatformRatingEligibility,
+} from '@/features/Feedback/hooks/usePlatformRating';
+import { CreatePlatformRatingRequest } from '@/features/Feedback/types/review-types';
+import { PaymentDetailsSkeleton } from '@/features/Payment/components/PaymentDetailsSkeleton';
 import { useStripe } from '@stripe/react-stripe-js';
 import { PaymentIntent } from '@stripe/stripe-js';
+import { CheckIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -61,29 +74,6 @@ const STATUS_CONTENT_MAP: Record<
   },
 };
 
-const PaymentDetailsSkeleton = () => (
-  <>
-    <div className="space-y-2">
-      <div className="flex justify-between">
-        <Skeleton className="h-4 w-1/4" />
-        <Skeleton className="h-4 w-1/2" />
-      </div>
-      <div className="flex justify-between">
-        <Skeleton className="h-4 w-1/4" />
-        <Skeleton className="h-4 w-1/4" />
-      </div>
-      <div className="flex justify-between">
-        <Skeleton className="h-4 w-1/4" />
-        <Skeleton className="h-4 w-1/4" />
-      </div>
-    </div>
-    <div className="flex justify-center space-x-6 mt-6">
-      <Skeleton className="h-10 w-32" />
-      <Skeleton className="h-10 w-32" />
-    </div>
-  </>
-);
-
 export const CheckoutComplete: React.FC = () => {
   const stripe = useStripe();
   const [status, setStatus] = useState<Status | 'default'>('processing');
@@ -91,7 +81,13 @@ export const CheckoutComplete: React.FC = () => {
     null,
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [showRating, setShowRating] = useState(false);
   const navigate = useNavigate();
+
+  const { data: eligibility, isLoading: isEligibilityLoading } =
+    usePlatformRatingEligibility();
+
+  const createRating = useCreatePlatformRating();
 
   useEffect(() => {
     if (!stripe) {
@@ -130,11 +126,33 @@ export const CheckoutComplete: React.FC = () => {
       });
   }, [stripe]);
 
+  useEffect(() => {
+    if (
+      status === 'succeeded' &&
+      !isLoading &&
+      !isEligibilityLoading &&
+      eligibility?.canRate
+    ) {
+      const timer = setTimeout(() => {
+        setShowRating(true);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [status, isLoading, isEligibilityLoading, eligibility]);
+
+  const handleRatingSubmit = async (data: CreatePlatformRatingRequest) => {
+    await createRating.mutateAsync(data);
+    setShowRating(false);
+    navigate('/buyer/transactions');
+  };
+
   const statusContent = STATUS_CONTENT_MAP[status];
 
   return (
-    <div className="wrapper">
-      <div className="max-w-4xl mx-auto">
+    <div className="wrapper py-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Payment Status Card */}
         <Card>
           <CardHeader>
             <CardTitle className={`text-center ${statusContent.color}`}>
@@ -164,26 +182,64 @@ export const CheckoutComplete: React.FC = () => {
                     </div>
                   </div>
                 )}
-                <div className="flex justify-center space-x-6 mt-6">
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/buyer/home')}
-                    disabled={status === 'processing'}
-                  >
-                    Return to Home
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => navigate('/buyer/transactions')}
-                    disabled={status === 'processing'}
-                  >
-                    View Transactions
-                  </Button>
-                </div>
               </>
             )}
           </CardContent>
         </Card>
+
+        {/* Rating Section */}
+        {status === 'succeeded' && !isLoading && showRating && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <Card>
+              <CardHeader className="text-center space-y-2">
+                <div className="h-12 w-12 rounded-full bg-green-100 mx-auto flex items-center justify-center">
+                  <CheckIcon className="h-6 w-6 text-green-600" />
+                </div>
+                <CardTitle>Help Us Reduce Food Waste</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Your feedback helps us improve and make a bigger impact on
+                  reducing food waste.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <PlatformRatingForm onSubmit={handleRatingSubmit} />
+              </CardContent>
+              <CardFooter className="flex justify-center">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setShowRating(false);
+                    navigate('/buyer/transactions');
+                  }}
+                >
+                  Skip for now
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        {status === 'succeeded' && !isLoading && !showRating && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex justify-center space-x-4">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/buyer/home')}
+                >
+                  Return to Home
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate('/buyer/transactions')}
+                >
+                  View Transactions
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
