@@ -75,3 +75,13 @@ export interface RatingEligibility {
   nextEligibleDate?: string;
   message: string;
 }
+
+export interface ReviewPromptData {
+  orderId: number;
+  buyerId: number;
+  distributorName: string;
+  productNames: string[];
+  promptNumber: number;
+  isLastPrompt: boolean;
+  promptTime: string;
+}

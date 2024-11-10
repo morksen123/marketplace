@@ -3,9 +3,7 @@ import { notificationsAtom } from '@/atoms/notificationAtoms';
 import { Button } from '@/components/ui/button';
 import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
 import { useCart } from '@/features/Cart/hooks/useCart';
-import { HomepageReviewPrompt } from '@/features/Feedback/components/HomepageReviewPrompt';
 import { NotificationDropdown } from '@/features/Notifications/components/NotificationDropdown';
-import { orderLineItems } from '@/mock-data';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import LeaderboardOutlinedIcon from '@mui/icons-material/LeaderboardOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
@@ -190,8 +188,6 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
           </div>
         </div>
       )}
-      {/* TODO: add visible condition */}
-      <HomepageReviewPrompt pendingReviews={orderLineItems} />
 
       <div className="w-full p-4">
         <div className="flex justify-between items-center">
