@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getDistributorOrders, getDistributorOrderById, getDistributorOrderByStatus, acceptDistributorOrder, rejectDistributorOrder, setAwaitingPickupDistributorOrder, shipDistributorOrder, deliverDistributorOrder } from '../api/distributor-orders';
+import { getDistributorOrders, getDistributorOrderById, getDistributorOrderByStatus, acceptDistributorOrder, rejectDistributorOrder, setAwaitingPickupDistributorOrder, shipDistributorOrder, deliverDistributorOrder, completeDistributorOrder } from '../api/distributor-orders';
 import { Order, OrderStatus } from '../types/orders';
 
 export const useDistributorOrders = (orderId?: number, orderStatus?: OrderStatus) => {
@@ -62,6 +62,14 @@ export const useDistributorOrders = (orderId?: number, orderStatus?: OrderStatus
         },
     });
 
+    const completeOrderMutation = useMutation<void, Error, number>({
+        mutationFn: completeDistributorOrder,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['distributorOrders'] });
+            ordersQuery.refetch();
+        },
+    });
+
     return { 
         orders: ordersQuery.data, 
         isLoadingOrders: ordersQuery.isLoading,
@@ -72,6 +80,7 @@ export const useDistributorOrders = (orderId?: number, orderStatus?: OrderStatus
         rejectOrder: rejectOrderMutation, 
         awaitPickupOrder: awaitPickupOrderMutation,
         shipOrder: shipOrderMutation, 
-        deliverOrder: deliverOrderMutation 
+        deliverOrder: deliverOrderMutation,
+        completeOrder: completeOrderMutation
     };  
 }

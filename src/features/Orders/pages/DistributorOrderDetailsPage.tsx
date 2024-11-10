@@ -19,6 +19,7 @@ export const DistributorOrderDetailsPage: React.FC = () => {
     shipOrder, 
     deliverOrder,
     awaitPickupOrder,
+    completeOrder,
     refetchOrders
   } = useDistributorOrders(Number(orderId));
 
@@ -93,7 +94,6 @@ export const DistributorOrderDetailsPage: React.FC = () => {
           </Button>
         );
       case 'SHIPPED':
-      case 'PICKUP':
         return (
           <Button
             onClick={() => handleStatusUpdate(() => deliverOrder.mutateAsync(order.orderId), 'deliver')}
@@ -101,6 +101,16 @@ export const DistributorOrderDetailsPage: React.FC = () => {
             disabled={isUpdating}
           >
             {isUpdating && lastAction === 'deliver' ? <Loader2 size={24} className="h-4 w-4 animate-spin"/> : 'Mark as Delivered'}
+          </Button>
+        );
+      case 'PICKUP':
+        return (
+          <Button
+            onClick={() => handleStatusUpdate(() => completeOrder.mutateAsync(order.orderId), 'complete')}
+            variant="secondary"
+            disabled={isUpdating}
+          >
+            {isUpdating && lastAction === 'complete' ? <Loader2 size={24} className="h-4 w-4 animate-spin"/> : 'Mark as Completed'}
           </Button>
         );
       default:

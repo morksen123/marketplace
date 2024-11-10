@@ -138,7 +138,6 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
                     </div>
                 );
             case 'DELIVERED':
-            case 'PICKUP':
                 return (
                     <Button 
                         variant="secondary" 
@@ -149,6 +148,7 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
                         {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Completed'}
                     </Button>
                 );
+            case 'PICKUP':
             default:
                 return null;
         }

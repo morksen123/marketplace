@@ -51,6 +51,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
     rejectOrder, 
     shipOrder, 
     deliverOrder,
+    completeOrder,
     awaitPickupOrder,
     refetchOrders
   } = useDistributorOrders();
@@ -157,6 +158,16 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
     }
   };
 
+  const handleCompleteOrder = async (orderId: number) => {
+    setLoading(orderId, true);
+    try {
+      await completeOrder.mutateAsync(orderId);
+      await refetchOrders();
+    } finally {
+      setLoading(orderId, false);
+    }
+  };
+
   const getStatusBadge = (status: OrderStatus) => {
     const statusColors: Record<OrderStatus, string> = {
       PENDING: 'bg-yellow-100 text-yellow-800',
@@ -237,6 +248,22 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
             {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Delivered'}
           </Button>
         );
+      case 'PICKUP':
+        return (
+          <div className="flex space-x-4">
+          <Button
+            variant="secondary"
+              onClick={() => handleCompleteOrder(order.orderId)}
+            disabled={loadingStates[order.orderId]}
+          >
+            {loadingStates[order.orderId] ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              'Complete Order'
+            )}
+          </Button>
+          </div>
+        )
       default:
         return null;
     }
