@@ -1,9 +1,23 @@
 import { LoadingSpinnerSvg } from '@/components/common/LoadingSpinner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+
 import { format } from 'date-fns';
 import { Star } from 'lucide-react';
 import { useState } from 'react';
-import { useProductReviews } from '../hooks/useReviews';
+import {
+  useDeleteReviewResponse,
+  useProductReviews,
+} from '../hooks/useReviews';
 import { ReviewCardProps } from '../types/review-types';
 import { ReviewResponseForm } from './ReviewResponseForm';
 
@@ -76,6 +90,15 @@ const StarRating = ({ rating }: { rating: number }) => (
 const ReviewCard = ({ review, isProductOwner }: ReviewCardProps) => {
   const [isResponseFormOpen, setIsResponseFormOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const deleteResponse = useDeleteReviewResponse();
+
+  const handleDelete = async () => {
+    if (!review.reviewResponse?.id) return;
+
+    await deleteResponse.mutateAsync(review.reviewResponse.id);
+    setIsDeleteDialogOpen(false);
+  };
 
   return (
     <div className="bg-gray-50 rounded-lg shadow-sm p-4 text-left">
@@ -103,10 +126,10 @@ const ReviewCard = ({ review, isProductOwner }: ReviewCardProps) => {
         <div className="flex-grow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-sm">
+              <p className="font-semibold text-sm">
                 {review.buyer.firstName} {review.buyer.lastName}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm text-gray-500">
                 {format(new Date(review.createdDateTime), 'MMM d, yyyy')}
               </p>
             </div>
@@ -120,7 +143,7 @@ const ReviewCard = ({ review, isProductOwner }: ReviewCardProps) => {
           <div className="flex items-center gap-4 mt-1">
             <StarRating rating={review.overallRating} />
             <span
-              className={`text-xs px-2 py-0.5 rounded-full ${
+              className={`text-sm px-2 py-0.5 rounded-full ${
                 review.wouldBuyAgain
                   ? 'bg-green-100 text-green-800'
                   : 'bg-red-100 text-red-800'
@@ -134,13 +157,13 @@ const ReviewCard = ({ review, isProductOwner }: ReviewCardProps) => {
 
       {/* Condition Tags - Always visible */}
       <div className="mt-2 flex flex-wrap gap-1">
-        <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">
+        <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-sm">
           {review.conditionAsDescribed}
         </span>
         {review.conditionTypes.map((type: string) => (
           <span
             key={type}
-            className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs"
+            className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-sm"
           >
             {type}
           </span>
@@ -159,7 +182,7 @@ const ReviewCard = ({ review, isProductOwner }: ReviewCardProps) => {
         <div className="mt-3 space-y-3 border-t border-gray-200 pt-3">
           {/* Quality Rating */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium">Quality:</span>
+            <span className="text-sm font-medium">Quality:</span>
             <StarRating rating={review.qualityRating} />
           </div>
 
@@ -167,14 +190,14 @@ const ReviewCard = ({ review, isProductOwner }: ReviewCardProps) => {
           <div className="grid grid-cols-2 gap-3 text-sm">
             {review.usablePercentage && (
               <div>
-                <p className="text-xs font-medium">
+                <p className="text-sm font-medium">
                   Usable: {review.usablePercentage}%
                 </p>
               </div>
             )}
             {review.storageTips && (
               <div>
-                <p className="text-xs font-medium">
+                <p className="text-sm font-medium">
                   Storage: {review.storageTips}
                 </p>
               </div>
@@ -200,14 +223,22 @@ const ReviewCard = ({ review, isProductOwner }: ReviewCardProps) => {
       {review.reviewResponse && (
         <div className="mt-3 pt-2 border-t border-gray-200">
           <div className="flex items-center justify-between text-sm">
-            <span className="font-bold">Distributor Response</span>
+            <span className="font-semibold">Distributor Response</span>
             {isProductOwner && (
-              <button
-                onClick={() => setIsResponseFormOpen(true)}
-                className="text-blue-600 hover:text-blue-700"
-              >
-                Edit
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsResponseFormOpen(true)}
+                  className="text-blue-600 hover:text-blue-700"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  Delete
+                </button>
+              </div>
             )}
           </div>
           <p className="mt-1 text-sm text-gray-700">
@@ -216,11 +247,35 @@ const ReviewCard = ({ review, isProductOwner }: ReviewCardProps) => {
         </div>
       )}
 
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Response</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this response? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {deleteResponse.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Response Button */}
       {!review.reviewResponse && isProductOwner && (
         <button
           onClick={() => setIsResponseFormOpen(true)}
-          className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium"
+          className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
         >
           Respond to Review
         </button>
