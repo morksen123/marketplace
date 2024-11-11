@@ -14,7 +14,7 @@ interface BuyerOrderListProps {
     orders: Order[];
 }
 
-const STATUS_FILTERS: OrderStatus[] = ['PENDING', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'PICKUP', 'COMPLETED', 'CANCELLED'];
+const STATUS_FILTERS: OrderStatus[] = ['PENDING', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'PICKUP', 'COMPLETED', 'CANCELLED', 'REFUNDED', 'IN_REFUND', 'REFUND_REJECTED', 'IN_DISPUTE'];
 
 const getOrderCountsByStatus = (orders: Order[]) => {
     const counts: Record<OrderStatus | 'ALL', number> = {
@@ -26,6 +26,10 @@ const getOrderCountsByStatus = (orders: Order[]) => {
         PICKUP: 0,
         COMPLETED: 0,
         CANCELLED: 0,
+        REFUNDED: 0,
+        IN_REFUND: 0,
+        REFUND_REJECTED: 0,
+        IN_DISPUTE: 0
     };
 
     orders.forEach((order) => {
@@ -105,6 +109,10 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
             PICKUP: 'bg-orange-100 text-orange-800',
             DELIVERED: 'bg-green-100 text-green-800',
             COMPLETED: 'bg-gray-100 text-gray-800',
+            REFUNDED: 'bg-pink-100 text-pink-800',
+            IN_REFUND: 'bg-indigo-100 text-indigo-800',
+            REFUND_REJECTED: 'bg-rose-100 text-rose-800',
+            IN_DISPUTE: 'bg-amber-100 text-amber-800'
         };
 
         const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : status;
