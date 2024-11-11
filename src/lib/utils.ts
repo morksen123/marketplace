@@ -12,7 +12,8 @@ export function cn(...inputs: ClassValue[]) {
 
 export function capitalizeFirstLetter(str: string): string {
   if (str.length === 0) return str;
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  const cleanedStr = str.replace(/_/g, ' ');
+  return cleanedStr.charAt(0).toUpperCase() + cleanedStr.slice(1).toLowerCase();
 }
 
 export function getUserRoleFromCookie() {

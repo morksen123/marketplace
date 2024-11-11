@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
 import { Loader2, Package, Search, ArrowDown, ArrowUp } from 'lucide-react';
+import { capitalizeFirstLetter } from '@/lib/utils';
 
 interface BuyerOrderListProps {
     orders: Order[];
@@ -115,7 +116,7 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
             IN_DISPUTE: 'bg-amber-100 text-amber-800'
         };
 
-        const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : status;
+        const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : capitalizeFirstLetter(status);
 
         return <Badge className={`${statusColors[status]} font-medium`}>{displayStatus}</Badge>;
     };
@@ -231,7 +232,7 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
                                 variant={activeFilter === status ? 'default' : 'outline'}
                                 size="sm"
                             >
-                                {status === 'PICKUP' ? 'Ready for Pickup' : status.charAt(0) + status.slice(1).toLowerCase()} ({orderCounts[status]})
+                                {status === 'PICKUP' ? 'Ready for Pickup' : capitalizeFirstLetter(status)} ({orderCounts[status]})
                             </Button>
                         ))}
                     </div>
