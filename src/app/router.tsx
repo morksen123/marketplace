@@ -2,6 +2,7 @@ import { ROLES } from '@/features/Authentication/types/auth';
 import { ReviewPrompt } from '@/features/Feedback/components/ReviewPrompt';
 import { AuthGuard, RoleGuard } from '@/lib/auth';
 import { StripeWrapper } from '@/lib/stripe';
+import { getUserRoleFromCookie } from '@/lib/utils';
 import {
   createBrowserRouter,
   RouteObject,
@@ -464,10 +465,11 @@ const routes: RouteObject[] = [
 const router = createBrowserRouter(routes);
 
 export const AppRouter = () => {
+  const userRole = getUserRoleFromCookie();
   return (
     <>
       <RouterProvider router={router} />
-      <ReviewPrompt />
+      {userRole === 'BUYER' && <ReviewPrompt />}
     </>
   );
 };

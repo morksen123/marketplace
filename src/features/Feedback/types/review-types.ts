@@ -46,13 +46,23 @@ export interface CreateReviewDTO {
 
 export interface ProductReviewDTO extends CreateReviewDTO {
   id: number;
-  buyerId: number;
+  buyer: BuyerDTO;
   createdDateTime: string;
   isResolved: boolean;
   isPrompted: boolean;
   lastPromptedAt: string | null;
   promptCount: number;
   comments: ReviewCommentDTO[];
+  reviewResponse?: ReviewResponseDTO;
+  isAllowedToRespond: boolean;
+}
+
+export interface ReviewResponseDTO {
+  id: number;
+  response: string;
+  distributor: DistributorDTO;
+  createdDateTime: string;
+  updatedDateTime: string;
 }
 
 export interface ReviewCommentDTO {
@@ -84,4 +94,51 @@ export interface ReviewPromptData {
   promptNumber: number;
   isLastPrompt: boolean;
   promptTime: string;
+}
+
+export interface CreateReviewResponseRequest {
+  reviewId: number;
+  response: string;
+}
+
+export interface UpdateReviewResponseRequest {
+  response: string;
+}
+
+export interface ReviewResponseDTO {
+  id: number;
+  response: string;
+  distributor: DistributorDTO;
+  createdDateTime: string;
+  updatedDateTime: string;
+}
+
+export interface BuyerDTO {
+  buyerId: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  profilePic?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DistributorDTO {
+  distributorId: number;
+  distributorName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  postalCode: string;
+  profilePicture?: string;
+  averageRating?: number;
+  totalReviews?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReviewCardProps {
+  review: ProductReviewDTO;
+  isProductOwner: boolean;
 }
