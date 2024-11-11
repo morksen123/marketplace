@@ -55,7 +55,6 @@ export const BuyerOrderDetailsPage: React.FC = () => {
           </Button>
         );
       case 'DELIVERED':
-      case 'PICKUP':
         return (
           <div className="flex space-x-4">
             <RefundRequestModal order={order} />
@@ -72,6 +71,7 @@ export const BuyerOrderDetailsPage: React.FC = () => {
             </Button>
           </div>
         );
+      case 'PICKUP':
       default:
         return null;
     }

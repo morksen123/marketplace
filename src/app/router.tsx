@@ -403,6 +403,20 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/distributor/orders/refunds',
+                lazy: async () => {
+                  const { DistributorRefundsRoute } = await import('./routes/refunds/distributor-refunds');
+                  return { Component: DistributorRefundsRoute };
+                },
+              },
+              {
+                path: '/distributor/orders/refunds/:refundId',
+                lazy: async () => {
+                  const { DistributorRefundDetailsRoute } = await import('./routes/refunds/distributor-refund-details');
+                  return { Component: DistributorRefundDetailsRoute };
+                },
+              },
+              {
                 path: '/distributor/leaderboard',
                 lazy: async () => {
                   const { LeaderboardRoute } = await import(

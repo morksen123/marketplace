@@ -1,4 +1,4 @@
-export type OrderStatus = 'PENDING' | 'ACCEPTED' | 'PICKUP' | 'CANCELLED' | 'SHIPPED' | 'DELIVERED' | 'COMPLETED';
+export type OrderStatus = 'PENDING' | 'ACCEPTED' | 'PICKUP' | 'CANCELLED' | 'SHIPPED' | 'DELIVERED' | 'COMPLETED' | 'REFUNDED' | 'IN_REFUND' | 'REFUND_REJECTED' | 'IN_DISPUTE';
 
 export interface Order {
     orderId: number;

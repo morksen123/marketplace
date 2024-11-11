@@ -104,3 +104,15 @@ export async function deliverDistributorOrder(orderId: number): Promise<void> {
     }
 }
 
+export async function completeDistributorOrder(orderId: number): Promise<void> {
+    try {
+        await put(`/distributor/order/${orderId}/completed`, {});
+    } catch (error) {
+        if (error instanceof Error) {
+            handleErrorApi(error.message, `Failed to complete order with ID ${orderId}`);
+        } else {
+            handleErrorApi('An unknown error occurred', `Failed to complete order with ID ${orderId}`);
+        }
+    }
+}
+
