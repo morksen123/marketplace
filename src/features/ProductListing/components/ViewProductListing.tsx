@@ -23,6 +23,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { useDistributor } from '@/features/DIstributorAccount/hooks/useDistributor';
+import { ProductReviews } from '@/features/Feedback/components/ProductReviews';
 import { EditBatchModal } from '@/features/InventoryManagement/components/EditBatchModal';
 import {
   Batch,
@@ -940,6 +941,11 @@ export const ViewProductListing = () => {
               </button>
             )}
           </div>
+        </div>
+
+        {/* comment section */}
+        <div className="mt-8">
+          <ProductReviews productId={Number(productId)} />
         </div>
 
         {/* Delete Dialog */}

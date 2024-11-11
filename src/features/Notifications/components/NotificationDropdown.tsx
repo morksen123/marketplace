@@ -1,9 +1,9 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 import { Notification } from '@/types/notification';
 import { format } from 'date-fns';
-import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Package, Bell } from 'lucide-react';
+import { Bell, MessageCircle, Package } from 'lucide-react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface NotificationDropdownProps {
   notifications: Notification[];
@@ -12,18 +12,28 @@ interface NotificationDropdownProps {
   userRole: 'buyer' | 'distributor';
 }
 
-export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notifications, onClose, onNotificationRead, userRole }) => {
+export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
+  notifications,
+  onClose,
+  onNotificationRead,
+  userRole,
+}) => {
   const navigate = useNavigate();
+
+  console.log(notifications);
 
   const markNotificationAsRead = async (notificationId: string) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/notifications/${notificationId}/read`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `http://localhost:8080/api/notifications/${notificationId}/read`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
         },
-        credentials: 'include',
-      });
+      );
       if (response.ok) {
         onNotificationRead(notificationId); // Call this immediately after successful API call
       } else {
@@ -37,13 +47,23 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ noti
   const handleNotificationClick = async (notification: Notification) => {
     await markNotificationAsRead(notification.notificationId.toString()); // Wait for this to complete
     const baseRoute = userRole === 'buyer' ? '/buyer' : '/distributor';
-    
+
     if (notification.content === 'New Message' && notification.messageDto) {
       navigate(`${baseRoute}/profile/chats`);
-    } else if (notification.content === 'New Order Created' && notification.orderDto) {
+    } else if (
+      notification.content === 'New Order Created' &&
+      notification.orderDto
+    ) {
       navigate(`${baseRoute}/orders/${notification.orderDto.orderId}`);
-    } else if (notification.content === 'Order Status Updated' && notification.orderDto) {
+    } else if (
+      notification.content === 'Order Status Updated' &&
+      notification.orderDto
+    ) {
       navigate(`${baseRoute}/orders/${notification.orderDto.orderId}`);
+    } else if (notification.content.includes('star')) {
+      navigate(`/view-product-listing/${notification.productId}`);
+    } else if (notification.content.includes('responded to your review')) {
+      navigate(`/buyer/view-product/${notification.productId}`);
     }
     onClose();
   };
@@ -73,21 +93,27 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ noti
     };
 
     return (
-      <Badge className={`${statusColors[status] || 'bg-gray-100 text-gray-800'} text-xs px-1 py-0.5`}>
+      <Badge
+        className={`${
+          statusColors[status] || 'bg-gray-100 text-gray-800'
+        } text-xs px-1 py-0.5`}
+      >
         {status}
       </Badge>
     );
   };
 
-  const sortedNotifications = [...notifications].sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  const sortedNotifications = [...notifications].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
   return (
     <div className="absolute right-0 mt-2 w-96 bg-white rounded-md shadow-lg overflow-hidden z-20">
       <div className="py-2 max-h-80 overflow-y-auto">
         {sortedNotifications.length === 0 ? (
-          <div className="px-4 py-2 text-sm text-gray-700">No new notifications</div>
+          <div className="px-4 py-2 text-sm text-gray-700">
+            No new notifications
+          </div>
         ) : (
           sortedNotifications.map((notification) => (
             <div
@@ -100,25 +126,35 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ noti
                   {getNotificationIcon(notification.content)}
                 </div>
                 <div className="flex-grow max-w-[280px]">
-                  <div className="text-sm font-medium text-gray-900 text-left break-words">{notification.content}</div>
-                  <div className="text-xs text-gray-500 text-left">
-                    {format(new Date(notification.createdAt), 'MMM d, yyyy HH:mm')}
+                  <div className="text-sm font-medium text-gray-900 text-left break-words">
+                    {notification.content}
                   </div>
-                  {notification.content === 'New Message' && notification.messageDto && (
-                    <div className="text-xs text-gray-600 text-left break-words">
-                      From: {notification.buyerNameString}
-                    </div>
-                  )}
-                  {notification.content === 'New Order Created' && notification.orderDto && (
-                    <div className="text-xs text-gray-600 text-left break-words">
-                      Order #{notification.orderDto.orderId} from {notification.buyerNameString}
-                    </div>
-                  )}
-                  {notification.content === 'Order Status Updated' && notification.orderDto && (
-                    <div className="text-xs text-gray-600 flex items-center flex-wrap gap-1">
-                      <span>Order #{notification.orderDto.orderId}:</span> {getStatusBadge(notification.orderStatus)}
-                    </div>
-                  )}
+                  <div className="text-xs text-gray-500 text-left">
+                    {format(
+                      new Date(notification.createdAt),
+                      'MMM d, yyyy HH:mm',
+                    )}
+                  </div>
+                  {notification.content === 'New Message' &&
+                    notification.messageDto && (
+                      <div className="text-xs text-gray-600 text-left break-words">
+                        From: {notification.buyerNameString}
+                      </div>
+                    )}
+                  {notification.content === 'New Order Created' &&
+                    notification.orderDto && (
+                      <div className="text-xs text-gray-600 text-left break-words">
+                        Order #{notification.orderDto.orderId} from{' '}
+                        {notification.buyerNameString}
+                      </div>
+                    )}
+                  {notification.content === 'Order Status Updated' &&
+                    notification.orderDto && (
+                      <div className="text-xs text-gray-600 flex items-center flex-wrap gap-1">
+                        <span>Order #{notification.orderDto.orderId}:</span>{' '}
+                        {getStatusBadge(notification.orderStatus)}
+                      </div>
+                    )}
                 </div>
                 {!notification.read && (
                   <div className="w-2 h-2 bg-red-500 rounded-full ml-2 flex-shrink-0 mt-1"></div>
