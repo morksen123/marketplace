@@ -29,6 +29,7 @@ export const BuyerSideMenu: React.FC = () => {
       links: [
         { text: 'Favourites', path: '/buyer/profile/favourites' },
         { text: 'Orders', path: '/buyer/orders' },
+        { text: 'Refunds', path: '/buyer/orders/refunds' },
         { text: 'Transactions', path: '/buyer/transactions' },
       ]
     }
