@@ -308,7 +308,7 @@ export const DistributorProfile: React.FC = () => {
         <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
           </DialogHeader>
-          <RedeemBoosts />
+          <RedeemBoosts onClose={() => setShowBoosts(false)} />
         </DialogContent>
       </Dialog>
       <PointsGuide
