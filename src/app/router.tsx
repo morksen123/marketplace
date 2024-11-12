@@ -428,6 +428,15 @@ const routes: RouteObject[] = [
                   return { Component: LeaderboardRoute };
                 },
               },
+              {
+                path: '/distributor/waste-audit',
+                lazy: async () => {
+                  const { WasteAuditRoute } = await import(
+                    './routes/sustainability/waste-audit'
+                  );
+                  return { Component: WasteAuditRoute };
+                },
+              },
             ],
           },
           // You can add more role-specific sections here
