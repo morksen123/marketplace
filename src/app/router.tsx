@@ -429,7 +429,7 @@ const routes: RouteObject[] = [
                 },
               },
               {
-                path: '/distributor/review-analytics',
+                path: '/distributor/product-analytics',
                 lazy: async () => {
                   const { DistributorAnalyticsPage } = await import(
                     './routes/reviews/distributor-analytics'
@@ -482,4 +482,3 @@ export const AppRouter = () => {
     </>
   );
 };
-
