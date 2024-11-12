@@ -47,7 +47,7 @@ export const Leaderboard = () => {
   const [referralLink, setReferralLink] = useState<string | null>(null);
   const { cart } = useCart();
   const [daysUntilReset, setDaysUntilReset] = useState<number>(0);
-
+  const [referralPoints, setReferralPoints] = useState<number>(0);
   const calculateDaysUntilReset = () => {
     const today = new Date();
     const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -64,11 +64,14 @@ export const Leaderboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [leaderboardResponse, profileResponse] = await Promise.all([
+        const [leaderboardResponse, profileResponse, pointsAllocationResponse] = await Promise.all([
           fetch('/api/buyer/leaderboard', {
             credentials: 'include'
           }),
           fetch('/api/buyer/profile', {
+            credentials: 'include'
+          }),
+          fetch('/api/points-allocation', {
             credentials: 'include'
           })
         ]);
@@ -79,9 +82,10 @@ export const Leaderboard = () => {
 
         const leaderboardData = await leaderboardResponse.json();
         const profileData = await profileResponse.json();
-
+        const pointsAllocationData = await pointsAllocationResponse.json();
+        setReferralPoints(pointsAllocationData.referralPoints);
         setUsers(leaderboardData);
-        setCurrentUser(profileData);
+        setCurrentUser(profileData)
       } catch (err) {
         setError('Failed to fetch data');
         console.error('Error:', err);
@@ -586,7 +590,7 @@ export const Leaderboard = () => {
                 >
                   <AlertDescription className="flex flex-col items-center gap-3">
                     <span className="text-xl font-medium">
-                      Refer friends & earn 250 points!
+                      Refer friends & earn {referralPoints} points!
                     </span>
                     <div className="flex items-center gap-2 bg-white/20 px-6 py-2 rounded-full">
                       <Users className="h-5 w-5" />

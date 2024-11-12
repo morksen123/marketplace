@@ -243,7 +243,7 @@ export const RedeemBoosts: React.FC<RedeemBoostsProps> = ({ onClose }) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    You need {pointsNeededForNext} more points to redeem an additional boost
+                    You only need {pointsNeededForNext} more points to redeem an additional boost
                   </motion.p>
                   <motion.p
                     className="text-base text-black mt-6"

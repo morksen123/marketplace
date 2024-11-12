@@ -389,7 +389,7 @@ export const DistributorHome = () => {
                       <img src={electricity} alt="Electricity" className="w-12 h-12 mb-2" />
                       <div>
                         <h3 className="text-gray-600 mb-2 font-medium">Energy Impact</h3>
-                        <p className="text-3xl font-bold text-emerald-600">{personalImpactMetrics.acNightsSaved.toFixed(1)} days</p>
+                        <p className="text-3xl font-bold text-emerald-600">{personalImpactMetrics.electricityDaysSaved.toFixed(1)} days</p>
                         <p className="text-base text-black-600">
                           ❄️ {personalImpactMetrics.acNightsSaved.toFixed(1)} nights of AC
                         </p>

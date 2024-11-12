@@ -267,7 +267,7 @@ export const CheckoutComplete: React.FC = () => {
                           <img src={electricity} alt="Electricity" className="w-8 h-8 mb-2" />
                           <h3 className="text-gray-600 text-sm font-bold">Energy Impact</h3>
                           <p className="text-2xl font-bold text-emerald-600 mt-1">
-                            {impactMetrics.acNightsSaved.toFixed(1)} days
+                            {impactMetrics?.electricityDaysSaved.toFixed(1)} days
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
                             ❄️ {impactMetrics.acNightsSaved.toFixed(1)} nights of AC

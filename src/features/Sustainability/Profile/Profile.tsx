@@ -26,6 +26,11 @@ interface Profile {
   profilePic: string;
 }
 
+interface PointsAllocation {
+  referralPoints: number;
+  referralPurchaseRequirement: number;
+}
+
 interface Badge {
   badgeId: number;
   title: string;
@@ -66,6 +71,28 @@ const fetchProfile = async () => {
     return data;
   } catch (error) {
     console.error('Error fetching profile:', error);
+    throw error;
+  }
+};
+
+const fetchPointsAllocation = async () => {
+  try {
+    const response = await fetch('/api/points-allocation', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch points allocation');
+    }
+
+    const data = await response.json();
+    return data.referralPoints;
+  } catch (error) {
+    console.error('Error fetching points allocation:', error);
     throw error;
   }
 };
@@ -128,6 +155,7 @@ export const Profile: React.FC = () => {
   });
   const [referralLink, setReferralLink] = useState<string>('');
   const [referralCodeInput, setReferralCodeInput] = useState<string>('');
+  const [pointsAllocation, setPointsAllocation] = useState<PointsAllocation | null>(null);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [impactMetrics, setImpactMetrics] = useState<ImpactMetricsDto | null>(null);
   const [selectedImpact, setSelectedImpact] = useState<{
@@ -143,10 +171,11 @@ export const Profile: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [profileData, referralLinkData, badgeData, impactData] = await Promise.all([
+        const [profileData, referralLinkData, badgeData, pointsAllocation, impactData] = await Promise.all([
           fetchProfile(),
           fetchReferralLink(),
           fetchBadges(),
+          fetchPointsAllocation(),
           fetch('/api/impact/personal', {
             method: 'GET',
             headers: {
@@ -158,6 +187,7 @@ export const Profile: React.FC = () => {
 
         setProfile(profileData);
         setReferralLink(referralLinkData);
+        setPointsAllocation(pointsAllocation);
         setBadges(badgeData);
         setImpactMetrics(impactData);
       } catch (error) {
@@ -347,8 +377,8 @@ export const Profile: React.FC = () => {
 
                   <div className="text-sm font-medium text-green-600 text-right">
                     {profile.referredByCode && !profile.hasQualifyingPurchase
-                      ? "Complete a purchase over $100 to earn your referral bonus!"
-                      : "Earn 250 points when you refer a friend!"}
+                      ? `Complete a purchase over $${pointsAllocation?.referralPurchaseRequirement} to earn your referral bonus!`
+                      : `Earn ${pointsAllocation?.referralPoints} points when you refer a friend!`}
                   </div>
                 </div>
               </div>

@@ -40,7 +40,7 @@ export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVar
     return `Check out my sustainability impact! 🌱\n\n` +
            `🍽️ Food Rescued: ${impactMetrics?.weightSaved.toFixed(1)} kg\n` +
            `🌳 CO2 Prevented: ${impactMetrics?.co2Prevented.toFixed(1)} kg\n` +
-           `⚡ Energy Saved: ${impactMetrics?.acNightsSaved.toFixed(1)} nights\n` +
+           `⚡ Energy Saved: ${impactMetrics?.electricityDaysSaved.toFixed(1)} nights\n` +
            `💧 Water Saved: ${impactMetrics?.waterLitresSaved.toFixed(0)} L\n\n` +
            `Join me in making a difference!`;
   };
@@ -131,7 +131,7 @@ export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVar
                 <img src={food} alt="Food" className="w-16 h-16 mb-3" />
                 <div>
                   <h3 className="text-gray-600 mb-2 font-medium">Food Rescued</h3>
-                  <p className="text-4xl font-bold text-emerald-600 mb-2">
+                  <p className="text-4xl font-bold text-green-500 mb-2">
                     {impactMetrics.weightSaved.toFixed(1)} kg
                   </p>
                   <p className="text-sm text-gray-600">
@@ -150,7 +150,7 @@ export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVar
                 <img src={co2} alt="CO2" className="w-16 h-16 mb-3" />
                 <div>
                   <h3 className="text-gray-600 mb-2 font-medium">Carbon Impact</h3>
-                  <p className="text-4xl font-bold text-emerald-600 mb-2">
+                  <p className="text-4xl font-bold text-green-500 mb-2">
                     {impactMetrics.co2Prevented.toFixed(1)} kg
                   </p>
                   <p className="text-sm text-gray-600">
@@ -169,8 +169,8 @@ export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVar
                 <img src={electricity} alt="Electricity" className="w-16 h-16 mb-3" />
                 <div>
                   <h3 className="text-gray-600 mb-2 font-medium">Energy Impact</h3>
-                  <p className="text-4xl font-bold text-emerald-600 mb-2">
-                    {impactMetrics.acNightsSaved.toFixed(1)} nights
+                  <p className="text-4xl font-bold text-green-500 mb-2">
+                    {impactMetrics.electricityDaysSaved.toFixed(1)} nights
                   </p>
                   <p className="text-sm text-gray-600">
                     ❄️ {impactMetrics.acNightsSaved.toFixed(1)} nights of AC saved
@@ -188,7 +188,7 @@ export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVar
                 <img src={water} alt="Water" className="w-16 h-16 mb-3" />
                 <div>
                   <h3 className="text-gray-600 mb-2 font-medium">Water Saved</h3>
-                  <p className="text-4xl font-bold text-emerald-600 mb-2">
+                  <p className="text-4xl font-bold text-green-500 mb-2">
                     {impactMetrics.waterLitresSaved >= 1000000000000
                       ? `${(impactMetrics.waterLitresSaved / 1000000000000).toFixed(1)} tril`
                       : impactMetrics.waterLitresSaved >= 1000000000
