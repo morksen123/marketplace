@@ -3,6 +3,7 @@ import {
   CreatePlatformRatingRequest,
   CreateReviewDTO,
   CreateReviewResponseRequest,
+  DistributorAnalytics,
   ProductReviewDTO,
   RatingEligibility,
   ReviewResponseDTO,
@@ -48,4 +49,11 @@ export async function updateReviewResponse(
 
 export async function deleteReviewResponse(responseId: number) {
   await del(`/review-responses/${responseId}`);
+}
+
+export async function getDistributorAnalytics() {
+  const { data } = await get<DistributorAnalytics>(
+    '/reviews/analytics/distributor',
+  );
+  return data;
 }

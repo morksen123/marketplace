@@ -4,6 +4,7 @@ import {
   createReview,
   createReviewResponse,
   deleteReviewResponse,
+  getDistributorAnalytics,
   getProductReviews,
   updateReviewResponse,
 } from '../api/api-reviews';
@@ -68,5 +69,12 @@ export const useDeleteReviewResponse = () => {
       queryClient.invalidateQueries({ queryKey: ['productReviews'] });
       handleSuccessApi('Success!', 'Response deleted successfully');
     },
+  });
+};
+
+export const useDistributorReviewAnalytics = () => {
+  return useQuery({
+    queryKey: ['distributorAnalytics'],
+    queryFn: getDistributorAnalytics,
   });
 };

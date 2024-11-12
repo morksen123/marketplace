@@ -428,6 +428,15 @@ const routes: RouteObject[] = [
                   return { Component: LeaderboardRoute };
                 },
               },
+              {
+                path: '/distributor/review-analytics',
+                lazy: async () => {
+                  const { DistributorAnalyticsPage } = await import(
+                    './routes/reviews/distributor-analytics'
+                  );
+                  return { Component: DistributorAnalyticsPage };
+                },
+              },
             ],
           },
           // You can add more role-specific sections here
