@@ -142,3 +142,29 @@ export interface ReviewCardProps {
   review: ProductReviewDTO;
   isProductOwner: boolean;
 }
+
+export interface DistributorAnalytics {
+  averageOverallRating: number;
+  averageQualityRating: number;
+  totalReviews: number;
+  totalProducts: number;
+  buyAgainRate: number;
+  conditionBreakdown: Record<string, number>;
+  imperfectionTypes: Record<string, number>;
+  productRatings: ProductRating[];
+  monthlyRatings: MonthlyRating[];
+  categoryRatings: Record<string, number>;
+}
+
+export interface ProductRating {
+  productId: number;
+  productName: string;
+  averageRating: number;
+  reviewCount: number;
+}
+
+export interface MonthlyRating {
+  month: string;
+  averageRating: number;
+  reviewCount: number;
+}
