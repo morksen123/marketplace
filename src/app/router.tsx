@@ -253,6 +253,20 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/buyer/orders/disputes',
+                lazy: async () => {
+                  const { BuyerDisputesRoute } = await import('./routes/disputes/buyer-disputes');
+                  return { Component: BuyerDisputesRoute };
+                }
+              },
+              {
+                path: 'buyer/orders/disputes/:disputeId',
+                lazy: async () => {
+                  const { BuyerDisputeDetailsRoute } = await import('./routes/disputes/buyer-dispute-details');
+                  return { Component: BuyerDisputeDetailsRoute };
+                }
+              },
+              {
                 path: '/buyer/leaderboard',
                 lazy: async () => {
                   const { LeaderboardRoute } = await import(

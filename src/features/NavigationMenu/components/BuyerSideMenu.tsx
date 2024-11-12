@@ -30,6 +30,7 @@ export const BuyerSideMenu: React.FC = () => {
         { text: 'Favourites', path: '/buyer/profile/favourites' },
         { text: 'Orders', path: '/buyer/orders' },
         { text: 'Refunds', path: '/buyer/orders/refunds' },
+        { text: 'Disputes', path: '/buyer/orders/disputes' },
         { text: 'Transactions', path: '/buyer/transactions' },
       ]
     }
