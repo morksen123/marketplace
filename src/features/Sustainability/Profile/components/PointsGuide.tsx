@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from 'framer-motion';
@@ -9,7 +10,32 @@ interface PointsGuideProps {
   userType?: 'buyer' | 'distributor';
 }
 
+interface PointsAllocation {
+  referralPoints: number;
+  purchasePointsPerDollar: number;
+  feedbackPoints: number;
+  referralPurchaseRequirement: number;
+  badgePoints: number;
+  soldPointsPerDollar: number;
+  donationPointsPerUnit: number;
+  donationKgUnit: number;
+  ratingPointsPerFiveStar: number;
+}
+
 export const PointsGuide: React.FC<PointsGuideProps> = ({ isOpen, onClose, userType = 'buyer' }) => {
+  const [pointsAllocation, setPointsAllocation] = useState<PointsAllocation | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('/api/points-allocation', {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setPointsAllocation(data);
+    };
+    fetchData();
+  }, []);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -32,31 +58,25 @@ export const PointsGuide: React.FC<PointsGuideProps> = ({ isOpen, onClose, userT
     {
       title: 'Food Saved',
       description: 'Points awarded based on purchase value',
-      criteria: '10 points per $ of product purchased',
+      criteria: `${pointsAllocation?.purchasePointsPerDollar} points per dollar of product purchased`,
       icon: <ShoppingBag className="h-6 w-6 text-green-500" />
-    },
-    {
-      title: 'Monthly Purchase Frequency',
-      description: 'Multiplier effect based on monthly activity',
-      criteria: 'Points multiplier increases with more purchases',
-      icon: <Scale className="h-6 w-6 text-blue-500" />
     },
     {
       title: 'Reviews & Feedback',
       description: 'Points for providing product feedback',
-      criteria: '5 points per feedback submitted',
+      criteria: `${pointsAllocation?.feedbackPoints} points per feedback submitted`,
       icon: <Star className="h-6 w-6 text-yellow-500" />
     },
     {
       title: 'Referral Program',
       description: 'Points for successful referrals',
-      criteria: '250 points when referred friend makes $100+ purchase',
+      criteria: `${pointsAllocation?.referralPoints} points when referred friend makes over $${pointsAllocation?.referralPurchaseRequirement} on their first purchase`,
       icon: <Users className="h-6 w-6 text-purple-500" />
     },
     {
         title: 'Badges Earned',
         description: 'Points for badges earned', 
-        criteria: '50 points for each badge earned',
+        criteria: `${pointsAllocation?.badgePoints} points for each badge earned`,
         icon: <Medal className="h-6 w-6 text-red-500" />
       }
   ];
@@ -64,26 +84,26 @@ export const PointsGuide: React.FC<PointsGuideProps> = ({ isOpen, onClose, userT
   const distributorPoints = [
     {
       title: 'Surplus Food Sales',
-      description: 'Points based on order value',
-      criteria: '10 points per $ of product sold',
+      description: 'Points based on selling value',
+      criteria: `${pointsAllocation?.soldPointsPerDollar} points per dollar of product sold`,
       icon: <ShoppingBag className="h-6 w-6 text-green-500" />
     },
     {
       title: 'Food Donations',
       description: 'Points for food donations',
-      criteria: '2 points per 5kg donated',
+      criteria: `${pointsAllocation?.donationPointsPerUnit} points per ${pointsAllocation?.donationKgUnit} kg donated`,
       icon: <Scale className="h-6 w-6 text-blue-500" />
     },
     {
       title: 'Customer Satisfaction',
       description: 'Points for positive ratings',
-      criteria: '5 points per 5-star rating',
+      criteria: `${pointsAllocation?.ratingPointsPerFiveStar} points per 5-star rating`,
       icon: <Star className="h-6 w-6 text-yellow-500" />
     },
     {
       title: 'Badges Earned',
       description: 'Points for badges earned', 
-      criteria: '50 points for each badge earned',
+      criteria: `${pointsAllocation?.badgePoints} points for each badge earned`,
       icon: <Medal className="h-6 w-6 text-red-500" />
     }
   ];
