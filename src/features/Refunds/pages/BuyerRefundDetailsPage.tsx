@@ -8,6 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Package, ArrowLeft, Calendar, User, CreditCard, AlertCircle } from 'lucide-react';
 import { RefundStatus } from '../types/refunds';
 import { Button } from '@/components/ui/button';
+import { capitalizeFirstLetter } from '@/lib/utils';
+
 
 export const BuyerRefundDetailsPage: React.FC = () => {
   const { refundId } = useParams<{ refundId: string }>();
@@ -37,7 +39,7 @@ export const BuyerRefundDetailsPage: React.FC = () => {
       REJECTED: 'bg-red-100 text-red-800',
     };
 
-    return <Badge className={`${statusColors[status]} font-medium`}>{status}</Badge>;
+    return <Badge className={`${statusColors[status]} font-medium`}>{capitalizeFirstLetter(status)}</Badge>;
   };
 
   const renderActionButton = () => {
