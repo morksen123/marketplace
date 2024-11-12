@@ -12,7 +12,7 @@ import {
 } from '../lib/dispute';
 import { DisputeRequest } from '../constants';
 
-export function useDispute() {
+export function useDispute(role: 'buyer' | 'distributor' = 'buyer') {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -24,6 +24,7 @@ export function useDispute() {
       if (error) throw error;
       return data;
     },
+    enabled: role === 'buyer', // Only run for buyers
   });
 
   const buyerPendingDisputesQuery = useQuery({
@@ -33,6 +34,7 @@ export function useDispute() {
       if (error) throw error;
       return data;
     },
+    enabled: role === 'buyer',
   });
 
   const getBuyerDisputeQuery = (disputeId: number) =>
@@ -53,6 +55,7 @@ export function useDispute() {
       if (error) throw error;
       return data;
     },
+    enabled: role === 'distributor', // Only run for distributors
   });
 
   const distributorPendingDisputesQuery = useQuery({
@@ -62,6 +65,7 @@ export function useDispute() {
       if (error) throw error;
       return data;
     },
+    enabled: role === 'distributor',
   });
 
   const getDistributorDisputeQuery = (disputeId: number) =>
@@ -92,7 +96,7 @@ export function useDispute() {
       queryClient.invalidateQueries({ queryKey: ['buyerDisputes'] });
       queryClient.invalidateQueries({ queryKey: ['buyerPendingDisputes'] });
       handleSuccessApi('Dispute Lodged', 'Your dispute has been lodged successfully.');
-      navigate('/buyer/disputes');
+      navigate('/buyer/orders');
     },
     onError: (error: Error) => {
       handleErrorApi('Error', error.message);
