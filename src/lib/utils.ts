@@ -12,8 +12,14 @@ export function cn(...inputs: ClassValue[]) {
 
 export function capitalizeFirstLetter(str: string): string {
   if (str.length === 0) return str;
-  const cleanedStr = str.replace(/_/g, ' ');
-  return cleanedStr.charAt(0).toUpperCase() + cleanedStr.slice(1).toLowerCase();
+  
+  // Split by underscore and filter out empty strings
+  const words = str.split('_').filter(word => word.length > 0);
+  
+  // Capitalize each word and join with space
+  return words
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 }
 
 export function getUserRoleFromCookie() {

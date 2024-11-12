@@ -14,6 +14,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { DisputeStatus, Dispute } from '../constants';
+import { capitalizeFirstLetter } from '@/lib/utils';
 
 export const DistributorDisputeDetailsPage: React.FC = () => {
   const { disputeId } = useParams<{ disputeId: string }>();
@@ -49,7 +50,7 @@ export const DistributorDisputeDetailsPage: React.FC = () => {
     };
 
     return (
-      <Badge className={`${statusColors[status]} font-medium`}>{status}</Badge>
+      <Badge className={`${statusColors[status]} font-medium`}>{capitalizeFirstLetter(status)}</Badge>
     );
   };
 

@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/pagination';
 import { AlertTriangle, Search, ArrowDown, ArrowUp, Info } from 'lucide-react';
 import { DisputeStatus, Dispute } from '../constants';
+import { capitalizeFirstLetter } from '@/lib/utils';
 
 interface DistributorDisputeListProps {
   disputes: Dispute[];
@@ -87,7 +88,7 @@ export const DistributorDisputeList: React.FC<DistributorDisputeListProps> = ({
     };
 
     return (
-      <Badge className={`${statusColors[status]} font-medium`}>{status}</Badge>
+      <Badge className={`${statusColors[status]} font-medium`}>{capitalizeFirstLetter(status)}</Badge>
     );
   };
 

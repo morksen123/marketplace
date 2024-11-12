@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Package, ArrowLeft, Loader2, Calendar, User, CreditCard, Truck, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { OrderStatus } from '@/features/Orders/types/orders';
+import { capitalizeFirstLetter } from '@/lib/utils';
 
 export const DistributorOrderDetailsPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
@@ -127,9 +128,13 @@ export const DistributorOrderDetailsPage: React.FC = () => {
       PICKUP: 'bg-orange-100 text-orange-800',
       DELIVERED: 'bg-green-100 text-green-800',
       COMPLETED: 'bg-gray-100 text-gray-800',
+      REFUNDED: 'bg-pink-100 text-pink-800',
+      IN_REFUND: 'bg-indigo-100 text-indigo-800',
+      REFUND_REJECTED: 'bg-rose-100 text-rose-800',
+      IN_DISPUTE: 'bg-amber-100 text-amber-800'
     };
 
-    const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : status;
+    const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : capitalizeFirstLetter(status);
 
     return <Badge className={`${statusColors[status]} font-medium`}>{displayStatus}</Badge>;
   };

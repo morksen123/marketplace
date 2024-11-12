@@ -17,6 +17,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@
 import { Loader2, Package, Search, ArrowDown, ArrowUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { capitalizeFirstLetter } from '@/lib/utils';
 
 interface DistributorOrderListProps {
   orders: Order[];
@@ -187,7 +188,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
       IN_DISPUTE: 'bg-amber-100 text-amber-800'
     };
 
-    const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : status;
+    const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : capitalizeFirstLetter(status);
 
     return <Badge className={`${statusColors[status]} font-medium`}>{displayStatus}</Badge>;
   };
@@ -348,7 +349,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
                 variant={activeFilter === status ? 'default' : 'outline'}
                 size="sm"
               >
-                {status === 'PICKUP' ? 'Ready for Pickup' : status.charAt(0) + status.slice(1).toLowerCase()} ({orderCounts[status]})
+                {status === 'PICKUP' ? 'Ready for Pickup' : capitalizeFirstLetter(status)} ({orderCounts[status]})
               </Button>
             ))}
           </div>

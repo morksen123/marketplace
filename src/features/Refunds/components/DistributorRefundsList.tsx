@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
 import { Package, Search, ArrowDown, ArrowUp } from 'lucide-react';
 import { RefundStatus, Refund } from '../types/refunds';
+import { capitalizeFirstLetter } from '@/lib/utils';
 
 interface DistributorRefundsListProps {
   refunds: Refund[];
@@ -68,7 +69,7 @@ export const DistributorRefundsList: React.FC<DistributorRefundsListProps> = ({ 
       REJECTED: 'bg-red-100 text-red-800'
     };
 
-    return <Badge className={`${statusColors[status]} font-medium`}>{status}</Badge>;
+    return <Badge className={`${statusColors[status]} font-medium`}>{capitalizeFirstLetter(status)}</Badge>;
   };
 
   const handleFilterChange = (status: RefundStatus | 'ALL') => {
