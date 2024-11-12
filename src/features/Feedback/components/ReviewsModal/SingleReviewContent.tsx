@@ -21,7 +21,6 @@ const CONDITION_TYPES = [
   { value: 'OVERRIPE', label: 'Overripe' },
   { value: 'UNDERRIPE', label: 'Underripe' },
   { value: 'BLEMISHED', label: 'Blemished' },
-  { value: 'SIZE_VARIATION', label: 'Size Variation' },
 ] as const;
 
 export function SingleReviewContent({

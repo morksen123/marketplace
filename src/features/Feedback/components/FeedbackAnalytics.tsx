@@ -31,8 +31,6 @@ export const FeedbackAnalytics = () => {
     return <div>No analytics data available</div>;
   }
 
-  console.log(analytics);
-
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Feedback Analytics</h1>
