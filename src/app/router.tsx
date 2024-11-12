@@ -417,6 +417,20 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/distributor/orders/disputes',
+                lazy: async () => {
+                  const { DistributorDisputesRoute } = await import('./routes/disputes/distributor-disputes');
+                  return { Component: DistributorDisputesRoute };
+                },
+              },
+              {
+                path:'/distributor/orders/disputes/:disputeId',
+                lazy: async () => {
+                  const { DistributorDisputeDetailsRoute } = await import('./routes/disputes/distributor-dispute-details');
+                  return { Component: DistributorDisputeDetailsRoute };
+                },
+              },
+              {
                 path: '/distributor/leaderboard',
                 lazy: async () => {
                   const { LeaderboardRoute } = await import(
