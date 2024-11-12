@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import Tooltip from '@mui/material/Tooltip';
 import { DistributorOrdersPreview } from '@/features/Orders/components/DistributorOrdersPreview';
+import CircularEconomyDonation from '@/features/Sustainability/CircularEconomy/components/CircularEconomyDonation';
 
 export const DistributorHome = () => {
   const [foodCategories, setFoodCategories] = useState<string[]>([]);
@@ -208,6 +209,8 @@ export const DistributorHome = () => {
           }
         `}</style>
       </div>
+
+      <CircularEconomyDonation />
 
       {/* Metrics Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
