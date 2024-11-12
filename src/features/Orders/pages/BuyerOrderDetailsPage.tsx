@@ -74,7 +74,7 @@ export const BuyerOrderDetailsPage: React.FC = () => {
         );
       case 'REFUND_REJECTED':
         return (
-          <LodgeDisputeModal order={order} refundId={1}/>
+          <LodgeDisputeModal order={order} refundId={order.refundId}/>
         );
       case 'PICKUP':
       default:

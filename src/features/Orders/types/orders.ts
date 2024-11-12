@@ -16,6 +16,8 @@ export interface Order {
     orderLineItems: OrderLineItem[];
     shippingAddress: ShippingAddress;
     pickUpLocation: string;
+    refundId: number;
+    disputeId: number;
 }
 
 export interface OrderLineItem {
