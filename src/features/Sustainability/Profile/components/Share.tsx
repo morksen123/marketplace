@@ -1,135 +1,287 @@
-import { Share as ShareIcon, ContentCopy as Copy, Facebook as FacebookIcon, LinkedIn as LinkedInIcon, Instagram as InstagramIcon } from '@mui/icons-material';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { TreeDeciduous, Copy, Download } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import html2canvas from 'html2canvas';
+import food from '@/assets/food.png';
+import co2 from '@/assets/co2.png';
+import electricity from '@/assets/electricity.png';
+import water from '@/assets/water.png';
+import { QRCodeSVG } from 'qrcode.react';
+import logo from '@/assets/gudfood-logo.png';
+import { useState, useEffect } from 'react';
+import { CircularProgress } from '@/components/ui/circular-progress';
+import { handleSuccessApi } from '@/lib/api-client';
 
-interface ShareProps {
-  title?: string;
-  description?: string;
-  metrics?: {
-    weightSaved?: number;
-    co2Prevented?: number;
-    treesEquivalent?: number;
-    waterLitresSaved?: number;
-    electricityDaysSaved?: number;
+interface ShareDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  impactMetrics: {
+    weightSaved: number;
+    co2Prevented: number;
+    treesEquivalent: number;
+    electricityDaysSaved: number;
+    acNightsSaved: number;
+    mealsSaved: number;
+    waterLitresSaved: number;
+    showersEquivalent: number;
+    swimmingPoolsEquivalent: number;
+    carKmEquivalent: number;
   };
-  referralCode?: string;
-  customMessage?: string;
 }
 
-export const ShareContent = ({ 
-  title = "Share Your Impact", 
-  description = "Share your environmental impact with friends!",
-  metrics,
-  referralCode,
-  customMessage
-}: ShareProps) => {
-  const { toast } = useToast();
-  
-  const createShareMessage = () => {
-    if (customMessage) return customMessage;
-    
-    let message = "I'm making a sustainable impact with GudFood! 🌱\n\n";
-    
-    if (metrics) {
-      if (metrics.weightSaved) message += `• Prevented ${metrics.weightSaved.toFixed(2)}kg of food waste\n`;
-      if (metrics.co2Prevented) message += `• Saved ${metrics.co2Prevented.toFixed(2)}kg of CO₂ emissions\n`;
-      if (metrics.treesEquivalent) message += `• Equivalent to ${metrics.treesEquivalent.toFixed(1)} trees\n`;
-      if (metrics.waterLitresSaved) message += `• Saved ${metrics.waterLitresSaved.toFixed(0)} litres of water\n`;
-      if (metrics.electricityDaysSaved) message += `• Saved ${metrics.electricityDaysSaved.toFixed(1)} days of electricity\n`;
+const fetchReferralLink = async () => {
+  try {
+    const response = await fetch('/api/buyer/referral-link', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch referral link');
     }
-    
-    message += "\nJoin me in reducing food waste!";
-    return message;
+
+    const data = await response.json();
+    return data.referralLink;
+  } catch (error) {
+    console.error('Error fetching referral link:', error);
+    throw error;
+  }
+};
+
+export const ShareDialog: React.FC<ShareDialogProps> = ({ isOpen, onClose, impactMetrics }) => {
+  const [referralLink, setReferralLink] = useState('');
+  const { toast } = useToast();
+  const [isCopying, setIsCopying] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    fetchReferralLink().then(setReferralLink);
+  }, []);
+
+  const shareText = `Join me in my journey with GudFood and create an impact on the world! Sign up here: ${referralLink}`;
+  const shareUrl = referralLink;
+
+  const handleCopyImage = async () => {
+    const element = document.getElementById('impact-card');
+    if (!element) return;
+
+    try {
+      setIsCopying(true);
+      const canvas = await html2canvas(element);
+      
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          try {
+            const data = new ClipboardItem({ 'image/png': blob });
+            await navigator.clipboard.write([data]);
+            
+            handleSuccessApi(
+              "Success!",
+              "Image copied to clipboard"
+            );
+          } catch (error) {
+            console.error('Error copying image:', error);
+            toast({
+              title: "Error",
+              description: "Failed to copy to clipboard. Try saving instead.",
+              duration: 2000,
+              variant: "destructive",
+            });
+          }
+        }
+      }, 'image/png');
+    } catch (error) {
+      console.error('Error creating image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create shareable image",
+        duration: 2000,
+        variant: "destructive",
+      });
+    } finally {
+      setIsCopying(false);
+    }
   };
 
-  const shareToSocialMedia = (platform: 'linkedin' | 'facebook' | 'instagram') => {
-    const message = createShareMessage();
-    const baseUrl = window.location.origin;
-    const shareUrl = referralCode ? `${baseUrl}/join?ref=${referralCode}` : baseUrl;
+  const handleSaveToGallery = async () => {
+    const element = document.getElementById('impact-card');
+    if (!element) return;
 
-    switch (platform) {
-      case 'linkedin':
-        const linkedInUrl = new URL('https://www.linkedin.com/sharing/share-offsite/');
-        linkedInUrl.searchParams.append('url', shareUrl);
-        linkedInUrl.searchParams.append('summary', message);
-        linkedInUrl.searchParams.append('source', 'GudFood');
-        
-        window.open(
-          linkedInUrl.toString(),
-          'LinkedInShare',
-          'width=800,height=600,menubar=no,toolbar=no,status=no'
-        );
-        break;
-
-      case 'facebook':
-        window.open(
-          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(message)}`,
-          '_blank',
-          'width=600,height=600'
-        );
-        break;
-
-      case 'instagram':
-        navigator.clipboard.writeText(message).then(() => {
-          toast({
-            title: "Instagram Sharing",
-            description: "Impact metrics copied! Share a screenshot of your stats along with the copied message on Instagram.",
-            duration: 5000,
-          });
-        });
-        break;
+    try {
+      setIsSaving(true);
+      const canvas = await html2canvas(element);
+      const dataUrl = canvas.toDataURL('image/png');
+      
+      const link = document.createElement('a');
+      link.download = 'gudfood-impact.png';
+      link.href = dataUrl;
+      link.click();
+      
+      handleSuccessApi(
+        "Success!",
+        "Image saved to your device"
+      );
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save image",
+        duration: 2000,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <ShareIcon className="h-4 w-4 mr-2" />
-          Share Impact
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogTitle>Share Your Impact</DialogTitle>
+          <DialogDescription>
+            Copy or save the image to share your sustainability journey!
+          </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col space-y-4">
-          <div className="flex justify-center space-x-4">
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => shareToSocialMedia('linkedin')}
+
+        <div className="space-y-6">
+          <div id="impact-card" className="bg-gradient-to-br from-emerald-50 to-teal-100 p-8 rounded-xl">
+            <div className="flex items-center justify-between mb-6">
+              <img src={logo} alt="GudFood Logo" className="h-12" />
+              <h2 className="text-2xl font-bold">My Sustainability Impact</h2>
+              <div className="h-12 w-[100px]"></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Food Impact */}
+              <div className="bg-white/80 backdrop-blur rounded-xl p-6">
+                <div className="flex flex-col items-center text-center">
+                  <img src={food} alt="Food" className="w-16 h-16 mb-3" />
+                  <h3 className="text-gray-600 mb-1 font-medium">Food Rescued</h3>
+                  <p className="text-4xl font-bold text-green-500 mb-4">
+                    {impactMetrics.weightSaved.toFixed(1)} kg
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    🍽️ {impactMetrics.mealsSaved.toFixed(0)} meals saved
+                  </p>
+                </div>
+              </div>
+
+              {/* Carbon Impact */}
+              <div className="bg-white/80 backdrop-blur rounded-xl p-6">
+                <div className="flex flex-col items-center text-center">
+                  <img src={co2} alt="CO2" className="w-16 h-16 mb-3" />
+                  <h3 className="text-gray-600 mb-1 font-medium">Carbon Impact</h3>
+                  <p className="text-4xl font-bold text-green-500 mb-4">
+                    {impactMetrics.co2Prevented.toFixed(1)} kg
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    🚗 {impactMetrics.carKmEquivalent.toFixed(1)} km not driven
+                  </p>
+                </div>
+              </div>
+
+              {/* Energy Impact */}
+              <div className="bg-white/80 backdrop-blur rounded-xl p-6">
+                <div className="flex flex-col items-center text-center">
+                  <img src={electricity} alt="Electricity" className="w-16 h-16 mb-3" />
+                  <h3 className="text-gray-600 mb-1 font-medium">Energy Impact</h3>
+                  <p className="text-4xl font-bold text-green-500 mb-4">
+                    {impactMetrics.electricityDaysSaved.toFixed(1)} days
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    ❄️ {impactMetrics.acNightsSaved.toFixed(1)} nights of AC saved
+                  </p>
+                </div>
+              </div>
+
+              {/* Water Impact */}
+              <div className="bg-white/80 backdrop-blur rounded-xl p-6">
+                <div className="flex flex-col items-center text-center">
+                  <img src={water} alt="Water" className="w-16 h-16 mb-3" />
+                  <h3 className="text-gray-600 mb-1 font-medium">Water Saved</h3>
+                  <p className="text-4xl font-bold text-green-500 mb-4">
+                    {impactMetrics.waterLitresSaved >= 1000000000000
+                      ? `${(impactMetrics.waterLitresSaved / 1000000000000).toFixed(1)} tril`
+                      : impactMetrics.waterLitresSaved >= 1000000000
+                        ? `${(impactMetrics.waterLitresSaved / 1000000000).toFixed(1)} bil`
+                        : impactMetrics.waterLitresSaved >= 1000000
+                          ? `${(impactMetrics.waterLitresSaved / 1000000).toFixed(1)}mil`
+                          : impactMetrics.waterLitresSaved.toFixed(0)
+                  }
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    🚿 {impactMetrics.showersEquivalent.toFixed(1)} showers saved
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-lg text-gray-700 font-semibold mb-2">
+                    Join me in my journey with GudFood and create an impact on the world!
+                  </p>
+                  <p className="text-base text-emerald-600 font-medium">
+                    Scan to join with my referral link and earn 250 points on your first purchase!*
+                  </p>
+                  <p className="text-[10px] text-gray-400 mt-4">
+                    *Terms and Conditions: Points will be credited with a minimum purchase. Valid for new customers only.
+                  </p>
+                </div>
+                <div className="ml-6">
+                  <QRCodeSVG
+                    value={shareUrl}
+                    size={120}
+                    level="L"
+                    includeMargin={false}
+                    className="bg-white p-2 rounded-lg shadow-md"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button 
+              onClick={handleCopyImage} 
+              variant="secondary"
+              className="button-green"
+              disabled={isCopying}
             >
-              <LinkedInIcon className="h-5 w-5 mr-2" />
-              LinkedIn
+              {isCopying ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full border-2 border-gray-200 border-t-green-500 h-4 w-4" />
+                  <span>Copying...</span>
+                </div>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-2" />
+                  <span>Copy Image</span>
+                </>
+              )}
             </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => shareToSocialMedia('facebook')}
+            <Button 
+              onClick={handleSaveToGallery}
+              variant="secondary" 
+              className="button-green"
+              disabled={isSaving}
             >
-              <FacebookIcon className="h-5 w-5 mr-2" />
-              Facebook
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => shareToSocialMedia('instagram')}
-            >
-              <InstagramIcon className="h-5 w-5 mr-2" />
-              Instagram
+              {isSaving ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full border-2 border-gray-200 border-t-green-500 h-4 w-4" />
+                  <span>Saving...</span>
+                </div>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  <span>Save to Gallery</span>
+                </>
+              )}
             </Button>
           </div>
         </div>

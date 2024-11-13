@@ -387,7 +387,7 @@ export const Checkout: React.FC = () => {
                   <Button
                     type="submit"
                     variant="secondary"
-                    className="w-full"
+                    className="w-full button-green"
                     disabled={isLoading || !stripe || !elements}
                   >
                     {isLoading ? (

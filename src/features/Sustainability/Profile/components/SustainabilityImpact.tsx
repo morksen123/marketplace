@@ -11,6 +11,8 @@ import food from '@/assets/food.png';
 import co2 from '@/assets/co2.png';
 import electricity from '@/assets/electricity.png';
 import water from '@/assets/water.png';
+import { useState } from 'react';
+import { ShareDialog } from './Share';
 
 interface ImpactMetricsDto {
   weightSaved: number;
@@ -35,50 +37,8 @@ export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVar
   const { toast } = useToast();
   const baseUrl = window.location.origin;
   const referralLink = `${baseUrl}/join`;
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
-  const createShareMessage = () => {
-    return `Check out my sustainability impact! 🌱\n\n` +
-           `🍽️ Food Rescued: ${impactMetrics?.weightSaved.toFixed(1)} kg\n` +
-           `🌳 CO2 Prevented: ${impactMetrics?.co2Prevented.toFixed(1)} kg\n` +
-           `⚡ Energy Saved: ${impactMetrics?.electricityDaysSaved.toFixed(1)} nights\n` +
-           `💧 Water Saved: ${impactMetrics?.waterLitresSaved.toFixed(0)} L\n\n` +
-           `Join me in making a difference!`;
-  };
-
-  const shareToSocialMedia = (platform: 'linkedin' | 'facebook' | 'instagram') => {
-    const message = createShareMessage();
-    const shareUrl = baseUrl;
-
-    switch (platform) {
-      case 'linkedin': {
-        const linkedInUrl = new URL('https://www.linkedin.com/sharing/share-offsite/');
-        linkedInUrl.searchParams.append('url', shareUrl);
-        window.open(
-          linkedInUrl.toString(),
-          'LinkedInShare',
-          'width=800,height=600,menubar=no,toolbar=no,status=no'
-        );
-        break;
-      }
-      case 'facebook': {
-        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(message)}`;
-        window.open(facebookUrl, '_blank', 'width=600,height=600');
-        break;
-      }
-      case 'instagram': {
-        navigator.clipboard.writeText(message)
-          .then(() => {
-            toast({
-              title: "Instagram Sharing",
-              description: "Impact metrics copied! Share a screenshot of your stats along with the copied message on Instagram.",
-              duration: 5000,
-            });
-          })
-          .catch((error) => console.error("Clipboard error:", error));
-        break;
-      }
-    }
-  };
 
   if (!impactMetrics) return null;
 
@@ -90,34 +50,15 @@ export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVar
             <CardTitle className="flex items-center">
               Your Sustainability Impact
             </CardTitle>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Share className="h-4 w-4" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Share Impact</DialogTitle>
-                  <DialogDescription>
-                    Share your sustainability impact on social media
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex flex-col space-y-4">
-                  <div className="flex justify-center space-x-4">
-                    <Button onClick={() => shareToSocialMedia('linkedin')} variant="outline">
-                      Share on LinkedIn
-                    </Button>
-                    <Button onClick={() => shareToSocialMedia('facebook')} variant="outline">
-                      Share on Facebook
-                    </Button>
-                    <Button onClick={() => shareToSocialMedia('instagram')} variant="outline">
-                      Share on Instagram
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsShareDialogOpen(true)}
+              className="ml-auto"
+            >
+              <Share className="h-4 w-4 mr-2" />
+              Share Impact
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -207,6 +148,11 @@ export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVar
           </div>
         </CardContent>
       </Card>
+      <ShareDialog
+        isOpen={isShareDialogOpen}
+        onClose={() => setIsShareDialogOpen(false)}
+        impactMetrics={impactMetrics}
+      />
     </motion.div>
   );
 }; 

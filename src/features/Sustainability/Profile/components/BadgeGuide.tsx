@@ -46,7 +46,7 @@ export const BadgeGuide: React.FC<BadgeGuideProps> = ({ isOpen, onClose, userTyp
       },
       {
         name: 'Waste Warrior',
-        description: 'Celebrates distributors who actively reduce food waste by maintaining regular surplus listings',
+        description: 'Recognises distributors who actively reduce food waste by maintaining regular surplus listings',
         criteria: 'Earned by listing 10+ products each month for 6 consecutive months'
       }
     ],
@@ -110,7 +110,7 @@ export const BadgeGuide: React.FC<BadgeGuideProps> = ({ isOpen, onClose, userTyp
       },
       {
         name: 'Waste Saver',
-        description: 'Celebrates buyers committed to sustainable choices',
+        description: 'Recognises buyers committed to sustainable choices',
         criteria: 'Earned by purchasing 10+ products each month for 6 consecutive months'
       }
     ],

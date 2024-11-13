@@ -273,7 +273,7 @@ export const BuyerNavMenu: React.FC<BuyerNavMenuProps> = ({
               )}
             </div>
             <Link to="/buyer/cart">
-              <Button variant="secondary" className="relative">
+              <Button variant="secondary" className="button-green relative">
                 <ShoppingCartOutlinedIcon className="mr-2 h-4 w-4" />
                 Cart
                 {cartQuantity > 0 && (

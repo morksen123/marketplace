@@ -313,7 +313,7 @@ export const Profile: React.FC = () => {
 
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-48">
+                      <Button variant="outline" className="button-green" size="sm" className="w-48">
                         <Share className="h-4 w-4 mr-2" />
                         Share Referral Code
                       </Button>
@@ -334,6 +334,7 @@ export const Profile: React.FC = () => {
                           />
                           <Button
                             variant="secondary"
+                            className="button-green"
                             size="icon"
                             onClick={() => {
                               navigator.clipboard.writeText(profile.referralCode || '');
@@ -357,6 +358,7 @@ export const Profile: React.FC = () => {
                             />
                             <Button
                               variant="secondary"
+                              className="button-green"
                               size="icon"
                               onClick={() => {
                                 navigator.clipboard.writeText(referralLink);
