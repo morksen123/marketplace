@@ -250,10 +250,12 @@ export const Cart: React.FC = () => {
                     <span className="text-secondary mr-2">
                       ${calculatedTotal.toFixed(2)}
                     </span>
-                    <span className="flex items-center text-orange-500 text-sm">
-                      <Tag className="h-3 w-3 mr-1" />
-                      Sitewide Promotion (-${(cartPrice - calculatedTotal).toFixed(2)})
-                    </span>
+                    {Number((cartPrice - calculatedTotal).toFixed(2)) > 0 && (
+                      <span className="flex items-center text-orange-500 text-sm">
+                        <Tag className="h-3 w-3 mr-1" />
+                        Sitewide Promotion (-${(cartPrice - calculatedTotal).toFixed(2)})
+                      </span>
+                    )}
                   </>
                 ) : (
                   <span>${cartPrice.toFixed(2)}</span>
@@ -268,7 +270,7 @@ export const Cart: React.FC = () => {
               )}
             </div>
             <Link to="/buyer/checkout">
-              <Button variant="secondary" size="lg">
+              <Button variant="secondary" className="button-green" size="lg">
                 Proceed to Checkout
               </Button>
             </Link>

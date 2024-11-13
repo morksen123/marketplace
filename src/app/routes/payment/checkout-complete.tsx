@@ -249,7 +249,7 @@ export const CheckoutComplete: React.FC = () => {
                         <div className="flex flex-col items-center text-center">
                           <img src={food} alt="Food" className="w-8 h-8 mb-2" />
                           <h3 className="text-gray-600 text-sm font-bold">Food Rescued</h3>
-                          <p className="text-2xl font-bold text-emerald-600 mt-1">
+                          <p className="text-2xl font-bold text-green-500 mt-1">
                             {impactMetrics.weightSaved.toFixed(1)} kg
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
@@ -266,7 +266,7 @@ export const CheckoutComplete: React.FC = () => {
                         <div className="flex flex-col items-center text-center">
                           <img src={co2} alt="CO2" className="w-8 h-8 mb-2" />
                           <h3 className="text-gray-600 text-sm font-bold">Carbon Impact</h3>
-                          <p className="text-2xl font-bold text-emerald-600 mt-1">
+                          <p className="text-2xl font-bold text-green-500 mt-1">
                             {impactMetrics.co2Prevented.toFixed(1)} kg
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
@@ -283,7 +283,7 @@ export const CheckoutComplete: React.FC = () => {
                         <div className="flex flex-col items-center text-center">
                           <img src={electricity} alt="Electricity" className="w-8 h-8 mb-2" />
                           <h3 className="text-gray-600 text-sm font-bold">Energy Impact</h3>
-                          <p className="text-2xl font-bold text-emerald-600 mt-1">
+                          <p className="text-2xl font-bold text-green-500 mt-1">
                             {impactMetrics?.electricityDaysSaved.toFixed(1)} days
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
@@ -300,7 +300,7 @@ export const CheckoutComplete: React.FC = () => {
                         <div className="flex flex-col items-center text-center">
                           <img src={water} alt="Water" className="w-8 h-8 mb-2" />
                           <h3 className="text-gray-600 text-sm font-bold">Water Saved</h3>
-                          <p className="text-2xl font-bold text-emerald-600 mt-1">
+                          <p className="text-2xl font-bold text-green-500 mt-1">
                             {impactMetrics.waterLitresSaved >= 1000000000000
                               ? `${(impactMetrics.waterLitresSaved / 1000000000000).toFixed(1)} tril`
                               : impactMetrics.waterLitresSaved >= 1000000000
@@ -328,6 +328,7 @@ export const CheckoutComplete: React.FC = () => {
                   </Button>
                   <Button
                     variant="secondary"
+                    className="button-green"
                     onClick={() => navigate('/buyer/transactions')}
                     disabled={status === 'processing'}
                   >
