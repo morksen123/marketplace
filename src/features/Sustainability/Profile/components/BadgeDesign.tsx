@@ -3,6 +3,8 @@ import { Calendar } from 'lucide-react';
 import SustainabilityIcon from '@/assets/forest.png';
 import LeaderboardIcon from '@/assets/podium.png';
 import QualityIcon from '@/assets/rating.png';
+import { BadgeDialog } from './BadgeDialog';
+import { useState } from 'react';
 
 interface BadgeDesignProps {
   badgeId: number;
@@ -21,6 +23,12 @@ export const BadgeDesign: React.FC<BadgeDesignProps> = ({
   earnedOn,
   category,
 }) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleBadgeClick = () => {
+    setIsDialogOpen(true);
+  };
+
   const getBadgeIcon = () => {
     switch (category) {
       case 'SUSTAINABILITY':
@@ -58,52 +66,68 @@ export const BadgeDesign: React.FC<BadgeDesignProps> = ({
   };
 
   return (
-    <motion.div
-      className="relative group"
-      whileHover={{ scale: 1.05 }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className={`
-        w-64 h-36 
-        rounded-lg 
-        bg-gradient-to-br ${getBadgeGradient()}
-        shadow-md 
-        hover:shadow-lg 
-        transition-all 
-        duration-300
-        flex flex-col 
-        items-center 
-        justify-center 
-        p-4
-        relative
-        overflow-hidden
-      `}>
-        {/* New Ribbon */}
-        {isRecentlyEarned() && (
-          <div className="absolute -right-8 top-6 rotate-45 bg-red-500 text-white px-12 py-1 text-xs font-semibold shadow-md text-center">
-            New!
+    <>
+      <motion.div
+        className="relative group cursor-pointer"
+        whileHover={{ scale: 1.05 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        onClick={handleBadgeClick}
+      >
+        <div className={`
+          w-64 h-36 
+          rounded-lg 
+          bg-gradient-to-br ${getBadgeGradient()}
+          shadow-md 
+          hover:shadow-lg 
+          transition-all 
+          duration-300
+          flex flex-col 
+          items-center 
+          justify-center 
+          p-4
+          relative
+          overflow-hidden
+        `}>
+          {/* New Ribbon */}
+          {isRecentlyEarned() && (
+            <div className="absolute -right-8 top-6 rotate-45 bg-red-500 text-white px-12 py-1 text-xs font-semibold shadow-md text-center">
+              New!
+            </div>
+          )}
+          
+          {/* Badge Icon */}
+          <div className="mb-3 transform transition-transform duration-300 group-hover:scale-110">
+            {getBadgeIcon()}
           </div>
-        )}
-        
-        {/* Badge Icon */}
-        <div className="mb-3 transform transition-transform duration-300 group-hover:scale-110">
-          {getBadgeIcon()}
-        </div>
 
-        {/* Badge Title */}
-        <h3 className="font-bold text-sm text-center mb-1">{title}</h3>
-        
-        {/* Badge Subtitle */}
-        <p className="text-xs text-center text-gray-600 mb-1">{criteria}</p>
+          {/* Badge Title */}
+          <h3 className="font-bold text-sm text-center mb-1">{title}</h3>
+          
+          {/* Badge Subtitle */}
+          <p className="text-xs text-center text-gray-600 mb-1">{criteria}</p>
 
-        {/* Earned Date */}
-        <div className="flex items-center text-xs text-gray-500">
-          <Calendar className="h-3 w-3 mr-1" />
-          {new Date(earnedOn).toLocaleDateString()}
+          {/* Earned Date */}
+          <div className="flex items-center text-xs text-gray-500">
+            <Calendar className="h-3 w-3 mr-1" />
+            {new Date(earnedOn).toLocaleDateString()}
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+
+      <BadgeDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        badge={{
+          badgeId,
+          title,
+          subtitle,
+          criteria,
+          earnedOn,
+          category,
+        }}
+      />
+    </>
   );
 }; 

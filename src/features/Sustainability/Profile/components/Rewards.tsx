@@ -13,6 +13,7 @@ interface RewardConfiguration {
 
 interface Profile {
   savedPoints: number;
+  activeVoucherCount: number;
 }
 
 interface RewardsProps {
@@ -59,7 +60,7 @@ export const Rewards: React.FC<RewardsProps> = ({ onClose }) => {
 
   const handleRedeemVouchers = async () => {
     if (!profile || !rewardConfig) return;
-    
+
     setIsRedeeming(true);
     try {
       const response = await fetch(`/api/buyer/redeem-voucher?quantity=${selectedVouchers}`, {
@@ -79,10 +80,10 @@ export const Rewards: React.FC<RewardsProps> = ({ onClose }) => {
       }
 
       handleSuccessApi('Success', `Successfully redeemed ${selectedVouchers} voucher${selectedVouchers > 1 ? 's' : ''}`);
-      
+
       // Refresh the entire page
       window.location.reload();
-      
+
     } catch (error) {
       console.error('Error redeeming vouchers:', error);
       handleErrorApi('Error', 'Failed to redeem vouchers');
@@ -93,8 +94,8 @@ export const Rewards: React.FC<RewardsProps> = ({ onClose }) => {
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.6 }
     }
@@ -109,12 +110,12 @@ export const Rewards: React.FC<RewardsProps> = ({ onClose }) => {
   }
 
   const maxVouchers = Math.floor(profile.savedPoints / rewardConfig.voucherPointsCost);
-  const pointsNeededForNext = maxVouchers === 0 
+  const pointsNeededForNext = maxVouchers === 0
     ? rewardConfig.voucherPointsCost - profile.savedPoints
     : rewardConfig.voucherPointsCost - (profile.savedPoints % rewardConfig.voucherPointsCost);
 
   return (
-    <motion.div 
+    <motion.div
       className="p-6"
       initial="hidden"
       animate="visible"
@@ -129,7 +130,7 @@ export const Rewards: React.FC<RewardsProps> = ({ onClose }) => {
         <Card className="bg-gradient-to-br from-blue-50 via-green-50 to-emerald-50 relative overflow-hidden">
           <CardContent className="p-8">
             <div className="flex flex-col items-center text-center">
-              <motion.div 
+              <motion.div
                 className="mb-8 relative"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300 }}
@@ -145,7 +146,7 @@ export const Rewards: React.FC<RewardsProps> = ({ onClose }) => {
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
                   Redeem Now
                 </div>
-                
+
                 <div className="mt-4">
                   <h4 className="font-semibold text-lg mb-4">Store Credit Vouchers</h4>
                   <p className="text-gray-600 mb-6">
@@ -174,7 +175,7 @@ export const Rewards: React.FC<RewardsProps> = ({ onClose }) => {
                     </Button>
                   </div>
 
-                  <Button 
+                  <Button
                     className="w-full bg-green-500 hover:bg-green-600 text-white"
                     disabled={maxVouchers === 0 || isRedeeming}
                     onClick={handleRedeemVouchers}
@@ -194,6 +195,15 @@ export const Rewards: React.FC<RewardsProps> = ({ onClose }) => {
                 </div>
               </div>
 
+              <motion.p
+                className="text-base text-black mt-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                You have <span className="text-green-500 font-bold">{profile.activeVoucherCount}</span> voucher(s) available
+              </motion.p>
+
               <AnimatePresence>
                 {maxVouchers === 0 ? (
                   <motion.div
@@ -211,7 +221,7 @@ export const Rewards: React.FC<RewardsProps> = ({ onClose }) => {
                     </Alert>
                   </motion.div>
                 ) : (
-                  <motion.p 
+                  <motion.p
                     className="text-sm text-gray-600 mt-6"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
