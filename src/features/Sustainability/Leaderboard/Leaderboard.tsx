@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Medal, Sparkles, Trophy, Leaf, Star, BarChart, TreeDeciduous, Droplets, Battery, Recycle, Info, TrendingUp, Calendar } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Medal, Trophy, Star, ShoppingCart, Users, Calendar } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { BuyerInformation } from './components/BuyerInformation';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Link } from 'react-router-dom';
+import { useCart } from '@/features/Cart/hooks/useCart';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { LinearProgress, Box, Typography } from '@mui/material';
+import { Input } from '@/components/ui/input';
+import { Copy } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface User {
   id: number;
@@ -22,35 +25,150 @@ interface User {
   treesPlanted: number;
   sustainabilityStreak: number;
   lastActive: string;
+  referralCount: number;
+  weightOfFoodSaved: number;
+  profilePic: string;
+}
+
+interface BuyerDTO {
+  id: number;
+  email: string;
+  points: number;
+  firstName: string;
+  lastName: string;
 }
 
 export const Leaderboard = () => {
-  const [hoveredUser, setHoveredUser] = useState<number | null>(null);
-
-  // Sample data - replace with your actual data source
-  const users: User[] = [
-    { id: 1, name: "John Doe", points: 1500, wasteReduced: 250, rank: 1, carbonSaved: 100, waterSaved: 50, energySaved: 75, treesPlanted: 5, sustainabilityStreak: 7, lastActive: "2023-01-01" },
-    { id: 2, name: "Jane Smith", points: 1200, wasteReduced: 200, rank: 2, carbonSaved: 90, waterSaved: 45, energySaved: 70, treesPlanted: 4, sustainabilityStreak: 6, lastActive: "2023-01-02" },
-    { id: 3, name: "Bob Johnson", points: 1000, wasteReduced: 180, rank: 3, carbonSaved: 80, waterSaved: 40, energySaved: 65, treesPlanted: 3, sustainabilityStreak: 5, lastActive: "2023-01-03" },
-    { id: 4, name: "Alice Brown", points: 800, wasteReduced: 150, rank: 4, carbonSaved: 70, waterSaved: 35, energySaved: 60, treesPlanted: 2, sustainabilityStreak: 4, lastActive: "2023-01-04" },
-    { id: 5, name: "Charlie Wilson", points: 750, wasteReduced: 140, rank: 5, carbonSaved: 65, waterSaved: 30, energySaved: 55, treesPlanted: 1, sustainabilityStreak: 3, lastActive: "2023-01-05" },
-    { id: 6, name: "Eva Martinez", points: 700, wasteReduced: 130, rank: 6, carbonSaved: 60, waterSaved: 25, energySaved: 50, treesPlanted: 0, sustainabilityStreak: 2, lastActive: "2023-01-06" },
-    { id: 7, name: "David Lee", points: 650, wasteReduced: 120, rank: 7, carbonSaved: 55, waterSaved: 20, energySaved: 45, treesPlanted: 0, sustainabilityStreak: 1, lastActive: "2023-01-07" },
-    { id: 8, name: "Sarah Taylor", points: 600, wasteReduced: 110, rank: 8, carbonSaved: 50, waterSaved: 15, energySaved: 40, treesPlanted: 0, sustainabilityStreak: 0, lastActive: "2023-01-08" },
-  ];
-
-  // Split users into top 3 and others
-  const topThree = users.slice(0, 3);
-  const otherUsers = users.slice(3);
-
-  const shootConfetti = () => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<BuyerDTO | null>(null);
+  const [referralLink, setReferralLink] = useState<string | null>(null);
+  const { cart } = useCart();
+  const [daysUntilReset, setDaysUntilReset] = useState<number>(0);
+  const [referralPoints, setReferralPoints] = useState<number>(0);
+  const calculateDaysUntilReset = () => {
+    const today = new Date();
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const diffTime = Math.abs(lastDay.getTime() - today.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   };
 
+  useEffect(() => {
+    setDaysUntilReset(calculateDaysUntilReset());
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [leaderboardResponse, profileResponse, pointsAllocationResponse] = await Promise.all([
+          fetch('/api/buyer/leaderboard', {
+            credentials: 'include'
+          }),
+          fetch('/api/buyer/profile', {
+            credentials: 'include'
+          }),
+          fetch('/api/points-allocation', {
+            credentials: 'include'
+          })
+        ]);
+
+        if (!leaderboardResponse.ok || !profileResponse.ok) {
+          throw new Error('Failed to fetch data');
+        }
+
+        const leaderboardData = await leaderboardResponse.json();
+        const profileData = await profileResponse.json();
+        const pointsAllocationData = await pointsAllocationResponse.json();
+        setReferralPoints(pointsAllocationData.referralPoints);
+        setUsers(leaderboardData);
+        setCurrentUser(profileData)
+      } catch (err) {
+        setError('Failed to fetch data');
+        console.error('Error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchReferralLink = async () => {
+      try {
+        const response = await fetch('/api/buyer/referral-link', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch referral link');
+        }
+
+        const data = await response.json();
+        setReferralLink(data.referralLink);
+      } catch (error) {
+        console.error('Error fetching referral link:', error);
+        throw error;
+      }
+    };
+    fetchData();
+    fetchReferralLink();
+  }, []);
+
+  const getOrdinalSuffix = (i: number) => {
+    const j = i % 10;
+    const k = i % 100;
+    if (j === 1 && k !== 11) return "st";
+    if (j === 2 && k !== 12) return "nd";
+    if (j === 3 && k !== 13) return "rd";
+    return "th";
+  };
+
+  const getLeaderboardMessage = () => {
+    if (!currentUser || !users.length) return null;
+
+    // Find current user's position in the leaderboard
+    const userPosition = users.findIndex(user => user.email === currentUser.email);
+
+    // If user is not in top 10
+    if (userPosition === -1) {
+      const pointsNeeded = users[users.length - 1].points - currentUser.points;
+      if (pointsNeeded <= 0) {
+        return {
+          message: "Keep earning points to climb up the leaderboard!",
+          type: 'info'
+        };
+      }
+      return {
+        message: `You need ${pointsNeeded.toLocaleString()} more points to appear on the leaderboard!`,
+        type: 'info'
+      };
+    }
+
+    // If user is in top 10 but not first
+    if (userPosition > 0) {
+      const pointsNeeded = users[userPosition - 1].points - currentUser.points;
+      const nextUser = users[userPosition - 1];
+      return {
+        message: `You're in ${userPosition + 1}${getOrdinalSuffix(userPosition + 1)} place! ${pointsNeeded.toLocaleString()} more points to overtake ${nextUser.name}!`,
+        type: 'success'
+      };
+    }
+
+    // If user is first
+    return {
+      message: "You're leading the leaderboard! Continue purchasing to maintain your position!",
+      type: 'success'
+    };
+  };
+
+  // Split users into top 3 and next 10 users (total of 13)
+  const topThree = users.slice(0, 3);
+  const nextTen = users.slice(3, 10);
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -116,8 +234,8 @@ export const Leaderboard = () => {
   // Add this with the other animation variants
   const tableRowVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
       transition: {
         type: "spring",
@@ -126,365 +244,437 @@ export const Leaderboard = () => {
     }
   };
 
-  // Add community impact stats
-  const communityStats = {
-    totalWasteReduced: users.reduce((acc, user) => acc + user.wasteReduced, 0),
-    totalCarbonSaved: users.reduce((acc, user) => acc + user.carbonSaved, 0),
-    totalWaterSaved: users.reduce((acc, user) => acc + user.waterSaved, 0),
-    totalTreesPlanted: users.reduce((acc, user) => acc + user.treesPlanted, 0),
+  const handleUserClick = (user: User) => {
+    setSelectedUser(user);
   };
 
-  // Add this section before the leaderboard
-  const CommunityImpactSection = () => (
-    <motion.div 
-      className="mb-12"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-    >
-      <h2 className="text-2xl font-bold mb-6 text-center">Our Community Impact</h2>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <motion.div 
-              className="flex items-center justify-center flex-col"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Recycle className="h-8 w-8 text-green-500 mb-2" />
-              <p className="text-2xl font-bold text-green-600">{communityStats.totalWasteReduced}kg</p>
-              <p className="text-sm text-gray-600">Waste Reduced</p>
-            </motion.div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <motion.div 
-              className="flex items-center justify-center flex-col"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Battery className="h-8 w-8 text-yellow-500 mb-2" />
-              <p className="text-2xl font-bold text-yellow-600">{communityStats.totalCarbonSaved}kg</p>
-              <p className="text-sm text-gray-600">Carbon Saved</p>
-            </motion.div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <motion.div 
-              className="flex items-center justify-center flex-col"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Droplets className="h-8 w-8 text-blue-500 mb-2" />
-              <p className="text-2xl font-bold text-blue-600">{communityStats.totalWaterSaved}L</p>
-              <p className="text-sm text-gray-600">Water Saved</p>
-            </motion.div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <motion.div 
-              className="flex items-center justify-center flex-col"
-              whileHover={{ scale: 1.05 }}
-            >
-              <TreeDeciduous className="h-8 w-8 text-emerald-500 mb-2" />
-              <p className="text-2xl font-bold text-emerald-600">{communityStats.totalTreesPlanted}</p>
-              <p className="text-sm text-gray-600">Trees Planted</p>
-            </motion.div>
-          </CardContent>
-        </Card>
+  // Add loading and error states to the return
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500" />
       </div>
-    </motion.div>
-  );
+    );
+  }
 
-  // Add this section after the leaderboard
-  const SustainabilityTipsSection = () => (
-    <motion.div 
-      className="mt-12"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
-    >
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Info className="h-5 w-5" />
-            Sustainability Tips & Challenges
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="weekly">
-            <TabsList className="mb-4">
-              <TabsTrigger value="weekly">Weekly Challenge</TabsTrigger>
-              <TabsTrigger value="tips">Daily Tips</TabsTrigger>
-              <TabsTrigger value="achievements">Achievements</TabsTrigger>
-            </TabsList>
-            <TabsContent value="weekly">
-              <div className="space-y-4">
-                <h3 className="font-semibold">Current Challenge: Reduce Plastic Usage</h3>
-                
-                {/* MUI Progress Bar */}
-                <Box sx={{ width: '100%', mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Box sx={{ width: '100%', mr: 1 }}>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={65} 
-                        sx={{
-                          height: 8,
-                          borderRadius: 5,
-                          backgroundColor: 'rgba(0,0,0,0.1)',
-                          '& .MuiLinearProgress-bar': {
-                            backgroundColor: '#22c55e', // green-500
-                            borderRadius: 5,
-                          }
-                        }}
-                      />
-                    </Box>
-                    <Box sx={{ minWidth: 35 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        65%
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
-
-                <p className="text-sm text-gray-600">Community Progress</p>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm">
-                    Join Challenge
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    Learn More
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="tips">
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                  Use reusable bags for grocery shopping
-                </li>
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                  Turn off lights when leaving a room
-                </li>
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                  Use a reusable water bottle
-                </li>
-              </ul>
-            </TabsContent>
-            <TabsContent value="achievements">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Add achievement badges here */}
-                <motion.div 
-                  className="text-center p-4 rounded-lg border"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <TreeDeciduous className="h-8 w-8 mx-auto text-green-500 mb-2" />
-                  <p className="font-semibold">Tree Hugger</p>
-                  <p className="text-xs text-gray-600">Plant 5 trees</p>
-                </motion.div>
-                {/* Add more achievements */}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
+  if (error) {
+    return (
+      <div className="text-center text-red-500 p-4">
+        <p>{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 text-sm text-gray-600 hover:text-gray-800"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <motion.div 
-      className="container mx-auto px-4 py-8"
+    <motion.div
+      className="w-full min-h-screen text-white"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-      <motion.div 
-        className="text-center mb-12"
+      <motion.div
+        className="w-full py-3"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
       >
-        <motion.h1 
-          className="text-4xl font-bold mb-2"
-          animate={{ scale: [1, 1.02, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          🌍 Sustainability Champions 🌱
-        </motion.h1>
-        <p className="text-gray-600">Making the world greener, one step at a time</p>
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div
+            className="flex items-center justify-center gap-3"
+            whileHover={{ scale: 1.01 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <Calendar className="h-5 w-5 text-green-400" />
+            <p className="text-center text-sm">
+              <span className="text-gray-800 mr-2">Monthly leaderboard resets in</span>
+              <span className="font-bold bg-green-500 bg-clip-text text-transparent">
+                {daysUntilReset} {daysUntilReset === 1 ? 'day' : 'days'}
+              </span>
+            </p>
+          </motion.div>
+        </div>
       </motion.div>
 
-      {/* Top 3 Section */}
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
-        variants={containerVariants}
-      >
-        {/* Reorder the top three into 2-1-3 layout */}
-        {[topThree[1], topThree[0], topThree[2]].map((user, index) => {
-          // Calculate visual order for animations
-          const visualOrder = index === 1 ? 0 : index === 0 ? 1 : 2;
-          
-          return (
+      {/* Full-width Status Message */}
+      {getLeaderboardMessage() && (
+        <motion.div className="w-full">
+          <Alert
+            variant={getLeaderboardMessage()?.type === 'success' ? 'success' : 'info'}
+            className="border-none shadow-lg bg-gradient-to-r from-green-400/90 to-blue-500/90 backdrop-blur-sm text-white py-6"
+          >
             <motion.div
-              key={user.id}
-              variants={cardVariants}
-              whileHover={{ 
-                scale: 1.05,
-                transition: { type: "spring", stiffness: 300 }
-              }}
-              onHoverStart={() => {
-                setHoveredUser(user.id);
-                if (user.rank === 1) shootConfetti();
-              }}
-              onHoverEnd={() => setHoveredUser(null)}
-              className={`${index === 1 ? 'md:mt-0' : 'md:mt-12'}`} // Add margin to side pedestals
+              className="flex flex-col items-center justify-center gap-3 w-full"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <Card className={`relative overflow-hidden ${getGradientByRank(user.rank)} hover:shadow-xl transition-all duration-300`}>
-                <motion.div 
-                  className="absolute top-0 right-0 p-2"
-                  animate={floatingAnimation}
-                >
-                  {renderMedalIcon(user.rank)}
-                  {user.rank === 1 && hoveredUser === user.id && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="absolute top-0 right-0 left-0 bottom-0"
-                    >
-                      {[...Array(3)].map((_, i) => (
-                        <motion.div
-                          key={i}
-                          animate={{
-                            opacity: [0, 1, 0],
-                            scale: [0.8, 1.2, 0.8],
-                            rotate: [0, 360],
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            delay: i * 0.2,
-                          }}
-                        >
-                          <Sparkles className="text-yellow-400 absolute" size={16} />
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </motion.div>
-                <CardHeader className="text-center">
-                  <CardTitle className={`text-3xl font-bold ${index === 1 ? 'text-4xl' : ''}`}>#{user.rank}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <motion.h3 
-                    className={`font-semibold mb-4 ${index === 1 ? 'text-2xl' : 'text-xl'}`}
-                    animate={hoveredUser === user.id ? { scale: 1.1 } : { scale: 1 }}
+              <AlertDescription className="flex flex-col items-center gap-3 text-center">
+                <span className="text-xl font-medium">
+                  {getLeaderboardMessage()?.message.split('!')[0]}!
+                </span>
+                {getLeaderboardMessage()?.message.includes('overtake') && (
+                  <motion.div
+                    className="bg-white/20 px-6 py-2 rounded-full"
+                    initial={{ scale: 1 }}
+                    animate={{
+                      scale: [1, 1.05, 1],
+                      boxShadow: [
+                        "0 0 0 0 rgba(255,255,255,0.4)",
+                        "0 0 0 10px rgba(255,255,255,0)",
+                        "0 0 0 0 rgba(255,255,255,0)"
+                      ]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
                   >
-                    {user.name}
-                  </motion.h3>
-                  <motion.div className="space-y-3">
-                    <motion.div whileHover={{ scale: 1.1 }}>
-                      <Badge className={`
-                        bg-green-500 text-white hover:bg-green-600 
-                        transition-colors duration-300 
-                        ${index === 1 ? 'text-xl px-6 py-2' : 'text-lg px-4 py-1'}
-                      `}>
-                        {user.points} Points
-                      </Badge>
-                    </motion.div>
-                    <motion.div 
-                      className="flex items-center justify-center gap-2 text-sm text-gray-600"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <Leaf className="text-green-500" size={16} />
-                      <span>{user.wasteReduced}kg waste reduced</span>
-                    </motion.div>
+                    <span className="text-lg font-bold">
+                      {getLeaderboardMessage()?.message.split('!')[1]}
+                    </span>
                   </motion.div>
+                )}
+              </AlertDescription>
+            </motion.div>
+          </Alert>
+        </motion.div>
+      )}
+
+      {/* Main Content Area */}
+      <div className="w-full bg-white rounded-t-[2.5rem] min-h-screen">
+        <div className="max-w-7xl mx-auto px-2 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Leaderboard Section - Left Side */}
+            <div className="lg:col-span-2">
+              <Card className="overflow-hidden shadow-lg border-none">
+                <CardHeader className="border-b border-gray-100 bg-gray-50">
+                  <CardTitle className="text-xl font-bold text-gray-800">
+                    Top Players
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {/* Top 3 Podium */}
+                  <div className="pt-16 pb-0 px-8">
+                    <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto">
+                      {/* 2nd Place */}
+                      <div className="flex flex-col items-center">
+                        <p className="text-black font-bold text-xl mb-1">{topThree[1]?.name}</p>
+                        <motion.div
+                          className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-white mb-8"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <img
+                            src={topThree[1]?.profilePic}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onClick={() => handleUserClick(topThree[1])}
+                          />
+                        </motion.div>
+                        <div className="relative w-full">
+                          <p className="text-black text-l font-bold mb-2">{topThree[1]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[1]?.weightOfFoodSaved || 0} kg</p>
+                          <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[1]?.referralCount || 0}</p>
+                          <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
+                          <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-16 rounded-t-lg flex items-center justify-center">
+                            <span className="text-3xl font-bold text-white">2</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 1st Place */}
+                      <div className="flex flex-col items-center -mt-8">
+                        <p className="text-black font-bold text-xl mb-1">{topThree[0]?.name}</p>
+                        <motion.div
+                          className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-white mb-8"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <img
+                            src={topThree[0]?.profilePic}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onClick={() => handleUserClick(topThree[0])}
+                          />
+                        </motion.div>
+                        <div className="relative w-full">
+                          <p className="text-black text-l font-bold mb-2">{topThree[0]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[0]?.weightOfFoodSaved || 0} kg</p>
+                          <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[0]?.referralCount || 0}</p>
+                          <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
+                          <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-20 rounded-t-lg flex items-center justify-center">
+                            <span className="text-4xl font-bold text-white">1</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 3rd Place */}
+                      <div className="flex flex-col items-center">
+                        <p className="text-black font-bold text-xl mb-1">{topThree[2]?.name}</p>
+
+                        <motion.div
+                          className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-white mb-8"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <img
+                            src={topThree[2]?.profilePic}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onClick={() => handleUserClick(topThree[2])}
+                          />
+                        </motion.div>
+                        <div className="relative w-full">
+                          <p className="text-black text-l font-bold mb-2 mt-1">{topThree[2]?.points?.toLocaleString() || 0} points</p>
+                          <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[2]?.weightOfFoodSaved || 0} kg</p>
+                          <p className="text-black/80 text-sm mb-4">Referrals Made: {topThree[2]?.referralCount || 0}</p>
+                          <div className="absolute inset-x-0 bottom-0 h-15 bg-[#3651C0]/20 rounded-t-lg" />
+                          <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-14 rounded-t-lg flex items-center justify-center">
+                            <span className="text-3xl font-bold text-white">3</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Leaderboard Table */}
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-16">Rank</TableHead>
+                        <TableHead>Buyer</TableHead>
+                        <TableHead className="text-right">Points</TableHead>
+                        <TableHead className="text-right hidden md:table-cell">Food Saved</TableHead>
+                        <TableHead className="text-right hidden md:table-cell">Referrals</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {nextTen.map((user, index) => (
+                        <TableRow
+                          key={user.id}
+                          onClick={() => handleUserClick(user)}
+                          className="cursor-pointer hover:bg-gray-50"
+                        >
+                          <TableCell className="font-medium">{index + 4}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full overflow-hidden">
+                                <img src={user.profilePic} alt="" className="w-full h-full object-cover" />
+                              </div>
+                              <div className="font-medium">{user.name}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-semibold">
+                            {user.points.toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-right hidden md:table-cell">
+                            {user.weightOfFoodSaved.toLocaleString()}kg
+                          </TableCell>
+                          <TableCell className="text-right hidden md:table-cell">
+                            {user.referralCount}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </CardContent>
               </Card>
-            </motion.div>
-          );
-        })}
-      </motion.div>
+            </div>
 
-      {/* Other Users Table */}
-      <motion.div
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <Card className="overflow-hidden shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl">Other Environmental Heroes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Rank</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Points</TableHead>
-                  <TableHead>Impact</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {otherUsers.map((user, index) => (
-                  <motion.tr
-                    key={user.id}
-                    variants={tableRowVariants}
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ 
-                      scale: 1.02,
-                      backgroundColor: "rgba(0,0,0,0.02)",
-                    }}
-                    className="cursor-pointer"
+            {/* Stats Section - Right Side */}
+            <div className="lg:col-span-1 space-y-8">
+              {/* Personal Stats Card */}
+              <Card className="shadow-lg border-none">
+                <CardHeader className="border-b border-gray-100 bg-gray-50">
+                  <CardTitle className="text-xl font-bold text-gray-800">
+                    Your Statistics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="max-w-7xl mx-auto mb-6 px-4">
+                      <p className="text-center text-sm">
+                        <span className="text-gray-800 mr-2">Keep climbing the leaderboard! Earn badges to unlock bonus points and rewards.</span>
+                      </p>
+                  </div>
+                  {currentUser ? (
+                    <div className="space-y-6">
+                      {/* Profile Summary */}
+                      <div className="text-center">
+                        <div className="relative">
+                          <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+                            <img
+                              src={users.find(u => u.buyerId === currentUser.buyerId)?.profilePic || 'default-avatar.png'}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="absolute -top-2 -right-2 bg-[#4263EB] text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                            {users.findIndex(u => u.buyerId === currentUser.buyerId) === -1
+                              ? 'N/A'
+                              : `${users.findIndex(u => u.buyerId === currentUser.buyerId) + 1}${getOrdinalSuffix(users.findIndex(u => u.buyerId === currentUser.buyerId) + 1)}`}
+                          </div>
+                        </div>
+                        <h3 className="font-bold text-lg">{currentUser.firstName} {currentUser.lastName}</h3>
+                        <p className="text-gray-600">{currentUser.points.toLocaleString()} points</p>
+                      </div>
+
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-gray-50 rounded-lg p-4 text-center">
+                          <h4 className="text-gray-600 text-sm">Food Saved</h4>
+                          <p className="text-xl font-bold text-green-600">
+                            {users.find(u => u.buyerId === currentUser.buyerId)?.weightOfFoodSaved.toLocaleString()} kg
+                          </p>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-4 text-center">
+                          <h4 className="text-gray-600 text-sm">Referrals</h4>
+                          <p className="text-xl font-bold text-blue-600">
+                            {users.find(u => u.buyerId === currentUser.buyerId)?.referralCount || 0}
+                          </p>
+                        </div>
+                      </div>
+
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-500">
+                      Please log in to view your statistics
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Cart Alert */}
+              {cart?.cartLineItems.length > 0 && (
+                <Alert
+                  variant="default"
+                  className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100 text-black py-6"
+                >
+                  <motion.div
+                    className="flex flex-col items-center justify-center gap-3 w-full h-full"
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   >
-                    <TableCell>
-                      <motion.div 
-                        className="flex items-center gap-2"
-                        whileHover={{ scale: 1.1 }}
+                    <AlertDescription className="flex flex-col items-center gap-3">
+                      <span className="text-xl font-medium">
+                        Complete your cart checkout to earn points!
+                      </span>
+                      <div className="flex items-center gap-2 bg-white/20 px-6 py-2 rounded-full">
+                        <ShoppingCart className="h-5 w-5" />
+                        <span className="font-bold">
+                          {cart?.cartLineItems.reduce((total, item) => total + item.quantity, 0)} {cart?.cartLineItems.reduce((total, item) => total + item.quantity, 0) === 1 ? 'item' : 'items'} in cart
+                        </span>
+                      </div>
+                      <Link
+                        to="/buyer/cart"
+                        className="mt-2 bg-white text-indigo-500 hover:bg-purple-50 font-bold px-8 py-3 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                       >
-                        <Star className="text-gray-400" size={16} />
-                        #{user.rank}
-                      </motion.div>
-                    </TableCell>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>
-                      <motion.div whileHover={{ scale: 1.1 }}>
-                        <Badge 
-                          variant="secondary"
-                          className="transition-all duration-300 hover:bg-green-100"
-                        >
-                          {user.points} Points
-                        </Badge>
-                      </motion.div>
-                    </TableCell>
-                    <TableCell>
-                      <motion.div 
-                        className="flex items-center gap-2"
-                        whileHover={{ scale: 1.1 }}
-                      >
-                        <Leaf className="text-green-500" size={16} />
-                        {user.wasteReduced}kg
-                      </motion.div>
-                    </TableCell>
-                  </motion.tr>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </motion.div>
+                        Checkout Now →
+                      </Link>
+                    </AlertDescription>
+                  </motion.div>
+                </Alert>
+              )}
 
-      {/* Add Community Impact Section */}
-      <CommunityImpactSection />
+              {/* Referral Alert */}
+              <Alert
+                variant="default"
+                className="border-none shadow-lg bg-gradient-to-br from-emerald-50 to-teal-100 text-black py-6"
+              >
+                <motion.div
+                  className="flex flex-col items-center justify-center gap-3 w-full h-full"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <AlertDescription className="flex flex-col items-center gap-3">
+                    <span className="text-xl font-medium">
+                      Refer friends & earn {referralPoints} points!
+                    </span>
+                    <div className="flex items-center gap-2 bg-white/20 px-6 py-2 rounded-full">
+                      <Users className="h-5 w-5" />
+                      <span className="font-bold">
+                        Share your referral code today
+                      </span>
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="mt-2 bg-white text-teal-600 hover:bg-emerald-50 font-bold px-8 py-3 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                          Get Referral Code →
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Your Referral Code</DialogTitle>
+                          <DialogDescription>
+                            Share this code with friends and earn rewards when they sign up!
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex flex-col space-y-4">
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              readOnly
+                              value={currentUser?.referralCode || ''}
+                              className="font-mono"
+                            />
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              onClick={() => {
+                                navigator.clipboard.writeText(currentUser?.referralCode || '');
+                                toast({
+                                  title: "Success!",
+                                  description: "Referral code copied to clipboard",
+                                  duration: 2000,
+                                });
+                              }}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="flex flex-col space-y-2">
+                            <p className="text-sm text-muted-foreground">Referral Link:</p>
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                readOnly
+                                value={referralLink}
+                                className="font-mono text-xs"
+                              />
+                              <Button
+                                variant="secondary"
+                                size="icon"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(referralLink);
+                                  toast({
+                                    title: "Success!",
+                                    description: "Referral link copied to clipboard",
+                                    duration: 2000,
+                                  });
+                                }}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </AlertDescription>
+                </motion.div>
+              </Alert>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Add Sustainability Tips Section */}
-      <SustainabilityTipsSection />
+      {/* Keep existing modal */}
+      <BuyerInformation
+        user={selectedUser}
+        currentUser={currentUser}   
+        isOpen={!!selectedUser}
+        onClose={() => setSelectedUser(null)}
+      />
     </motion.div>
   );
 };

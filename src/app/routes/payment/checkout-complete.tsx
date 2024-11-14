@@ -7,7 +7,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { createTransaction } from '@/features/Cart/api/api-cart';
 import { PlatformRatingForm } from '@/features/Feedback/components/PlatformReview/PlatformRatingForm';
 import {
   useCreatePlatformRating,
@@ -15,11 +14,21 @@ import {
 } from '@/features/Feedback/hooks/usePlatformRating';
 import { CreatePlatformRatingRequest } from '@/features/Feedback/types/review-types';
 import { PaymentDetailsSkeleton } from '@/features/Payment/components/PaymentDetailsSkeleton';
+import { Skeleton } from '@/components/ui/skeleton';
+import { createTransaction, calculateCartImpact } from '@/features/Cart/api/api-cart';
 import { useStripe } from '@stripe/react-stripe-js';
 import { PaymentIntent } from '@stripe/stripe-js';
 import { CheckIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Apple, TreePine, Factory, Lightbulb, Droplets } from 'lucide-react';
+import { motion } from 'framer-motion';
+import food from '@/assets/food.png';
+import co2 from '@/assets/co2.png';
+import electricity from '@/assets/electricity.png';
+import water from '@/assets/water.png';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ImpactExplanation } from '@/features/Sustainability/Profile/components/ImpactExplanation';
 
 type Status = PaymentIntent['status'];
 
@@ -74,15 +83,88 @@ const STATUS_CONTENT_MAP: Record<
   },
 };
 
+interface ImpactMetrics {
+  weightSaved: number;
+  co2Prevented: number;
+  treesEquivalent: number;
+  electricityDaysSaved: number;
+  acNightsSaved: number;
+  mealsSaved: number;
+  waterLitresSaved: number;
+  carKmEquivalent: number;
+  showersEquivalent: number;
+}
+
+// Add these animation variants
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+    },
+  },
+};
+
+interface ImpactMetrics {
+  weightSaved: number;
+  co2Prevented: number;
+  treesEquivalent: number;
+  electricityDaysSaved: number;
+  acNightsSaved: number;
+  mealsSaved: number;
+  waterLitresSaved: number;
+  carKmEquivalent: number;
+  showersEquivalent: number;
+}
+
+// Add these animation variants
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+    },
+  },
+};
+
 export const CheckoutComplete: React.FC = () => {
   const stripe = useStripe();
   const [status, setStatus] = useState<Status | 'default'>('processing');
-  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(
-    null,
-  );
+  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null);
+  const [impactMetrics, setImpactMetrics] = useState<ImpactMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showRating, setShowRating] = useState(false);
   const navigate = useNavigate();
+  const [selectedImpact, setSelectedImpact] = useState<{
+    category: 'food' | 'water' | 'electricity' | 'carbon';
+    type: 'personal' | 'community';
+  } | null>(null);
 
   const { data: eligibility, isLoading: isEligibilityLoading } =
     usePlatformRatingEligibility();
@@ -90,9 +172,7 @@ export const CheckoutComplete: React.FC = () => {
   const createRating = useCreatePlatformRating();
 
   useEffect(() => {
-    if (!stripe) {
-      return;
-    }
+    if (!stripe) return;
 
     const clientSecret = new URLSearchParams(window.location.search).get(
       'payment_intent_client_secret',
@@ -105,18 +185,17 @@ export const CheckoutComplete: React.FC = () => {
 
     stripe
       .retrievePaymentIntent(clientSecret)
-      .then(({ paymentIntent }) => {
+      .then(async ({ paymentIntent }) => {
         if (paymentIntent) {
           setStatus(paymentIntent.status);
           setPaymentIntent(paymentIntent);
 
           if (paymentIntent.status === 'succeeded') {
+            const impact = await calculateCartImpact();
+            setImpactMetrics(impact);
             return createTransaction(paymentIntent.id);
           }
         }
-      })
-      .then(() => {
-        console.log('Payment process completed');
       })
       .catch((err) => {
         console.error('Error processing payment intent:', err);
@@ -145,21 +224,26 @@ export const CheckoutComplete: React.FC = () => {
     await createRating.mutateAsync(data);
     setShowRating(false);
     navigate('/buyer/transactions');
+  }
+  const handleImpactCardClick = (
+    category: 'food' | 'water' | 'electricity' | 'carbon',
+    type: 'personal' | 'community'
+  ) => {
+    setSelectedImpact({ category, type });
   };
 
   const statusContent = STATUS_CONTENT_MAP[status];
 
   return (
-    <div className="wrapper py-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Payment Status Card */}
-        <Card>
+    <div className="min-h-screen flex items-center justify-center py-12">
+      <div className="max-w-6xl w-full">
+        <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className={`text-center ${statusContent.color}`}>
               {statusContent.title}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <p className="text-center">{statusContent.message}</p>
             <Separator />
             {isLoading ? (
@@ -182,6 +266,110 @@ export const CheckoutComplete: React.FC = () => {
                     </div>
                   </div>
                 )}
+                {status === 'succeeded' && (
+                  <>
+                    <div className="text-center space-y-2 mb-8">
+                      <h2 className="text-2xl font-semibold text-gray-800">Thank You for Making a Difference!</h2>
+                      <p className="text-gray-600">Here's how your purchase has positively impacted the environment:</p>
+                    </div>
+                    <motion.div 
+                      variants={container} 
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-8"
+                    >
+                      {/* Food Impact Card */}
+                      <div 
+                        className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                        onClick={() => handleImpactCardClick('food', 'personal')}
+                      >
+                        <div className="flex flex-col items-center text-center">
+                          <img src={food} alt="Food" className="w-8 h-8 mb-2" />
+                          <h3 className="text-gray-600 text-sm font-bold">Food Rescued</h3>
+                          <p className="text-2xl font-bold text-green-500 mt-1">
+                            {impactMetrics.weightSaved.toFixed(1)} kg
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            🍽️ {impactMetrics.mealsSaved.toFixed(0)} meals saved
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Carbon Impact Card */}
+                      <div 
+                        className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                        onClick={() => handleImpactCardClick('carbon', 'personal')}
+                      >
+                        <div className="flex flex-col items-center text-center">
+                          <img src={co2} alt="CO2" className="w-8 h-8 mb-2" />
+                          <h3 className="text-gray-600 text-sm font-bold">Carbon Impact</h3>
+                          <p className="text-2xl font-bold text-green-500 mt-1">
+                            {impactMetrics.co2Prevented.toFixed(1)} kg
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            🚗 {impactMetrics.carKmEquivalent.toFixed(1)} km not driven
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Energy Impact Card */}
+                      <div 
+                        className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                        onClick={() => handleImpactCardClick('electricity', 'personal')}
+                      >
+                        <div className="flex flex-col items-center text-center">
+                          <img src={electricity} alt="Electricity" className="w-8 h-8 mb-2" />
+                          <h3 className="text-gray-600 text-sm font-bold">Energy Impact</h3>
+                          <p className="text-2xl font-bold text-green-500 mt-1">
+                            {impactMetrics?.electricityDaysSaved.toFixed(1)} days
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            ❄️ {impactMetrics.acNightsSaved.toFixed(1)} nights of AC
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Water Impact Card */}
+                      <div 
+                        className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                        onClick={() => handleImpactCardClick('water', 'personal')}
+                      >
+                        <div className="flex flex-col items-center text-center">
+                          <img src={water} alt="Water" className="w-8 h-8 mb-2" />
+                          <h3 className="text-gray-600 text-sm font-bold">Water Saved</h3>
+                          <p className="text-2xl font-bold text-green-500 mt-1">
+                            {impactMetrics.waterLitresSaved >= 1000000000000
+                              ? `${(impactMetrics.waterLitresSaved / 1000000000000).toFixed(1)} tril`
+                              : impactMetrics.waterLitresSaved >= 1000000000
+                              ? `${(impactMetrics.waterLitresSaved / 1000000000).toFixed(1)} bil`
+                              : impactMetrics.waterLitresSaved >= 1000000
+                              ? `${(impactMetrics.waterLitresSaved / 1000000).toFixed(1)} mil`
+                              : impactMetrics.waterLitresSaved.toFixed(0)
+                            } ℓ
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            🚿 {impactMetrics.showersEquivalent.toFixed(0)} showers
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+                <div className="flex justify-center space-x-6 mt-8">
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/buyer/home')}
+                    disabled={status === 'processing'}
+                  >
+                    Return to Home
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="button-green"
+                    onClick={() => navigate('/buyer/transactions')}
+                    disabled={status === 'processing'}
+                  >
+                    View Transactions
+                  </Button>
+                </div>
               </>
             )}
           </CardContent>
@@ -241,6 +429,16 @@ export const CheckoutComplete: React.FC = () => {
           </Card>
         )}
       </div>
+      <Dialog open={!!selectedImpact} onOpenChange={() => setSelectedImpact(null)}>
+        <DialogContent className="max-w-4xl">
+          {selectedImpact && (
+            <ImpactExplanation
+              category={selectedImpact.category}
+              type={selectedImpact.type}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

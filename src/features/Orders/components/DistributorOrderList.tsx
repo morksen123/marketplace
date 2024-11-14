@@ -192,6 +192,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
               onClick={() => handleAcceptOrder(order.orderId)} 
               variant="secondary"
               size="sm"
+              className="button-green"
               disabled={loadingStates[order.orderId]}
             >
               {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Accept'}
@@ -212,6 +213,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
             onClick={() => handleAwaitingPickup(order.orderId)} 
             variant="secondary"
             size="sm"
+            className="button-green"
             disabled={loadingStates[order.orderId]}
           >
             {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Ready for Pickup'}
@@ -221,6 +223,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
             onClick={() => handleShipOrder(order.orderId)} 
             variant="secondary"
             size="sm"
+            className="button-green"
             disabled={loadingStates[order.orderId]}
           >
             {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Ship'}
@@ -233,6 +236,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
             variant="secondary"
             size="sm"
             disabled={loadingStates[order.orderId]}
+            className="button-green"
           >
             {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Delivered'}
           </Button>
@@ -411,7 +415,8 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
             <DialogFooter>
               <Button 
                 type="submit" 
-                className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transform transition duration-200 ease-in-out hover:scale-105"
+                variant="secondary"
+                className="button-green"
               >
                 Ship Order
               </Button>

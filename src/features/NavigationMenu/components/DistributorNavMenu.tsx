@@ -15,6 +15,7 @@ import LoyaltyIcon from '@mui/icons-material/Loyalty';
 import { useAtom } from 'jotai';
 import { notificationsAtom } from '@/atoms/notificationAtoms';
 import { NotificationDropdown } from '@/features/Notifications/components/NotificationDropdown';
+import LeaderboardOutlinedIcon from '@mui/icons-material/LeaderboardOutlined';
 
 export const DistributorNavMenu = () => {
   const navigate = useNavigate();
@@ -98,6 +99,12 @@ export const DistributorNavMenu = () => {
 
           {/* Navigation Links with Icons */}
           <div className="flex items-center space-x-12 pr-6">
+          <Link
+              to="/distributor/leaderboard"
+              className="text-black hover:text-gray-600 flex items-center"
+            >
+              <LeaderboardOutlinedIcon className="mr-1" /> Leaderboard
+            </Link>
             <Link
               to="/distributor/faq"
               className="text-black hover:text-gray-600 flex items-center"
@@ -185,7 +192,7 @@ export const DistributorNavMenu = () => {
               )}
             </div>
             <Link to="/distributor/home">
-              <Button variant="secondary">
+              <Button variant="secondary" className="button-green">
                 <StoreMallDirectoryOutlinedIcon className="mr-2" /> Store
               </Button>
             </Link>

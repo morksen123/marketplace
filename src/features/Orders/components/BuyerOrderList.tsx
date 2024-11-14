@@ -115,6 +115,97 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
     if (orders) {
       setFilteredOrders(filteredOrdersMemo);
       setCurrentPage(1);
+    const indexOfLastOrder = currentPage * ordersPerPage;
+    const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+
+    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+    const [loadingStates, setLoadingStates] = useState<Record<number, boolean>>({});
+
+    const setLoading = (orderId: number, isLoading: boolean) => {
+        setLoadingStates(prev => ({ ...prev, [orderId]: isLoading }));
+    };
+
+    const handleCancelOrder = async (orderId: number) => {
+        setLoading(orderId, true);
+        try {
+            await cancelOrderMutation.mutateAsync(orderId);
+        } finally {
+            setLoading(orderId, false);
+        }
+    };
+
+    const handleCompleteOrder = async (orderId: number) => {
+        setLoading(orderId, true);
+        try {
+            await completeOrderMutation.mutateAsync(orderId);
+        } finally {
+            setLoading(orderId, false);
+        }
+    };
+
+    const getStatusBadge = (status: OrderStatus) => {
+        const statusColors: Record<OrderStatus, string> = {
+            PENDING: 'bg-yellow-100 text-yellow-800',
+            ACCEPTED: 'bg-blue-100 text-blue-800',
+            CANCELLED: 'bg-red-100 text-red-800',
+            SHIPPED: 'bg-purple-100 text-purple-800',
+            PICKUP: 'bg-orange-100 text-orange-800',
+            DELIVERED: 'bg-green-100 text-green-800',
+            COMPLETED: 'bg-gray-100 text-gray-800',
+        };
+
+        const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : status;
+
+        return <Badge className={`${statusColors[status]} font-medium`}>{displayStatus}</Badge>;
+    };
+
+    const handleFilterChange = (status: OrderStatus | 'ALL') => {
+        setActiveFilter(status);
+        setCurrentPage(1);
+    };
+
+    const handleDeliveryMethodFilterChange = (method: 'ALL' | 'DOORSTEP_DELIVERY' | 'SELF_PICK_UP') => {
+        setActiveDeliveryMethodFilter(method);
+        setCurrentPage(1);
+    };
+
+    const renderActionButtons = (order: Order) => {
+        switch (order.status) {
+            case 'PENDING':
+                return (
+                    <div className="flex space-x-2">
+                        <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            onClick={() => handleCancelOrder(order.orderId)}
+                            className="button-green"
+                            disabled={loadingStates[order.orderId]}
+                        >
+                            {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Cancel Order'}
+                        </Button>
+                    </div>
+                );
+            case 'DELIVERED':
+            case 'PICKUP':
+                return (
+                    <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        onClick={() => handleCompleteOrder(order.orderId)}
+                        className="button-green"
+                        disabled={loadingStates[order.orderId]}
+                    >
+                        {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Completed'}
+                    </Button>
+                );
+            default:
+                return null;
+        }
+    };
+
+    if (ordersQuery.isLoading) {
+        return <div className="flex justify-center items-center h-64">Loading orders...</div>;
     }
   }, [orders, searchTerm, activeFilter, filteredOrdersMemo]);
 

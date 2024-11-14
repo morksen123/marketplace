@@ -12,22 +12,20 @@ export const LandingContent = () => {
     <>
       <LandingNavBar />
       {/* Banner Section */}
-      <section className="relative flex justify-center items-center h-[1150px]">
+      <section className="relative flex justify-center items-center min-h-screen">
         <div className="w-full h-full">
           <img
             src={bannerImage}
             alt="GudFood Banner"
-            className="w-full h-full object-cover opacity-20"
+            className="fixed top-0 left-0 w-full h-full object-cover opacity-20 -z-10"
           />
-          <div className="absolute inset-0 flex justify-center items-center">
+          <div className="flex justify-center items-center min-h-screen">
             <BannerContent />
           </div>
         </div>
       </section>
 
-      {/* Content Section */}
-      <main className="wrapper">
-        {/* Our Mission */}
+  {/* <main className="wrapper">
         <section>
           <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
           <p className="text-gray-700 mb-8">
@@ -41,9 +39,7 @@ export const LandingContent = () => {
             and working together to minimize waste and support a greener future.
           </p>
 
-          {/* statistics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            {/* Greenhouse Gas Emissions */}
             <div className="p-4 bg-white rounded-lg shadow text-center">
               <img
                 src={greenhouseGasIcon}
@@ -55,7 +51,6 @@ export const LandingContent = () => {
               </h3>
             </div>
 
-            {/* Food Waste Prevented */}
             <div className="p-4 bg-white rounded-lg shadow text-center">
               <img
                 src={foodWasteIcon}
@@ -65,7 +60,6 @@ export const LandingContent = () => {
               <h3 className="text-xl font-bold">5000kg Food Waste Prevented</h3>
             </div>
 
-            {/* Users Onboard */}
             <div className="p-4 bg-white rounded-lg shadow text-center">
               <img src={usersIcon} alt="Users" className="mx-auto h-16 mb-4" />
               <h3 className="text-xl font-bold">Over 50,000 Users Onboard</h3>
@@ -76,7 +70,6 @@ export const LandingContent = () => {
         <section>
           <h2 className="text-3xl font-bold mb-4">The Problem</h2>
           <div className="flex flex-col md:flex-row">
-            {/* Left Side - Image */}
             <div className="md:w-1/2 w-full mb-4 md:mb-0">
               <img
                 src={foodDumpImage}
@@ -85,7 +78,6 @@ export const LandingContent = () => {
               />
             </div>
 
-            {/* Right Side - Text */}
             <p className="text-gray-700 sm:text-start md:w-1/2 w-full md:pl-10">
               Food waste is a significant and persistent challenge in Singapore,
               especially at the distributor level. Daily, central warehouses of
@@ -102,7 +94,7 @@ export const LandingContent = () => {
             </p>
           </div>
         </section>
-      </main>
+      </main>     */}
     </>
   );
 };
