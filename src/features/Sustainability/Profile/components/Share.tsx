@@ -53,14 +53,24 @@ const fetchReferralLink = async () => {
   }
 };
 
+const fetchData = async () => {
+  const response = await fetch('/api/points-allocation', {
+    credentials: 'include'
+  });
+  const data = await response.json();
+  return data;
+};
+
 export const ShareDialog: React.FC<ShareDialogProps> = ({ isOpen, onClose, impactMetrics }) => {
   const [referralLink, setReferralLink] = useState('');
   const { toast } = useToast();
+  const [pointsAllocation, setPointsAllocation] = useState<PointsAllocation | null>(null);
   const [isCopying, setIsCopying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchReferralLink().then(setReferralLink);
+    fetchData().then(setPointsAllocation);
   }, []);
 
   const shareText = `Join me in my journey with GudFood and create an impact on the world! Sign up here: ${referralLink}`;
@@ -72,7 +82,12 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({ isOpen, onClose, impac
 
     try {
       setIsCopying(true);
-      const canvas = await html2canvas(element);
+      const canvas = await html2canvas(element, {
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        scale: 2
+      });
       
       canvas.toBlob(async (blob) => {
         if (blob) {
@@ -114,8 +129,14 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({ isOpen, onClose, impac
 
     try {
       setIsSaving(true);
-      const canvas = await html2canvas(element);
-      const dataUrl = canvas.toDataURL('image/png');
+      const canvas = await html2canvas(element, {
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        scale: 2
+      });
+      
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
       
       const link = document.createElement('a');
       link.download = 'gudfood-impact.png';
@@ -227,19 +248,18 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({ isOpen, onClose, impac
                     Join me in my journey with GudFood and create an impact on the world!
                   </p>
                   <p className="text-base text-emerald-600 font-medium">
-                    Scan to join with my referral link and earn 250 points on your first purchase!*
+                    Scan to join with my referral link or go to <u>{referralLink}</u> and earn {pointsAllocation?.referralPoints} points on your first purchase!*
                   </p>
                   <p className="text-[10px] text-gray-400 mt-4">
                     *Terms and Conditions: Points will be credited with a minimum purchase. Valid for new customers only.
                   </p>
                 </div>
-                <div className="ml-6">
+                <div className="ml-6 flex-shrink-0">
                   <QRCodeSVG
                     value={shareUrl}
                     size={120}
                     level="L"
-                    includeMargin={false}
-                    className="bg-white p-2 rounded-lg shadow-md"
+                    includeMargin={true}
                   />
                 </div>
               </div>

@@ -90,7 +90,7 @@ const fetchPointsAllocation = async () => {
     }
 
     const data = await response.json();
-    return data.referralPoints;
+    return data;
   } catch (error) {
     console.error('Error fetching points allocation:', error);
     throw error;

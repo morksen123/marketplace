@@ -192,7 +192,7 @@ export const BadgeDialog: React.FC<BadgeDialogProps> = ({ isOpen, onClose, badge
                     Join me in my sustainability journey with GudFood!
                   </p>
                   <p className="text-base text-emerald-600 font-medium">
-                    Scan to join with my referral link and earn 250 points on your first purchase!*
+                    Scan to join with my referral link or go to <u>{referralLink}</u> and earn 250 points on your first purchase!*
                   </p>
                   <p className="text-[10px] text-gray-400 mt-4">
                     *Terms and Conditions: Points will be credited with a minimum purchase. Valid for new customers only.
@@ -204,7 +204,6 @@ export const BadgeDialog: React.FC<BadgeDialogProps> = ({ isOpen, onClose, badge
                     size={120}
                     level="L"
                     includeMargin={false}
-                    className="bg-white p-2 rounded-lg shadow-md"
                   />
                 </div>
               </div>
