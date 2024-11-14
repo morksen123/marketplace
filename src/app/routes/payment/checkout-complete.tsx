@@ -1,3 +1,7 @@
+import co2 from '@/assets/co2.png';
+import electricity from '@/assets/electricity.png';
+import food from '@/assets/food.png';
+import water from '@/assets/water.png';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -6,7 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import {
+  calculateCartImpact,
+  createTransaction,
+} from '@/features/Cart/api/api-cart';
 import { PlatformRatingForm } from '@/features/Feedback/components/PlatformReview/PlatformRatingForm';
 import {
   useCreatePlatformRating,
@@ -14,21 +23,13 @@ import {
 } from '@/features/Feedback/hooks/usePlatformRating';
 import { CreatePlatformRatingRequest } from '@/features/Feedback/types/review-types';
 import { PaymentDetailsSkeleton } from '@/features/Payment/components/PaymentDetailsSkeleton';
-import { Skeleton } from '@/components/ui/skeleton';
-import { createTransaction, calculateCartImpact } from '@/features/Cart/api/api-cart';
+import { ImpactExplanation } from '@/features/Sustainability/Profile/components/ImpactExplanation';
 import { useStripe } from '@stripe/react-stripe-js';
 import { PaymentIntent } from '@stripe/stripe-js';
+import { motion } from 'framer-motion';
 import { CheckIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Apple, TreePine, Factory, Lightbulb, Droplets } from 'lucide-react';
-import { motion } from 'framer-motion';
-import food from '@/assets/food.png';
-import co2 from '@/assets/co2.png';
-import electricity from '@/assets/electricity.png';
-import water from '@/assets/water.png';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { ImpactExplanation } from '@/features/Sustainability/Profile/components/ImpactExplanation';
 
 type Status = PaymentIntent['status'];
 
@@ -107,57 +108,15 @@ const container = {
   },
 };
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.4,
-    },
-  },
-};
-
-interface ImpactMetrics {
-  weightSaved: number;
-  co2Prevented: number;
-  treesEquivalent: number;
-  electricityDaysSaved: number;
-  acNightsSaved: number;
-  mealsSaved: number;
-  waterLitresSaved: number;
-  carKmEquivalent: number;
-  showersEquivalent: number;
-}
-
-// Add these animation variants
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
-    },
-  },
-};
-
-const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.4,
-    },
-  },
-};
-
 export const CheckoutComplete: React.FC = () => {
   const stripe = useStripe();
   const [status, setStatus] = useState<Status | 'default'>('processing');
-  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null);
-  const [impactMetrics, setImpactMetrics] = useState<ImpactMetrics | null>(null);
+  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(
+    null,
+  );
+  const [impactMetrics, setImpactMetrics] = useState<ImpactMetrics | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [showRating, setShowRating] = useState(false);
   const navigate = useNavigate();
@@ -224,10 +183,10 @@ export const CheckoutComplete: React.FC = () => {
     await createRating.mutateAsync(data);
     setShowRating(false);
     navigate('/buyer/transactions');
-  }
+  };
   const handleImpactCardClick = (
     category: 'food' | 'water' | 'electricity' | 'carbon',
-    type: 'personal' | 'community'
+    type: 'personal' | 'community',
   ) => {
     setSelectedImpact({ category, type });
   };
@@ -269,21 +228,30 @@ export const CheckoutComplete: React.FC = () => {
                 {status === 'succeeded' && (
                   <>
                     <div className="text-center space-y-2 mb-8">
-                      <h2 className="text-2xl font-semibold text-gray-800">Thank You for Making a Difference!</h2>
-                      <p className="text-gray-600">Here's how your purchase has positively impacted the environment:</p>
+                      <h2 className="text-2xl font-semibold text-gray-800">
+                        Thank You for Making a Difference!
+                      </h2>
+                      <p className="text-gray-600">
+                        Here's how your purchase has positively impacted the
+                        environment:
+                      </p>
                     </div>
-                    <motion.div 
-                      variants={container} 
+                    <motion.div
+                      variants={container}
                       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-8"
                     >
                       {/* Food Impact Card */}
-                      <div 
+                      <div
                         className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
-                        onClick={() => handleImpactCardClick('food', 'personal')}
+                        onClick={() =>
+                          handleImpactCardClick('food', 'personal')
+                        }
                       >
                         <div className="flex flex-col items-center text-center">
                           <img src={food} alt="Food" className="w-8 h-8 mb-2" />
-                          <h3 className="text-gray-600 text-sm font-bold">Food Rescued</h3>
+                          <h3 className="text-gray-600 text-sm font-bold">
+                            Food Rescued
+                          </h3>
                           <p className="text-2xl font-bold text-green-500 mt-1">
                             {impactMetrics.weightSaved.toFixed(1)} kg
                           </p>
@@ -294,59 +262,89 @@ export const CheckoutComplete: React.FC = () => {
                       </div>
 
                       {/* Carbon Impact Card */}
-                      <div 
+                      <div
                         className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
-                        onClick={() => handleImpactCardClick('carbon', 'personal')}
+                        onClick={() =>
+                          handleImpactCardClick('carbon', 'personal')
+                        }
                       >
                         <div className="flex flex-col items-center text-center">
                           <img src={co2} alt="CO2" className="w-8 h-8 mb-2" />
-                          <h3 className="text-gray-600 text-sm font-bold">Carbon Impact</h3>
+                          <h3 className="text-gray-600 text-sm font-bold">
+                            Carbon Impact
+                          </h3>
                           <p className="text-2xl font-bold text-green-500 mt-1">
                             {impactMetrics.co2Prevented.toFixed(1)} kg
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
-                            🚗 {impactMetrics.carKmEquivalent.toFixed(1)} km not driven
+                            🚗 {impactMetrics.carKmEquivalent.toFixed(1)} km not
+                            driven
                           </p>
                         </div>
                       </div>
 
                       {/* Energy Impact Card */}
-                      <div 
+                      <div
                         className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
-                        onClick={() => handleImpactCardClick('electricity', 'personal')}
+                        onClick={() =>
+                          handleImpactCardClick('electricity', 'personal')
+                        }
                       >
                         <div className="flex flex-col items-center text-center">
-                          <img src={electricity} alt="Electricity" className="w-8 h-8 mb-2" />
-                          <h3 className="text-gray-600 text-sm font-bold">Energy Impact</h3>
+                          <img
+                            src={electricity}
+                            alt="Electricity"
+                            className="w-8 h-8 mb-2"
+                          />
+                          <h3 className="text-gray-600 text-sm font-bold">
+                            Energy Impact
+                          </h3>
                           <p className="text-2xl font-bold text-green-500 mt-1">
-                            {impactMetrics?.electricityDaysSaved.toFixed(1)} days
+                            {impactMetrics?.electricityDaysSaved.toFixed(1)}{' '}
+                            days
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
-                            ❄️ {impactMetrics.acNightsSaved.toFixed(1)} nights of AC
+                            ❄️ {impactMetrics.acNightsSaved.toFixed(1)} nights
+                            of AC
                           </p>
                         </div>
                       </div>
 
                       {/* Water Impact Card */}
-                      <div 
+                      <div
                         className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
-                        onClick={() => handleImpactCardClick('water', 'personal')}
+                        onClick={() =>
+                          handleImpactCardClick('water', 'personal')
+                        }
                       >
                         <div className="flex flex-col items-center text-center">
-                          <img src={water} alt="Water" className="w-8 h-8 mb-2" />
-                          <h3 className="text-gray-600 text-sm font-bold">Water Saved</h3>
+                          <img
+                            src={water}
+                            alt="Water"
+                            className="w-8 h-8 mb-2"
+                          />
+                          <h3 className="text-gray-600 text-sm font-bold">
+                            Water Saved
+                          </h3>
                           <p className="text-2xl font-bold text-green-500 mt-1">
                             {impactMetrics.waterLitresSaved >= 1000000000000
-                              ? `${(impactMetrics.waterLitresSaved / 1000000000000).toFixed(1)} tril`
+                              ? `${(
+                                  impactMetrics.waterLitresSaved / 1000000000000
+                                ).toFixed(1)} tril`
                               : impactMetrics.waterLitresSaved >= 1000000000
-                              ? `${(impactMetrics.waterLitresSaved / 1000000000).toFixed(1)} bil`
+                              ? `${(
+                                  impactMetrics.waterLitresSaved / 1000000000
+                                ).toFixed(1)} bil`
                               : impactMetrics.waterLitresSaved >= 1000000
-                              ? `${(impactMetrics.waterLitresSaved / 1000000).toFixed(1)} mil`
-                              : impactMetrics.waterLitresSaved.toFixed(0)
-                            } ℓ
+                              ? `${(
+                                  impactMetrics.waterLitresSaved / 1000000
+                                ).toFixed(1)} mil`
+                              : impactMetrics.waterLitresSaved.toFixed(0)}{' '}
+                            ℓ
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
-                            🚿 {impactMetrics.showersEquivalent.toFixed(0)} showers
+                            🚿 {impactMetrics.showersEquivalent.toFixed(0)}{' '}
+                            showers
                           </p>
                         </div>
                       </div>
@@ -429,7 +427,10 @@ export const CheckoutComplete: React.FC = () => {
           </Card>
         )}
       </div>
-      <Dialog open={!!selectedImpact} onOpenChange={() => setSelectedImpact(null)}>
+      <Dialog
+        open={!!selectedImpact}
+        onOpenChange={() => setSelectedImpact(null)}
+      >
         <DialogContent className="max-w-4xl">
           {selectedImpact && (
             <ImpactExplanation

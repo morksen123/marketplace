@@ -1,24 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { ContentCopy as Copy, Share } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { Share, ContentCopy as Copy } from '@mui/icons-material';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { ImpactExplanation } from './components/ImpactExplanation';
-import { SustainabilityImpact } from './components/SustainabilityImpact';
+import React, { useEffect, useState } from 'react';
 import { Badges } from './components/Badges';
+import { ImpactExplanation } from './components/ImpactExplanation';
 import { PointsGuide } from './components/PointsGuide';
 import { PointsHistory } from './components/PointsHistoryTable';
 import { Rewards } from './components/Rewards';
+import { SustainabilityImpact } from './components/SustainabilityImpact';
 
 interface Profile {
   points: number;
   firstName: string;
   lastName: string;
   email: string;
-  createdDateTime: string
+  createdDateTime: string;
   referralCode?: string;
   referredByCode?: string;
   hasQualifyingPurchase: boolean;
@@ -37,7 +44,11 @@ interface Badge {
   subtitle: string;
   criteria: string;
   earnedOn: string;
-  category: 'SUSTAINABILITY' | 'LEADERBOARD' | 'QUALITY_SERVICE' | 'QUALITY_ENGAGEMENT';
+  category:
+    | 'SUSTAINABILITY'
+    | 'LEADERBOARD'
+    | 'QUALITY_SERVICE'
+    | 'QUALITY_ENGAGEMENT';
 }
 
 interface ImpactMetricsDto {
@@ -151,13 +162,16 @@ export const Profile: React.FC = () => {
     referralCode: '',
     hasQualifyingPurchase: false,
     savedPoints: 0,
-    profilePic: ''
+    profilePic: '',
   });
   const [referralLink, setReferralLink] = useState<string>('');
   const [referralCodeInput, setReferralCodeInput] = useState<string>('');
-  const [pointsAllocation, setPointsAllocation] = useState<PointsAllocation | null>(null);
+  const [pointsAllocation, setPointsAllocation] =
+    useState<PointsAllocation | null>(null);
   const [badges, setBadges] = useState<Badge[]>([]);
-  const [impactMetrics, setImpactMetrics] = useState<ImpactMetricsDto | null>(null);
+  const [impactMetrics, setImpactMetrics] = useState<ImpactMetricsDto | null>(
+    null,
+  );
   const [selectedImpact, setSelectedImpact] = useState<{
     category: 'food' | 'water' | 'electricity' | 'carbon';
     type: 'personal' | 'community';
@@ -171,7 +185,13 @@ export const Profile: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [profileData, referralLinkData, badgeData, pointsAllocation, impactData] = await Promise.all([
+        const [
+          profileData,
+          referralLinkData,
+          badgeData,
+          pointsAllocation,
+          impactData,
+        ] = await Promise.all([
           fetchProfile(),
           fetchReferralLink(),
           fetchBadges(),
@@ -182,7 +202,7 @@ export const Profile: React.FC = () => {
               'Content-Type': 'application/json',
             },
             credentials: 'include',
-          }).then(res => res.json())
+          }).then((res) => res.json()),
         ]);
 
         setProfile(profileData);
@@ -217,8 +237,8 @@ export const Profile: React.FC = () => {
       }
 
       toast({
-        title: "Success!",
-        description: "Referral code applied successfully.",
+        title: 'Success!',
+        description: 'Referral code applied successfully.',
         duration: 2000,
       });
 
@@ -228,21 +248,14 @@ export const Profile: React.FC = () => {
       setReferralCodeInput(''); // Clear input after successful submission
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to apply referral code",
+        title: 'Error',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to apply referral code',
         duration: 2000,
-        variant: "destructive",
+        variant: 'destructive',
       });
-    }
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2
-      }
     }
   };
 
@@ -252,16 +265,15 @@ export const Profile: React.FC = () => {
       y: 0,
       opacity: 1,
       transition: {
-        type: "spring",
-        stiffness: 100
-      }
-    }
+        type: 'spring',
+        stiffness: 100,
+      },
+    },
   };
-
 
   const handleImpactCardClick = (
     category: 'food' | 'water' | 'electricity' | 'carbon',
-    type: 'personal' | 'community'
+    type: 'personal' | 'community',
   ) => {
     setSelectedImpact({ category, type });
   };
@@ -291,29 +303,46 @@ export const Profile: React.FC = () => {
             <div className="flex flex-col gap-8">
               <div className="flex justify-between items-start">
                 <div className="text-left">
-                  <div className="text-4xl font-bold text-black">{profile.firstName} {profile.lastName}</div>
-                  <div className="text-xs text-gray-500 mt-2">Member since {new Date(profile.createdDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                  <div className="text-4xl font-bold text-black">
+                    {profile.firstName} {profile.lastName}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    Member since{' '}
+                    {new Date(profile.createdDateTime).toLocaleDateString(
+                      'en-GB',
+                      { day: '2-digit', month: 'long', year: 'numeric' },
+                    )}
+                  </div>
                 </div>
 
                 {/* Referral Sections */}
                 <div className="flex flex-col items-end gap-4">
-                  {!profile.referredByCode && !profile.hasQualifyingPurchase && (
-                    <motion.div className="flex items-center gap-2">
-                      <Input
-                        placeholder="Enter referral code"
-                        value={referralCodeInput}
-                        onChange={(e) => setReferralCodeInput(e.target.value)}
-                        className="w-48"
-                      />
-                      <Button variant="outline" size="sm" onClick={handleSubmitReferralCode}>
-                        Apply
-                      </Button>
-                    </motion.div>
-                  )}
+                  {!profile.referredByCode &&
+                    !profile.hasQualifyingPurchase && (
+                      <motion.div className="flex items-center gap-2">
+                        <Input
+                          placeholder="Enter referral code"
+                          value={referralCodeInput}
+                          onChange={(e) => setReferralCodeInput(e.target.value)}
+                          className="w-48"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleSubmitReferralCode}
+                        >
+                          Apply
+                        </Button>
+                      </motion.div>
+                    )}
 
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="button-green" size="sm" className="w-48">
+                      <Button
+                        variant="outline"
+                        className="button-green w-48"
+                        size="sm"
+                      >
                         <Share className="h-4 w-4 mr-2" />
                         Share Referral Code
                       </Button>
@@ -322,7 +351,8 @@ export const Profile: React.FC = () => {
                       <DialogHeader>
                         <DialogTitle>Your Referral Code</DialogTitle>
                         <DialogDescription>
-                          Share this code with friends and earn rewards when they sign up!
+                          Share this code with friends and earn rewards when
+                          they sign up!
                         </DialogDescription>
                       </DialogHeader>
                       <div className="flex flex-col space-y-4">
@@ -337,10 +367,13 @@ export const Profile: React.FC = () => {
                             className="button-green"
                             size="icon"
                             onClick={() => {
-                              navigator.clipboard.writeText(profile.referralCode || '');
+                              navigator.clipboard.writeText(
+                                profile.referralCode || '',
+                              );
                               toast({
-                                title: "Success!",
-                                description: "Referral code copied to clipboard",
+                                title: 'Success!',
+                                description:
+                                  'Referral code copied to clipboard',
                                 duration: 2000,
                               });
                             }}
@@ -349,7 +382,9 @@ export const Profile: React.FC = () => {
                           </Button>
                         </div>
                         <div className="flex flex-col space-y-2">
-                          <p className="text-sm text-muted-foreground">Referral Link:</p>
+                          <p className="text-sm text-muted-foreground">
+                            Referral Link:
+                          </p>
                           <div className="flex items-center space-x-2">
                             <Input
                               readOnly
@@ -363,8 +398,9 @@ export const Profile: React.FC = () => {
                               onClick={() => {
                                 navigator.clipboard.writeText(referralLink);
                                 toast({
-                                  title: "Success!",
-                                  description: "Referral link copied to clipboard",
+                                  title: 'Success!',
+                                  description:
+                                    'Referral link copied to clipboard',
                                   duration: 2000,
                                 });
                               }}
@@ -395,17 +431,20 @@ export const Profile: React.FC = () => {
               <div className="rounded-full w-5 h-5 bg-gray-200 flex items-center justify-center">
                 <span className="text-gray-600 text-sm">?</span>
               </div>
-              <div
-                className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-6 py-2 bg-gray-800 text-white text-sm font-medium rounded-md shadow-lg w-72"
-              >
-                These points reset every month. They contribute to your leaderboard position.
+              <div className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-6 py-2 bg-gray-800 text-white text-sm font-medium rounded-md shadow-lg w-72">
+                These points reset every month. They contribute to your
+                leaderboard position.
               </div>
             </div>
           </div>
           <CardContent className="p-8 flex flex-col items-center justify-center h-full">
             <div className="flex flex-col items-center">
-              <div className="text-5xl font-bold text-green-500">{profile.points}</div>
-              <div className="text-xl text-gray-600 mt-2">Leaderboard Points</div>
+              <div className="text-5xl font-bold text-green-500">
+                {profile.points}
+              </div>
+              <div className="text-xl text-gray-600 mt-2">
+                Leaderboard Points
+              </div>
               <button
                 className="text-sm text-blue-600 hover:text-blue-800 underline absolute top-2 right-2"
                 onClick={() => setShowPointsGuide(true)}
@@ -430,15 +469,16 @@ export const Profile: React.FC = () => {
               <div className="rounded-full w-5 h-5 bg-gray-200 flex items-center justify-center">
                 <span className="text-gray-600 text-sm">?</span>
               </div>
-              <div
-                className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-6 py-2 bg-gray-800 text-white text-sm font-medium rounded-md shadow-lg w-72"
-              >
-                After the Leaderboard resets, these points are added to your Redeemable Points and can be redeemed for rewards.
+              <div className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-6 py-2 bg-gray-800 text-white text-sm font-medium rounded-md shadow-lg w-72">
+                After the Leaderboard resets, these points are added to your
+                Redeemable Points and can be redeemed for rewards.
               </div>
             </div>
           </div>
           <CardContent className="p-8 flex flex-col items-center justify-center h-full">
-            <div className="text-5xl font-bold text-green-500">{profile.savedPoints}</div>
+            <div className="text-5xl font-bold text-green-500">
+              {profile.savedPoints}
+            </div>
             <div className="text-xl text-gray-600 mt-2">Redeemable Points</div>
             <Button
               variant="outline"
@@ -460,12 +500,8 @@ export const Profile: React.FC = () => {
           cardVariants={cardVariants}
         />
 
-
         {/* Badges */}
-        <Badges badges={badges} 
-          userType="buyer"
-        />
-
+        <Badges badges={badges} userType="buyer" />
       </div>
 
       {/* Keep existing Dialog for impact explanation */}
@@ -485,16 +521,14 @@ export const Profile: React.FC = () => {
 
       <Dialog open={showPointsHistory} onOpenChange={setShowPointsHistory}>
         <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-          </DialogHeader>
+          <DialogHeader></DialogHeader>
           <PointsHistory />
         </DialogContent>
       </Dialog>
 
       <Dialog open={showRewards} onOpenChange={setShowRewards}>
         <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-          </DialogHeader>
+          <DialogHeader></DialogHeader>
           <Rewards />
         </DialogContent>
       </Dialog>
