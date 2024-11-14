@@ -32,15 +32,15 @@ interface Voucher {
 }
 
 export const Cart: React.FC = () => {
-  const { 
-    cart, 
-    removeFromCart, 
-    updateQuantity, 
-    cartPrice, 
-    addVoucher, 
+  const {
+    cart,
+    removeFromCart,
+    updateQuantity,
+    cartPrice,
+    addVoucher,
     removeVoucher,
     selectedVoucher,
-    setSelectedVoucher 
+    setSelectedVoucher
   } = useCart();
   const [calculatedTotal, setCalculatedTotal] = useState<number | null>(null);
   const [adminPromotionAmount, setAdminPromotionAmount] = useState<number>(0);
@@ -254,58 +254,70 @@ export const Cart: React.FC = () => {
               </div>
             );
           })}
-          <div className="flex justify-between items-center pt-6">
-            <div className="text-2xl font-bold flex flex-col">
-              <div className="flex items-center">
-                Total:
-                {calculatedTotal !== null && (calculatedTotal < cartPrice || selectedVoucher) ? (
-                  <>
-                    <span className="line-through text-gray-500 mr-2">
-                      ${cartPrice.toFixed(2)}
-                    </span>
-                    <div className="flex flex-col">
-                      {Number((cartPrice - calculatedTotal).toFixed(2)) > 0 && (
-                        <span className="flex items-center text-orange-500 text-sm">
-                          <Tag className="h-3 w-3 mr-1" />
-                          Sitewide Promotion (-${(cartPrice - calculatedTotal).toFixed(2)})
-                        </span>
-                      )}
-                      {selectedVoucher && (
-                        <span className="flex items-center text-blue-500 text-sm">
-                          <Tag className="h-3 w-3 mr-1" />
-                          Voucher Applied (-${selectedVoucher.voucherValue.toFixed(2)})
-                        </span>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <span>${cartPrice.toFixed(2)}</span>
+
+          <div className="flex flex-col gap-6">
+            <div className="flex justify-end">
+              <div className="w-[200px]">
+                <VoucherDropdown
+                  onVoucherSelect={setSelectedVoucher}
+                  selectedVoucher={selectedVoucher}
+                  calculatedTotal={calculatedTotal ?? cartPrice}
+                  onApply={(voucherCode) => {
+                    if (voucherCode) {
+                      addVoucher(voucherCode);
+                    } else {
+                      if (selectedVoucher?.voucherCode) {
+                        removeVoucher(selectedVoucher.voucherCode);
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center pt-6">
+              <div className="text-2xl font-bold flex flex-col">
+                <div className="flex items-center">
+                  Total:
+                  {calculatedTotal !== null && (calculatedTotal < cartPrice || selectedVoucher) ? (
+                    <>
+                      <span className="line-through text-gray-500 mr-2">
+                        ${cartPrice.toFixed(2)}
+                      </span>
+                      <div className="flex flex-col">
+                        {adminPromotionAmount > 0 && (
+                          <span className="flex items-center text-orange-500 text-sm">
+                            <Tag className="h-3 w-3 mr-1" />
+                            Sitewide Promotion (-${adminPromotionAmount.toFixed(2)})
+                          </span>
+                        )}
+                        {selectedVoucher && (
+                          <span className="flex items-center text-blue-500 text-sm">
+                            <Tag className="h-3 w-3 mr-1" />
+                            Voucher Applied (-${selectedVoucher.voucherValue.toFixed(2)})
+                          </span>
+                        )}
+                      </div>
+                      <span className="ml-2 font-bold">
+                        ${calculatedTotal.toFixed(2)}
+                      </span>
+                    </>
+                  ) : (
+                    <span>${cartPrice.toFixed(2)}</span>
+                  )}
+                </div>
+                {nextBestPromotion && (
+                  <p className="text-sm text-red-500 mt-2 italic text-left">
+                    Add ${(nextBestPromotion.minimumSpend - cartPrice).toFixed(2)} more to your cart to save ${nextBestPromotion.discountAmount.toFixed(2)}!
+                  </p>
                 )}
               </div>
-              {nextBestPromotion && (
-                <p className="text-sm text-red-500 mt-2 italic text-left">
-                  Add ${(nextBestPromotion.minimumSpend - cartPrice).toFixed(2)} more to your cart to save ${nextBestPromotion.discountAmount.toFixed(2)}!
-                </p>
-              )}
+              <Link to="/buyer/checkout">
+                <Button variant="secondary" className="button-green" size="lg">
+                  Proceed to Checkout
+                </Button>
+              </Link>
             </div>
-            <VoucherDropdown
-              onVoucherSelect={setSelectedVoucher}
-              selectedVoucher={selectedVoucher}
-              onApply={(voucherCode) => {
-                if (voucherCode) {
-                  addVoucher(voucherCode);
-                } else {
-                  if (selectedVoucher?.voucherCode) {
-                    removeVoucher(selectedVoucher.voucherCode);
-                  }
-                }
-              }}
-            />
-            <Link to="/buyer/checkout">
-              <Button variant="secondary" className="button-green" size="lg">
-                Proceed to Checkout
-              </Button>
-            </Link>
           </div>
         </div>
       )}
