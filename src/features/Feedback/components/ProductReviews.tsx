@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
 import { format } from 'date-fns';
 import { Star } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   useDeleteReviewResponse,
   useProductReviews,
@@ -29,11 +29,15 @@ interface ReviewImageProps {
 export const ProductReviews = ({ productId }: { productId: number }) => {
   const { data: reviews, isLoading } = useProductReviews(productId);
 
+  const filteredReviews = useMemo(() => {
+    return reviews?.filter((review) => review.status === 'APPROVED');
+  }, [reviews]);
+
   if (isLoading) {
     return <LoadingSpinnerSvg />;
   }
 
-  if (!reviews?.length) {
+  if (!filteredReviews?.length) {
     return <div className="text-gray-500">No reviews yet</div>;
   }
 
@@ -41,7 +45,7 @@ export const ProductReviews = ({ productId }: { productId: number }) => {
     <div className="mt-8">
       <h2 className="text-2xl font-semibold mb-6">Customer Reviews</h2>
       <div className="space-y-6">
-        {reviews.map((review) => (
+        {filteredReviews.map((review) => (
           <ReviewCard
             key={review.id}
             review={review}

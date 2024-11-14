@@ -55,6 +55,7 @@ export interface ProductReviewDTO extends CreateReviewDTO {
   comments: ReviewCommentDTO[];
   reviewResponse?: ReviewResponseDTO;
   isAllowedToRespond: boolean;
+  status: ReviewStatus;
 }
 
 export interface ReviewResponseDTO {
@@ -168,3 +169,5 @@ export interface MonthlyRating {
   averageRating: number;
   reviewCount: number;
 }
+
+export type ReviewStatus = 'APPROVED' | 'REJECTED' | 'PENDING';
