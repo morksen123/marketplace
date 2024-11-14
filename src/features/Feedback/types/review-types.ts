@@ -29,7 +29,6 @@ export interface PendingOrder {
 export interface CreateReviewDTO {
   orderLineItemId: number;
   overallRating: number;
-  qualityRating: number;
   conditionAsDescribed:
     | 'AS_DESCRIBED'
     | 'BETTER_THAN_DESCRIBED'
@@ -55,6 +54,7 @@ export interface ProductReviewDTO extends CreateReviewDTO {
   comments: ReviewCommentDTO[];
   reviewResponse?: ReviewResponseDTO;
   isAllowedToRespond: boolean;
+  status: ReviewStatus;
 }
 
 export interface ReviewResponseDTO {
@@ -168,3 +168,5 @@ export interface MonthlyRating {
   averageRating: number;
   reviewCount: number;
 }
+
+export type ReviewStatus = 'APPROVED' | 'REJECTED' | 'PENDING';
