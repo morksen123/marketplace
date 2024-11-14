@@ -7,15 +7,25 @@ import {
   removeItemFromCart,
   updateItemQuantity,
   viewCart,
+  addVoucher as addVoucherApi,
+  removeVoucher as removeVoucherApi,
 } from '../api/api-cart';
+import { useState, useEffect } from 'react';
 
 export const useCart = () => {
   const queryClient = useQueryClient();
+  const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
 
   const { data: cart = null } = useQuery({
     queryKey: ['cart'],
     queryFn: viewCart,
   });
+
+  useEffect(() => {
+    if (cart?.voucher) {
+      setSelectedVoucher(cart.voucher);
+    }
+  }, [cart?.voucher]);
 
   const addToCartMutation = useMutation({
     mutationFn: ({
@@ -36,6 +46,25 @@ export const useCart = () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
   });
+
+  const addVoucherMutation = useMutation({
+    mutationFn: async ({ voucherCode }: { voucherCode: string }) => {
+      return addVoucherApi(voucherCode);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    },
+  });
+
+  const removeVoucherMutation = useMutation({
+    mutationFn: async ({ voucherCode }: { voucherCode: string }) => {
+      return removeVoucherApi(voucherCode);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    },
+  });
+
 
   const updateQuantityMutation = useMutation({
     mutationFn: ({
@@ -61,6 +90,15 @@ export const useCart = () => {
 
   const removeFromCart = (productId: string) => {
     removeFromCartMutation.mutate(productId);
+  };
+
+  const addVoucher = (voucherCode: string) => {
+    addVoucherMutation.mutate({ voucherCode });
+  };
+
+  const removeVoucher = (voucherCode: string) => {
+    removeVoucherMutation.mutate({ voucherCode });
+    setSelectedVoucher(null);
   };
 
   const cartPrice =
@@ -96,8 +134,12 @@ export const useCart = () => {
     addToCart,
     removeFromCart,
     updateQuantity,
+    removeVoucher,
+    addVoucher,
     cartPrice,
     cartQuantity,
+    selectedVoucher,
+    setSelectedVoucher,
     isShippingAddressRequired,
     cartItemsThatRequireSelfPickUp,
     cartItemsExpiringSoon,
