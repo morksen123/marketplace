@@ -29,7 +29,6 @@ export interface PendingOrder {
 export interface CreateReviewDTO {
   orderLineItemId: number;
   overallRating: number;
-  qualityRating: number;
   conditionAsDescribed:
     | 'AS_DESCRIBED'
     | 'BETTER_THAN_DESCRIBED'

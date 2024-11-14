@@ -33,7 +33,6 @@ export function SingleReviewContent({
     currentReview || {
       orderLineItemId: item.orderLineItem,
       overallRating: 0,
-      qualityRating: 0,
       review: '',
       conditionAsDescribed: 'AS_DESCRIBED',
       conditionTypes: [],
@@ -50,7 +49,6 @@ export function SingleReviewContent({
       setReview({
         orderLineItemId: item.orderLineItem,
         overallRating: 0,
-        qualityRating: 0,
         review: '',
         conditionAsDescribed: 'AS_DESCRIBED',
         conditionTypes: [],
@@ -235,22 +233,6 @@ export function SingleReviewContent({
               </svg>
             </div>
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="quality-rating" className="text-md">
-            Quality of the Usable Portion{' '}
-            <span className="text-destructive">*</span>
-          </Label>
-          <p className="text-sm text-muted-foreground">
-            Rate the taste/quality of the usable part
-          </p>
-          <StarRating
-            rating={review.qualityRating}
-            onRatingChange={(qualityRating) =>
-              handleReviewChange({ qualityRating })
-            }
-          />
         </div>
 
         {/* buy again */}

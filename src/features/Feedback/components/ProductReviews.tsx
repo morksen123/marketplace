@@ -184,12 +184,6 @@ const ReviewCard = ({ review, isProductOwner }: ReviewCardProps) => {
       {/* Expandable Content */}
       {isExpanded && (
         <div className="mt-3 space-y-3 border-t border-gray-200 pt-3">
-          {/* Quality Rating */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Quality:</span>
-            <StarRating rating={review.qualityRating} />
-          </div>
-
           {/* Storage Tips & Usable Percentage */}
           <div className="grid grid-cols-2 gap-3 text-sm">
             {review.usablePercentage && (
