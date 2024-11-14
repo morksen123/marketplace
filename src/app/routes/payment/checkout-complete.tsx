@@ -118,6 +118,41 @@ const fadeInUp = {
   },
 };
 
+interface ImpactMetrics {
+  weightSaved: number;
+  co2Prevented: number;
+  treesEquivalent: number;
+  electricityDaysSaved: number;
+  acNightsSaved: number;
+  mealsSaved: number;
+  waterLitresSaved: number;
+  carKmEquivalent: number;
+  showersEquivalent: number;
+}
+
+// Add these animation variants
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+    },
+  },
+};
+
 export const CheckoutComplete: React.FC = () => {
   const stripe = useStripe();
   const [status, setStatus] = useState<Status | 'default'>('processing');
