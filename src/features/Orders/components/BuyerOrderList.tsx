@@ -17,7 +17,14 @@ import {
 } from '@/components/ui/select';
 import { ReviewModal } from '@/features/Feedback/components/ReviewsModal/ReviewModal';
 import { useReviewModal } from '@/features/Feedback/hooks/useReviewModal';
-import { ArrowDown, ArrowUp, Loader2, Package, Search } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  Loader2,
+  Package,
+  Search,
+  Star,
+} from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useBuyerOrders } from '../hooks/useBuyerOrders';
@@ -376,12 +383,23 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
                       ))}
                     </div>
                   </div>
-                  {order.reviewNeeded && (
+                  {/* {order.reviewNeeded && (
                     <Button
                       onClick={() => openReviewModal(order)}
                       variant="outline"
                     >
                       Review
+                    </Button>
+                  )} */}
+
+                  {order.reviewNeeded && (
+                    <Button
+                      onClick={() => openReviewModal(order)}
+                      className="bg-green-50 hover:bg-green-100 text-green-700 hover:text-green-800 border border-green-200 hover:border-green-300 font-medium transition-colors duration-200 flex items-center gap-2 ml-4"
+                      variant="outline"
+                    >
+                      <Star className="h-4 w-4" /> {/* Add Lucide Star icon */}
+                      Leave Review
                     </Button>
                   )}
 
