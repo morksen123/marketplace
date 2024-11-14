@@ -144,6 +144,7 @@ export const Checkout: React.FC = () => {
       }
       const data = await response.json();
       setCalculatedTotal(data.cartTotal);
+      console.log('cartTotal', data.cartTotal);
       setAdminPromotionAmount(data.adminPromotionAmount);
       console.log('hi', data.voucherAmount);  
       setVoucherAmount(data.voucherAmount || null);
