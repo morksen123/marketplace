@@ -404,28 +404,6 @@ export const CheckoutComplete: React.FC = () => {
             </Card>
           </div>
         )}
-
-        {/* Navigation Buttons */}
-        {status === 'succeeded' && !isLoading && !showRating && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex justify-center space-x-4">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate('/buyer/home')}
-                >
-                  Return to Home
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => navigate('/buyer/transactions')}
-                >
-                  View Transactions
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
       <Dialog
         open={!!selectedImpact}

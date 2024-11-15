@@ -44,12 +44,17 @@ export const ReviewModal = ({
     ? Boolean(
         bulkReviews[currentItem?.orderLineItem || 0]?.overallRating &&
           bulkReviews[currentItem?.orderLineItem || 0]?.review &&
-          bulkReviews[currentItem?.orderLineItem || 0]?.usablePercentage,
+          bulkReviews[currentItem?.orderLineItem || 0]?.usablePercentage &&
+          bulkReviews[currentItem?.orderLineItem || 0]?.conditionAsDescribed &&
+          bulkReviews[currentItem?.orderLineItem || 0]?.conditionTypes.length >
+            0,
       )
     : Boolean(
         currentReview?.overallRating &&
           currentReview?.review &&
-          currentReview?.usablePercentage,
+          currentReview?.usablePercentage &&
+          currentReview?.conditionAsDescribed &&
+          currentReview?.conditionTypes.length > 0,
       );
 
   if (!selectedOrder) return null;

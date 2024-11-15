@@ -270,7 +270,7 @@ export function SingleReviewContent({
 
         <div className="space-y-2">
           <Label className="text-md" htmlFor="review">
-            Share your experience
+            Share your experience <span className="text-red-500">*</span>
           </Label>
           <Textarea
             id="review"
