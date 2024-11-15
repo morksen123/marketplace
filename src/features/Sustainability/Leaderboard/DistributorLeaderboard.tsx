@@ -335,7 +335,7 @@ export const DistributorLeaderboard = () => {
               <div className="flex flex-col mb-4">
                 <h3 className="text-xl font-bold text-gray-800 mb-2">Your Transaction Fee Tier</h3>
                 <p className="text-sm text-gray-600">
-                  The standard transaction fee is 10%. Maintain your position on the leaderboard at month-end to qualify for reduced fees.
+                  The standard transaction fee is 10%. Maintain your position on the leaderboard at <b className="text-red-600">month-end</b> to qualify for reduced fees.
                 </p>
               </div>
              
