@@ -173,7 +173,10 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({ isOpen, onClose, impac
           <div id="impact-card" className="bg-gradient-to-br from-emerald-50 to-teal-100 p-8 rounded-xl">
             <div className="flex items-center justify-between mb-6">
               <img src={logo} alt="GudFood Logo" className="h-12" />
-              <h2 className="text-2xl font-bold">My Sustainability Impact</h2>
+              <div className="text-center">
+                <h2 className="text-2xl font-bold">My Sustainability Impact</h2>
+                <p className="text-sm text-gray-600">As of {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+              </div>
               <div className="h-12 w-[100px]"></div>
             </div>
             <div className="grid grid-cols-2 gap-4">

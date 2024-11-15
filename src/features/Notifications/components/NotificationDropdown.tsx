@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { Bell, MessageCircle, Package } from 'lucide-react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { Medal } from 'lucide-react';
 interface NotificationDropdownProps {
   notifications: Notification[];
   onClose: () => void;
@@ -64,6 +64,8 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       navigate(`/view-product-listing/${notification.productId}`);
     } else if (notification.content.includes('responded to your review')) {
       navigate(`/buyer/view-product/${notification.productId}`);
+    } else if (notification.content === 'New Badge Earned') {
+      navigate(`${baseRoute}/profile`);
     }
     onClose();
   };
@@ -76,6 +78,8 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         return <Package className="w-4 h-4 text-green-500" />;
       case 'Order Status Updated':
         return <Bell className="w-4 h-4 text-orange-500" />;
+      case 'New Badge Earned':
+        return <Medal className="w-4 h-4 text-yellow-500" />;
       default:
         return <Bell className="w-4 h-4 text-gray-500" />;
     }
@@ -155,6 +159,11 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                         {getStatusBadge(notification.orderStatus)}
                       </div>
                     )}
+                  {notification.content === 'New Badge Earned' && (
+                    <div className={`text-xs text-gray-600 flex items-center flex-wrap gap-1`}>
+                      <span>Another badge earned!</span>{' '}
+                    </div>
+                  )}
                 </div>
                 {!notification.read && (
                   <div className="w-2 h-2 bg-red-500 rounded-full ml-2 flex-shrink-0 mt-1"></div>

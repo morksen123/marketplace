@@ -495,9 +495,9 @@ export const Leaderboard = () => {
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="max-w-7xl mx-auto mb-6 px-4">
-                      <p className="text-center text-sm">
-                        <span className="text-gray-800 mr-2">Keep climbing the leaderboard! Earn badges to unlock bonus points and rewards.</span>
-                      </p>
+                    <p className="text-center text-sm">
+                      <span className="text-gray-800 mr-2">Keep climbing the leaderboard! Earn badges to unlock bonus points and rewards.</span>
+                    </p>
                   </div>
                   {currentUser ? (
                     <div className="space-y-6">
@@ -547,7 +547,7 @@ export const Leaderboard = () => {
               </Card>
 
               {/* Cart Alert */}
-              {cart?.cartLineItems.length > 0 && (
+              {cart?.cartLineItems.length > 0 ? (
                 <Alert
                   variant="default"
                   className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100 text-black py-6"
@@ -572,6 +572,35 @@ export const Leaderboard = () => {
                         className="mt-2 bg-white text-indigo-500 hover:bg-purple-50 font-bold px-8 py-3 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                       >
                         Checkout Now →
+                      </Link>
+                    </AlertDescription>
+                  </motion.div>
+                </Alert>
+              ) : (
+                <Alert
+                  variant="default"
+                  className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100 text-black py-6"
+                >
+                  <motion.div
+                    className="flex flex-col items-center justify-center gap-3 w-full h-full"
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  >
+                    <AlertDescription className="flex flex-col items-center gap-3">
+                      <span className="text-xl font-medium">
+                        Start Shopping Now!
+                      </span>
+                      <div className="flex items-center gap-2 bg-white/20 px-6 py-2 rounded-full">
+                        <ShoppingCart className="h-5 w-5" />
+                        <span className="font-bold">
+                          Purchase items to climb the leaderboard!
+                        </span>
+                      </div>
+                      <Link
+                        to="/buyer/home"
+                        className="mt-2 bg-white text-indigo-500 hover:bg-purple-50 font-bold px-8 py-3 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                      >
+                        Start Shopping Now →
                       </Link>
                     </AlertDescription>
                   </motion.div>
@@ -671,7 +700,7 @@ export const Leaderboard = () => {
       {/* Keep existing modal */}
       <BuyerInformation
         user={selectedUser}
-        currentUser={currentUser}   
+        currentUser={currentUser}
         isOpen={!!selectedUser}
         onClose={() => setSelectedUser(null)}
       />
