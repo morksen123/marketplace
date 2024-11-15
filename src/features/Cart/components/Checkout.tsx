@@ -27,15 +27,7 @@ import { MapPin } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useCart } from '../hooks/useCart';
 import { SavedAddressDropdown } from './SavedAddressDropdown';
-import { SelfPickupItems } from './selfPickUpItems';
-
-interface Voucher {
-  voucherId: number;
-  voucherCode: string;
-  voucherValue: number;
-  expiresAt: string;
-  used: boolean;
-}
+import { SelfPickupItems } from './SelfPickUpItems';
 
 export const Checkout: React.FC = () => {
   const stripe = useStripe();
@@ -146,7 +138,7 @@ export const Checkout: React.FC = () => {
       setCalculatedTotal(data.cartTotal);
       console.log('cartTotal', data.cartTotal);
       setAdminPromotionAmount(data.adminPromotionAmount);
-      console.log('hi', data.voucherAmount);  
+      console.log('hi', data.voucherAmount);
       setVoucherAmount(data.voucherAmount || null);
     } catch (error) {
       console.error('Error fetching calculated total:', error);
