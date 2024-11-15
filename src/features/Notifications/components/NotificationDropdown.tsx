@@ -55,11 +55,11 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     } else if (notification.content === 'Order Status Updated' && notification.orderDto) {
       if (['IN_REFUND', 'REFUNDED', 'REFUND_REJECTED'].includes(notification.orderStatus)) {
         navigate(`${baseRoute}/orders/refunds/${notification.orderDto.refundId}`);
-      } else if (notification.orderStatus === 'IN_DISPUTE') {
-        navigate(`${baseRoute}/orders/disputes/${notification.orderDto.disputeId}`);
       } else {
         navigate(`${baseRoute}/orders/${notification.orderDto.orderId}`);
       }
+    } else if (notification.content === 'Dispute Status Updated' && notification.orderDto) {
+      navigate(`${baseRoute}/orders/disputes/${notification.orderDto.disputeId}`);
     } else if (notification.content === 'New Order Created' && notification.orderDto) {
       navigate(`${baseRoute}/orders/${notification.orderDto.orderId}`);
     } else if (notification.content.includes('star')) {
