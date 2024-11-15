@@ -44,4 +44,6 @@ export interface OrderDto {
   trackingNo: string | null;
   transactionId: number;
   updatedDateTime: string | null;
+  refundId?: number;
+  disputeId?: number;
 }

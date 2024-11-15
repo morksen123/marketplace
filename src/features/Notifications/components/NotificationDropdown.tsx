@@ -54,7 +54,9 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       navigate(`${baseRoute}/profile/chats`);
     } else if (notification.content === 'Order Status Updated' && notification.orderDto) {
       if (['IN_REFUND', 'REFUNDED', 'REFUND_REJECTED'].includes(notification.orderStatus)) {
-        navigate(`${baseRoute}/orders/refunds`);
+        navigate(`${baseRoute}/orders/refunds/${notification.orderDto.refundId}`);
+      } else if (notification.orderStatus === 'IN_DISPUTE') {
+        navigate(`${baseRoute}/orders/disputes/${notification.orderDto.disputeId}`);
       } else {
         navigate(`${baseRoute}/orders/${notification.orderDto.orderId}`);
       }
@@ -163,6 +165,12 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                       <div className="text-xs text-gray-600 flex items-center flex-wrap gap-1">
                         <span>Order #{notification.orderDto.orderId}:</span>{' '}
                         {getStatusBadge(notification.orderStatus)}
+                      </div>
+                    )}
+                  {notification.content === 'Dispute Status Updated' &&
+                    notification.orderDto && (
+                      <div className="text-xs text-gray-600 flex items-center flex-wrap gap-1">
+                        Order #{notification.orderDto.orderId}: {getStatusBadge(notification.orderStatus)}
                       </div>
                     )}
                   {notification.content === 'New Badge Earned' && (
