@@ -375,7 +375,7 @@ export const CheckoutComplete: React.FC = () => {
 
         {/* Rating Section */}
         {status === 'succeeded' && !isLoading && showRating && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 mt-8">
             <Card>
               <CardHeader className="text-center space-y-2">
                 <div className="h-12 w-12 rounded-full bg-green-100 mx-auto flex items-center justify-center">
