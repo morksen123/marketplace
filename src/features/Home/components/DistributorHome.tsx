@@ -22,6 +22,7 @@ import { DistributorOrdersPreview } from '@/features/Orders/components/Distribut
 import { AnimatePresence, motion } from 'framer-motion';
 import { ImpactExplanation } from '@/features/Sustainability/Profile/components/ImpactExplanation';
 import { ImpactGoalsProgress } from './ImpactGoalsProgress';
+import { FoodDonationCard } from '@/features/Sustainability/FoodDonation/components/FoodDonationCard';
 import { Card, CardContent } from '@/components/ui/card';
 import bannerImage from '@/assets/buyer-homepage-banner.png';
 import food from '@/assets/food.png';
@@ -320,6 +321,7 @@ export const DistributorHome = () => {
           </Card>
         </motion.div>
 
+
         {/* Monthly Community Goals - Moved up */}
         <motion.div
           className="md:col-span-8"
@@ -511,6 +513,10 @@ export const DistributorHome = () => {
             </Card>
           </div>
         </motion.div>
+      </div>
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4 text-left">Donate & Make a Difference</h2>
+        <FoodDonationCard weightSaved={impactMetrics.weightSaved} />
       </div>
 
       {/* Orders Section */}
