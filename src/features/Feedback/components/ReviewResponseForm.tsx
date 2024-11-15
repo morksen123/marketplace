@@ -114,7 +114,7 @@ export const ReviewResponseForm = ({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               type="submit"
-              className={`bg-secondary hover:bg-secondary/90 ${
+              className={`button-green hover:bg-green-600 ${
                 response.trim().length < 10
                   ? 'opacity-50 cursor-not-allowed'
                   : ''

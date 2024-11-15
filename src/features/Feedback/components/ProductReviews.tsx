@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { format } from 'date-fns';
 import { Star } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -228,13 +230,13 @@ const ReviewCard = ({ review, isProductOwner }: ReviewCardProps) => {
                   onClick={() => setIsResponseFormOpen(true)}
                   className="text-blue-600 hover:text-blue-700"
                 >
-                  Edit
+                  <EditIcon />
                 </button>
                 <button
                   onClick={() => setIsDeleteDialogOpen(true)}
                   className="text-red-600 hover:text-red-700"
                 >
-                  Delete
+                  <DeleteIcon />
                 </button>
               </div>
             )}
