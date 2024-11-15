@@ -194,7 +194,6 @@ export const CheckoutComplete: React.FC = () => {
   const handleRatingSubmit = async (data: CreatePlatformRatingRequest) => {
     await createRating.mutateAsync(data);
     setShowRating(false);
-    navigate('/buyer/transactions');
   };
   const handleImpactCardClick = (
     category: 'food' | 'water' | 'electricity' | 'carbon',
@@ -387,7 +386,7 @@ export const CheckoutComplete: React.FC = () => {
 
         {/* Rating Section */}
         {status === 'succeeded' && !isLoading && showRating && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 mt-8">
             <Card>
               <CardHeader className="text-center space-y-2">
                 <div className="h-12 w-12 rounded-full bg-green-100 mx-auto flex items-center justify-center">
@@ -415,28 +414,6 @@ export const CheckoutComplete: React.FC = () => {
               </CardFooter>
             </Card>
           </div>
-        )}
-
-        {/* Navigation Buttons */}
-        {status === 'succeeded' && !isLoading && !showRating && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex justify-center space-x-4">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate('/buyer/home')}
-                >
-                  Return to Home
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => navigate('/buyer/transactions')}
-                >
-                  View Transactions
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         )}
       </div>
       <Dialog

@@ -12,6 +12,7 @@ import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ReviewPromptData } from '../types/review-types';
 
+// TODO: separate connection logic and dialog component using jotai
 export const ReviewPrompt = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [promptData, setPromptData] = useState<ReviewPromptData[] | null>(null);
@@ -56,7 +57,7 @@ export const ReviewPrompt = () => {
   const handleReviewNow = () => {
     if (!promptData) return;
     // Navigate to reviews page
-    window.location.href = `/buyer/orders`;
+    window.location.href = '/buyer/orders';
     setIsOpen(false);
   };
 
@@ -81,7 +82,7 @@ export const ReviewPrompt = () => {
           <AlertDialogTitle className="flex justify-between items-center">
             Pending Order Reviews
             <button
-              onClick={handleDismiss}
+              onClick={() => setIsOpen(false)}
               className="rounded-full p-1 hover:bg-gray-100"
             >
               <X className="h-4 w-4" />
