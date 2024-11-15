@@ -14,9 +14,8 @@ export const LandingNavBar: React.FC<LandingNavBarProps> = ({
 
   const tabs = [
     { name: 'Home', route: '/' },
+    { name: 'About Us', route: '/about' },
     { name: 'Blogs', route: '/blogs' },
-    { name: 'Mission', route: '/sustainability/mission' },
-    { name: 'About', route: '/sustainability/about' },
   ];
 
   useEffect(() => {
@@ -31,7 +30,7 @@ export const LandingNavBar: React.FC<LandingNavBarProps> = ({
       <div className="w-full px-4 pt-4">
         <div className="flex justify-between items-center">
           {/* Logo Section */}
-          <div className="pl-6">
+          <div className="pl-6 flex items-center">
             <Link to="/">
               <img src={logo} alt="GudFood Logo" className="h-12" />
             </Link>

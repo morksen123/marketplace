@@ -23,6 +23,10 @@ const BlogsCard: React.FC<BlogsCardProps> = ({ blog }) => {
     navigate(`/blogs/${blog.blogId}`);
   };
 
+  const truncateText = (text: string, maxLength: number) => {
+    return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+  };
+
   return (
     <motion.div
       whileHover={{ y: -5 }}
@@ -65,11 +69,11 @@ const BlogsCard: React.FC<BlogsCardProps> = ({ blog }) => {
           </div>
 
           <CardTitle className="text-xl font-bold line-clamp-2">
-            {blog.title}
+          {truncateText(blog.title, 50)}
           </CardTitle>
 
           <p className="text-muted-foreground text-sm line-clamp-2">
-            {blog.subtitle || "No description available"}
+          {truncateText(blog.subtitle || "No description available", 100)}
           </p>
 
         </CardHeader>

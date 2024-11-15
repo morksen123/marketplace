@@ -209,7 +209,7 @@ export default function AddressBook() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button variant="secondary" type="submit">
+              <Button variant="secondary" className="button-green" type="submit">
                 {formData.shippingAddressId ? 'Update Address' : 'Add Address'}
               </Button>
               {formData.shippingAddressId && (

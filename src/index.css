@@ -84,7 +84,7 @@
   }
 
   .button-green {
-    @apply bg-[#017A37] hover:bg-[#015A27];
+    @apply bg-green-500 hover:bg-green-600;
   }
   .button-red {
     @apply bg-red-600 hover:bg-red-700;

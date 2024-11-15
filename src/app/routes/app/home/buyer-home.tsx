@@ -5,7 +5,9 @@ export const BuyerHomeRoute = () => {
   return (
     <>
       <BuyerNavMenu showTabs={true} />
+      <div className="w-full">
       <BuyerHome />
+      </div>
     </>
   );
 };

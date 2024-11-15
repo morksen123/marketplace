@@ -76,7 +76,7 @@ const ViewDistributorPromotions: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex justify-end">
-            <Button variant="secondary" onClick={handleCreatePromotion}>
+            <Button className="button-green text-white hover:bg-green-600" onClick={handleCreatePromotion}>
               <AddIcon className="mr-2" />
               Create New Promotion
             </Button>

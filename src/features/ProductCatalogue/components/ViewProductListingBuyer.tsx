@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/carousel';
 import { useFavourites } from '@/features/BuyerAccount/hooks/useFavourites';
 import { useCart } from '@/features/Cart/hooks/useCart';
+import { ProductReviews } from '@/features/Feedback/components/ProductReviews';
 import {
   Batch,
   BulkPricing,
@@ -181,7 +182,7 @@ export const ViewProductListingBuyer: React.FC<
   };
 
   return (
-    <div className="wrapper">
+    <div className="wrapper text-left">
       {/* Carousel */}
       <Carousel className="w-full max-w-10xl mx-auto mb-6">
         <CarouselContent>
@@ -220,13 +221,11 @@ export const ViewProductListingBuyer: React.FC<
         <div className="flex-grow">
           <div className="flex justify-between items-start mb-2">
             <div>
-              <h1 className="text-3xl font-bold text-left">
-                {product.listingTitle}
-              </h1>
+              <h1 className="text-3xl font-bold">{product.listingTitle}</h1>
               {/* Pricing - implement promotion price here */}
               {promotionalPrice !== null ? (
                 <>
-                  <p className="text-2xl text-[#017A37] font-semibold text-left mr-2">
+                  <p className="text-2xl text-[#22C55E] font-semibold text-left mr-2">
                     ${promotionalPrice.toFixed(2)} per{' '}
                     {unitMapping[product.foodCategory] || 'unit'}
                   </p>
@@ -236,7 +235,7 @@ export const ViewProductListingBuyer: React.FC<
                   </p>
                 </>
               ) : (
-                <p className="text-2xl text-[#017A37] font-semibold text-left">
+                <p className="text-2xl text-[#22C55E] font-semibold text-left">
                   ${product.price.toFixed(2)}
                 </p>
               )}
@@ -271,7 +270,7 @@ export const ViewProductListingBuyer: React.FC<
                 <span className="ml-1 text-sm font-medium">4.5</span>
               </div>
               <button
-                className="ml-4 flex items-center bg-[#017A37] hover:bg-[#015A27] text-white rounded-full px-3 py-1 transition duration-300 ease-in-out"
+                className="ml-4 flex items-center button-green text-white rounded-full px-3 py-1 transition duration-300 ease-in-out"
                 onClick={handleChatClick}
               >
                 <ChatIcon style={{ fontSize: '18px' }} className="mr-1" />
@@ -366,7 +365,7 @@ export const ViewProductListingBuyer: React.FC<
                     )}
                   </td>
                   {promotionalDiscount > 0 && (
-                    <td className="border border-gray-300 px-4 py-2 text-[#017A37] font-semibold">
+                    <td className="border border-gray-300 px-4 py-2 text-[#22C55E] font-semibold">
                       ${pricing.discountedPrice.toFixed(2)}
                     </td>
                   )}
@@ -389,10 +388,10 @@ export const ViewProductListingBuyer: React.FC<
             min="1"
           />
           <button
-            className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 flex items-center"
+            className="button-green text-white px-4 py-2 rounded-full flex items-center"
             onClick={() => handleAddToCart(product, quantity)}
           >
-            <AddShoppingCartIcon className="mr-2" /> Add to Cart
+            <AddShoppingCartIcon className="mr-2" /> Add to Cart {product.foodCategory === 'FRUITS_AND_VEGETABLES' ? '(per kg)' : '(per item)'}
           </button>
         </div>
       )}
@@ -416,6 +415,10 @@ export const ViewProductListingBuyer: React.FC<
             </Card>
           ))}
         </div>
+      </div>
+
+      <div className="mt-8">
+        <ProductReviews productId={Number(productId)} />
       </div>
     </div>
   );

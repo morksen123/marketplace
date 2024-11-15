@@ -15,7 +15,7 @@ import { AlertTriangle, Minus, Plus, Tag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 import { useEffect, useState } from 'react';
-
+import { VoucherDropdown } from './VoucherDropdown';
 // Add this new interface
 interface AdminPromotion {
   id: number;
@@ -23,8 +23,25 @@ interface AdminPromotion {
   discountAmount: number;
 }
 
+interface Voucher {
+  voucherId: number;
+  voucherCode: string;
+  voucherValue: number;
+  expiresAt: string;
+  used: boolean;
+}
+
 export const Cart: React.FC = () => {
-  const { cart, removeFromCart, updateQuantity, cartPrice } = useCart();
+  const {
+    cart,
+    removeFromCart,
+    updateQuantity,
+    cartPrice,
+    addVoucher,
+    removeVoucher,
+    selectedVoucher,
+    setSelectedVoucher
+  } = useCart();
   const [calculatedTotal, setCalculatedTotal] = useState<number | null>(null);
   const [adminPromotionAmount, setAdminPromotionAmount] = useState<number>(0);
   const [adminPromotions, setAdminPromotions] = useState<AdminPromotion[]>([]);
@@ -72,12 +89,12 @@ export const Cart: React.FC = () => {
   useEffect(() => {
     if (adminPromotions.length > 0 && calculatedTotal !== null) {
       const eligiblePromotions = adminPromotions.filter(promo => promo.minimumSpend > cartPrice);
-      
+
       const sortedPromotions = eligiblePromotions.sort((a, b) => {
         if (a.minimumSpend === b.minimumSpend) {
           return b.discountAmount - a.discountAmount;
         }
-        return a.minimumSpend - b.minimumSpend; 
+        return a.minimumSpend - b.minimumSpend;
       });
 
       setNextBestPromotion(sortedPromotions[0] || null);
@@ -157,9 +174,8 @@ export const Cart: React.FC = () => {
                         </p>
                       )}
                       <span
-                        className={`text-sm font-semibold ${
-                          isDiscounted ? 'text-secondary' : 'text-gray-700'
-                        }`}
+                        className={`text-sm font-semibold ${isDiscounted ? 'text-secondary' : 'text-gray-700'
+                          }`}
                       >
                         ${item.price.toFixed(2)}
                       </span>
@@ -238,40 +254,70 @@ export const Cart: React.FC = () => {
               </div>
             );
           })}
-          <div className="flex justify-between items-center pt-6">
-            <div className="text-2xl font-bold flex flex-col">
-              <div className="flex items-center">
-                Total: 
-                {calculatedTotal !== null && calculatedTotal < cartPrice ? (
-                  <>
-                    <span className="line-through text-gray-500 mr-2">
-                      ${cartPrice.toFixed(2)}
-                    </span>
-                    <span className="text-secondary mr-2">
-                      ${calculatedTotal.toFixed(2)}
-                    </span>
-                    <span className="flex items-center text-orange-500 text-sm">
-                      <Tag className="h-3 w-3 mr-1" />
-                      Sitewide Promotion (-${(cartPrice - calculatedTotal).toFixed(2)})
-                    </span>
-                  </>
-                ) : (
-                  <span>${cartPrice.toFixed(2)}</span>
-                )}
+
+          <div className="flex flex-col gap-6">
+            <div className="flex justify-end">
+              <div className="w-[200px]">
+                <VoucherDropdown
+                  onVoucherSelect={setSelectedVoucher}
+                  selectedVoucher={selectedVoucher}
+                  calculatedTotal={calculatedTotal ?? cartPrice}
+                  onApply={(voucherCode) => {
+                    if (voucherCode) {
+                      addVoucher(voucherCode);
+                    } else {
+                      if (selectedVoucher?.voucherCode) {
+                        removeVoucher(selectedVoucher.voucherCode);
+                      }
+                    }
+                  }}
+                />
               </div>
-              {nextBestPromotion && (
-                <p className="text-sm text-secondary mt-2">
+            </div>
+
+            <div className="flex justify-between items-center pt-6">
+              <div className="text-2xl font-bold flex flex-col">
+                <div className="flex items-center">
+                  Total:
+                  {calculatedTotal !== null && (calculatedTotal < cartPrice || selectedVoucher) ? (
+                    <>
+                      <span className="line-through text-gray-500 mr-2">
+                        ${cartPrice.toFixed(2)}
+                      </span>
+                      <div className="flex flex-col">
+                        {adminPromotionAmount > 0 && (
+                          <span className="flex items-center text-orange-500 text-sm">
+                            <Tag className="h-3 w-3 mr-1" />
+                            Sitewide Promotion (-${adminPromotionAmount.toFixed(2)})
+                          </span>
+                        )}
+                        {selectedVoucher && (
+                          <span className="flex items-center text-blue-500 text-sm">
+                            <Tag className="h-3 w-3 mr-1" />
+                            Voucher Applied (-${selectedVoucher.voucherValue.toFixed(2)})
+                          </span>
+                        )}
+                      </div>
+                      <span className="ml-2 font-bold">
+                        ${calculatedTotal.toFixed(2)}
+                      </span>
+                    </>
+                  ) : (
+                    <span>${cartPrice.toFixed(2)}</span>
+                  )}
+                </div>
+                {nextBestPromotion && (
                   <p className="text-sm text-red-500 mt-2 italic text-left">
                     Add ${(nextBestPromotion.minimumSpend - cartPrice).toFixed(2)} more to your cart to save ${nextBestPromotion.discountAmount.toFixed(2)}!
                   </p>
-                </p>
-              )}
+                )}
+              </div>
+              <Link to="/buyer/checkout">
+                <Button variant="secondary" className="button-green" size="lg">
+                  Proceed to Checkout
+                </Button>
+              </Link>
             </div>
-            <Link to="/buyer/checkout">
-              <Button variant="secondary" size="lg">
-                Proceed to Checkout
-              </Button>
-            </Link>
           </div>
         </div>
       )}

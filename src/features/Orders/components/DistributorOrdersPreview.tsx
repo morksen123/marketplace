@@ -99,8 +99,8 @@ export const DistributorOrdersPreview: React.FC = () => {
         ) : (
           <p className="text-center text-gray-500">No recent orders</p>
         )}
-        <div className="mt-6 text-center">
-          <Button asChild className="px-4 py-2 rounded-md text-white font-semibold flex items-center button button-green hover:bg-green-900">
+        <div className="mt-6 flex justify-end">
+          <Button asChild className="flex items-center button-green border border-gray-300 text-white hover:bg-green-600">
             <Link to="/distributor/orders">View All Orders</Link>
           </Button>
         </div>

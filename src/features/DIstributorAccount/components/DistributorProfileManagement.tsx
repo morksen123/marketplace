@@ -102,7 +102,7 @@ const DistributorProfileManagement: React.FC = () => {
         updateProfile={updateProfile}
         profileFields={profileFields}
         greeting={greeting}
-        hasProfilePicture={false}
+        hasProfilePicture={true}
       />
     </div>
   );

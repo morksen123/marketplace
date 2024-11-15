@@ -40,7 +40,7 @@ export const BuyerChats: React.FC = () => {
               key={chat.chatId}
               className={`p-4 cursor-pointer transition-colors duration-300 ${
                 selectedChat?.chatId === chat.chatId
-                  ? 'bg-[#e8f5fe] border-l-4 border-[#017A37]'
+                  ? 'bg-[#e8f5fe] border-l-4 border-[#22C55E]'
                   : 'hover:bg-gray-50'
               }`}
               onClick={() => handleSelectChat(chat)}
@@ -49,7 +49,7 @@ export const BuyerChats: React.FC = () => {
                 <h3 className="font-semibold text-gray-800">
                   {chat.administratorId ? 'Administrator' : chat.distributorName}
                 </h3>
-                <p className="text-xs italic text-[#017A37]">{chat.distributorName}</p>
+                <p className="text-xs italic text-[#22C55E]">{chat.distributorName}</p>
                 <p className="text-sm text-gray-600 mt-1 w-full truncate text-left">
                   {chat.lastMessage?.slice(0, 60)}
                   {chat.lastMessage && chat.lastMessage.length > 60 ? '...' : ''}
@@ -233,7 +233,7 @@ export const BuyerChats: React.FC = () => {
 //               key={chat.chatId}
 //               className={`p-4 cursor-pointer transition-colors duration-300 ${
 //                 selectedChat?.chatId === chat.chatId
-//                   ? 'bg-[#e8f5fe] border-l-4 border-[#017A37]'
+//                   ? 'bg-[#e8f5fe] border-l-4 border-[#22C55E]'
 //                   : 'hover:bg-gray-50'
 //               }`}
 //               onClick={() => handleSelectChat(chat)}
@@ -242,7 +242,7 @@ export const BuyerChats: React.FC = () => {
 //                 <h3 className="font-semibold text-gray-800">
 //                   {chat.administratorId ? 'Administrator' : chat.distributorName}
 //                 </h3>
-//                 <p className="text-xs italic text-[#017A37]">{chat.distributorEmail}</p>
+//                 <p className="text-xs italic text-[#22C55E]">{chat.distributorEmail}</p>
 //                 <p className="text-sm text-gray-600 mt-1 w-full truncate text-left">
 //                   {chat.lastMessage?.slice(0, 60)}
 //                   {chat.lastMessage && chat.lastMessage.length > 60 ? '...' : ''}

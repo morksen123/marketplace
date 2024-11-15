@@ -1,6 +1,8 @@
 import { ROLES } from '@/features/Authentication/types/auth';
+import { ReviewPrompt } from '@/features/Feedback/components/ReviewPrompt';
 import { AuthGuard, RoleGuard } from '@/lib/auth';
 import { StripeWrapper } from '@/lib/stripe';
+import { getUserRoleFromCookie } from '@/lib/utils';
 import {
   createBrowserRouter,
   RouteObject,
@@ -17,6 +19,13 @@ const routes: RouteObject[] = [
     },
   },
   {
+    path: '/about',
+    lazy: async () => {
+      const { AboutRoute } = await import('./routes/about');
+      return { Component: AboutRoute };
+    },
+  },
+  {
     path: '/blogs',
     lazy: async () => {
       const { BlogsRoute } = await import('./routes/sustainability/blogs');
@@ -26,7 +35,9 @@ const routes: RouteObject[] = [
   {
     path: '/blogs/:blogId',
     lazy: async () => {
-      const { ViewBlogRoute } = await import('./routes/sustainability/view-blog');
+      const { ViewBlogRoute } = await import(
+        './routes/sustainability/view-blog'
+      );
       return { Component: ViewBlogRoute };
     },
   },
@@ -234,7 +245,9 @@ const routes: RouteObject[] = [
               {
                 path: '/buyer/orders/:orderId',
                 lazy: async () => {
-                  const { BuyerOrderDetailsRoute } = await import('./routes/buyerProfile/buyer-order-details');
+                  const { BuyerOrderDetailsRoute } = await import(
+                    './routes/buyerProfile/buyer-order-details'
+                  );
                   return { Component: BuyerOrderDetailsRoute };
                 },
               },
@@ -275,6 +288,15 @@ const routes: RouteObject[] = [
                   return { Component: LeaderboardRoute };
                 },
               },
+              {
+                path: '/buyer/reviews/pending',
+                lazy: async () => {
+                  const { ReviewsPendingRoute } = await import(
+                    './routes/reviews/ reviews-pending'
+                  );
+                  return { Component: ReviewsPendingRoute };
+                },
+              },
             ],
           },
           {
@@ -291,12 +313,21 @@ const routes: RouteObject[] = [
               },
               // Add other distributor-specific routes here
               {
-                path: '/distributor/profile',
+                path: '/distributor/profile-management',
                 lazy: async () => {
                   const { ProfileManagementRoute } = await import(
                     './routes/distributorProfile/profile-management'
                   );
                   return { Component: ProfileManagementRoute };
+                },
+              },
+              {
+                path: '/distributor/profile',
+                lazy: async () => {
+                  const { ProfileRoute } = await import(
+                    './routes/distributorProfile/profile'
+                  );
+                  return { Component: ProfileRoute };
                 },
               },
               {
@@ -426,7 +457,9 @@ const routes: RouteObject[] = [
               {
                 path: '/distributor/orders/:orderId',
                 lazy: async () => {
-                  const { DistributorOrderDetailsRoute } = await import('./routes/orders/distributor-order-details');
+                  const { DistributorOrderDetailsRoute } = await import(
+                    './routes/orders/distributor-order-details'
+                  );
                   return { Component: DistributorOrderDetailsRoute };
                 },
               },
@@ -461,10 +494,19 @@ const routes: RouteObject[] = [
               {
                 path: '/distributor/leaderboard',
                 lazy: async () => {
-                  const { LeaderboardRoute } = await import(
-                    './routes/sustainability/leaderboard'
+                  const { DistributorLeaderboardRoute } = await import(
+                    './routes/sustainability/distributor-leaderboard'
                   );
-                  return { Component: LeaderboardRoute };
+                  return { Component: DistributorLeaderboardRoute };
+                },
+              },
+              {
+                path: '/distributor/product-analytics',
+                lazy: async () => {
+                  const { DistributorAnalyticsPage } = await import(
+                    './routes/reviews/distributor-analytics'
+                  );
+                  return { Component: DistributorAnalyticsPage };
                 },
               },
             ],
@@ -504,5 +546,11 @@ const routes: RouteObject[] = [
 const router = createBrowserRouter(routes);
 
 export const AppRouter = () => {
-  return <RouterProvider router={router} />;
+  const userRole = getUserRoleFromCookie();
+  return (
+    <>
+      <RouterProvider router={router} />
+      {userRole === 'BUYER' && <ReviewPrompt />}
+    </>
+  );
 };

@@ -58,6 +58,7 @@ export const DistributorOrderDetailsPage: React.FC = () => {
             <Button
               onClick={() => handleStatusUpdate(() => acceptOrder.mutateAsync(order.orderId), 'accept')}
               variant="secondary"
+              className="button-green"
               disabled={isUpdating}
             >
               {isUpdating && lastAction === 'accept' ? <Loader2 size={24} className="h-4 w-4 animate-spin" /> : 'Accept Order'}

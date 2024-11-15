@@ -21,21 +21,21 @@ export interface Order {
 }
 
 export interface OrderLineItem {
-    orderLineItemId: number;
-    quantity: number;
-    price: number;
-    productId: number;
-    orderId: number;
-    productName: string;
-    deliveryMethod: string;
-    pickUpLocation: string;
+  orderLineItem: number;
+  quantity: number;
+  price: number;
+  productId: number;
+  orderId: number;
+  productName: string;
+  deliveryMethod: string;
+  pickUpLocation: string;
 }
 
 export interface ShippingAddress {
-    shippingAddressId: number;
-    label: string;
-    phoneNumber: string;
-    addressLine1: string;
-    addressLine2: string;
-    postalCode: string;
+  shippingAddressId: number;
+  label: string;
+  phoneNumber: string;
+  addressLine1: string;
+  addressLine2: string;
+  postalCode: string;
 }

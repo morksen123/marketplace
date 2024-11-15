@@ -8,7 +8,7 @@ export const ProfileRoute = () => {
       <BuyerNavMenu showTabs={false} />
       <div className="flex">
         <BuyerSideMenu />
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-8 w-full">
           <Profile profile={{}} />
         </div>
       </div>

@@ -29,6 +29,14 @@ import { useCart } from '../hooks/useCart';
 import { SavedAddressDropdown } from './SavedAddressDropdown';
 import { SelfPickupItems } from './selfPickUpItems';
 
+interface Voucher {
+  voucherId: number;
+  voucherCode: string;
+  voucherValue: number;
+  expiresAt: string;
+  used: boolean;
+}
+
 export const Checkout: React.FC = () => {
   const stripe = useStripe();
   const elements = useElements();
@@ -52,6 +60,7 @@ export const Checkout: React.FC = () => {
   const [adminPromotionAmount, setAdminPromotionAmount] = useState(0);
   const [originalTotal, setOriginalTotal] = useState(0);
   const [bulkPricingDiscount, setBulkPricingDiscount] = useState(0);
+  const [voucherAmount, setVoucherAmount] = useState<number | null>(null);
 
   useEffect(() => {
     if (defaultBillingAddress) {
@@ -135,7 +144,10 @@ export const Checkout: React.FC = () => {
       }
       const data = await response.json();
       setCalculatedTotal(data.cartTotal);
+      console.log('cartTotal', data.cartTotal);
       setAdminPromotionAmount(data.adminPromotionAmount);
+      console.log('hi', data.voucherAmount);  
+      setVoucherAmount(data.voucherAmount || null);
     } catch (error) {
       console.error('Error fetching calculated total:', error);
     }
@@ -369,6 +381,12 @@ export const Checkout: React.FC = () => {
                       <span>-${adminPromotionAmount.toFixed(2)}</span>
                     </div>
                   )}
+                  {voucherAmount && (
+                    <div className="flex justify-between text-sm text-blue-600">
+                      <span>Voucher Applied</span>
+                      <span>-${voucherAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Shipping</span>
                     <span className="font-medium">
@@ -387,7 +405,7 @@ export const Checkout: React.FC = () => {
                   <Button
                     type="submit"
                     variant="secondary"
-                    className="w-full"
+                    className="w-full button-green"
                     disabled={isLoading || !stripe || !elements}
                   >
                     {isLoading ? (

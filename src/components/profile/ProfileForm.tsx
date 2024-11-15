@@ -83,7 +83,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             <Button type="button" onClick={onCancel} variant="outline">Cancel</Button>
           </>
         ) : (
-          <Button type="button" onClick={onEdit} variant="secondary">Edit Profile</Button>
+          <Button type="button" className="button-green" onClick={onEdit} variant="secondary">Edit Profile</Button>
         )}
       </div>
     </form>

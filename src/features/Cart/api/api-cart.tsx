@@ -5,6 +5,16 @@ interface CartDto {
   cartId: string;
   buyerId: string;
   cartLineItems: CartLineItem[];
+  voucherAmount: number;
+  voucher: Voucher;
+}
+
+interface Voucher {
+  voucherId: number;
+  voucherCode: string;
+  voucherValue: number;
+  expiresAt: string;
+  used: boolean;
 }
 
 export interface CartLineItem {
@@ -14,6 +24,18 @@ export interface CartLineItem {
   quantity: number;
   bulkPricingDiscount: number;
   promotionDiscount: number;
+}
+
+interface ImpactMetricsDto {
+  weightSaved: number;
+  co2Prevented: number;
+  treesEquivalent: number;
+  electricityDaysSaved: number;
+  acNightsSaved: number;
+  mealsSaved: number;
+  waterLitresSaved: number;
+  carKmEquivalent: number;
+  showersEquivalent: number;
 }
 
 export async function viewCart(): Promise<CartDto | null> {
@@ -49,4 +71,19 @@ export async function removeItemFromCart(productId: string) {
 
 export async function createTransaction(paymentIntentId: string) {
   await post(`/cart/create-transaction?paymentIntentId=${paymentIntentId}`, {});
+}
+
+export async function calculateCartImpact(): Promise<ImpactMetricsDto | null> {
+  const { data } = await get<ImpactMetricsDto>('/cart/calculate-impact');
+  return data || null;
+}
+
+export async function addVoucher(voucherCode: string): Promise<CartDto | null> {
+  const { data } = await post<CartDto>(`/cart/apply-voucher?voucherCode=${voucherCode}`, {});
+  return data || null;
+}
+
+export async function removeVoucher(voucherCode: string): Promise<CartDto | null> {
+  const { data } = await del<CartDto>(`/cart/remove-voucher?voucherCode=${voucherCode}`);
+  return data || null;
 }

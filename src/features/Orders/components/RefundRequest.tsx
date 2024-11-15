@@ -60,9 +60,7 @@ export const RefundRequestModal: React.FC<RefundRequestModalProps> = ({
 
   const refundAmount = useMemo(() => {
     return order.orderLineItems
-      .filter((item) =>
-        selectedItems.has(item.orderLineItemId?.toString() || ''),
-      )
+      .filter((item) => selectedItems.has(item.orderLineItem?.toString() || ''))
       .reduce((total, item) => total + item.price * item.quantity, 0);
   }, [selectedItems, order.orderLineItems]);
 
@@ -152,21 +150,19 @@ export const RefundRequestModal: React.FC<RefundRequestModalProps> = ({
             <p className="font-medium mt-2">Items:</p>
             <ul className="space-y-2">
               {order.orderLineItems.map((item) => (
-                <li key={item.orderLineItemId} className="flex items-center">
+                <li key={item.orderLineItem} className="flex items-center">
                   <Checkbox
-                    id={`item-${item.orderLineItemId}`}
+                    id={`item-${item.orderLineItem}`}
                     checked={selectedItems.has(
-                      item.orderLineItemId?.toString() || '',
+                      item.orderLineItem?.toString() || '',
                     )}
                     onCheckedChange={() =>
-                      handleItemSelection(
-                        item.orderLineItemId?.toString() || '',
-                      )
+                      handleItemSelection(item.orderLineItem?.toString() || '')
                     }
                     className="mr-2"
                   />
                   <label
-                    htmlFor={`item-${item.orderLineItemId}`}
+                    htmlFor={`item-${item.orderLineItem}`}
                     className="text-sm"
                   >
                     {item.productName} - ${item.price.toFixed(2)} x{' '}
