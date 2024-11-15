@@ -199,6 +199,7 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
               onClick={() => handleCancelOrder(order.orderId)}
               className="button-green"
               disabled={loadingStates[order.orderId]}
+              className="button-green"
             >
               {loadingStates[order.orderId] ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -217,6 +218,7 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
             onClick={() => handleCompleteOrder(order.orderId)}
             className="button-green"
             disabled={loadingStates[order.orderId]}
+            className="button-green"
           >
             {loadingStates[order.orderId] ? (
               <Loader2 className="h-4 w-4 animate-spin" />

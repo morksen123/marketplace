@@ -8,6 +8,7 @@ import { CircularProgress } from '@/components/ui/circular-progress';
 interface ImpactGoal {
     id?: number;
     targetWeightInKg: number;
+    progressWeightInKg: number;
     description: string;
     startDate: string;
     endDate: string;
@@ -91,7 +92,7 @@ export const ImpactGoalsProgress = ({ weightSaved }: { weightSaved: number }) =>
                                         <div className="text-center">
                                             <h3 className="font-semibold text-gray-800">{goal.description}</h3>
                                             <p className="text-sm text-gray-500">
-                                                {savedWeight.toFixed(0)} kg of {goal.targetWeightInKg} kg goal
+                                                {goal.progressWeightInKg.toFixed(0)} kg of {goal.targetWeightInKg} kg goal
                                             </p>
                                         </div>
                                     </div>

@@ -139,7 +139,7 @@ export const ReviewPrompt = () => {
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleReviewNow}
-            className="bg-secondary hover:bg-secondary/90"
+            className="button-green text-white hover:bg-green-600"
           >
             View pending orders
           </AlertDialogAction>
