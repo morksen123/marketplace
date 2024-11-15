@@ -6,6 +6,7 @@ import { Link, useParams } from 'react-router-dom';
 import { RefundRequestModal } from '../components/RefundRequest';
 import { useBuyerOrders } from '../hooks/useBuyerOrders';
 import { Order } from '../types/orders';
+import { LodgeDisputeModal } from '../components/BuyerLodgeDispute';
 
 export const BuyerOrderDetailsPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
@@ -55,7 +56,6 @@ export const BuyerOrderDetailsPage: React.FC = () => {
           </Button>
         );
       case 'DELIVERED':
-      case 'PICKUP':
         return (
           <div className="flex space-x-4">
             <RefundRequestModal order={order} />
@@ -72,6 +72,11 @@ export const BuyerOrderDetailsPage: React.FC = () => {
             </Button>
           </div>
         );
+      case 'REFUND_REJECTED':
+        return (
+          <LodgeDisputeModal order={order} refundId={order.refundId}/>
+        );
+      case 'PICKUP':
       default:
         return null;
     }

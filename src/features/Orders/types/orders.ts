@@ -1,29 +1,23 @@
-export type OrderStatus =
-  | 'PENDING'
-  | 'ACCEPTED'
-  | 'PICKUP'
-  | 'CANCELLED'
-  | 'SHIPPED'
-  | 'DELIVERED'
-  | 'COMPLETED';
+export type OrderStatus = 'PENDING' | 'ACCEPTED' | 'PICKUP' | 'CANCELLED' | 'SHIPPED' | 'DELIVERED' | 'COMPLETED' | 'REFUNDED' | 'IN_REFUND' | 'REFUND_REJECTED' | 'IN_DISPUTE';
 
 export interface Order {
-  orderId: number;
-  status: OrderStatus;
-  orderTotal: number;
-  createdDateTime: string;
-  updatedDateTime?: string;
-  trackingNo?: string;
-  transactionId: number;
-  buyerId: number;
-  buyerEmail: string;
-  distributorId: number;
-  distributorName: string;
-  orderFees: number;
-  orderLineItems: OrderLineItem[];
-  shippingAddress: ShippingAddress;
-  pickUpLocation: string;
-  reviewNeeded: boolean;
+    orderId: number;
+    status: OrderStatus;
+    orderTotal: number;
+    createdDateTime: string;
+    updatedDateTime?: string;
+    trackingNo?: string;
+    transactionId: number;
+    buyerId: number;
+    buyerEmail: string;
+    distributorId: number;
+    distributorName: string;
+    orderFees: number;
+    orderLineItems: OrderLineItem[];
+    shippingAddress: ShippingAddress;
+    pickUpLocation: string;
+    refundId: number;
+    disputeId: number;
 }
 
 export interface OrderLineItem {

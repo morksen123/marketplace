@@ -8,6 +8,7 @@ import { Package } from 'lucide-react';
 import React from 'react';
 import { getOrderDetails } from '../api/payments';
 import { DistributorInformation } from './DistributorInformation';
+import { OrderStatus } from '../types/payment';
 
 export const OrderDetails: React.FC<{ orderIds: number[] }> = ({
   orderIds,
@@ -32,6 +33,26 @@ export const OrderDetails: React.FC<{ orderIds: number[] }> = ({
   if (!orders || orders.length === 0) {
     return <div>No order details available.</div>;
   }
+
+  const getStatusBadge = (status: OrderStatus) => {
+    const statusColors: Record<OrderStatus, string> = {
+      PENDING: 'bg-yellow-100 text-yellow-800',
+      ACCEPTED: 'bg-blue-100 text-blue-800',
+      CANCELLED: 'bg-red-100 text-red-800',
+      SHIPPED: 'bg-purple-100 text-purple-800',
+      PICKUP: 'bg-orange-100 text-orange-800',
+      DELIVERED: 'bg-green-100 text-green-800',
+      COMPLETED: 'bg-gray-100 text-gray-800',
+      REFUNDED: 'bg-pink-100 text-pink-800',
+      IN_REFUND: 'bg-indigo-100 text-indigo-800',
+      REFUND_REJECTED: 'bg-rose-100 text-rose-800',
+      IN_DISPUTE: 'bg-amber-100 text-amber-800'
+    };
+
+    const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : capitalizeFirstLetter(status);
+
+    return <Badge className={`${statusColors[status]} font-medium`}>{displayStatus}</Badge>;
+  };
 
   return (
     <Card className="shadow-sm border border-gray-200">
@@ -58,17 +79,7 @@ export const OrderDetails: React.FC<{ orderIds: number[] }> = ({
                       Order #{order.orderId}
                     </h4>
                   </div>
-                  <Badge
-                    variant={
-                      order.status === 'COMPLETED'
-                        ? 'secondary'
-                        : order.status === 'PENDING'
-                        ? 'warning'
-                        : 'destructive'
-                    }
-                  >
-                    {capitalizeFirstLetter(order.status)}
-                  </Badge>
+                  {getStatusBadge(order.status)}
                 </div>
                 <DistributorInformation distributorId={order.distributorId} />
 

@@ -1,35 +1,27 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useDistributorOrders } from '../hooks/useDistributorOrders';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Package, ArrowLeft, Loader2, Calendar, User, CreditCard, Truck, MapPin, Phone } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { OrderStatus } from '@/features/Orders/types/orders';
-import {
-  ArrowLeft,
-  Calendar,
-  CreditCard,
-  Loader2,
-  MapPin,
-  Package,
-  Phone,
-  Truck,
-  User,
-} from 'lucide-react';
-import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useDistributorOrders } from '../hooks/useDistributorOrders';
+import { capitalizeFirstLetter } from '@/lib/utils';
 
 export const DistributorOrderDetailsPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const {
-    order,
-    isLoadingOrders,
-    acceptOrder,
-    rejectOrder,
-    shipOrder,
+  const { 
+    order, 
+    isLoadingOrders, 
+    acceptOrder, 
+    rejectOrder, 
+    shipOrder, 
     deliverOrder,
     awaitPickupOrder,
-    refetchOrders,
+    completeOrder,
+    refetchOrders
   } = useDistributorOrders(Number(orderId));
 
   const [isUpdating, setIsUpdating] = useState(false);
@@ -43,10 +35,7 @@ export const DistributorOrderDetailsPage: React.FC = () => {
     return <div className="text-center">Order not found</div>;
   }
 
-  const handleStatusUpdate = async (
-    action: () => Promise<void>,
-    actionName: string,
-  ) => {
+  const handleStatusUpdate = async (action: () => Promise<void>, actionName: string) => {
     setIsUpdating(true);
     setLastAction(actionName);
     try {
@@ -67,101 +56,63 @@ export const DistributorOrderDetailsPage: React.FC = () => {
         return (
           <>
             <Button
-              onClick={() =>
-                handleStatusUpdate(
-                  () => acceptOrder.mutateAsync(order.orderId),
-                  'accept',
-                )
-              }
+              onClick={() => handleStatusUpdate(() => acceptOrder.mutateAsync(order.orderId), 'accept')}
               variant="secondary"
               className="button-green"
               disabled={isUpdating}
             >
-              {isUpdating && lastAction === 'accept' ? (
-                <Loader2 size={24} className="h-4 w-4 animate-spin" />
-              ) : (
-                'Accept Order'
-              )}
+              {isUpdating && lastAction === 'accept' ? <Loader2 size={24} className="h-4 w-4 animate-spin" /> : 'Accept Order'}
             </Button>
             <Button
-              onClick={() =>
-                handleStatusUpdate(
-                  () => rejectOrder.mutateAsync(order.orderId),
-                  'reject',
-                )
-              }
+              onClick={() => handleStatusUpdate(() => rejectOrder.mutateAsync(order.orderId), 'reject')}
               variant="destructive"
               disabled={isUpdating}
             >
-              {isUpdating && lastAction === 'reject' ? (
-                <Loader2 size={24} className="h-4 w-4 animate-spin" />
-              ) : (
-                'Reject Order'
-              )}
+              {isUpdating && lastAction === 'reject' ? <Loader2 size={24} className="h-4 w-4 animate-spin"/> : 'Reject Order'}
             </Button>
           </>
         );
       case 'ACCEPTED':
         return order.orderLineItems[0]?.deliveryMethod === 'SELF_PICK_UP' ? (
           <Button
-            onClick={() =>
-              handleStatusUpdate(
-                () => awaitPickupOrder.mutateAsync(order.orderId),
-                'awaitPickup',
-              )
-            }
+            onClick={() => handleStatusUpdate(() => awaitPickupOrder.mutateAsync(order.orderId), 'awaitPickup')}
             variant="secondary"
             disabled={isUpdating}
           >
-            {isUpdating && lastAction === 'awaitPickup' ? (
-              <Loader2 size={24} className="h-4 w-4 animate-spin" />
-            ) : (
-              'Set Awaiting Pickup'
-            )}
+            {isUpdating && lastAction === 'awaitPickup' ? <Loader2 size={24} className="h-4 w-4 animate-spin"/> : 'Set Awaiting Pickup'}
           </Button>
         ) : (
           <Button
             onClick={() => {
               const trackingNo = prompt('Enter tracking number:');
               if (trackingNo) {
-                handleStatusUpdate(
-                  () =>
-                    shipOrder.mutateAsync({
-                      orderId: order.orderId,
-                      trackingNo,
-                    }),
-                  'ship',
-                );
+                handleStatusUpdate(() => shipOrder.mutateAsync({ orderId: order.orderId, trackingNo }), 'ship');
               }
             }}
             variant="secondary"
             disabled={isUpdating}
           >
-            {isUpdating && lastAction === 'ship' ? (
-              <Loader2 size={24} className="h-4 w-4 animate-spin" />
-            ) : (
-              'Ship Order'
-            )}
+            {isUpdating && lastAction === 'ship' ? <Loader2 size={24} className="h-4 w-4 animate-spin"/> : 'Ship Order'}
           </Button>
         );
       case 'SHIPPED':
-      case 'PICKUP':
         return (
           <Button
-            onClick={() =>
-              handleStatusUpdate(
-                () => deliverOrder.mutateAsync(order.orderId),
-                'deliver',
-              )
-            }
+            onClick={() => handleStatusUpdate(() => deliverOrder.mutateAsync(order.orderId), 'deliver')}
             variant="secondary"
             disabled={isUpdating}
           >
-            {isUpdating && lastAction === 'deliver' ? (
-              <Loader2 size={24} className="h-4 w-4 animate-spin" />
-            ) : (
-              'Mark as Delivered'
-            )}
+            {isUpdating && lastAction === 'deliver' ? <Loader2 size={24} className="h-4 w-4 animate-spin"/> : 'Mark as Delivered'}
+          </Button>
+        );
+      case 'PICKUP':
+        return (
+          <Button
+            onClick={() => handleStatusUpdate(() => completeOrder.mutateAsync(order.orderId), 'complete')}
+            variant="secondary"
+            disabled={isUpdating}
+          >
+            {isUpdating && lastAction === 'complete' ? <Loader2 size={24} className="h-4 w-4 animate-spin"/> : 'Mark as Completed'}
           </Button>
         );
       default:
@@ -178,15 +129,15 @@ export const DistributorOrderDetailsPage: React.FC = () => {
       PICKUP: 'bg-orange-100 text-orange-800',
       DELIVERED: 'bg-green-100 text-green-800',
       COMPLETED: 'bg-gray-100 text-gray-800',
+      REFUNDED: 'bg-pink-100 text-pink-800',
+      IN_REFUND: 'bg-indigo-100 text-indigo-800',
+      REFUND_REJECTED: 'bg-rose-100 text-rose-800',
+      IN_DISPUTE: 'bg-amber-100 text-amber-800'
     };
 
-    const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : status;
+    const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : capitalizeFirstLetter(status);
 
-    return (
-      <Badge className={`${statusColors[status]} font-medium`}>
-        {displayStatus}
-      </Badge>
-    );
+    return <Badge className={`${statusColors[status]} font-medium`}>{displayStatus}</Badge>;
   };
 
   return (
@@ -199,7 +150,9 @@ export const DistributorOrderDetailsPage: React.FC = () => {
           <ArrowLeft className="mr-2" size={20} />
           Back to All Orders
         </Link>
-        <div className="flex space-x-2">{renderActionButtons()}</div>
+        <div className="flex space-x-2">
+          {renderActionButtons()}
+        </div>
       </div>
 
       <Card className="shadow-sm border border-gray-200">
@@ -222,34 +175,24 @@ export const DistributorOrderDetailsPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="flex items-center">
                 <Calendar className="mr-2 text-gray-600" size={16} />
-                <span className="text-sm text-gray-600">
-                  Order Date: {new Date(order.createdDateTime).toLocaleString()}
-                </span>
+                <span className="text-sm text-gray-600">Order Date: {new Date(order.createdDateTime).toLocaleString()}</span>
               </div>
               <div className="flex items-center">
                 <User className="mr-2 text-gray-600" size={16} />
-                <span className="text-sm text-gray-600">
-                  Buyer ID: {order.buyerId}
-                </span>
+                <span className="text-sm text-gray-600">Buyer ID: {order.buyerId}</span>
               </div>
               <div className="flex items-center">
                 <CreditCard className="mr-2 text-gray-600" size={16} />
-                <span className="text-sm text-gray-600">
-                  Transaction ID: {order.transactionId}
-                </span>
+                <span className="text-sm text-gray-600">Transaction ID: {order.transactionId}</span>
               </div>
               <div className="flex items-center">
                 <Truck className="mr-2 text-gray-600" size={16} />
-                <span className="text-sm text-gray-600">
-                  Order Fees: ${order.orderFees?.toFixed(2)}
-                </span>
+                <span className="text-sm text-gray-600">Order Fees: ${order.orderFees.toFixed(2)}</span>
               </div>
               {order.trackingNo && (
                 <div className="flex items-center">
                   <Truck className="mr-2 text-gray-600" size={16} />
-                  <span className="text-sm text-gray-600">
-                    Tracking Number: {order.trackingNo}
-                  </span>
+                  <span className="text-sm text-gray-600">Tracking Number: {order.trackingNo}</span>
                 </div>
               )}
             </div>
@@ -268,17 +211,11 @@ export const DistributorOrderDetailsPage: React.FC = () => {
                 <span className="col-span-3 text-right">Total</span>
               </div>
               {order.orderLineItems.map((item, index) => (
-                <React.Fragment key={item.orderLineItem}>
+                <React.Fragment key={item.orderLineItemId}>
                   <div className="grid grid-cols-12 gap-2 items-center py-2 text-sm text-left">
-                    <span className="col-span-5 font-medium">
-                      {item.productName}
-                    </span>
-                    <span className="col-span-2 text-gray-600">
-                      ${item.price.toFixed(2)}
-                    </span>
-                    <span className="col-span-2 text-center text-gray-600">
-                      {item.quantity}
-                    </span>
+                    <span className="col-span-5 font-medium">{item.productName}</span>
+                    <span className="col-span-2 text-gray-600">${item.price.toFixed(2)}</span>
+                    <span className="col-span-2 text-center text-gray-600">{item.quantity}</span>
                     <span className="col-span-3 text-right font-medium">
                       ${(item.price * item.quantity).toFixed(2)}
                     </span>
@@ -298,18 +235,10 @@ export const DistributorOrderDetailsPage: React.FC = () => {
                   <MapPin className="mr-2" size={16} />
                   Shipping Address
                 </h3>
-                <p className="text-sm text-gray-600 text-left">
-                  {order.shippingAddress?.label ?? 'N/A'}
-                </p>
-                <p className="text-sm text-gray-600 text-left">
-                  {order.shippingAddress?.addressLine1 ?? 'N/A'}
-                </p>
-                <p className="text-sm text-gray-600 text-left">
-                  {order.shippingAddress?.addressLine2 ?? ''}
-                </p>
-                <p className="text-sm text-gray-600 text-left">
-                  {order.shippingAddress?.postalCode ?? 'N/A'}
-                </p>
+                <p className="text-sm text-gray-600 text-left">{order.shippingAddress?.label ?? 'N/A'}</p>
+                <p className="text-sm text-gray-600 text-left">{order.shippingAddress?.addressLine1 ?? 'N/A'}</p>
+                <p className="text-sm text-gray-600 text-left">{order.shippingAddress?.addressLine2 ?? ''}</p>
+                <p className="text-sm text-gray-600 text-left">{order.shippingAddress?.postalCode ?? 'N/A'}</p>
                 <p className="text-sm text-gray-600 text-left flex items-center mt-1">
                   <Phone className="mr-2" size={14} />
                   {order.shippingAddress?.phoneNumber ?? 'N/A'}
@@ -321,9 +250,7 @@ export const DistributorOrderDetailsPage: React.FC = () => {
                     <MapPin className="mr-2" size={16} />
                     Pick-up Location
                   </h3>
-                  <p className="text-sm text-gray-600">
-                    {order.pickUpLocation}
-                  </p>
+                  <p className="text-sm text-gray-600">{order.pickUpLocation}</p>
                 </div>
               )}
             </div>

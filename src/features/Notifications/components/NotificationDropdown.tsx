@@ -5,6 +5,8 @@ import { Bell, MessageCircle, Package } from 'lucide-react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Medal } from 'lucide-react';
+import { capitalizeFirstLetter } from '@/lib/utils';
+
 interface NotificationDropdownProps {
   notifications: Notification[];
   onClose: () => void;
@@ -45,20 +47,20 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   };
 
   const handleNotificationClick = async (notification: Notification) => {
-    await markNotificationAsRead(notification.notificationId.toString()); // Wait for this to complete
+    await markNotificationAsRead(notification.notificationId.toString());
     const baseRoute = userRole === 'buyer' ? '/buyer' : '/distributor';
 
     if (notification.content === 'New Message' && notification.messageDto) {
       navigate(`${baseRoute}/profile/chats`);
-    } else if (
-      notification.content === 'New Order Created' &&
-      notification.orderDto
-    ) {
-      navigate(`${baseRoute}/orders/${notification.orderDto.orderId}`);
-    } else if (
-      notification.content === 'Order Status Updated' &&
-      notification.orderDto
-    ) {
+    } else if (notification.content === 'Order Status Updated' && notification.orderDto) {
+      if (['IN_REFUND', 'REFUNDED', 'REFUND_REJECTED'].includes(notification.orderStatus)) {
+        navigate(`${baseRoute}/orders/refunds/${notification.orderDto.refundId}`);
+      } else if (notification.orderStatus === 'IN_DISPUTE') {
+        navigate(`${baseRoute}/orders/disputes/${notification.orderDto.disputeId}`);
+      } else {
+        navigate(`${baseRoute}/orders/${notification.orderDto.orderId}`);
+      }
+    } else if (notification.content === 'New Order Created' && notification.orderDto) {
       navigate(`${baseRoute}/orders/${notification.orderDto.orderId}`);
     } else if (notification.content.includes('star')) {
       navigate(`/view-product-listing/${notification.productId}`);
@@ -94,7 +96,13 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       PICKUP: 'bg-orange-100 text-orange-800',
       DELIVERED: 'bg-green-100 text-green-800',
       COMPLETED: 'bg-gray-100 text-gray-800',
+      REFUNDED: 'bg-pink-100 text-pink-800',
+      IN_REFUND: 'bg-indigo-100 text-indigo-800',
+      REFUND_REJECTED: 'bg-rose-100 text-rose-800',
+      IN_DISPUTE: 'bg-amber-100 text-amber-800'
     };
+
+    const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : capitalizeFirstLetter(status);
 
     return (
       <Badge
@@ -102,7 +110,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           statusColors[status] || 'bg-gray-100 text-gray-800'
         } text-xs px-1 py-0.5`}
       >
-        {status}
+        {displayStatus}
       </Badge>
     );
   };
@@ -157,6 +165,12 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                       <div className="text-xs text-gray-600 flex items-center flex-wrap gap-1">
                         <span>Order #{notification.orderDto.orderId}:</span>{' '}
                         {getStatusBadge(notification.orderStatus)}
+                      </div>
+                    )}
+                  {notification.content === 'Dispute Status Updated' &&
+                    notification.orderDto && (
+                      <div className="text-xs text-gray-600 flex items-center flex-wrap gap-1">
+                        Order #{notification.orderDto.orderId}: {getStatusBadge(notification.orderStatus)}
                       </div>
                     )}
                   {notification.content === 'New Badge Earned' && (

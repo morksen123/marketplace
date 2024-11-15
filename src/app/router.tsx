@@ -252,6 +252,34 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/buyer/orders/refunds',
+                lazy: async () => {
+                  const { BuyerRefundsRoute } = await import('./routes/refunds/buyer-refunds');
+                  return { Component: BuyerRefundsRoute };
+                },
+              },
+              {
+                path: '/buyer/orders/refunds/:refundId',
+                lazy: async () => {
+                  const { BuyerRefundDetailsRoute } = await import('./routes/refunds/buyer-refund-details');
+                  return { Component: BuyerRefundDetailsRoute };
+                },
+              },
+              {
+                path: '/buyer/orders/disputes',
+                lazy: async () => {
+                  const { BuyerDisputesRoute } = await import('./routes/disputes/buyer-disputes');
+                  return { Component: BuyerDisputesRoute };
+                }
+              },
+              {
+                path: 'buyer/orders/disputes/:disputeId',
+                lazy: async () => {
+                  const { BuyerDisputeDetailsRoute } = await import('./routes/disputes/buyer-dispute-details');
+                  return { Component: BuyerDisputeDetailsRoute };
+                }
+              },
+              {
                 path: '/buyer/leaderboard',
                 lazy: async () => {
                   const { LeaderboardRoute } = await import(
@@ -433,6 +461,34 @@ const routes: RouteObject[] = [
                     './routes/orders/distributor-order-details'
                   );
                   return { Component: DistributorOrderDetailsRoute };
+                },
+              },
+              {
+                path: '/distributor/orders/refunds',
+                lazy: async () => {
+                  const { DistributorRefundsRoute } = await import('./routes/refunds/distributor-refunds');
+                  return { Component: DistributorRefundsRoute };
+                },
+              },
+              {
+                path: '/distributor/orders/refunds/:refundId',
+                lazy: async () => {
+                  const { DistributorRefundDetailsRoute } = await import('./routes/refunds/distributor-refund-details');
+                  return { Component: DistributorRefundDetailsRoute };
+                },
+              },
+              {
+                path: '/distributor/orders/disputes',
+                lazy: async () => {
+                  const { DistributorDisputesRoute } = await import('./routes/disputes/distributor-disputes');
+                  return { Component: DistributorDisputesRoute };
+                },
+              },
+              {
+                path:'/distributor/orders/disputes/:disputeId',
+                lazy: async () => {
+                  const { DistributorDisputeDetailsRoute } = await import('./routes/disputes/distributor-dispute-details');
+                  return { Component: DistributorDisputeDetailsRoute };
                 },
               },
               {

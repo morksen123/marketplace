@@ -17,12 +17,13 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@
 import { Loader2, Package, Search, ArrowDown, ArrowUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { capitalizeFirstLetter } from '@/lib/utils';
 
 interface DistributorOrderListProps {
   orders: Order[];
 }
 
-const STATUS_FILTERS: OrderStatus[] = ['PENDING', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'PICKUP', 'COMPLETED', 'CANCELLED'];
+const STATUS_FILTERS: OrderStatus[] = ['PENDING', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'PICKUP', 'COMPLETED', 'CANCELLED', 'REFUNDED', 'IN_REFUND', 'REFUND_REJECTED', 'IN_DISPUTE'];
 
 const getOrderCountsByStatus = (orders: Order[]) => {
   const counts: Record<OrderStatus | 'ALL', number> = {
@@ -34,6 +35,10 @@ const getOrderCountsByStatus = (orders: Order[]) => {
     PICKUP: 0,
     COMPLETED: 0,
     CANCELLED: 0,
+    REFUNDED: 0,
+    IN_REFUND: 0,
+    REFUND_REJECTED: 0,
+    IN_DISPUTE: 0
   };
 
   orders.forEach((order) => {
@@ -51,6 +56,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
     rejectOrder, 
     shipOrder, 
     deliverOrder,
+    completeOrder,
     awaitPickupOrder,
     refetchOrders
   } = useDistributorOrders();
@@ -157,6 +163,16 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
     }
   };
 
+  const handleCompleteOrder = async (orderId: number) => {
+    setLoading(orderId, true);
+    try {
+      await completeOrder.mutateAsync(orderId);
+      await refetchOrders();
+    } finally {
+      setLoading(orderId, false);
+    }
+  };
+
   const getStatusBadge = (status: OrderStatus) => {
     const statusColors: Record<OrderStatus, string> = {
       PENDING: 'bg-yellow-100 text-yellow-800',
@@ -166,9 +182,13 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
       PICKUP: 'bg-orange-100 text-orange-800',
       DELIVERED: 'bg-green-100 text-green-800',
       COMPLETED: 'bg-gray-100 text-gray-800',
+      REFUNDED: 'bg-pink-100 text-pink-800',
+      IN_REFUND: 'bg-indigo-100 text-indigo-800',
+      REFUND_REJECTED: 'bg-rose-100 text-rose-800',
+      IN_DISPUTE: 'bg-amber-100 text-amber-800'
     };
 
-    const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : status;
+    const displayStatus = status === 'PICKUP' ? 'AWAITING PICKUP' : capitalizeFirstLetter(status);
 
     return <Badge className={`${statusColors[status]} font-medium`}>{displayStatus}</Badge>;
   };
@@ -241,6 +261,22 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
             {loadingStates[order.orderId] ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Delivered'}
           </Button>
         );
+      case 'PICKUP':
+        return (
+          <div className="flex space-x-4">
+          <Button
+            variant="secondary"
+              onClick={() => handleCompleteOrder(order.orderId)}
+            disabled={loadingStates[order.orderId]}
+          >
+            {loadingStates[order.orderId] ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              'Complete Order'
+            )}
+          </Button>
+          </div>
+        )
       default:
         return null;
     }
@@ -317,7 +353,7 @@ export const DistributorOrderList: React.FC<DistributorOrderListProps> = () => {
                 variant={activeFilter === status ? 'default' : 'outline'}
                 size="sm"
               >
-                {status === 'PICKUP' ? 'Ready for Pickup' : status.charAt(0) + status.slice(1).toLowerCase()} ({orderCounts[status]})
+                {status === 'PICKUP' ? 'Ready for Pickup' : capitalizeFirstLetter(status)} ({orderCounts[status]})
               </Button>
             ))}
           </div>

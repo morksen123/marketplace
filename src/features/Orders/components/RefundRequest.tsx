@@ -83,6 +83,7 @@ export const RefundRequestModal: React.FC<RefundRequestModalProps> = ({
       setReason('');
       setDetails('');
       setSelectedItems(new Set());
+      window.location.reload();
     },
     onError: () => {
       handleErrorApi(

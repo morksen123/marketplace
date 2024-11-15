@@ -1,15 +1,15 @@
 import { DistributorNavMenu } from "@/features/NavigationMenu/components/DistributorNavMenu";
-import { DistributorOrdersPage } from "@/features/Orders/pages/DistributorOrdersPage";
 import { OrdersSideMenu } from "@/features/NavigationMenu/components/OrdersSideMenu";
+import { DistributorRefundsPage } from "@/features/Refunds/pages/DistributorRefundsPage";
 
-export const DistributorOrdersRoute = () => {
+export const DistributorRefundsRoute = () => {
   return (
     <div>
       <DistributorNavMenu />
       <div className="flex">
         <OrdersSideMenu userType="distributor" />
         <div className="flex-1 p-8">
-          <DistributorOrdersPage />
+          <DistributorRefundsPage />
         </div>
       </div>
     </div>
