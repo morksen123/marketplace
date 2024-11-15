@@ -512,11 +512,13 @@ export const DistributorHome = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Food Donation Portion */}
+          <div className="mt-8">
+            <FoodDonationCard weightSaved={impactMetrics.weightSaved} />
+          </div>
+          
         </motion.div>
-      </div>
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4 text-left">Donate & Make a Difference</h2>
-        <FoodDonationCard weightSaved={impactMetrics.weightSaved} />
       </div>
 
       {/* Orders Section */}
