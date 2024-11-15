@@ -48,8 +48,8 @@ export const Badges: React.FC<BadgesProps> = ({ badges, userType }) => {
             </button>
           </div>
         </CardHeader>
-        <CardContent className="h-[calc(100%-5rem)]">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 h-full">
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 content-start">
             {badges && badges.length > 0 ? (
               <>
                 {displayedBadges.map((badge) => (
@@ -66,12 +66,12 @@ export const Badges: React.FC<BadgesProps> = ({ badges, userType }) => {
                 {hasMoreBadges && (
                   <motion.div
                     whileHover={{ scale: 1.05 }}
-                    className="flex items-center justify-center col-span-2 md:col-span-3"
+                    className="flex items-center justify-center col-span-2 md:col-span-3 mt-4"
                   >
                     <Button
                       onClick={() => setIsAllBadgesOpen(true)}
                       variant="outline"
-                      className="h-full w-1/2 bg-white/50 hover:bg-white/80"
+                      className="w-1/2 bg-white/50 hover:bg-white/80"
                     >
                       View All Badges ({badges.length})
                     </Button>
