@@ -1,27 +1,28 @@
 import logo from '@/assets/gudfood-logo.png';
 import { Button } from '@/components/ui/button';
 import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
+import { NotificationDropdown } from '@/features/Notifications/components/NotificationDropdown';
+import { notificationsAtom } from '@/store/notificationAtoms';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
+import LeaderboardOutlinedIcon from '@mui/icons-material/LeaderboardOutlined';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import LoyaltyIcon from '@mui/icons-material/Loyalty';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
 import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirectoryOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
-import LoyaltyIcon from '@mui/icons-material/Loyalty';
 import { useAtom } from 'jotai';
-import { notificationsAtom } from '@/atoms/notificationAtoms';
-import { NotificationDropdown } from '@/features/Notifications/components/NotificationDropdown';
-import LeaderboardOutlinedIcon from '@mui/icons-material/LeaderboardOutlined';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export const DistributorNavMenu = () => {
   const navigate = useNavigate();
   const { logout } = useAuthActions();
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
-  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [showNotificationDropdown, setShowNotificationDropdown] =
+    useState(false);
   const [notifications, setNotifications] = useAtom(notificationsAtom);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
@@ -63,25 +64,33 @@ export const DistributorNavMenu = () => {
 
   const toggleNotificationDropdown = () => {
     setShowNotificationDropdown(!showNotificationDropdown);
-    console.log('Notification dropdown toggled. Current state:', !showNotificationDropdown);
+    console.log(
+      'Notification dropdown toggled. Current state:',
+      !showNotificationDropdown,
+    );
   };
 
-  const handleNotificationRead = useCallback((notificationId: string) => {
-    console.log('Marking notification as read:', notificationId);
-    setNotifications(prevNotifications => {
-      const updatedNotifications = prevNotifications.map(notification =>
-        notification.notificationId.toString() === notificationId
-          ? { ...notification, read: true }
-          : notification
-      );
-      console.log('Updated notifications:', updatedNotifications);
-      return updatedNotifications;
-    });
-  }, [setNotifications]);
+  const handleNotificationRead = useCallback(
+    (notificationId: string) => {
+      console.log('Marking notification as read:', notificationId);
+      setNotifications((prevNotifications) => {
+        const updatedNotifications = prevNotifications.map((notification) =>
+          notification.notificationId.toString() === notificationId
+            ? { ...notification, read: true }
+            : notification,
+        );
+        console.log('Updated notifications:', updatedNotifications);
+        return updatedNotifications;
+      });
+    },
+    [setNotifications],
+  );
 
   // Calculate unread notifications count
   const unreadNotificationsCount = useMemo(() => {
-    const count = notifications.filter(notification => !notification.read).length;
+    const count = notifications.filter(
+      (notification) => !notification.read,
+    ).length;
     console.log('Unread notifications count:', count);
     return count;
   }, [notifications]);
@@ -99,7 +108,7 @@ export const DistributorNavMenu = () => {
 
           {/* Navigation Links with Icons */}
           <div className="flex items-center space-x-12 pr-6">
-          <Link
+            <Link
               to="/distributor/leaderboard"
               className="text-black hover:text-gray-600 flex items-center"
             >

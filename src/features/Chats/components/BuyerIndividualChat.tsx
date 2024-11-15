@@ -1,21 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
-import SendIcon from '@mui/icons-material/Send';
-import AttachFileIcon from '@mui/icons-material/Upload';
-import SaveIcon from '@mui/icons-material/Save';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import TableChartIcon from '@mui/icons-material/TableChart';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import DeleteIcon from '@mui/icons-material/Remove';
-import CircularProgress from '@mui/material/CircularProgress';
-import { S3Client } from "@aws-sdk/client-s3";
-import { Upload } from "@aws-sdk/lib-storage";
-import { Dialog, DialogContent, DialogActions } from '@mui/material';
-import Button from '@mui/material/Button';
 import { useGlobalChat } from '@/contexts/GlobalChatContext';
+import { selectedChatAtom } from '@/store/chatAtoms';
 import { Message } from '@/types/chat';
+import { S3Client } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import DeleteIcon from '@mui/icons-material/Remove';
+import SaveIcon from '@mui/icons-material/Save';
+import SendIcon from '@mui/icons-material/Send';
+import TableChartIcon from '@mui/icons-material/TableChart';
+import AttachFileIcon from '@mui/icons-material/Upload';
+import { Dialog, DialogActions, DialogContent } from '@mui/material';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import { format, isSameDay } from 'date-fns';
 import { useAtom } from 'jotai';
-import { selectedChatAtom } from '@/atoms/chatAtoms';
+import React, { useEffect, useRef, useState } from 'react';
 
 export const BuyerIndividualChat: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -23,7 +23,9 @@ export const BuyerIndividualChat: React.FC = () => {
   const { sendMessage } = useGlobalChat();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<{ type: string; content: string }[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<
+    { type: string; content: string }[]
+  >([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export const BuyerIndividualChat: React.FC = () => {
   }, [selectedChat?.messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleSendMessage = async () => {
@@ -81,11 +83,17 @@ export const BuyerIndividualChat: React.FC = () => {
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setImagePreviews((prevPreviews) => [...prevPreviews, { type: 'image', content: reader.result as string }]);
+          setImagePreviews((prevPreviews) => [
+            ...prevPreviews,
+            { type: 'image', content: reader.result as string },
+          ]);
         };
         reader.readAsDataURL(file);
       } else {
-        setImagePreviews((prevPreviews) => [...prevPreviews, { type: 'file', content: file.name }]);
+        setImagePreviews((prevPreviews) => [
+          ...prevPreviews,
+          { type: 'file', content: file.name },
+        ]);
       }
     });
   };
@@ -169,17 +177,25 @@ export const BuyerIndividualChat: React.FC = () => {
   const getFileName = (fileUrl: string) => {
     const fileName = fileUrl.split('/').pop() || 'File';
     if (fileName.length <= 60) return fileName;
-    
+
     const extension = fileName.split('.').pop();
-    const nameWithoutExtension = fileName.slice(0, -(extension?.length || 0) - 1);
-    const truncatedName = nameWithoutExtension.slice(0, 56 - (extension?.length || 0));
-    
+    const nameWithoutExtension = fileName.slice(
+      0,
+      -(extension?.length || 0) - 1,
+    );
+    const truncatedName = nameWithoutExtension.slice(
+      0,
+      56 - (extension?.length || 0),
+    );
+
     return `${truncatedName}...${extension}`;
   };
 
   const handleRemoveFile = (index: number) => {
     setImages((prevImages) => prevImages.filter((_, i) => i !== index));
-    setImagePreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index));
+    setImagePreviews((prevPreviews) =>
+      prevPreviews.filter((_, i) => i !== index),
+    );
   };
 
   return (
@@ -188,92 +204,133 @@ export const BuyerIndividualChat: React.FC = () => {
         <div className="flex flex-col h-full">
           <div className="p-4 border-b flex items-center">
             <h2 className="text-xl font-semibold">
-              {selectedChat.distributorName ? selectedChat.distributorName : 'Administrator'}
+              {selectedChat.distributorName
+                ? selectedChat.distributorName
+                : 'Administrator'}
             </h2>
           </div>
           <div className="flex-grow overflow-y-auto p-4">
-            {selectedChat.messages?.reduce((acc: JSX.Element[], msg, index, array) => {
-              const messageDate = new Date(msg.sentAt);
-              const isBuyerMessage = msg.senderRole === 'buyer';
+            {selectedChat.messages?.reduce(
+              (acc: JSX.Element[], msg, index, array) => {
+                const messageDate = new Date(msg.sentAt);
+                const isBuyerMessage = msg.senderRole === 'buyer';
 
-              // Add date divider if it's a new day
-              if (index === 0 || !isSameDay(messageDate, new Date(array[index - 1].sentAt))) {
+                // Add date divider if it's a new day
+                if (
+                  index === 0 ||
+                  !isSameDay(messageDate, new Date(array[index - 1].sentAt))
+                ) {
+                  acc.push(
+                    <div
+                      key={`date-${msg.messageId}`}
+                      className="flex items-center my-4"
+                    >
+                      <div className="flex-grow border-t border-gray-300"></div>
+                      <span className="mx-4 text-sm text-gray-500">
+                        {format(messageDate, 'MMMM d, yyyy')}
+                      </span>
+                      <div className="flex-grow border-t border-gray-300"></div>
+                    </div>,
+                  );
+                }
+
+                // Add message
                 acc.push(
-                  <div key={`date-${msg.messageId}`} className="flex items-center my-4">
-                    <div className="flex-grow border-t border-gray-300"></div>
-                    <span className="mx-4 text-sm text-gray-500">
-                      {format(messageDate, 'MMMM d, yyyy')}
-                    </span>
-                    <div className="flex-grow border-t border-gray-300"></div>
-                  </div>
-                );
-              }
-
-              // Add message
-              acc.push(
-                <div 
-                  key={msg.messageId} 
-                  className={`mb-2 ${isBuyerMessage ? 'flex justify-end' : 'flex justify-start'}`}
-                >
-                  <div className={`max-w-[70%] ${isBuyerMessage ? 'ml-auto' : 'mr-auto'}`}>
-                    {msg.text && (
-                      <div className="flex flex-col">
-                        <span 
-                          className={`px-4 py-2 inline-block rounded text-sm break-words ${
-                            isBuyerMessage ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'
+                  <div
+                    key={msg.messageId}
+                    className={`mb-2 ${
+                      isBuyerMessage ? 'flex justify-end' : 'flex justify-start'
+                    }`}
+                  >
+                    <div
+                      className={`max-w-[70%] ${
+                        isBuyerMessage ? 'ml-auto' : 'mr-auto'
+                      }`}
+                    >
+                      {msg.text && (
+                        <div className="flex flex-col">
+                          <span
+                            className={`px-4 py-2 inline-block rounded text-sm break-words ${
+                              isBuyerMessage
+                                ? 'bg-green-500 text-white'
+                                : 'bg-gray-200 text-black'
+                            }`}
+                          >
+                            {msg.title && (
+                              <>
+                                <strong>ANNOUNCEMENT: {msg.title}</strong>
+                                <br />
+                              </>
+                            )}
+                            {msg.text}
+                          </span>
+                          <span
+                            className={`text-xs mt-1 ${
+                              isBuyerMessage ? 'text-right' : 'text-left'
+                            } text-gray-500`}
+                          >
+                            {format(messageDate, 'h:mm a')}
+                          </span>
+                        </div>
+                      )}
+                      {msg.images && msg.images.length > 0 && (
+                        <div
+                          className={`${
+                            isBuyerMessage ? 'text-right' : 'text-left'
                           }`}
                         >
-                          {msg.title && (
-                            <>
-                              <strong>ANNOUNCEMENT: {msg.title}</strong>
-                              <br />
-                            </>
-                          )}
-                          {msg.text}
-                        </span>
-                        <span className={`text-xs mt-1 ${isBuyerMessage ? 'text-right' : 'text-left'} text-gray-500`}>
-                          {format(messageDate, 'h:mm a')}
-                        </span>
-                      </div>
-                    )}
-                    {msg.images && msg.images.length > 0 && (
-                      <div className={`${isBuyerMessage ? 'text-right' : 'text-left'}`}>
-                        {msg.images.map((image, index) => (
-                          image.match(/\.(jpeg|jpg|gif|png)$/i) ? (
-                            <div key={index} className="mt-2">
-                              <img 
-                                src={image} 
-                                alt={`Message attachment ${index + 1}`} 
-                                className="max-w-full h-auto rounded cursor-pointer border border-gray-300" 
-                                onClick={() => handleFileClick(image)}
-                              />
-                              <span className={`text-xs mt-1 ${isBuyerMessage ? 'text-right' : 'text-left'} text-gray-500 block`}>
-                                {format(messageDate, 'h:mm a')}
-                              </span>
-                            </div>
-                          ) : (
-                            <div key={index} className="mt-2">
-                              <div 
-                                className={`flex items-center rounded p-2 cursor-pointer ${isBuyerMessage ? 'bg-green-500 text-white': 'bg-gray-200'}`}
-                                onClick={() => handleFileClick(image)}
-                              >
-                                {getFileIcon(image)}
-                                <span className="ml-2 text-sm">{getFileName(image)}</span>
+                          {msg.images.map((image, index) =>
+                            image.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+                              <div key={index} className="mt-2">
+                                <img
+                                  src={image}
+                                  alt={`Message attachment ${index + 1}`}
+                                  className="max-w-full h-auto rounded cursor-pointer border border-gray-300"
+                                  onClick={() => handleFileClick(image)}
+                                />
+                                <span
+                                  className={`text-xs mt-1 ${
+                                    isBuyerMessage ? 'text-right' : 'text-left'
+                                  } text-gray-500 block`}
+                                >
+                                  {format(messageDate, 'h:mm a')}
+                                </span>
                               </div>
-                              <span className={`text-xs mt-1 ${isBuyerMessage ? 'text-right' : 'text-left'} text-gray-500 block`}>
-                                {format(messageDate, 'h:mm a')}
-                              </span>
-                            </div>
-                          )
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
+                            ) : (
+                              <div key={index} className="mt-2">
+                                <div
+                                  className={`flex items-center rounded p-2 cursor-pointer ${
+                                    isBuyerMessage
+                                      ? 'bg-green-500 text-white'
+                                      : 'bg-gray-200'
+                                  }`}
+                                  onClick={() => handleFileClick(image)}
+                                >
+                                  {getFileIcon(image)}
+                                  <span className="ml-2 text-sm">
+                                    {getFileName(image)}
+                                  </span>
+                                </div>
+                                <span
+                                  className={`text-xs mt-1 ${
+                                    isBuyerMessage ? 'text-right' : 'text-left'
+                                  } text-gray-500 block`}
+                                >
+                                  {format(messageDate, 'h:mm a')}
+                                </span>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>,
+                );
 
-              return acc;
-            }, [])}
+                return acc;
+              },
+              [],
+            )}
             <div ref={messagesEndRef} />
           </div>
           <div className="border-t p-4">
@@ -282,11 +339,17 @@ export const BuyerIndividualChat: React.FC = () => {
                 {imagePreviews.map((preview, index) => (
                   <div key={index} className="relative mr-2 mb-2">
                     {preview.type === 'image' ? (
-                      <img src={preview.content} alt="Preview" className="w-16 h-16 object-cover rounded border border-gray-300" />
+                      <img
+                        src={preview.content}
+                        alt="Preview"
+                        className="w-16 h-16 object-cover rounded border border-gray-300"
+                      />
                     ) : (
                       <div className="w-48 h-16 flex items-center justify-start bg-green-100 rounded p-2 overflow-hidden">
                         {getFileIcon(preview.content)}
-                        <span className="ml-2 text-sm truncate">{getFileName(preview.content)}</span>
+                        <span className="ml-2 text-sm truncate">
+                          {getFileName(preview.content)}
+                        </span>
                       </div>
                     )}
                     <button
@@ -308,16 +371,29 @@ export const BuyerIndividualChat: React.FC = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               />
-              <button onClick={handleAttachment} className="ml-2 p-2 focus:outline-none button button-green">
+              <button
+                onClick={handleAttachment}
+                className="ml-2 p-2 focus:outline-none button button-green"
+              >
                 <AttachFileIcon className="w-5 h-5" />
               </button>
-              <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} multiple />
-              <button 
-                onClick={handleSendMessage} 
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleFileChange}
+                multiple
+              />
+              <button
+                onClick={handleSendMessage}
                 className="ml-2 p-2 button button-green rounded-full"
                 disabled={isSending}
               >
-                {isSending ? <CircularProgress size={24} /> : <SendIcon className="w-5 h-5" />}
+                {isSending ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  <SendIcon className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
@@ -341,9 +417,15 @@ export const BuyerIndividualChat: React.FC = () => {
       >
         <DialogContent style={{ padding: '24px' }}>
           {enlargedImage ? (
-            <img src={enlargedImage} alt="Enlarged" style={{ width: '100%', height: 'auto', borderRadius: '8px' }} />
+            <img
+              src={enlargedImage}
+              alt="Enlarged"
+              style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+            />
           ) : selectedFile ? (
-            <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+            <div
+              style={{ textAlign: 'center', padding: '20px', color: '#666' }}
+            >
               File preview not available. Click download to save the file.
             </div>
           ) : null}
@@ -363,7 +445,7 @@ export const BuyerIndividualChat: React.FC = () => {
           </Button>
           {(selectedFile || enlargedImage) && (
             <Button
-              onClick={handleSaveFile}              
+              onClick={handleSaveFile}
               startIcon={<SaveIcon />}
               style={{
                 backgroundColor: '#22C55E',
