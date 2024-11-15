@@ -188,6 +188,7 @@ export function PlatformRatingForm({
               <Button
                 variant="secondary"
                 type="submit"
+                className="button-green"
                 disabled={isFormSubmitting || !form.formState.isValid}
               >
                 {isFormSubmitting ? 'Submitting...' : 'Submit Feedback'}

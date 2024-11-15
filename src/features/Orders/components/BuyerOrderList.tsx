@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { LoadingSpinnerSvg } from '@/components/common/LoadingSpinner';
 import { useBuyerOrders } from '../hooks/useBuyerOrders';
 import { Order, OrderStatus } from '../types/orders';
 import { Link } from 'react-router-dom';
@@ -163,9 +164,13 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
         }
     };
 
-    if (ordersQuery.isLoading) {
-        return <div className="flex justify-center items-center h-64">Loading orders...</div>;
-    }
+  if (ordersQuery.isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <LoadingSpinnerSvg />
+      </div>
+    );
+  }
 
     return (
         <Card className="shadow-sm border border-gray-200">

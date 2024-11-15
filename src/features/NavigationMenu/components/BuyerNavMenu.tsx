@@ -1,9 +1,9 @@
 import logo from '@/assets/gudfood-logo.png';
-import { notificationsAtom } from '@/atoms/notificationAtoms';
 import { Button } from '@/components/ui/button';
 import { useAuthActions } from '@/features/Authentication/hooks/useAuthActions';
 import { useCart } from '@/features/Cart/hooks/useCart';
 import { NotificationDropdown } from '@/features/Notifications/components/NotificationDropdown';
+import { notificationsAtom } from '@/store/notificationAtoms';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import LeaderboardOutlinedIcon from '@mui/icons-material/LeaderboardOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';

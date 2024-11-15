@@ -339,8 +339,8 @@ export const Profile: React.FC = () => {
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
-                        variant="outline"
-                        className="button-green w-48"
+                        variant="secondary"
+                        className="button-green w-48 text-[#020817]"
                         size="sm"
                       >
                         <Share className="h-4 w-4 mr-2" />
