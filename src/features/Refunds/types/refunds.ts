@@ -1,4 +1,4 @@
-export type RefundStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+export type RefundStatus = 'PENDING' | 'REFUNDED' | 'REJECTED' | 'CANCELLED';
 
 export interface Refund {
     refundId: number;

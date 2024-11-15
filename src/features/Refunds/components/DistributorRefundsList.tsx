@@ -13,14 +13,15 @@ interface DistributorRefundsListProps {
   refunds: Refund[];
 }
 
-const STATUS_FILTERS: RefundStatus[] = ['PENDING', 'ACCEPTED', 'REJECTED'];
+const STATUS_FILTERS: RefundStatus[] = ['PENDING', 'REFUNDED', 'REJECTED', 'CANCELLED'];
 
 const getRefundCountsByStatus = (refunds: Refund[]) => {
   const counts: Record<RefundStatus | 'ALL', number> = {
     ALL: refunds.length,
     PENDING: 0,
-    ACCEPTED: 0,
-    REJECTED: 0
+    REFUNDED: 0,
+    REJECTED: 0,
+    CANCELLED: 0
   };
 
   refunds.forEach((refund) => {
@@ -65,8 +66,9 @@ export const DistributorRefundsList: React.FC<DistributorRefundsListProps> = ({ 
   const getStatusBadge = (status: RefundStatus) => {
     const statusColors: Record<RefundStatus, string> = {
       PENDING: 'bg-yellow-100 text-yellow-800',
-      ACCEPTED: 'bg-green-100 text-green-800',
-      REJECTED: 'bg-red-100 text-red-800'
+      REFUNDED: 'bg-green-100 text-green-800',
+      REJECTED: 'bg-red-100 text-red-800',
+      CANCELLED: 'bg-blue-100 text-blue-800'
     };
 
     return <Badge className={`${statusColors[status]} font-medium`}>{capitalizeFirstLetter(status)}</Badge>;
