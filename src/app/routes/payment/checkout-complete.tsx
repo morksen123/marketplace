@@ -182,7 +182,6 @@ export const CheckoutComplete: React.FC = () => {
   const handleRatingSubmit = async (data: CreatePlatformRatingRequest) => {
     await createRating.mutateAsync(data);
     setShowRating(false);
-    navigate('/buyer/transactions');
   };
   const handleImpactCardClick = (
     category: 'food' | 'water' | 'electricity' | 'carbon',

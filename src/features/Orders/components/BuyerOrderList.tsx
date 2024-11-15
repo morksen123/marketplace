@@ -1,3 +1,4 @@
+import { LoadingSpinnerSvg } from '@/components/common/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -233,7 +234,7 @@ export const BuyerOrderList: React.FC<BuyerOrderListProps> = () => {
   if (ordersQuery.isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        Loading orders...
+        <LoadingSpinnerSvg />
       </div>
     );
   }
