@@ -1,24 +1,39 @@
-import React, { createContext, useContext, useCallback, useEffect, useRef } from 'react';
-import { useAtom } from 'jotai';
-import WebSocketService from '@/services/WebSocketService';
-import { Chat, Message, Announcement, GlobalChatContextType } from '@/types/chat';
-import { toast } from '@/hooks/use-toast';
-import {
-  chatsAtom,
-  messagesAtom,
-  announcementsAtom,
-  selectedChatAtom,
-  isLoadingAtom,
-  errorAtom,
-} from '@/atoms/chatAtoms';
-import { notificationsAtom } from '@/atoms/notificationAtoms';
-import { Notification } from '@/types/notification';
 import { useAuthStatus } from '@/features/Authentication/hooks/useAuthStatus';
+import { toast } from '@/hooks/use-toast';
 import { useUser } from '@/hooks/useUser';
+import WebSocketService from '@/services/WebSocketService';
+import {
+  announcementsAtom,
+  chatsAtom,
+  errorAtom,
+  isLoadingAtom,
+  messagesAtom,
+  selectedChatAtom,
+} from '@/store/chatAtoms';
+import { notificationsAtom } from '@/store/notificationAtoms';
+import {
+  Announcement,
+  Chat,
+  GlobalChatContextType,
+  Message,
+} from '@/types/chat';
+import { Notification } from '@/types/notification';
+import { useAtom } from 'jotai';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from 'react';
 
-const GlobalChatContext = createContext<GlobalChatContextType | undefined>(undefined);
+const GlobalChatContext = createContext<GlobalChatContextType | undefined>(
+  undefined,
+);
 
-export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [chats, setChats] = useAtom(chatsAtom);
   const [messages, setMessages] = useAtom(messagesAtom);
   const [announcements] = useAtom(announcementsAtom);
@@ -34,29 +49,32 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     userInfoRef.current = { userId, userRole };
   }, [userId, userRole]);
 
-  const fetchChatMessages = useCallback(async (chatId: number) => {
-    if (!messages[chatId]) {
-      try {
-        const response = await fetch(`/api/chat/messages/${chatId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setMessages(prevMessages => ({
-            ...prevMessages,
-            [chatId]: data
-          }));
-        } else {
-          throw new Error('Failed to fetch chat messages');
+  const fetchChatMessages = useCallback(
+    async (chatId: number) => {
+      if (!messages[chatId]) {
+        try {
+          const response = await fetch(`/api/chat/messages/${chatId}`);
+          if (response.ok) {
+            const data = await response.json();
+            setMessages((prevMessages) => ({
+              ...prevMessages,
+              [chatId]: data,
+            }));
+          } else {
+            throw new Error('Failed to fetch chat messages');
+          }
+        } catch (error) {
+          console.error('Error fetching chat messages:', error);
+          toast({
+            title: 'Error',
+            description: 'Failed to fetch chat messages. Please try again.',
+            variant: 'destructive',
+          });
         }
-      } catch (error) {
-        console.error('Error fetching chat messages:', error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch chat messages. Please try again.",
-          variant: "destructive",
-        });
       }
-    }
-  }, [messages]);
+    },
+    [messages],
+  );
 
   const fetchChats = useCallback(async () => {
     try {
@@ -92,36 +110,41 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, []);
 
-  const handleChatUpdate = useCallback((message: any) => { // this isnt really being used. but i will clean it up later.
+  const handleChatUpdate = useCallback((message: any) => {
+    // this isnt really being used. but i will clean it up later.
     const updatedChat = JSON.parse(message.body);
-    setChats(prevChats => 
-      prevChats.map(chat => 
-        chat.chatId === updatedChat.chatId ? { ...chat, ...updatedChat } : chat
-      )
+    setChats((prevChats) =>
+      prevChats.map((chat) =>
+        chat.chatId === updatedChat.chatId ? { ...chat, ...updatedChat } : chat,
+      ),
     );
   }, []);
 
-  const handleChatMessage = useCallback((message: any) => { // this is da key!
-    const data = JSON.parse(message.body);
-    console.log('Message received:', data);
+  const handleChatMessage = useCallback(
+    (message: any) => {
+      // this is da key!
+      const data = JSON.parse(message.body);
+      console.log('Message received:', data);
 
-    const updatedChats = fetchChats();
-    // Update chats
-    const update = async () => {
-      const resolvedChats = await updatedChats;
-      setChats(resolvedChats);
-    };
+      const updatedChats = fetchChats();
+      // Update chats
+      const update = async () => {
+        const resolvedChats = await updatedChats;
+        setChats(resolvedChats);
+      };
 
-    const updateSelectedChat = async () => {
-      if (selectedChat?.chatId) {
-        const resolvedChat = await fetchSelectedChat(selectedChat.chatId);
-        setSelectedChat(resolvedChat);
-      }
-    };
-    
-    update();
-    updateSelectedChat();
-  }, [setChats, fetchSelectedChat, selectedChat]);
+      const updateSelectedChat = async () => {
+        if (selectedChat?.chatId) {
+          const resolvedChat = await fetchSelectedChat(selectedChat.chatId);
+          setSelectedChat(resolvedChat);
+        }
+      };
+
+      update();
+      updateSelectedChat();
+    },
+    [setChats, fetchSelectedChat, selectedChat],
+  );
 
   const fetchNotifications = useCallback(async () => {
     if (!userId || !userRole) {
@@ -130,7 +153,9 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
 
     try {
-      const response = await fetch(`/api/${userRole.toLowerCase()}/notifications/${userId}`);
+      const response = await fetch(
+        `/api/${userRole.toLowerCase()}/notifications/${userId}`,
+      );
       if (response.ok) {
         const data = await response.json();
         return data;
@@ -144,21 +169,24 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [setError, userId, userRole]);
 
-  const handleNotification = useCallback(async (message: any) => {
-    console.log('Notification received:', message.body);
-    const data = JSON.parse(message.body);
-    console.log('Parsed notification data:', data);
-    
-    // Add a delay before fetching notifications
-    await new Promise(resolve => setTimeout(resolve, 5000)); // 5 second delay
+  const handleNotification = useCallback(
+    async (message: any) => {
+      console.log('Notification received:', message.body);
+      const data = JSON.parse(message.body);
+      console.log('Parsed notification data:', data);
 
-    try {
-      const updatedNotifications = await fetchNotifications();
-      setNotifications(updatedNotifications);
-    } catch (error) {
-      console.error('Error updating notifications:', error);
-    }
-  }, [fetchNotifications, setNotifications]);
+      // Add a delay before fetching notifications
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // 5 second delay
+
+      try {
+        const updatedNotifications = await fetchNotifications();
+        setNotifications(updatedNotifications);
+      } catch (error) {
+        console.error('Error updating notifications:', error);
+      }
+    },
+    [fetchNotifications, setNotifications],
+  );
 
   const connectWebSocket = useCallback(async () => {
     if (!isAuthenticated) {
@@ -169,7 +197,7 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (WebSocketService.isConnected()) {
         return true;
       }
-      
+
       if (WebSocketService.isConnecting()) {
         return false;
       }
@@ -179,24 +207,32 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
         // Use the ref to get the most up-to-date user info
         const { userId, userRole } = userInfoRef.current;
-        console.log(`Attempting to subscribe to notifications for ${userRole} ${userId}`);
+        console.log(
+          `Attempting to subscribe to notifications for ${userRole} ${userId}`,
+        );
         if (userId && userRole) {
           console.log(`Subscribing to notifications for ${userRole} ${userId}`);
-          WebSocketService.subscribe(`/topic/notifications/${userRole}/${userId}`, handleNotification);
+          WebSocketService.subscribe(
+            `/topic/notifications/${userRole}/${userId}`,
+            handleNotification,
+          );
         }
 
         const fetchedNotifications = await fetchNotifications();
         if (fetchedNotifications) {
           setNotifications(fetchedNotifications);
         }
-        
+
         WebSocketService.subscribe('/topic/chats', handleChatUpdate);
         const fetchedChats = await fetchChats();
         fetchedChats.forEach((chat: Chat) => {
-          WebSocketService.subscribe(`/topic/chat/${chat.chatId}`, handleChatMessage);
+          WebSocketService.subscribe(
+            `/topic/chat/${chat.chatId}`,
+            handleChatMessage,
+          );
         });
         setChats(fetchedChats);
-        
+
         console.log('WebSocket connected successfully');
         setIsLoading(false);
         setError(null);
@@ -212,9 +248,17 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     while (true) {
       const connected = await attemptConnection();
       if (connected) break;
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
-  }, [fetchChats, handleChatUpdate, handleChatMessage, isAuthenticated, fetchNotifications, handleNotification, setError]);
+  }, [
+    fetchChats,
+    handleChatUpdate,
+    handleChatMessage,
+    isAuthenticated,
+    fetchNotifications,
+    handleNotification,
+    setError,
+  ]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -225,74 +269,86 @@ export const GlobalChatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           setTimeout(() => connect(), 5000);
         }
       };
-      
+
       connect();
-      
+
       return () => {
         WebSocketService.disconnect();
       };
     }
   }, [connectWebSocket, isAuthenticated]);
 
-  const sendMessage = useCallback(async (message: Omit<Message, 'messageId' | 'sentAt'>) => {
-    try {
-      // Optimistically update the UI
-      const tempMessage = {
-        ...message,
-        messageId: Date.now(), // Temporary ID
-        sentAt: new Date().toISOString(),
-      };
-      setMessages(prevMessages => ({
-        ...prevMessages,
-        [message.chatId]: [...(prevMessages[message.chatId] || []), tempMessage]
-      }));
-      
-      // Send the message to the server
-      WebSocketService.sendMessage('/app/sendMessage', message);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, []);
+  const sendMessage = useCallback(
+    async (message: Omit<Message, 'messageId' | 'sentAt'>) => {
+      try {
+        // Optimistically update the UI
+        const tempMessage = {
+          ...message,
+          messageId: Date.now(), // Temporary ID
+          sentAt: new Date().toISOString(),
+        };
+        setMessages((prevMessages) => ({
+          ...prevMessages,
+          [message.chatId]: [
+            ...(prevMessages[message.chatId] || []),
+            tempMessage,
+          ],
+        }));
 
-  const sendAnnouncement = useCallback(async (announcement: Omit<Announcement, 'announcementId' | 'sentAt'>) => {
-    try {
-      WebSocketService.sendMessage('/app/sendAnnouncement', announcement);
-    } catch (error) {
-      console.error('Error sending announcement:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send announcement. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, []);
+        // Send the message to the server
+        WebSocketService.sendMessage('/app/sendMessage', message);
+      } catch (error) {
+        console.error('Error sending message:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to send message. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    },
+    [],
+  );
 
-  const sendNotification = useCallback(async (notification: Omit<Notification, 'notificationId' | 'sentAt'>) => {
-    try {
-      WebSocketService.sendMessage('/app/sendNotification', notification);
-    } catch (error) {
-      console.error('Error sending notification:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send notification. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, []);
+  const sendAnnouncement = useCallback(
+    async (announcement: Omit<Announcement, 'announcementId' | 'sentAt'>) => {
+      try {
+        WebSocketService.sendMessage('/app/sendAnnouncement', announcement);
+      } catch (error) {
+        console.error('Error sending announcement:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to send announcement. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    },
+    [],
+  );
+
+  const sendNotification = useCallback(
+    async (notification: Omit<Notification, 'notificationId' | 'sentAt'>) => {
+      try {
+        WebSocketService.sendMessage('/app/sendNotification', notification);
+      } catch (error) {
+        console.error('Error sending notification:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to send notification. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    },
+    [],
+  );
 
   return (
-    <GlobalChatContext.Provider 
-      value={{ 
-        chats, 
+    <GlobalChatContext.Provider
+      value={{
+        chats,
         messages,
         announcements,
-        selectedChat, 
-        setSelectedChat, 
+        selectedChat,
+        setSelectedChat,
         sendMessage,
         sendAnnouncement,
         fetchChatMessages,

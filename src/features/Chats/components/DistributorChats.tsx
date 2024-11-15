@@ -1,9 +1,13 @@
-import React from 'react';
-import SearchIcon from '@mui/icons-material/Search';
-import { DistributorIndividualChat } from './DistributorIndividualChat';
+import {
+  searchTermAtom,
+  selectedChatAtom,
+  sortedChatsAtom,
+} from '@/store/chatAtoms';
 import { Chat } from '@/types/chat';
+import SearchIcon from '@mui/icons-material/Search';
 import { useAtom } from 'jotai';
-import { searchTermAtom, sortedChatsAtom, selectedChatAtom } from '@/atoms/chatAtoms';
+import React from 'react';
+import { DistributorIndividualChat } from './DistributorIndividualChat';
 
 export const DistributorChats: React.FC = () => {
   const [searchTerm, setSearchTerm] = useAtom(searchTermAtom);
@@ -47,12 +51,18 @@ export const DistributorChats: React.FC = () => {
             >
               <div className="flex flex-col items-start w-full">
                 <h3 className="font-semibold text-gray-800">
-                  {chat.administratorId ? 'Administrator' : `${chat.firstName} ${chat.lastName}`}
+                  {chat.administratorId
+                    ? 'Administrator'
+                    : `${chat.firstName} ${chat.lastName}`}
                 </h3>
-                <p className="text-xs italic text-[#22C55E]">{chat.firstName}</p>
+                <p className="text-xs italic text-[#22C55E]">
+                  {chat.firstName}
+                </p>
                 <p className="text-sm text-gray-600 mt-1 w-full truncate text-left">
                   {chat.lastMessage?.slice(0, 60)}
-                  {chat.lastMessage && chat.lastMessage.length > 60 ? '...' : ''}
+                  {chat.lastMessage && chat.lastMessage.length > 60
+                    ? '...'
+                    : ''}
                 </p>
               </div>
             </li>

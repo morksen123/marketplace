@@ -1,9 +1,13 @@
-import React from 'react';
-import SearchIcon from '@mui/icons-material/Search';
-import { BuyerIndividualChat } from './BuyerIndividualChat';
+import {
+  searchTermAtom,
+  selectedChatAtom,
+  sortedChatsAtom,
+} from '@/store/chatAtoms';
 import { Chat } from '@/types/chat';
+import SearchIcon from '@mui/icons-material/Search';
 import { useAtom } from 'jotai';
-import { searchTermAtom, sortedChatsAtom, selectedChatAtom } from '@/atoms/chatAtoms';
+import React from 'react';
+import { BuyerIndividualChat } from './BuyerIndividualChat';
 
 export const BuyerChats: React.FC = () => {
   const [searchTerm, setSearchTerm] = useAtom(searchTermAtom);
@@ -47,12 +51,18 @@ export const BuyerChats: React.FC = () => {
             >
               <div className="flex flex-col items-start w-full">
                 <h3 className="font-semibold text-gray-800">
-                  {chat.administratorId ? 'Administrator' : chat.distributorName}
+                  {chat.administratorId
+                    ? 'Administrator'
+                    : chat.distributorName}
                 </h3>
-                <p className="text-xs italic text-[#22C55E]">{chat.distributorName}</p>
+                <p className="text-xs italic text-[#22C55E]">
+                  {chat.distributorName}
+                </p>
                 <p className="text-sm text-gray-600 mt-1 w-full truncate text-left">
                   {chat.lastMessage?.slice(0, 60)}
-                  {chat.lastMessage && chat.lastMessage.length > 60 ? '...' : ''}
+                  {chat.lastMessage && chat.lastMessage.length > 60
+                    ? '...'
+                    : ''}
                 </p>
               </div>
             </li>
@@ -77,7 +87,7 @@ export const BuyerChats: React.FC = () => {
 
 // interface Chat {
 //   chatId: number;
-//   distributorName: string;  
+//   distributorName: string;
 //   distributorId: number;
 //   distributorEmail: string; // Added distributorEmail
 //   lastMessage: string;
@@ -178,29 +188,29 @@ export const BuyerChats: React.FC = () => {
 
 //   const connectToWebSocket = (chatId: string) => {
 //     const socket = new SockJS('http://localhost:8080/chat-websocket');
-    
+
 //     const stompClient = new Client({
-//       webSocketFactory: () => socket,  
-//       debug: (str) => console.log(str), 
-//       reconnectDelay: 5000,      
+//       webSocketFactory: () => socket,
+//       debug: (str) => console.log(str),
+//       reconnectDelay: 5000,
 //     });
-  
+
 //     stompClient.onConnect = (frame: any) => {
 //       console.log('Connected to WebSocket:', frame);
-  
+
 //       stompClient.subscribe(`/topic/chat/${chatId}`, (messageOutput: any) => {
 //         const message = JSON.parse(messageOutput.body);
 //         setMessages((prevMessages) => [...prevMessages, message]);
 //       });
 //     };
-  
+
 //     stompClient.onStompError = (frame) => {
 //       console.error('Broker reported error: ' + frame.headers['message']);
 //       console.error('Additional details: ' + frame.body);
 //     };
-  
+
 //     stompClient.activate();
-  
+
 //     setStompClient(stompClient);
 //   };
 
