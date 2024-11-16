@@ -1,237 +1,139 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
 import { motion } from 'framer-motion';
-import { fetchDashboardData } from '@/features/Payment/api/sales';
-import { getExpiringBatches } from '@/features/Sustainability/FoodDonation/api/food-donations';
-import { foodCategoryMapping } from '@/features/Home/constants';
-import { Batch } from '@/features/Sustainability/FoodDonation/types';
+import { useWasteAudit } from '../hooks/useWasteAudit';
+import { WasteMetricsCards } from './WasteMetricsCards';
+import { WasteOverTimeChart } from './WasteOverTimeChart';
+import { CategoryBreakdownChart } from './CategoryBreakdownChart';
+import { WasteRecommendations } from './WasteRecommendations';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Info, TrendingUp, Download } from "lucide-react";
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
-interface WasteMetrics {
-  totalWastePrevented: number;
-  monthlyWasteData: {
-    name: string;
-    wastePrevented: number;
-  }[];
-  categoryBreakdown: {
-    category: string;
-    amount: number;
-  }[];
-  recommendations: string[];
-}
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
 
 export const WasteAuditDashboard = () => {
-  const [metrics, setMetrics] = useState<WasteMetrics>({
-    totalWastePrevented: 0,
-    monthlyWasteData: [],
-    categoryBreakdown: [],
-    recommendations: []
-  });
-  const [loading, setLoading] = useState(true);
-  const [timeframe, setTimeframe] = useState<'week' | 'month' | 'year'>('month');
+  const { wasteMetrics, recommendations, isLoading } = useWasteAudit();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch sales data
-        const salesData = await fetchDashboardData();
-        
-        // Fetch current inventory
-        const inventoryBatches = await getExpiringBatches();
-        
-        // Process data for waste metrics
-        const wastePrevented = processWasteMetrics(salesData, inventoryBatches);
-        
-        setMetrics(wastePrevented);
-      } catch (error) {
-        console.error('Error fetching waste audit data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [timeframe]);
-
-  const processWasteMetrics = (salesData: any, inventory: Batch[]) => {
-    // Calculate total waste prevented through sales
-    const totalWastePrevented = salesData.totalUnitsSold * 0.5; // Assuming average weight per unit
-
-    // Process monthly data
-    const monthlyWasteData = salesData.monthlySales.map((month: any) => ({
-      name: month.name,
-      wastePrevented: month.sales * 0.5
-    }));
-
-    // Process category breakdown
-    const categoryBreakdown = processCategoryBreakdown(inventory);
-
-    // Generate recommendations
-    const recommendations = generateRecommendations(inventory, salesData);
-
-    return {
-      totalWastePrevented,
-      monthlyWasteData,
-      categoryBreakdown,
-      recommendations
-    };
-  };
-
-  const processCategoryBreakdown = (inventory: Batch[]) => {
-    const categoryMap = new Map<string, number>();
-    
-    inventory.forEach(batch => {
-      const category = foodCategoryMapping[batch.product.foodCategory] || batch.product.foodCategory;
-      const currentAmount = categoryMap.get(category) || 0;
-      categoryMap.set(category, currentAmount + (batch.quantity * batch.weight));
-    });
-
-    return Array.from(categoryMap.entries()).map(([category, amount]) => ({
-      category,
-      amount
-    }));
-  };
-
-  const generateRecommendations = (inventory: Batch[], salesData: any) => {
-    const recommendations: string[] = [];
-
-    // Check for items nearing expiry
-    const nearExpiryItems = inventory.filter(batch => {
-      const daysToExpiry = Math.ceil(
-        (new Date(batch.bestBeforeDate).getTime() - new Date().getTime()) / 
-        (1000 * 60 * 60 * 24)
-      );
-      return daysToExpiry <= 14;
-    });
-
-    if (nearExpiryItems.length > 0) {
-      recommendations.push(
-        `Consider donating ${nearExpiryItems.length} items that are nearing expiry to reduce waste`
-      );
-    }
-
-    // Analyze slow-moving inventory
-    const slowMovingCategories = new Set<string>();
-    inventory.forEach(batch => {
-      const category = batch.product.foodCategory;
-      const categorySales = salesData.topThreeProducts.find(
-        (p: any) => p.productCategory === category
-      );
-      if (!categorySales) {
-        slowMovingCategories.add(category);
-      }
-    });
-
-    if (slowMovingCategories.size > 0) {
-      recommendations.push(
-        `Consider adjusting prices for slow-moving categories: ${Array.from(slowMovingCategories).join(', ')}`
-      );
-    }
-
-    return recommendations;
-  };
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Waste Audit Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="overview">
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="trends">Trends</TabsTrigger>
-              <TabsTrigger value="categories">Categories</TabsTrigger>
-              <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
-            </TabsList>
+    <div className="wrapper space-y-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Waste Audit Dashboard</h1>
+        <Button variant="outline" className="flex items-center gap-2">
+          <Download className="h-4 w-4" />
+          Export Report
+        </Button>
+      </div>
 
-            {/* Overview Tab */}
-            <TabsContent value="overview">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardContent className="pt-6">
-                    <h3 className="text-2xl font-bold text-green-600">
-                      {metrics.totalWastePrevented.toFixed(1)} kg
-                    </h3>
-                    <p className="text-gray-600">Total Waste Prevented</p>
-                  </CardContent>
-                </Card>
-                
-                {/* Add more overview metrics */}
-              </div>
-            </TabsContent>
+      <motion.div
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <WasteMetricsCards metrics={wasteMetrics} />
+      </motion.div>
 
-            {/* Trends Tab */}
-            <TabsContent value="trends">
-              <div className="h-[400px] w-full">
-                <LineChart data={metrics.monthlyWasteData} width={800} height={400}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="wastePrevented" 
-                    stroke="#059669" 
-                    name="Waste Prevented (kg)" 
-                  />
-                </LineChart>
-              </div>
-            </TabsContent>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.2 }}
+        >
+          <WasteOverTimeChart data={wasteMetrics?.monthlyWastePrevention || []} />
+        </motion.div>
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.3 }}
+        >
+          <CategoryBreakdownChart data={wasteMetrics?.categoryBreakdown || []} />
+        </motion.div>
+      </div>
 
-            {/* Categories Tab */}
-            <TabsContent value="categories">
-              <div className="h-[400px] w-full">
-                <PieChart width={800} height={400}>
-                  <Pie
-                    data={metrics.categoryBreakdown}
-                    dataKey="amount"
-                    nameKey="category"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={150}
-                    label
-                  >
-                    {metrics.categoryBreakdown.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={`#${Math.floor(Math.random()*16777215).toString(16)}`} />
+      <motion.div
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        transition={{ delay: 0.4 }}
+      >
+        <WasteRecommendations recommendations={recommendations} />
+      </motion.div>
+
+      <motion.div
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        transition={{ delay: 0.5 }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Info className="h-5 w-5" />
+              Sustainability Tips & Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="recommendations">
+              <TabsList className="mb-4">
+                <TabsTrigger value="recommendations">Smart Recommendations</TabsTrigger>
+                <TabsTrigger value="tips">Waste Reduction Tips</TabsTrigger>
+                <TabsTrigger value="impact">Environmental Impact</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="recommendations">
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Current Focus: Inventory Optimization</h3>
+                  <ul className="space-y-2">
+                    {recommendations.slice(0, 3).map((rec, index) => (
+                      <li key={index} className="flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-green-500" />
+                        {rec.recommendationText}
+                      </li>
                     ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </div>
-            </TabsContent>
+                  </ul>
+                </div>
+              </TabsContent>
 
-            {/* Recommendations Tab */}
-            <TabsContent value="recommendations">
-              <div className="space-y-4">
-                {metrics.recommendations.map((recommendation, index) => (
-                  <Alert key={index}>
-                    <AlertDescription>{recommendation}</AlertDescription>
-                  </Alert>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+              <TabsContent value="tips">
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    Implement first-in-first-out (FIFO) inventory management
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    Monitor storage temperatures regularly
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    Use dynamic pricing for near-expiry items
+                  </li>
+                </ul>
+              </TabsContent>
+
+              <TabsContent value="impact">
+                <div className="text-center space-y-4">
+                  <p className="text-2xl font-bold text-green-600">
+                    {wasteMetrics ? (wasteMetrics.totalWastePrevented * 2.5).toFixed(2) : '0.00'}kg
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    CO₂ emissions prevented through waste reduction
+                  </p>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
-}; 
+};
