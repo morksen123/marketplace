@@ -19,6 +19,7 @@ import { PointsGuide } from './components/PointsGuide';
 import { PointsHistory } from './components/PointsHistoryTable';
 import { Rewards } from './components/Rewards';
 import { SustainabilityImpact } from './components/SustainabilityImpact';
+import { handleSuccessApi } from '@/lib/api-client';
 
 interface Profile {
   points: number;
@@ -236,11 +237,7 @@ export const Profile: React.FC = () => {
         throw new Error(errorData.message || 'Failed to apply referral code');
       }
 
-      toast({
-        title: 'Success!',
-        description: 'Referral code applied successfully.',
-        duration: 2000,
-      });
+      handleSuccessApi('Success!', 'Referral code applied successfully.');
 
       // Refresh profile data
       const updatedProfile = await fetchProfile();
@@ -339,8 +336,8 @@ export const Profile: React.FC = () => {
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
-                        variant="secondary"
-                        className="button-green w-48 text-[#020817]"
+                        variant="outline"
+                        className="button-green text-white w-48 hover:bg-green-600 hover:text-white"
                         size="sm"
                       >
                         <Share className="h-4 w-4 mr-2" />
