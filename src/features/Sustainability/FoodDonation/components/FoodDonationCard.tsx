@@ -383,7 +383,7 @@ export const FoodDonationCard = ({ weightSaved }: FoodDonationCardProps) => {
                                     : `${daysToExpiry} days left`}
                                   </span>
                                   <span>•</span>
-                                  <span>{(batch.quantity * batch.weight).toFixed(1)} kg</span>
+                                  <span>{batch.quantity.toFixed(1)} kg</span>
                                 </div>
                               </div>
                             </SelectItem>
