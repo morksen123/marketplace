@@ -11,9 +11,10 @@ import { DistributorInformation } from './components/DistributorInformation';
 import { Calendar } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
+import { FoodDonationStats } from '@/features/Sustainability/FoodDonation/types';
 
 interface User {
-  id: number;
+  distributorId: number;
   distributorName: string;
   points: number;
   wasteReduced: number;
@@ -28,6 +29,7 @@ interface User {
   weightOfFoodSaved: number;
   profilePic: string;
   email: string;
+  weightDonated: number;
 }
 
 interface DistributorDTO {
@@ -35,6 +37,10 @@ interface DistributorDTO {
   email: string;
   points: number;
   distributorName: string;
+}
+
+interface FoodDonationStatsComputed {
+  totalDonationsByDistributor: number;
 }
 
 export const DistributorLeaderboard = () => {
@@ -45,6 +51,7 @@ export const DistributorLeaderboard = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [daysUntilReset, setDaysUntilReset] = useState<number>(0);
   const [currentDistributor, setCurrentDistributor] = useState<DistributorDTO | null>(null);
+  const [foodDonationStats, setFoodDonationStats] = useState<FoodDonationStats | null>(null);
 
   const calculateDaysUntilReset = () => {
     const today = new Date();
@@ -57,6 +64,59 @@ export const DistributorLeaderboard = () => {
   useEffect(() => {
     setDaysUntilReset(calculateDaysUntilReset());
   }, []);
+
+  const fetchFoodDonationStats = async (distributorId: number | undefined) => {
+    if (!distributorId) {
+      console.warn('No distributor ID provided');
+      return null;
+    }
+
+    try {
+      const response = await fetch(`/api/distributor/food-donations/stats/${distributorId}`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch donation stats: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`Donation stats for distributor ${distributorId}:`, data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching food donation stats:', error);
+      return null;
+    }
+  };
+
+  const calculateTotalDonations = (donationsByType: Record<string, number>): number => {
+    return Object.values(donationsByType).reduce((total, value) => total + value, 0);
+  };
+
+  const updateUsersWithDonationStats = async (users: User[]) => {
+    try {
+      const updatedUsers = await Promise.all(
+        users.map(async (user) => {
+          const stats = await fetchFoodDonationStats(user.distributorId);
+          const totalDonations = stats?.distributorDonationsByType 
+            ? calculateTotalDonations(stats.distributorDonationsByType)
+            : 0;
+          
+          const updatedUser = {
+            ...user,
+            weightDonated: totalDonations
+          };
+          console.log(`Updated user ${user.distributorName} with ID ${user.distributorId}:`, updatedUser);
+          return updatedUser;
+        })
+      );
+
+      // Only update state after all users have been processed
+      setUsers(updatedUsers);
+    } catch (error) {
+      console.error('Error updating users with donation stats:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,8 +138,18 @@ export const DistributorLeaderboard = () => {
         const leaderboardData = await leaderboardResponse.json();
         const profileData = await profileResponse.json();
 
-        setUsers(leaderboardData);
-        setCurrentDistributor(profileData);
+        console.log('Leaderboard Data:', leaderboardData);
+        console.log('Profile Data:', profileData);
+
+        if (Array.isArray(leaderboardData)) {
+          setUsers(leaderboardData);
+          setCurrentDistributor(profileData);
+          
+          // Update users with donation stats
+          await updateUsersWithDonationStats(leaderboardData);
+        } else {
+          throw new Error('Invalid leaderboard data format');
+        }
       } catch (err) {
         setError('Failed to fetch data');
         console.error('Error:', err);
@@ -441,7 +511,7 @@ export const DistributorLeaderboard = () => {
                         <div className="relative w-full">
                           <p className="text-black text-l font-bold mb-2">{topThree[1]?.points?.toLocaleString() || 0} points</p>
                           <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[1]?.weightOfFoodSaved || 0} kg</p>
-                          <p className="text-black/80 text-sm mb-4">Weight Donated: {topThree[1]?.referralCount || 0}</p>
+                          <p className="text-black/80 text-sm mb-4">Weight Donated: {topThree[1]?.weightDonated || 0}</p>
                           <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
                           <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-16 rounded-t-lg flex items-center justify-center">
                             <span className="text-3xl font-bold text-white">2</span>
@@ -466,7 +536,7 @@ export const DistributorLeaderboard = () => {
                         <div className="relative w-full">
                           <p className="text-black text-l font-bold mb-2">{topThree[0]?.points?.toLocaleString() || 0} points</p>
                           <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[0]?.weightOfFoodSaved || 0} kg</p>
-                          <p className="text-black/80 text-sm mb-4">Weight Donated: {topThree[0]?.referralCount || 0}</p>
+                          <p className="text-black/80 text-sm mb-4">Weight Donated: {topThree[0]?.weightDonated || 0}</p>
                           <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
                           <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-20 rounded-t-lg flex items-center justify-center">
                             <span className="text-4xl font-bold text-white">1</span>
@@ -491,7 +561,7 @@ export const DistributorLeaderboard = () => {
                         <div className="relative w-full">
                           <p className="text-black text-l font-bold mb-2">{topThree[2]?.points?.toLocaleString() || 0} points</p>
                           <p className="text-black/80 text-sm mb-2">Food Saved: {topThree[2]?.weightOfFoodSaved || 0} kg</p>
-                          <p className="text-black/80 text-sm mb-4">Weight Donated: {topThree[2]?.referralCount || 0}</p>
+                          <p className="text-black/80 text-sm mb-4">Weight Donated: {topThree[2]?.weightDonated || 0}</p>
                           <div className="absolute inset-x-0 bottom-0 bg-[#3651C0]/20 rounded-t-lg" />
                           <div className="relative z-10 bg-gradient-to-r from-green-400/90 to-blue-500/90 w-full h-14 rounded-t-lg flex items-center justify-center">
                             <span className="text-3xl font-bold text-white">3</span>
@@ -548,8 +618,8 @@ export const DistributorLeaderboard = () => {
                             <TableCell className="text-right">
                               {(user.weightOfFoodSaved || 0).toLocaleString()}kg
                             </TableCell>
-                            <TableCell className="text-right text-red-500">
-                              CHANGE
+                            <TableCell className="text-right">
+                              {(user.weightDonated || 0).toLocaleString()}kg
                             </TableCell>
                           </motion.tr>
                         ))}
@@ -607,12 +677,12 @@ export const DistributorLeaderboard = () => {
                             {users.find(u => u.distributorId === currentDistributor.distributorId)?.weightOfFoodSaved?.toLocaleString() ?? 0} kg
                           </p>
                         </div>
-                        {/* <div className="bg-gray-50 rounded-lg p-4 text-center">
-                          <h4 className="text-gray-600 text-sm">Referrals</h4>
+                        <div className="bg-gray-50 rounded-lg p-4 text-center">
+                          <h4 className="text-gray-600 text-sm">Weight Donated</h4>
                           <p className="text-xl font-bold text-blue-600">
-                            {users.find(u => u.distributorId === currentUser.distributorId)?.weightDonated || 0}
+                            {users.find(u => u.distributorId === currentDistributor.distributorId)?.weightDonated?.toLocaleString() ?? 0} kg
                           </p>
-                        </div> */}
+                        </div>
                       </div>
 
                     </div>

@@ -114,7 +114,7 @@ export const InventoryManagementPage: React.FC = () => {
           setProducts(products);
           const allBatches: BatchWithProduct[] = products.flatMap(
             (product) =>
-              product.batches?.map((batch) => ({
+              product.batches?.filter(batch => batch.isActive).map((batch) => ({
                 ...batch,
                 product: product,
               })) ?? [],
