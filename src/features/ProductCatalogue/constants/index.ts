@@ -49,6 +49,7 @@ export interface Batch {
   quantity: number;
   bestBeforeDate: string;
   batchId: number;
+  isActive: boolean;
 }
 
 export interface BulkPricing {
