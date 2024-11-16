@@ -1,5 +1,5 @@
 export interface WasteMetrics {
-    totalWastePrevented: number; // in kg
+    totalWastePrevented: number;
     monthlyWastePrevention: {
       month: string;
       wastePrevented: number;
@@ -9,12 +9,22 @@ export interface WasteMetrics {
       wastePrevented: number;
       percentageOfTotal: number;
     }[];
-  }
+    donationStats: {
+      distributorDonationsByType: {
+        COMPOSTE: number;
+        BIOGAS: number;
+        UPCYCLING: number;
+      };
+      totalDonated: number;
+    };
+}
+  
+export type WasteRecommendationType = 'URGENT_ACTION' | 'WARNING' | 'OPTIMIZATION';
   
 export interface WasteRecommendation {
     productId: number;
     productName: string;
-    recommendationType: 'URGENT_ACTION' | 'WARNING' | 'OPTIMIZATION';
+    recommendationType: WasteRecommendationType;
     recommendationText: string;
     potentialWastePrevention: number; // in kg
     currentStock: number;

@@ -36,30 +36,36 @@ export const WasteRecommendations = ({ recommendations }: WasteRecommendationsPr
         <CardTitle>Waste Prevention Recommendations</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {recommendations.map((recommendation, index) => (
-            <div
-              key={index}
-              className="p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-start gap-4">
-                {getRecommendationIcon(recommendation.recommendationType)}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold">{recommendation.productName}</h3>
-                    <Badge className={getRecommendationColor(recommendation.recommendationType)}>
-                      {recommendation.recommendationType.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                  <p className="text-gray-600">{recommendation.recommendationText}</p>
-                  <div className="mt-2 text-sm text-gray-500">
-                    Potential waste prevention: {recommendation.potentialWastePrevention.toFixed(2)}kg
+        {recommendations.length > 0 ? (
+          <div className="space-y-4">
+            {recommendations.map((recommendation, index) => (
+              <div
+                key={index}
+                className="p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-start gap-4">
+                  {getRecommendationIcon(recommendation.recommendationType)}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold">{recommendation.productName}</h3>
+                      <Badge className={getRecommendationColor(recommendation.recommendationType)}>
+                        {recommendation.recommendationType.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                    <p className="text-gray-600">{recommendation.recommendationText}</p>
+                    <div className="mt-2 text-sm text-gray-500">
+                      Potential waste prevention: {recommendation.potentialWastePrevention.toFixed(2)}kg
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            No waste prevention recommendations available. There are currently no products at risk of expiring.
+          </div>
+        )}
       </CardContent>
     </Card>
   );

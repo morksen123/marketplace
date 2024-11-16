@@ -28,9 +28,14 @@ export const DistributorSideMenu: React.FC = () => {
         { text: 'Transactions', path: '/distributor/transactions' },
         { text: 'Sales', path: '/distributor/sales' },
         { text: 'Product Analytics', path: '/distributor/product-analytics' },
-        { text: 'Waste Audit', path: '/distributor/waste-audit' },
       ],
     },
+    {
+      title: 'Sustainability',
+      links: [
+        { text: 'Waste Audit', path: '/distributor/waste-audit' },
+      ],
+    }
   ];
 
   return (

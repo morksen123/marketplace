@@ -20,7 +20,7 @@ export const WasteOverTimeChart = ({ data }: WasteOverTimeChartProps) => {
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
-              <YAxis label={{ value: 'Waste Prevented (kg)', angle: -90, position: 'insideLeft' }} />
+              <YAxis label={{ value: 'Food Saved (kg)', angle: -90, position: 'insideLeft' }} />
               <Tooltip 
                 formatter={(value: number) => [`${value.toFixed(2)} kg`, 'Waste Prevented']}
               />
