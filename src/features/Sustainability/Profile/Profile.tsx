@@ -495,6 +495,7 @@ export const Profile: React.FC = () => {
           impactMetrics={impactMetrics}
           onImpactCardClick={handleImpactCardClick}
           cardVariants={cardVariants}
+          userType="buyer"
         />
 
         {/* Badges */}

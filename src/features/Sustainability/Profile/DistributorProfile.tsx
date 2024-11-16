@@ -273,6 +273,7 @@ export const DistributorProfile: React.FC = () => {
           impactMetrics={impactMetrics}
           onImpactCardClick={handleImpactCardClick}
           cardVariants={cardVariants}
+          userType="distributor"
         />
 
         {/* Badges */}
