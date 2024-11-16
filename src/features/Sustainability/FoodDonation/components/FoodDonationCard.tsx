@@ -316,11 +316,8 @@ export const FoodDonationCard = ({ weightSaved }: FoodDonationCardProps) => {
                           
                           {/* Right side - Quantity Info */}
                           <div className="text-right flex flex-col items-end gap-1 min-w-[140px]">
-                            <div className="font-medium text-gray-700">
-                              {batch.quantity} units
-                            </div>
                             <div className="text-sm text-gray-500">
-                              Total: {(batch.quantity * batch.weight).toFixed(1)} kg
+                              Total: {batch.quantity.toFixed(1)} kg
                             </div>
                           </div>
                         </div>
