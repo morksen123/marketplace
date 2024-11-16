@@ -79,6 +79,10 @@ export const DistributorRefundsList: React.FC<DistributorRefundsListProps> = ({ 
     setCurrentPage(1);
   };
 
+  const centsToDollars = (cents: number): string => {
+    return (cents / 100).toFixed(2);
+  };
+
   const refundCounts = useMemo(() => getRefundCountsByStatus(distributorRefunds || []), [distributorRefunds]);
 
   return (
@@ -152,7 +156,7 @@ export const DistributorRefundsList: React.FC<DistributorRefundsListProps> = ({ 
                   </div>
                   
                   <div className="text-left">
-                    <p className="font-medium">Amount: ${refund.amount.toFixed(2)}</p>
+                    <p className="font-medium">Amount: ${centsToDollars(refund.amount)}</p>
                     <p className="text-sm text-gray-500">Date: {new Date(refund.createdDateTime).toLocaleDateString()}</p>
                   </div>
                   

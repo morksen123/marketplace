@@ -50,6 +50,10 @@ export const DistributorRefundDetailsPage: React.FC = () => {
     return <Badge className={`${statusColors[status]} font-medium`}>{capitalizeFirstLetter(status)}</Badge>;
   };
 
+  const centsToDollars = (cents: number): string => {
+    return (cents / 100).toFixed(2);
+  };
+
   const renderActionButtons = () => {
     if (refund.refundStatus !== 'PENDING') {
       return null;
@@ -150,7 +154,7 @@ export const DistributorRefundDetailsPage: React.FC = () => {
 
             <div className="flex justify-between items-center font-semibold text-lg">
               <span>Refund Amount</span>
-              <span>${refund.amount.toFixed(2)}</span>
+              <span>${centsToDollars(refund.amount)}</span>
             </div>
           </div>
         </CardContent>

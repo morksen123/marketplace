@@ -32,6 +32,10 @@ export const BuyerRefundDetailsPage: React.FC = () => {
     }
   };
 
+  const centsToDollars = (cents: number): string => {
+    return (cents / 100).toFixed(2);
+  };
+
   const getStatusBadge = (status: RefundStatus) => {
     const statusColors: Record<RefundStatus, string> = {
       PENDING: 'bg-yellow-100 text-yellow-800',
@@ -130,7 +134,7 @@ export const BuyerRefundDetailsPage: React.FC = () => {
 
             <div className="flex justify-between items-center font-semibold text-lg">
               <span>Refund Amount</span>
-              <span>${refund.amount.toFixed(2)}</span>
+              <span>${centsToDollars(refund.amount)}</span>
             </div>
           </div>
         </CardContent>
