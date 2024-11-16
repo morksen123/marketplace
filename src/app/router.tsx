@@ -331,6 +331,13 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: '/distributor/waste-audit',
+                lazy: async () => {
+                  const { WasteAuditRoute } = await import('./routes/sustainability/waste-audit');
+                  return { Component: WasteAuditRoute };
+                },
+              },
+              {
                 path: '/create-product-listing',
                 lazy: async () => {
                   const { CreateProductListingRoute } = await import(
