@@ -1,21 +1,17 @@
 export type FoodDonationType = 'COMPOSTE' | 'BIOGAS' | 'UPCYCLING';
 
-export interface FoodDonation {
-    foodDonationId: number;
-    createdOn: string;
-    distributor: {
-        distributorId: number;
-        name: string;
-    };
-    batch: {
-        batchId: number;
-        batchNumber: string;
-    };
-    product: {
-        productId: number;
-        name: string;
-    };
+export interface Batch {
+    batchId: number;
+    bestBeforeDate: string;
     quantity: number;
+    isActive: boolean;
+    productId: number;
+    productName: string;
+    createdOn: string;
     weight: number;
-    foodDonationType: FoodDonationType;
+}
+
+export interface FoodDonationStats {
+    totalDonationsByType: Record<FoodDonationType, number>;
+    distributorDonationsByType: Record<FoodDonationType, number>;
 }
