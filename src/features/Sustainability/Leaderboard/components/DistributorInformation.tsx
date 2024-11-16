@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
 import { BadgeDesign } from '../../Profile/components/BadgeDesign';
-import { Package, Tag, Heart } from 'lucide-react';
+import { Package, Tag, Heart, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Badge {
@@ -39,6 +39,7 @@ interface User {
     profilePic: string;
     email: string;
     badges?: Badge[];
+    weightDonated?: number;
 }
 
 interface DistributorInformationProps {
@@ -61,6 +62,13 @@ interface ImpactMetrics {
     carKmEquivalent: number;
 }
 
+interface DonationStats {
+  distributorDonationsByType: {
+    [key: string]: number;
+  };
+  totalDonations: number;
+}
+
 export const DistributorInformation: React.FC<DistributorInformationProps> = ({
     user,
     isOpen,
@@ -69,6 +77,9 @@ export const DistributorInformation: React.FC<DistributorInformationProps> = ({
 }) => {
     const [badges, setBadges] = useState<Badge[]>([]);
     const [impactMetrics, setImpactMetrics] = useState<ImpactMetrics | null>(null);
+    const [foodDonationStats, setFoodDonationStats] = useState<number>(0);
+    const [donationStats, setDonationStats] = useState<DonationStats | null>(null);
+
     useEffect(() => {
         const fetchData = async () => {
             if (user?.distributorId) {
@@ -90,6 +101,15 @@ export const DistributorInformation: React.FC<DistributorInformationProps> = ({
                     }
                     const impactData = await impactResponse.json();
                     setImpactMetrics(impactData);
+
+                    const donationResponse = await fetch(`/api/distributor/food-donations/stats/${user.distributorId}`, {
+                        credentials: 'include'
+                    });
+                    if (!donationResponse.ok) {
+                        throw new Error('Failed to fetch donation stats');
+                    }
+                    const donationData = await donationResponse.json();
+                    setDonationStats(donationData);
                 } catch (error) {
                     console.error('Error fetching data:', error);
                 }
@@ -98,6 +118,14 @@ export const DistributorInformation: React.FC<DistributorInformationProps> = ({
 
         fetchData();
     }, [user?.distributorId]);
+
+    // Helper function to format donation type
+    const formatDonationType = (type: string) => {
+        return type
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    };
 
     if (!user) return null;
 
@@ -126,14 +154,79 @@ export const DistributorInformation: React.FC<DistributorInformationProps> = ({
                         </div>
                     </div>
 
-                    {/* Additional Stats */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h3 className="font-semibold mb-2">Community Impact</h3>
-                            <div className="space-y-2">
-                                <p className="text-sm text-red-500">Weight Donated: Change</p>
+                    {/* Updated Community Impact section */}
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 shadow-md">
+                        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <Heart className="h-5 w-5 text-rose-500" />
+                            Food Saved
+                        </h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Total Donations Card */}
+                            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h4 className="text-sm font-medium text-gray-600">Total Donations</h4>
+                                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
+                                        All Time
+                                    </Badge>
+                                </div>
+                                <p className="text-3xl font-bold text-emerald-600">
+                                    {(user?.weightDonated || 0).toLocaleString()} kg
+                                </p>
+                            </div>
+
+                            {/* Food Rescued Card */}
+                            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h4 className="text-sm font-medium text-gray-600">Food Rescued</h4>
+                                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                                        All Time
+                                    </Badge>
+                                </div>
+                                <p className="text-3xl font-bold text-blue-600">
+                                    {(user?.weightOfFoodSaved || 0).toLocaleString()} kg
+                                </p>
                             </div>
                         </div>
+
+                        {/* Donation Breakdown */}
+                        {donationStats?.distributorDonationsByType && 
+                         Object.keys(donationStats.distributorDonationsByType).length > 0 ? (
+                            <div className="mt-6">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                                    Donations by Type
+                                </h4>
+                                <div className="grid grid-cols-1 gap-3">
+                                    {Object.entries(donationStats.distributorDonationsByType)
+                                        .sort(([, a], [, b]) => b - a)
+                                        .map(([type, amount]) => (
+                                            <div 
+                                                key={type}
+                                                className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-100 hover:shadow-md transition-shadow"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                                    <span className="font-medium text-gray-700">
+                                                        {formatDonationType(type)}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-semibold text-emerald-600">
+                                                        {amount.toLocaleString()} kg
+                                                    </span>
+                                                    <span className="text-gray-400 text-sm">
+                                                        ({((amount / user.weightDonated!) * 100).toFixed(1)}%)
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mt-6 text-center text-gray-500 italic">
+                                No donation data available
+                            </div>
+                        )}
                     </div>
 
                     {/* Stats Grid */}
