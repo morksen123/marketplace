@@ -33,7 +33,7 @@ export const FeedbackAnalytics = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Feedback Analytics</h1>
+      <h1 className="text-2xl font-bold">Product Analytics</h1>
 
       {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
