@@ -119,7 +119,6 @@ interface ImpactMetrics {
   showersEquivalent: number;
 }
 
-
 export const CheckoutComplete: React.FC = () => {
   const stripe = useStripe();
   const [status, setStatus] = useState<Status | 'default'>('processing');

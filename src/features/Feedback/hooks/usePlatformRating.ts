@@ -1,3 +1,4 @@
+import { handleSuccessApi } from '@/lib/api-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   checkRatingEligibility,
@@ -27,6 +28,7 @@ export const useCreatePlatformRating = () => {
       createPlatformReview(data),
     onSuccess: () => {
       // Invalidate eligibility query after successful submission
+      handleSuccessApi('Success!', 'Feedback submitted');
       queryClient.invalidateQueries({
         queryKey: platformRatingKeys.eligibility(),
       });
