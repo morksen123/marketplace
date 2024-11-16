@@ -13,6 +13,7 @@ interface BadgeDesignProps {
   criteria: string;
   earnedOn: string;
   category: 'SUSTAINABILITY' | 'LEADERBOARD' | 'QUALITY_SERVICE' | 'QUALITY_ENGAGEMENT';
+  userType: 'distributor' | 'buyer';
 }
 
 export const BadgeDesign: React.FC<BadgeDesignProps> = ({
@@ -22,6 +23,7 @@ export const BadgeDesign: React.FC<BadgeDesignProps> = ({
   criteria,
   earnedOn,
   category,
+  userType,
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -126,6 +128,7 @@ export const BadgeDesign: React.FC<BadgeDesignProps> = ({
           criteria,
           earnedOn,
           category,
+          userType,
         }}
       />
     </>

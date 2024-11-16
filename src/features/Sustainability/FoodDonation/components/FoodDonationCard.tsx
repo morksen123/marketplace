@@ -16,7 +16,7 @@ import { FoodDonationType } from '../types';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { Batch, FoodDonationStats } from '../types';
-
+import { handleSuccessApi, handleErrorApi } from '@/lib/api-client';
 interface FoodDonationCardProps {
   weightSaved: number;
 }
@@ -151,17 +151,11 @@ export const FoodDonationCard = ({ weightSaved }: FoodDonationCardProps) => {
       setSelectedBatch('');
       setDonationType('COMPOSTE');
 
-      toast({
-        title: 'Donation processed successfully',
-        description: 'Thank you for your contribution!',
-      });
+      handleSuccessApi('Donation processed successfully', 'Thank you for your contribution!');
     } catch (error) {
       console.error('Error processing donation:', error);
       // Optional: Add error toast/notification
-      toast({
-        title: 'Failed to process donation',
-        description: 'Please try again later',
-      });
+      handleErrorApi('Failed to process donation', 'Please try again later');
     } finally {
       setLoading(false);
     }
@@ -389,7 +383,7 @@ export const FoodDonationCard = ({ weightSaved }: FoodDonationCardProps) => {
                                     : `${daysToExpiry} days left`}
                                   </span>
                                   <span>•</span>
-                                  <span>{(batch.quantity * batch.weight).toFixed(1)} kg</span>
+                                  <span>{batch.quantity.toFixed(1)} kg</span>
                                 </div>
                               </div>
                             </SelectItem>

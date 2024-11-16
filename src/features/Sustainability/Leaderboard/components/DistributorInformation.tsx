@@ -131,7 +131,7 @@ export const DistributorInformation: React.FC<DistributorInformationProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold flex items-center gap-2">
                         Distributor Profile
@@ -294,9 +294,9 @@ export const DistributorInformation: React.FC<DistributorInformationProps> = ({
 
                 </div>
 
-                <div className="mt-6">
+                <div className="mt-6 mb-6">
                     <h3 className="font-semibold mb-4">Earned Badges</h3>
-                    <div className="grid grid-cols-3 md:grid-cols-3 gap-y-4">
+                    <div className="grid grid-cols-3 md:grid-cols-3 gap-y-4 place-items-center">
                         {badges.length > 0 ? (
                             badges.map((badge) => (
                                 <BadgeDesign
@@ -310,7 +310,7 @@ export const DistributorInformation: React.FC<DistributorInformationProps> = ({
                                 />
                             ))
                         ) : (
-                            <p className="text-gray-500 col-span-full text-left">
+                            <p className="text-gray-500 col-span-full text-center">
                                 <i>No badges earned yet</i>
                             </p>
                         )}

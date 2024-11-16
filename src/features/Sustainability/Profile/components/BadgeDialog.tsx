@@ -21,6 +21,7 @@ interface BadgeDialogProps {
     criteria: string;
     earnedOn: string;
     category: 'SUSTAINABILITY' | 'LEADERBOARD' | 'QUALITY_SERVICE' | 'QUALITY_ENGAGEMENT';
+    userType: 'distributor' | 'buyer';
   };
 }
 
@@ -53,8 +54,12 @@ export const BadgeDialog: React.FC<BadgeDialogProps> = ({ isOpen, onClose, badge
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetchReferralLink().then(setReferralLink);
-  }, []);
+    if (badge.userType === 'buyer') {
+      fetchReferralLink().then(setReferralLink);
+    }
+
+    console.log(badge.userType);
+  }, [badge.userType]);
 
   const getBadgeIcon = () => {
     switch (badge.category) {
@@ -189,18 +194,28 @@ export const BadgeDialog: React.FC<BadgeDialogProps> = ({ isOpen, onClose, badge
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <p className="text-lg text-gray-700 font-semibold mb-2">
-                    Join me in my sustainability journey with GudFood!
+                    {badge.userType === 'buyer' 
+                      ? "Join me in my sustainability journey with GudFood!"
+                      : "Join us in our sustainability journey with GudFood!"}
                   </p>
                   <p className="text-base text-emerald-600 font-medium">
-                    Scan to join with my referral link or go to <u>{referralLink}</u> and earn 250 points on your first purchase!*
+                    {badge.userType === 'buyer' ? (
+                      <>
+                        Scan to join with my referral link or go to <u>{referralLink}</u> and earn 250 points on your first purchase!*
+                      </>
+                    ) : (
+                      "Scan to join GudFood and be part of our sustainable food ecosystem!"
+                    )}
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-4">
-                    *Terms and Conditions: Points will be credited with a minimum purchase. Valid for new customers only.
-                  </p>
+                  {badge.userType === 'buyer' && (
+                    <p className="text-[10px] text-gray-400 mt-4">
+                      *Terms and Conditions: Points will be credited with a minimum purchase. Valid for new customers only.
+                    </p>
+                  )}
                 </div>
                 <div className="ml-6">
                   <QRCodeSVG
-                    value={referralLink}
+                    value={badge.userType === 'buyer' ? referralLink : 'http://localhost:5173'}
                     size={120}
                     level="L"
                     includeMargin={false}

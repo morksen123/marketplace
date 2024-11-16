@@ -108,7 +108,7 @@ export const ViewProductListingBuyer: React.FC<
         const response = await fetch(`/api/products/product/${productId}`);
         const data = await response.json();
         setProduct(data);
-        setBatches(data.batches || []);
+        setBatches((data.batches || []).filter(batch => batch.isActive));
         setDistributorId(data.distributorId);
       } catch (error) {
         console.error('Error fetching product:', error);
