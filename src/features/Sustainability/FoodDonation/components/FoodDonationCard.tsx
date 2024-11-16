@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { FoodDonationType } from '../types';
 import { Badge } from '@/components/ui/badge';
-import { handleErrorApi } from '@/lib/api-client';
 import { toast } from '@/hooks/use-toast';
 import { Batch, FoodDonationStats } from '../types';
 
@@ -117,24 +116,41 @@ export const FoodDonationCard = ({ weightSaved }: FoodDonationCardProps) => {
 
       // If successful:
       // 1. Refresh the donation stats
-      const updatedStats = await fetch('/api/distributor/donations/stats', {
+      const updatedStats = await fetch('/api/distributor/food-donations/stats', {
         credentials: 'include',
       }).then(res => res.json());
       
-      // 2. Refresh the expiring batches
-      const updatedBatches = await fetch('/api/distributor/batches', {
+      // 2. Refresh the batches
+      const updatedBatchesResponse = await fetch('/api/distributor/batches', {
         credentials: 'include',
       }).then(res => res.json());
 
-      // 3. Update state
+      // 3. Update all states
       setDonationStats(updatedStats);
-      setExpiringBatches(updatedBatches);
+      setAllBatches(updatedBatchesResponse);
+      
+      // Filter and sort the updated batches for expiring batches display
+      const filteredBatches = updatedBatchesResponse.filter((batch: Batch) => {
+        const expiryDate = new Date(batch.bestBeforeDate);
+        const now = new Date();
+        const daysToExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+        return daysToExpiry <= 14;
+      });
+
+      const sortedBatches = filteredBatches
+        .sort((a: Batch, b: Batch) => {
+          const aDate = new Date(a.bestBeforeDate);
+          const bDate = new Date(b.bestBeforeDate);
+          return aDate.getTime() - bDate.getTime();
+        })
+        .slice(0, 3);
+
+      setExpiringBatches(sortedBatches);
       
       // 4. Reset selection
       setSelectedBatch('');
       setDonationType('COMPOSTE');
 
-      // Optional: Add success toast/notification
       toast({
         title: 'Donation processed successfully',
         description: 'Thank you for your contribution!',
@@ -329,113 +345,120 @@ export const FoodDonationCard = ({ weightSaved }: FoodDonationCardProps) => {
               <Target className="h-5 w-5 text-gray-600" />
               Make a Donation
             </h3>
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Batch Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Select Batch</label>
-                  <Select value={selectedBatch} onValueChange={setSelectedBatch}>
-                    <SelectTrigger className="bg-white border-gray-200 h-12 hover:border-gray-300 
-                      transition-colors duration-200">
-                      <SelectValue placeholder="Choose a batch to donate" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[300px]">
-                      {allBatches.map((batch) => {
-                        const expiryStatus = getExpiryStatus(batch.bestBeforeDate);
-                        const daysToExpiry = Math.ceil(
-                          (new Date(batch.bestBeforeDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24)
-                        );
-                        
-                        return (
-                          <SelectItem 
-                            key={batch.batchId} 
-                            value={batch.batchId.toString()}
-                            className="py-3 px-2 hover:bg-gray-50 cursor-pointer"
-                          >
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">{batch.productName}</span>
-                                <Badge variant="outline" className={`${expiryStatus.className} text-xs`}>
-                                  {expiryStatus.badge}
-                                </Badge>
+            {allBatches.length === 0 ? (
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <Package className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-500">No batches available for donation at the moment</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Batch Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Select Batch</label>
+                    <Select value={selectedBatch} onValueChange={setSelectedBatch}>
+                      <SelectTrigger className="bg-white border-gray-200 h-12 hover:border-gray-300 
+                        transition-colors duration-200">
+                        <SelectValue placeholder="Choose a batch to donate" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {allBatches.map((batch) => {
+                          const expiryStatus = getExpiryStatus(batch.bestBeforeDate);
+                          const daysToExpiry = Math.ceil(
+                            (new Date(batch.bestBeforeDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24)
+                          );
+                          
+                          return (
+                            <SelectItem 
+                              key={batch.batchId} 
+                              value={batch.batchId.toString()}
+                              className="py-3 px-2 hover:bg-gray-50 cursor-pointer"
+                            >
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{batch.productName}</span>
+                                  <Badge variant="outline" className={`${expiryStatus.className} text-xs`}>
+                                    {expiryStatus.badge}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                  <span>Batch #{batch.batchId}</span>
+                                  <span>•</span>
+                                  <span>{daysToExpiry <= 0 
+                                    ? 'Expired' 
+                                    : `${daysToExpiry} days left`}
+                                  </span>
+                                  <span>•</span>
+                                  <span>{(batch.quantity * batch.weight).toFixed(1)} kg</span>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-gray-500">
-                                <span>Batch #{batch.batchId}</span>
-                                <span>•</span>
-                                <span>{daysToExpiry <= 0 
-                                  ? 'Expired' 
-                                  : `${daysToExpiry} days left`}
-                                </span>
-                                <span>•</span>
-                                <span>{(batch.quantity * batch.weight).toFixed(1)} kg</span>
-                              </div>
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Donation Type Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Donation Type</label>
+                    <Select 
+                      value={donationType} 
+                      onValueChange={(value) => setDonationType(value as FoodDonationType)}
+                    >
+                      <SelectTrigger className="bg-white border-gray-200 h-12 hover:border-gray-300 
+                        transition-colors duration-200">
+                        <SelectValue placeholder="Choose donation method" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="COMPOSTE" className="py-3 hover:bg-gray-50 cursor-pointer">
+                          <div className="flex items-center gap-2">
+                            <Apple className="h-4 w-4 text-yellow-600" />
+                            <span>Food Composting</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="BIOGAS" className="py-3 hover:bg-gray-50 cursor-pointer">
+                          <div className="flex items-center gap-2">
+                            <Flame className="h-4 w-4 text-blue-600" />
+                            <span>Biogas Production</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="UPCYCLING" className="py-3 hover:bg-gray-50 cursor-pointer">
+                          <div className="flex items-center gap-2">
+                            <Recycle className="h-4 w-4 text-purple-600" />
+                            <span>Food Upcycling</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                {/* Donation Type Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Donation Type</label>
-                  <Select 
-                    value={donationType} 
-                    onValueChange={(value) => setDonationType(value as FoodDonationType)}
+                {/* Donation Button */}
+                <div className="pt-4">
+                  <Button 
+                    className={`w-full h-12 font-semibold transition-all duration-200 
+                      ${!selectedBatch || !donationType
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-green-600 hover:bg-green-700 text-white hover:scale-[1.02] active:scale-[0.98]'
+                      }`}
+                    onClick={handleDonation}
+                    disabled={!selectedBatch || !donationType || loading}
                   >
-                    <SelectTrigger className="bg-white border-gray-200 h-12 hover:border-gray-300 
-                      transition-colors duration-200">
-                      <SelectValue placeholder="Choose donation method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="COMPOSTE" className="py-3 hover:bg-gray-50 cursor-pointer">
-                        <div className="flex items-center gap-2">
-                          <Apple className="h-4 w-4 text-yellow-600" />
-                          <span>Food Composting</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="BIOGAS" className="py-3 hover:bg-gray-50 cursor-pointer">
-                        <div className="flex items-center gap-2">
-                          <Flame className="h-4 w-4 text-blue-600" />
-                          <span>Biogas Production</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="UPCYCLING" className="py-3 hover:bg-gray-50 cursor-pointer">
-                        <div className="flex items-center gap-2">
-                          <Recycle className="h-4 w-4 text-purple-600" />
-                          <span>Food Upcycling</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Processing...
+                      </div>
+                    ) : !selectedBatch || !donationType ? (
+                      'Select batch and donation type'
+                    ) : (
+                      'Confirm Donation'
+                    )}
+                  </Button>
                 </div>
               </div>
-
-              {/* Donation Button */}
-              <div className="pt-4">
-                <Button 
-                  className={`w-full h-12 font-semibold transition-all duration-200 
-                    ${!selectedBatch || !donationType
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-green-600 hover:bg-green-700 text-white hover:scale-[1.02] active:scale-[0.98]'
-                    }`}
-                  onClick={handleDonation}
-                  disabled={!selectedBatch || !donationType || loading}
-                >
-                  {loading ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Processing...
-                    </div>
-                  ) : !selectedBatch || !donationType ? (
-                    'Select batch and donation type'
-                  ) : (
-                    'Confirm Donation'
-                  )}
-                </Button>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </CardContent>
