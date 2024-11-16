@@ -75,6 +75,10 @@ export const LodgeDisputeModal: React.FC<LodgeDisputeModalProps> = ({
     });
   };
 
+  const centsToDollars = (cents: number): string => {
+    return (cents / 100).toFixed(2);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -98,7 +102,7 @@ export const LodgeDisputeModal: React.FC<LodgeDisputeModalProps> = ({
           {/* Amount */}
           <div className="mb-4 text-center">
             <div className="text-2xl font-bold text-slate-900">
-              ${refundDetails?.amount?.toFixed(2)}
+              ${centsToDollars(refundDetails?.amount as number)}
             </div>
             <div className="text-xs text-slate-500">Refund Amount</div>
           </div>
