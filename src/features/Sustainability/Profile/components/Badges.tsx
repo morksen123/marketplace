@@ -61,6 +61,7 @@ export const Badges: React.FC<BadgesProps> = ({ badges, userType }) => {
                     criteria={badge.criteria}
                     earnedOn={badge.earnedOn}
                     category={badge.category}
+                    userType={userType}
                   />
                 ))}
                 {hasMoreBadges && (
@@ -124,6 +125,7 @@ export const Badges: React.FC<BadgesProps> = ({ badges, userType }) => {
                       criteria={badge.criteria}
                       earnedOn={badge.earnedOn}
                       category={badge.category}
+                      userType={userType}
                     />
                   ))}
                 </div>
@@ -142,6 +144,7 @@ export const Badges: React.FC<BadgesProps> = ({ badges, userType }) => {
                         criteria={badge.criteria}
                         earnedOn={badge.earnedOn}
                         category={badge.category}
+                        userType={userType}
                       />
                     ))}
                 </div>
@@ -160,6 +163,7 @@ export const Badges: React.FC<BadgesProps> = ({ badges, userType }) => {
                         criteria={badge.criteria}
                         earnedOn={badge.earnedOn}
                         category={badge.category}
+                        userType={userType}
                       />
                     ))}
                 </div>
@@ -181,7 +185,8 @@ export const Badges: React.FC<BadgesProps> = ({ badges, userType }) => {
                         criteria={badge.criteria}
                         earnedOn={badge.earnedOn}
                         category={badge.category}
-                      />
+                        userType={userType}
+                        />
                     ))}
                 </div>
               </TabsContent>

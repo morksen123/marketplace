@@ -29,6 +29,7 @@ interface ShareDialogProps {
     swimmingPoolsEquivalent: number;
     carKmEquivalent: number;
   };
+  userType: 'distributor' | 'buyer';
 }
 
 const fetchReferralLink = async () => {
@@ -61,7 +62,7 @@ const fetchData = async () => {
   return data;
 };
 
-export const ShareDialog: React.FC<ShareDialogProps> = ({ isOpen, onClose, impactMetrics }) => {
+export const ShareDialog: React.FC<ShareDialogProps> = ({ isOpen, onClose, impactMetrics, userType }) => {
   const [referralLink, setReferralLink] = useState('');
   const { toast } = useToast();
   const [pointsAllocation, setPointsAllocation] = useState<PointsAllocation | null>(null);
@@ -69,9 +70,11 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({ isOpen, onClose, impac
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetchReferralLink().then(setReferralLink);
+    if (userType === 'buyer') {
+      fetchReferralLink().then(setReferralLink);
+    }
     fetchData().then(setPointsAllocation);
-  }, []);
+  }, [userType]);
 
   const shareText = `Join me in my journey with GudFood and create an impact on the world! Sign up here: ${referralLink}`;
   const shareUrl = referralLink;
@@ -248,18 +251,26 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({ isOpen, onClose, impac
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <p className="text-lg text-gray-700 font-semibold mb-2">
-                    Join me in my journey with GudFood and create an impact on the world!
+                    {userType === 'buyer' 
+                      ? "Join me in my journey with GudFood and create an impact on the world!"
+                      : "Join us in our sustainability journey with GudFood!"}
                   </p>
                   <p className="text-base text-emerald-600 font-medium">
-                    Scan to join with my referral link or go to <u>{referralLink}</u> and earn {pointsAllocation?.referralPoints} points on your first purchase!*
+                    {userType === 'buyer' 
+                      ? <>
+                          Scan to join with my referral link or go to <u>{referralLink}</u> and earn {pointsAllocation?.referralPoints} points on your first purchase!*
+                        </>
+                      : "Scan to join GudFood and be part of our sustainable food ecosystem!"}
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-4">
-                    *Terms and Conditions: Points will be credited with a minimum purchase. Valid for new customers only.
-                  </p>
+                  {userType === 'buyer' && (
+                    <p className="text-[10px] text-gray-400 mt-4">
+                      *Terms and Conditions: Points will be credited with a minimum purchase. Valid for new customers only.
+                    </p>
+                  )}
                 </div>
                 <div className="ml-6 flex-shrink-0">
                   <QRCodeSVG
-                    value={shareUrl}
+                    value={userType === 'buyer' ? referralLink : 'http://localhost:5173'}
                     size={120}
                     level="L"
                     includeMargin={true}

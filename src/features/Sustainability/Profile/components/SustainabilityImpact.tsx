@@ -31,9 +31,10 @@ interface SustainabilityImpactProps {
   impactMetrics: ImpactMetricsDto | null;
   onImpactCardClick: (category: 'food' | 'water' | 'electricity' | 'carbon', type: 'personal' | 'community') => void;
   cardVariants: any;
+  userType: 'distributor' | 'buyer';
 }
 
-export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVariants }: SustainabilityImpactProps) => {
+export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVariants, userType }: SustainabilityImpactProps) => {
   const { toast } = useToast();
   const baseUrl = window.location.origin;
   const referralLink = `${baseUrl}/join`;
@@ -152,6 +153,7 @@ export const SustainabilityImpact = ({ impactMetrics, onImpactCardClick, cardVar
         isOpen={isShareDialogOpen}
         onClose={() => setIsShareDialogOpen(false)}
         impactMetrics={impactMetrics}
+        userType={userType}
       />
     </motion.div>
   );
