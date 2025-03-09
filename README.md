@@ -1,6 +1,6 @@
-# capstone
+# Gudfood
 
-Team Spring
+Marketplace for selling imperfect goods!
 
 ## Tech Stack
 
